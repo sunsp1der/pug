@@ -1,0 +1,99 @@
+now:	
+	make very simple editor interface... 
+		click to select
+		drag to position/nudge with arrows
+		show selection in project tab
+	create example out of opioid bricks
+		html tutorial
+		function to open browser for tutorial
+	write basic tutorial - Using pug as a level builder
+	create zip tarball exe?
+	release 0.2!!!
+	
+later: 
+	log all exceptions that are glossed over by automation
+	indent text a little to make it not push into left edge in big labels
+	make standalone work right
+		app should not auto-close when no windows and no projectwindow
+			or frame should automatically create app if none exists
+		pug.frame() should work (on principle)
+		pug.frame(obj) should work WITHOUT creating app
+	create tab-style gui
+		refactor pugframe into pugview
+		multiple objects in one window...
+		when tab is switched check that object is the same, then refresh
+	editable code_storage
+	file agui
+		allow text entry in 
+		show absolute path in tooltip
+	refactor scene and object dict into utils, only store strings in dropdowns
+	code_storage_exporter.is_exportable
+		check lists recursively
+		check dicts for keys and items
+		keep list of checked stuff... recursive = NO!
+	sprite does settings after it shows up in corner
+	make component system something you can add on later
+		not necessary to derive
+		components should not keep objects alive
+		make sure component object can be deleted properly
+	convert pugframe_opened system to accept  (self, frame, object)
+	auto-refresh -- leave the attribute being editted alone
+	project windows... show all frames available
+	tree frame check for other tree frames
+	make sprite groups work
+	check for frame opening from post_init vs frame from tree
+
+bugs:
+	crash when context help on load scene file
+	
+	image pug crashes when private atts shown
+	little bit of top control hidden
+	
+not understand:
+
+looks:
+	
+r&d:
+	integrate pycrust for editor
+	
+useability:
+	code_storage dict features: 
+		post_init_attributes list, 
+		post_init_method (default is __init__)
+		properties should ALWAYS be post_init
+	allow template to specify 'persist' so as not to use proxies
+	allow Routine aguidict 'argstring' instead of arguments
+	add refresh object option to pug view - to refresh actual puglist
+	'first, use dropdown to select a component to add' error msg when adding''
+	make subobject subobject_small and subobject show ala components
+	list,dictionary,and tuple attribute guis can also work like components
+	create Component and Component Methods pug views
+	allow a dictionary when adding a component, containing component attributes
+	make code_export functions and dicts separate from obj's?
+		reason would be to take out of release version
+	
+big needs later... help from outside?:
+	undo/redo system
+	editor mode - dragging sprites... selection boxes... all that
+	 
+Python Questions:
+	Other ways to load/scan all modules in a folder
+	How to properly wait for another thread to complete something
+	How to register a callback without storing a reference
+	How to keep a view of objects without keeping them alive... ref system?
+
+	talk about ways to separate runtime game code
+		study egg system
+	nice way to register/add components to a project
+		wait for 3k
+	how to doc component attributes
+		use properties, look at class
+	singletons
+		don't need to be marked global
+		could be created at search time
+			
+Wx Questions:
+	how to turn OFF a damn tooltip
+	component add and browse buttons sizeability
+	weird overlap of subobject labels
+	how do I get default values of font_sizes and colors and shit
