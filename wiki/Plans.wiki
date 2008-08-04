@@ -1,12 +1,12 @@
 #summary Things currently being worked on for the next point release
 
 ===Basic Opioid Editor===
-Select an object by clicking on it
-Highlight selected object
-Display selected object info in a pug.frame dedicated to displaying selection
-Drag and keyboard nudge objects
+  * Select an object by clicking on it
+  * Highlight selected object
+  * Display selected object info in a pug.frame dedicated to displaying selection
+  * Drag and keyboard nudge objects
 
 ===Demo Kit===
-Simple breakout game kit
-A few example components
-Brief html tutorial - pug button to open it
+  * Simple breakout game kit
+  * A few example components
+  * Brief html tutorial - pug button to open it
