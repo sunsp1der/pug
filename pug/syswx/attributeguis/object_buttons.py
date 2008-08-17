@@ -15,22 +15,22 @@ ObjectButtons(attribute, window, aguidata, **kwargs)
 attribute: what attribute of window.object is being controlled
 window: the parent pugFrame. 
 aguidata: {
-    'viewButton': if True, show viewButton (see below)... default is true
-    'newViewButton': if True, show newViewButton (see below)... default is true
+    'view_button': if True, show view_button (see below)... default is true
+    'new_view_button': if True, show new_view_button (see below)... default is true
     }
 For kwargs arguments, see the Base attribute GUI
 
 Contains text showing attribute's value and two buttons... 
-    viewButton: changes the parent window to display this object
-    newViewButton: opens a new pug window to display objet
+    view_button: changes the parent window to display this object
+    new_view_button: opens a new pug window to display objet
     
 This control is generally meant to be used for instances, but could be used for
 any object.
 """
-    viewButton = newViewButton = 0
+    view_button = new_view_button = 0
     def __init__(self, attribute, frame, aguidata ={}, **kwargs):
-        aguidata.setdefault('viewButton',False)#,True)
-        aguidata.setdefault('newViewButton',True)        
+        aguidata.setdefault('view_button',False)#,True)
+        aguidata.setdefault('new_view_button',True)        
         #widgets
         control = wx.Panel(frame.get_control_window(), 
                            size=(1,WX_STANDARD_HEIGHT))
@@ -40,19 +40,19 @@ any object.
         obj = getattr(frame.object,attribute)
         control.value = ''
         
-        if aguidata['newViewButton']:
-            newViewButton = PugButton(control, obj,
+        if aguidata['new_view_button']:
+            new_view_button = PugButton(control, obj,
                                    True, attribute, frame)
-            controlSizer.Add(newViewButton)
-            self.newViewButton = newViewButton    
-            self.newViewButton.Bind(wx.EVT_BUTTON, self.evt_view)     
+            controlSizer.Add(new_view_button)
+            self.new_view_button = new_view_button    
+            self.new_view_button.Bind(wx.EVT_BUTTON, self.evt_view)     
 
-        if aguidata['viewButton']:
-            viewButton = PugButton(control, obj,
+        if aguidata['view_button']:
+            view_button = PugButton(control, obj,
                                    False, attribute, frame)
-            self.viewButton = viewButton
-            controlSizer.Add(viewButton)
-            self.viewButton.Bind(wx.EVT_BUTTON, self.evt_view)     
+            self.view_button = view_button
+            controlSizer.Add(view_button)
+            self.view_button.Bind(wx.EVT_BUTTON, self.evt_view)     
         
         textSizer = AguiLabelSizer(control)
         infoText = textSizer.text
@@ -72,7 +72,7 @@ any object.
         event.Skip()
         
     def setup_buttons(self, obj):
-        for button in [self.viewButton, self.newViewButton]:
+        for button in [self.view_button, self.new_view_button]:
             if button:
                 button.set_object(obj, self.attribute, self._window)
         

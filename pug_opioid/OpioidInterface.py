@@ -14,7 +14,7 @@ from Opioid2D.public.Node import Node
 import pug
 from pug_opioid.PugScene import PugScene
 from pug_opioid.PugSprite import PugSprite
-from pug_opioid.SelectionFrame import SelectionFrame
+from pug_opioid.editor import EditorState, selectionManager
 from pug_opioid.util import get_available_scenes, get_available_objects,\
                             get_project_path, set_project_path, \
                             close_scene_windows                          
@@ -70,10 +70,11 @@ value can be either an actual scene class, or the name of a scene class
                      ' has taken over 5 seconds to load. \nContinue waiting?']),
                      'Scene Load Time',wx.YES_NO)
                     if dlg.ShowModal() == wx.ID_NO:
-                        break
+                        return
                     else:
                         starttime = time.time()
                 time.sleep(0.05)
+            Opioid2D.Director.scene.state = EditorState
     def get_sceneclass(self):
         try:
             scene = Opioid2D.Director.scene.__class__
@@ -163,6 +164,23 @@ Add an object to the scene
             raise TypeError("add_object(): arg 1 must be a subclass of Node")
         node = objectclass()
         
+    def set_selection(self, selectList):
+        """set_selection( selectList)
+        
+Select the objects in the list. Display their data in the selectFrame and 
+highlight them."""
+        wx.GetApp().set_selection( selectList)
+        
+    def on_set_selection(self, selectRefSet):
+        """on_set_selection( selectRefSet)
+        
+Callback from PugApp...
+"""
+        selectionManager.on_set_selection(selectRefSet)
+        
+    def open_selection_frame(self):
+        wx.GetApp().open_selection_frame()
+        
     def _on_pug_quit(self):
         Opioid2D.Director.quit()
 
@@ -170,16 +188,15 @@ quitting = False
 def project_quit(*args, **kwargs):
     """project_quit(*args, **kwargs)
     
-This is meant to have the app confirm project closure. Doesn't work right now.
+Have the app confirm project closure.
 """
-    app._evt_project_frame_close() # just let it crash
-    return 
-#################################################
     global quitting
-    app = wx.GetApp()
-    if not quitting and not app.quitting:
-        app._evt_project_frame_close()
-    quitting = True
+    if not quitting:
+        quitting = True
+        app = wx.GetApp()
+        wx.CallAfter(app._evt_project_frame_close)
+        return 
+
 Opioid2D.Director.quit = project_quit                    
                     
 def _scene_list_generator():
@@ -205,24 +222,29 @@ _interfaceTemplate = {
     'name':'Basic',
     'attributes':[ 
         [' Current Scene', pug.Label],
-        ['sceneclass', pug.Dropdown, {'label':'   Select Scene',
-                                 'list_generator':_scene_list_generator}],
+        ['sceneclass', pug.Dropdown, 
+             {'label':'   Select Scene',
+              'list_generator':_scene_list_generator}],
         ['scene', None,  {'label':'   View Scene'}],
         ['save_scene', None,  {'label':'   Save Scene'}],
         ['revert_scene', None,  {'label':'   Revert Scene'}],
         ['create_scene_dict', None,  {'label':'   Reload Scenes'}],
         ['', pug.Label, {'label':' Add Object'}],
         ['addObjectClass', pug.Dropdown, 
-                             {'list_generator':_object_list_generator,
+             {'list_generator':_object_list_generator,
               'label':'   Object to add',
               'tooltip':'Select an object type for the add button below'}],
-        ['add_object', None, {'tooltip':\
-              'Add an object to the current scene.\nSelect object type above.',
-                              'use_defaults':True,
-                              'label':'   Add Object'}],
+        ['add_object', None, 
+             {'tooltip':
+               'Add an object to the current scene.\nSelect object type above.',
+              'use_defaults':True,
+              'label':'   Add Object'}],
         ['create_object_dict', None, {'label':'   Reload Objects'}],
         
         [' Utilities', pug.Label],
+        ['open_selection_frame', None, 
+             {'label':'   View Selection',
+              'no_return_value': True}],
         ['Director'],
     ]
 }

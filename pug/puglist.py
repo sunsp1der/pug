@@ -170,8 +170,8 @@ take all the objects attributes and make entries based on defaults defined in:
     return pugList
 
 def do_filter_underscore(attribute, filterUnderscore):
-    if attribute[:1]=='_' and filterUnderscore==1 \
-            or attribute[:2]=='__' and filterUnderscore>=1:
+    if (attribute[:1]=='_' and filterUnderscore==1) \
+            or (attribute[:2]=='__' and filterUnderscore>=2):
         return True
     else:
         return False

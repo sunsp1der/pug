@@ -115,6 +115,23 @@ class PugSprite(Sprite, pug.BaseObject):
                 item.delete()
         return ''.join(code)
     
+    def _test_referrers(self):
+        """_test_referrers
+        
+Just a debug test to make sure that pug doesn't keep the object alive when it's
+supposed to be deleted.
+"""
+        import gc
+        gc.collect()
+        a = gc.get_referrers(self)   
+        for ob in a:
+            print ob
+            b = gc.get_referrers(ob)
+            for ob2 in b:
+                print "   ", ob2 
+            print "_______________________"
+        pass
+    
     _codeStorageDict = {
             'skip_attributes': ['_actions', '_image_file', 'image_file', 
                                 'layer_name'], 
@@ -152,7 +169,8 @@ _spriteTemplate = {
         ['acceleration'],
         ['', pug.Label, {'label':' Functions'}],
         ['delete'],
-#        ['test_referrers'],
+#        ['_delete_test'],
+#        ['_test_referrers'],
     ]       
  }
 pug.add_template('PugSprite', _spriteTemplate, True)

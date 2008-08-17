@@ -130,7 +130,11 @@ Special kwargs:
         self.DeleteChildren(self.root)
         self.SetMainColumn(0)
         for noderef in nodes.iterkeyrefs():
+            if not noderef:
+                continue
             node = noderef()
+            if not node:
+                continue
             cls = node.__class__.__name__
             gname = getattr(node, 'gname', '')
             if not gname:

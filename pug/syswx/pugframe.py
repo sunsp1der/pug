@@ -1,8 +1,8 @@
 #Boa:Frame:PugFrame
-"""The basic pug display window
+"""PugFrame: The basic pug display frame
 
 This is generally meant to be created by the pug function. You can send the 
-object to be viewed as an argument on creation of the window."""
+object to be viewed as an argument on creation of the frame."""
 
 # TODO: intercept tabbing stuff with EVT_NAVIGATION_KEY - apply/skip buttons
 # TODO: apply when a control loses focus
@@ -15,22 +15,10 @@ object to be viewed as an argument on creation of the window."""
 # TODO: allow personalized toolbars
 # TODO: put all settings in menu
 
-#import re
-#import os.path
-#from weakref import ref, proxy, ProxyTypes
-#from sys import exc_info
-
 import wx
-#import wx.lib
 
-#from pug.puglist import create_raw_puglist, create_template_puglist
-#from pug.util import pugSave, pugLoad, get_simple_name
-#from pug.syswx.helpframe import HelpFrame
 from pug.syswx.wxconstants import *
 from pug.syswx.pugwindow import PugWindow
-#from pug.templatemanager import get_template_info
-#from pug.code_storage import code_export
-
 
 def pug_frame( obj=None, *args, **kwargs):
     """pug_frame( obj=None, *args, **kwargs) -> a PugFrame or None
@@ -65,23 +53,29 @@ PugFrame(self, obj=None, objectpath="object", title="", show=True, parent=None)
 
         wx.Frame.__init__(self, parent=parent, size=WX_PUGFRAME_DEFAULT_SIZE, 
                           title=title)        
+        self.SetMinSize(wx.Size(250, 130))
+        
         #self.SetIcon('../Images/pug.png')
         #toolbarSeparator = wx.StaticLine(self, size=(1,2))
         #toolbarSeparator.SetMinSize((-1,-1))
         #sizer.AddWindow(toolbarSeparator, flag=wx.EXPAND)
         self.SetSizer(sizer)        
-        pugWindow = PugWindow(self, obj, objectpath, title)
+        pugWindow = PugWindow(self)
+        self.set_pugwindow( pugWindow)
+        self.set_pugwindow_object( obj, objectpath, title)
         bar = self.CreateStatusBar()        
         bar.Bind(wx.EVT_LEFT_DCLICK, self.show_all_attributes)        
-        self.set_pugwindow( pugWindow)
         self.Bind(wx.EVT_MENU, self._evt_passmenu)
         self.show_all_attributes()
         if show:
             self.Show()
             
+    def set_pugwindow_object(self, obj, objectpath, title):
+        self.activePugWindow.set_object(obj, objectpath, title)
+        self.SetTitle(self.activePugWindow.title)        
+        
     def show_all_attributes(self, event = None):
         """Expand the frame's size so that all attributes are visible"""
-        size = self.GetSize()
         bestSize = self.activePugWindow.get_optimal_size()
         # give some space for scrollbars
         newSize = (bestSize[0] + WX_SCROLLBAR_FUDGE[0], 
@@ -92,6 +86,7 @@ PugFrame(self, obj=None, objectpath="object", title="", show=True, parent=None)
             newSize = (toolbarWidth, newSize[1])
             
         self.SetClientSize(newSize)
+        self.activePugWindow.GetSizer().Layout()
             
     def _evt_passmenu(self, event):
         if self.activePugWindow:
@@ -114,7 +109,6 @@ PugFrame(self, obj=None, objectpath="object", title="", show=True, parent=None)
             menuBar.Show()
         self.GetSizer().AddWindow(pugWindow, 1, border=0, flag=wx.EXPAND)
         self.activePugWindow = pugWindow
-        self.SetTitle(pugWindow.title)
         
     def get_object_list(self):
         """get_object_list() > list of objects displayed in this frame
@@ -122,5 +116,15 @@ PugFrame(self, obj=None, objectpath="object", title="", show=True, parent=None)
         return [self.activePugWindow.objectRef()]
 
     def show_object(self, obj):
-        """show_object(obj) > reveal the tab containing obj"""
+        """show_object(obj) > reveal the tab containing obj. Not implemented"""
         pass
+    
+    def on_view_object_deleted(self, window, obj):
+        """on_view_object_deleted(window, obj)
+        
+window: the PugWindow whose object was deleted
+obj: the proxy object
+Override this callback to affect behavior when an object being viewed in the
+pugframe is deleted.
+"""
+        self.SetTitle(''.join(['Deleted: ', self.GetTitle()]))

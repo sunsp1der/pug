@@ -1,0 +1,60 @@
+#################
+# init autocode #
+#################
+MAINOBJECT = 'Main'
+from Opioid2D import *
+from pug_opioid.components import bounce, collision_callback 
+...
+#####################
+# End init autocode #
+#####################
+
+############################
+# 'Main' PugScene autocode #
+############################
+class Main(PugScene):
+	layers = [
+			  "bg",
+		      "court",
+		     ]
+	
+	def enter(self):
+		# sprites
+		crunchedGname_or_sprite_0 = Ball()
+		crunchedGname_or_sprite_0.gname = 'bouncer'
+		crunchedGname_or_sprite_0.position = (250, 50)
+		
+		crunchedGname_or_sprite_1 = PugSprite()
+		crunchedGname_or_sprite_1.set_image("explosion1.py")
+		crunchedGname_or_sprite_1.group = "thegroup"
+			
+		
+		# components
+		self.add_component(
+			collision_callback, {
+				'group1':'bop',
+				'group2':'bop'
+				})
+#####################################################
+# End 'Main' Scene autocode - Add custom code below #
+###################################################1#
+
+##########################
+# 'Ball' Sprite autocode #
+########################2#
+class Ball(PugSprite):
+	image = "boop"
+	group = "bop"
+	layer = "bip"
+	position = 0,0
+	
+	def on_create(self):	
+		# components
+		self.add_component( 
+			bounce, {
+				'height':1,
+				'length':3,
+			})
+######################################################
+# End 'Ball' Sprite autocode - Add custom code below #
+####################################################2#

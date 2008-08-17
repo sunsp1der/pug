@@ -13,15 +13,13 @@ class ExampleInterface(OpioidInterface):
         OpioidInterface.__init__(self, *args, **kwargs)
     def _post_init(self):
         # set up starting scene
-        self.sceneclass = 'TimingScene'
+        self.sceneclass = 'Diagonals'
         
         # open frame to view scene
         pug.frame(Opioid2D.Director.scene)
         
         # open frame to view first sprite in scene
-        nodes = Opioid2D.Director.scene.nodes
-        sprite = nodes.keys()[0]
-        pug.frame(sprite)
+        self.open_selection_frame()
     
 def init_pug():
     """start mainScene with a pug interface"""  
