@@ -13,16 +13,18 @@ class Routine (Base):
     
 When runButton is pressed, if the routine takes arguments (besides self) when 
 called, open a pugFnFrame. If not, just execute.
-    
+If the routine returns a value, the Routine agui pops up a dialog showing the 
+return value.    
 This is meant for methods, but could be used on any callable object
 """
     def __init__(self, attribute, window, aguidata, **kwargs):
         """__init__(self, attribute, window, aguidata, **kwargs)
         
 special aguidata entries:
-    'use_defaults': execute routine using all default args if possible
     'routine': the callable object that will be used. This is as an
         alternative to the attribute argument.
+    'use_defaults': execute routine using all default args if possible
+    'no_return_popup': if this is true, don't show a return value popup
 See Base attribute gui for other argument info
 """
         control = wx.Panel(window.get_control_window(), 
@@ -170,6 +172,9 @@ See Base attribute gui for other argument info
         dlg.Destroy()
 
     def display_retvalue(self, retValue):
+        do_retvalue = self._aguidata.get('no_return_popup', True)
+        if not do_retvalue:
+            return
         if retValue is not None:
             if type(retValue) in BASIC_TYPES:
                 retDlg = wx.MessageDialog(self.control,

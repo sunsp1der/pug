@@ -10,6 +10,7 @@ from inspect import getsourcefile
 import wx
 
 from pug.syswx.pugframe import PugFrame
+from pug.syswx.SelectionFrame import SelectionFrame
 
 # TODO: create 'Initializing Pug' window
 # TODO: create a link between project closing and app closing
@@ -34,6 +35,10 @@ projectFolder="": where file menus start at.  Defaults to current working dir.
         self.progressDialog = None
         self.initTryCounter = 0 #so we don't loop on post_init_forever
         
+        # selection manager stuff
+        self.selectedRefSet = set()
+        self.selectionWatcherDict = weakref.WeakKeyDictionary()        
+        
         # track frames and objects they view { 'frame':obj(id)}
         self.pugFrameDict = weakref.WeakKeyDictionary()
         self.set_project_folder(projectFolder)
@@ -55,9 +60,6 @@ projectFolder="": where file menus start at.  Defaults to current working dir.
         # default save and load folder 
         self.set_project_object(projectObject)        
 
-#        thread.start_new_thread(self.MainLoop,())
-#        thread = PugAppThread(app=self)
-#        thread.start()
         self.MainLoop()
         
         
@@ -118,16 +120,20 @@ called every second until the object is initialized"""
                                    str(self.initTryCounter)])
                     self.initProgressDialog.Update(self.initTryCounter, msg)
         if not hasattr(object,'_isReady') or object._isReady:        
-            msg = 'PUG system initialized...'
             self.initProgressDialog.Update(22, msg)
-            self.open_project_frame(object) 
-            self.initTryCounter = 1
-            if self.initProgressDialog:
-                self.initProgressDialog.Destroy()
-            self.SetExitOnFrameDelete(True)
-            self.projectFrame.Raise()
+            self.finalize_project_object( object)
         else:
             wx.CallLater(500,self.post_init,object)
+
+    def finalize_project_object(self, object):
+        msg = 'PUG system initialized...'
+        self.open_project_frame(object) 
+        self.register_selection_watcher(object)
+        self.initTryCounter = 1
+        if self.initProgressDialog:
+            self.initProgressDialog.Destroy()
+        self.SetExitOnFrameDelete(True)
+        self.projectFrame.Raise()
             
     def open_project_frame(self, object = None):
         if object is None:
@@ -151,6 +157,7 @@ called every second until the object is initialized"""
                                "Close all windows and exit project?",
                                'Project Frame Closed', 
                                wx.YES_NO | wx.NO_DEFAULT)
+        #TODO: would be nice if the dlg could be forced above other apps
             if dlg.ShowModal() != wx.ID_YES:
                 return
         self.quit()
@@ -175,7 +182,10 @@ called every second until the object is initialized"""
     def pugframe_opened(self, frame, object=None):
         """pugframe_opened(frame)
 
-Notify the app that a PugFrame has opened, so that it can track object views
+Notify the app that a PugFrame has opened, so that it can track object views.
+frame: the frame that is being opened
+object: the object being viewed. Alternatively, this can be a string identifying
+    the pugframe.
 """
 #        if self.progressDialog and frame.object == self.projectObject:
 #            self.progressDialog.Destroy()
@@ -204,12 +214,10 @@ Return the PugFrame currently viewing 'object', or None if not found.
         return None
         
     def show_object_pugframe(self, object):
-        """show_pugframe(object)
+        """show_object_pugframe(object)
         
 Raise the pugframe viewing 'object'. If it exists return the frame... otherwise, 
-return None. This has the special functionality of ALWAYS returning None if the
-control key is currently pressed. This has the effect of allowing the user to 
-open 2 windows for the same object. 
+return None. 
 """
         frame = self.get_object_pugframe(object)
         if frame:
@@ -217,11 +225,69 @@ open 2 windows for the same object.
             frame.Raise()
             frame.show_object(object)
         return frame
-#
-class PugAppThread(Thread):
-    def __init__(self, **kwargs):
-        Thread.__init__(self)
-        self.app = kwargs['app']
-    def run(self):
-        self.app.MainLoop()
+    
+    def show_selection_frames(self):
+        """show_selection_frames(object)
         
+Raise the apps current selection frames. If any exist, return a list of them.
+Otherwise, return None. 
+"""
+        frameList = []
+        if self.selectionWatcherDict:
+            for watcher in self.selectionWatcherDict:
+                if isinstance(watcher, PugFrame):
+                    watcher.Show()
+                    watcher.Raise()
+                    frameList.append(watcher)
+            return frameList
+        else:
+            return None
+    
+    def set_selection(self, selectList=[], skipObj=None):
+        """set_selection( selectList=[], skipObj=None)
+        
+selectList: a list of objects that are currently selected in the project. 
+skipObj: this object will not get a callback 
+    (convenience to prevent infinite loop)
+
+Set the interface's selectedRefSet. These objects can be viewed in a PugWindow 
+by calling the open_selection_frame method. Selection is tracked in a set, so 
+duplicates will be automatically eliminated.
+"""
+        if getattr( self, "setting_selection", False):
+            return
+        self.setting_selection = True
+        self.selectedRefSet.clear()
+        for item in selectList:
+            self.selectedRefSet.add( weakref.ref(item))
+        for obj in self.selectionWatcherDict:
+            if obj == skipObj:
+                continue
+            if hasattr(obj, 'on_set_selection'):
+                obj.on_set_selection( self.selectedRefSet)
+        self.setting_selection = False
+            
+    def open_selection_frame(self, *args, **kwargs):
+        """open_selection_frame()
+
+Open a SelectionFrame, or if one exists AND control is not being held down, 
+bring it to the top. For arguments, see the doc for PugFrame.  
+Selection frames display pug views of the objects in self.selectedRefSet. The 
+selectedRefSet can be changed using the set_selection method.
+"""
+        if not self.show_selection_frames() or wx.GetKeyState(wx.WXK_CONTROL):
+            frame = SelectionFrame( *args, **kwargs)
+            self.register_selection_watcher(frame)
+            frame.on_set_selection(self.selectedRefSet)
+        else:
+            frame = None
+
+    def register_selection_watcher(self, obj):
+        """register_selection_watcher(obj)
+        
+Register an object to receive 'on_set_selection( selectedRefSet)' callback 
+when the App's selectedRefSet changes. selectedRefSet is a set of references to
+selected objects. Project object will automatically be registered if it has an
+attribute called on_set_selection
+"""
+        self.selectionWatcherDict[obj] = id(obj)

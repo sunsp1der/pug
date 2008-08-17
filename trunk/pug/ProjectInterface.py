@@ -14,19 +14,13 @@ methods meant for override:
 #TODO: add a 'quit project function'
 from sys import exc_info
 from time import sleep
+from weakref import ref
 
 import pug
 
 class ProjectInterface(object):
     """Pug's starting frame"""
-    _isReady = False
-    def __init__(self):
-        pass
-#        if not self._isReady:
-#            self._try_post_init()
-#        else:
-#            self._isReady = True
-        
+    _isReady = False        
     def _try_post_init(self):
         """_try_post_init-> return None, or exception string if method fails
 Try to exec all the __postInitExecs
@@ -39,4 +33,10 @@ Try to exec all the __postInitExecs
         return None
     
     def _post_init(self):
+        """_post_init()
+
+Derived classes can override this with any code that needs to run after the
+application starts. For example, opening pug frames for app objects....
+"""
         pass
+    

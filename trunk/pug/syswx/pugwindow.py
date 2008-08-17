@@ -69,8 +69,7 @@ holds multiple PugWindows in tabbed (or other) form.
         wx.ScrolledWindow.__init__(self, parent=parent, pos=wx.Point(0, 0),
               size=WX_PUGFRAME_DEFAULT_SIZE, style=wx.HSCROLL | wx.VSCROLL)
         self.SetScrollRate(1,5)
-        self.pugSizer = wx.GridBagSizer(0,2)
-        self.pugSizer.AddGrowableCol(1)
+        self.pugSizer = wx.GridBagSizer()
         self.SetSizer(self.pugSizer)
         self._init_ctrls(parent) #BOA STUFF
         #events
@@ -79,7 +78,9 @@ holds multiple PugWindows in tabbed (or other) form.
         #set up actual object gui
         if obj:
             self.set_object(obj, objectpath, title)     
-
+        else:
+            app.pugframe_opened(self.GetParent(), "Empty")                     
+            
         if self.shortPath:
             self.defaultFilename = self.shortPath
         else:
@@ -87,13 +88,19 @@ holds multiple PugWindows in tabbed (or other) form.
         
     def get_optimal_size(self):
         size = self.pugSizer.CalcMin()
-        niceWidth = self.pugSizer.GetColWidths()[0]*2 # double the label width
-        if size[0] < niceWidth:
-            size = (niceWidth,size[1])
+        if self.pugSizer.GetColWidths():
+            # double the label width
+            niceWidth = self.pugSizer.GetColWidths()[0]*2 
+            if size[0] < niceWidth:
+                size = (niceWidth,size[1])
         return size
         
     def set_object(self, obj, objectpath="unknown", title=None):
+        if self.objectRef and obj and obj is self.objectRef():
+            self.display_puglist()
+            return
         wx.BeginBusyCursor()
+        self.Hide()
         self.shortPath = get_simple_name(obj, objectpath)
         if objectpath == "unknown":
             self.objectPath = self.shortPath
@@ -112,32 +119,65 @@ holds multiple PugWindows in tabbed (or other) form.
             self.object = obj
             self.pugList = []
             self.pugSizer.Clear(True)
-            parent = self.GetParent()
+            self.display_message("No object")
         else:
             wx.GetApp().pugframe_opened(self.GetParent(),obj)             
             try:
                 self.objectRef = ref(obj)
-                obj = proxy(obj, self._object_deleted)
+                obj = proxy(obj, self._schedule_object_deleted)
             except:
                 def objectRef():
                     return obj
                 self.objectRef = objectRef
-            if obj != self.object:
-                #recreate pugList
-                self.object = obj
-                self._init_viewMenu_Items(self.viewMenu)
-                self._init_fileMenu_Items(self.fileMenu)
-                self.create_puglist()
-                self.SetSize(WX_PUGFRAME_DEFAULT_SIZE)                    
+            self.object = obj
+            self._init_viewMenu_Items(self.viewMenu)
+            self._init_fileMenu_Items(self.fileMenu)
+            self.create_puglist()
+            # hack to make scrollbars refresh
+            parent = self.GetParent()
+            size = parent.GetSize()
+            parent.SetSize((1,1))
+            parent.SetSize(size)
+            # end hack
+        self.Show()                   
         wx.EndBusyCursor()        
 
-    def _object_deleted(self=None, obj=None):
-        try:
-            wx.CallAfter(self.set_object,None)
-            if hasattr(parent, 'child_object_deleted'):
-                wx.CallAfter(parent.child_object_deleted, self)
-        except:
-            pass
+    def _schedule_object_deleted(self=None, obj=None):
+        wx.CallAfter(self._object_deleted, obj)
+    def _object_deleted(self, obj=None):
+        title = self.title
+        self.set_object(None)
+        self.display_message(''.join(['Deleted: ', title]))
+        parent = self.GetParent()
+        if hasattr(parent, 'on_view_object_deleted'):
+            parent.on_view_object_deleted( self, obj)
+            
+    def display_message(self, message):
+        """display_message( message)
+        
+Set the PugWindow to display a simple text message rather than view an object.
+To return to object view, call display_puglist().
+"""
+        sizer = self.pugSizer
+        sizer.ShowItems( False)
+        sizer.Clear(False)
+        self.reset_sizer()
+        text = wx.StaticText( self, label = message)
+        sizer.Add(text,(0,0), flag = wx.ALIGN_CENTER)
+        sizer.AddGrowableRow(0)
+        sizer.AddGrowableCol(0)       
+        sizer.Layout()
+        
+    def reset_sizer(self):
+        sizer = self.pugSizer
+        rows = range(sizer.GetRows())
+        for row in rows:
+            sizer.RemoveGrowableRow(row)
+        cols = range(sizer.GetCols())
+        for col in cols:
+            sizer.RemoveGrowableCol(col)
+        sizer.SetRows(0)
+        sizer.SetCols(0)
 
     def create_puglist(self):
         wx.BeginBusyCursor()
@@ -163,7 +203,7 @@ holds multiple PugWindows in tabbed (or other) form.
             template = self._currentView
             self.template = template
             self.pugList = create_template_puglist(self.object, self, template,
-                                                   filterUnderscore)
+                                                   filterUnderscore=0)
             self.SetSize(wx.Size(template['size'][0], 
                                  template['size'][1]))
             if template.get('force_persist'):
@@ -180,6 +220,7 @@ holds multiple PugWindows in tabbed (or other) form.
                 sizer = self.pugSizer
                 #clear pugList
                 sizer.Clear(True)
+                self.reset_sizer()
                 #set up attributeguis
                 # self.labelWidth = 0 # USED TO BE FOR SASH ADJUST
                 row = 0
@@ -208,11 +249,12 @@ holds multiple PugWindows in tabbed (or other) form.
                             item.control.Show()
                             item.label.Show()
                         if item._aguidata.get('growable',False):
-                            sizer.AddGrowableRow(row)
+                            sizer.AddGrowableRow(row)                            
                         # USED TO BE FOR SASH ADJUST
                         # if item.label.preferredWidth > self.labelWidth:
                         #    self.labelWidth = item.label.preferredWidth
                         row+=1
+                self.pugSizer.AddGrowableCol(1)                        
                 sizer.Layout()
                 # hack to make scrollbars resize
                 size = self.GetSize()
@@ -263,15 +305,14 @@ Generally, this is called when an attribute gui has changed size.
                 rawList.sort()
                 templateList+=rawList
                 # create _viewDict and menu items
-                Id = 101
                 for name in templateList:
+                    Id = wx.NewId()
                     template = templateInfo['templates'][name]
                     self._viewDict[Id] = template
                     self.Bind(wx.EVT_MENU, self._evt_viewmenu, id=Id)                    
                     menuItem = menu.Append(id=Id, 
                                      help=' '.join(['Show',name,'view']),
                                      text=name, kind=wx.ITEM_CHECK)
-                    Id+=1
                     if name == defaultViewName:
                         self._defaultView = templateInfo['templates'][name]
                         menuItem.Check(True)
@@ -483,12 +524,12 @@ Automatically calls on_<setting>(val, event) callback.
         dlg.Destroy()
 
     def _init_PrivateDataMenu_Items(self, parent):
-        parent.Append(help='Hide attributes that start with one underscore',
-                       id=_MENU_HIDE1UNDERSCORE, kind=wx.ITEM_CHECK, 
-                       text=u'Hide "_" attributes\tCtrl+1')
-        parent.Append(help='Hide attributes that start with two underscores', 
-                      id=_MENU_HIDE2UNDERSCORE, kind=wx.ITEM_CHECK, 
-                      text=u'Hide "__" attributes\tCtrl+2')
+        parent.Append(help='Hide "_" and "__" attributes in raw views',
+                   id=_MENU_HIDE1UNDERSCORE, kind=wx.ITEM_CHECK, 
+                   text=u'Hide "_" attributes\tCtrl+1')
+        parent.Append(help='Hide "__" attributes in raw views', 
+                   id=_MENU_HIDE2UNDERSCORE, kind=wx.ITEM_CHECK, 
+                   text=u'Hide "__" attributes\tCtrl+2')
         self.Bind(wx.EVT_MENU, self._evt_setting,
               id=_MENU_HIDE1UNDERSCORE)
         self.Bind(wx.EVT_MENU, self._evt_setting,
@@ -601,7 +642,7 @@ Automatically calls on_<setting>(val, event) callback.
     def _init_ctrls(self, prnt):
         # generated method, don't edit
         self._init_utils()
-        self.SetMinSize(wx.Size(150, 130))
+        #self.SetMinSize(wx.Size(150, 130))
         
         self.make_toolbar()
                 

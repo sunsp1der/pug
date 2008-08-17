@@ -1,15 +1,18 @@
 now:	
 	make very simple editor interface... 
-		click to select
-		drag to position/nudge with arrows
-		show selection in project tab
+		nudge with arrows
+		ctrl-c, ctrl-v, ctrl-x, delete
 	create example out of opioid bricks
 		html tutorial
 		function to open browser for tutorial
 	write basic tutorial - Using pug as a level builder
 	create zip tarball exe?
 	release 0.2!!!
-	
+
+bugs: 
+	calling select_update in scene_nodes can cause crash
+	trying to look at a SpriteRect causes crash	
+
 later: 
 	log all exceptions that are glossed over by automation
 	indent text a little to make it not push into left edge in big labels
