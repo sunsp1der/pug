@@ -20,9 +20,11 @@ class ComponentSet(object):
 
         """add(component)->component instance
 
-           Adds component to the object.  'component' can be a component class
-           OR instance.  If it's a class, an instance will be created and
-           added."""
+Adds component to the object.  
+
+component: component instance or component class. If it's an instance it will simply be added.
+If it's a class, an instance will be created and added.
+"""
 
         if not isinstance(component, Component):
             try:
@@ -30,7 +32,9 @@ class ComponentSet(object):
             except TypeError:
                 is_component_class = False
             if not is_component_class:
-                raise TypeError("invalid argument")
+                raise TypeError(message=''.join(['ComponentList.add: ',
+                                             str(component), 
+                                             "is not a component"]))
             component = component()
         component_list = self.__component_list
         component_list.add(component)

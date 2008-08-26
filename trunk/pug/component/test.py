@@ -1,10 +1,12 @@
 from pug.component import * 
 
 class XComponent(Component):
-    _Type = 'effect/special'
-    _Set = 'Testers'
-    def __init__(self):
+    _type = 'effect/special'
+    _set = 'Testers'
+    _attribute_dict = {'defaultsize':'The default size'}
+    def __init__(self, **kwargs):
         self.defaultsize = 12
+        Component.__init__(self, **kwargs)
 
     @component_method
     def explode(self, owner, size, i=2, *args):
@@ -16,8 +18,8 @@ class XComponent(Component):
 register_component(XComponent)
 
 class X2Component(Component):
-    _Type = 'effect'
-    _Set = 'Testers'
+    _type = 'effect'
+    _set = 'Testers'
 
     @component_method
     def explode(self, owner, size, i=3, **kw_args):
@@ -49,7 +51,12 @@ if __name__ == "__main__":
     obj.components.remove(xcomp)
     print "--- obj.explode with X2Component"
     obj.explode("some third size", 20)
+    print
+    print "STORAGE TEST"
+    xcomp.defaultsize = 33
+    print xcomp._create_object_code({'storage_name':'xcomp', 'as_class':0},0,0)
     print "----"
+    print "BAD"
     obj.components.remove(x2comp2)
     print "--- obj.explode with no components"
     obj.explode("some not work size", 20)

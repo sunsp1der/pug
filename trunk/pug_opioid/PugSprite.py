@@ -11,13 +11,14 @@ from pug_opioid.util import get_available_layers, save_object
 import sys
 class PugSprite(Sprite, pug.BaseObject):
     """PugSprite - Opioid2d Sprite with features for use with pug"""
-    image = "art/pug.png"
-    layer = "new_layer"
     __metaclass__ = SpriteMeta
     _pugTemplateClass = 'PugSprite'
 
     # image stuff... allows entry and storage of filename
     _image_file = None   
+    def __init__(self):
+        pug.BaseObject.__init__(self)
+        Sprite.__init__(self)
     def get_image_file(self):
         # TODO: find a way to actually look up this filename in the image
         if self._image_file is None:
@@ -33,10 +34,7 @@ class PugSprite(Sprite, pug.BaseObject):
     def _set_gname(self, value):
         pug.BaseObject._set_gname(self, value)
         Director.scene.update_node(self)
-    gname = property(pug.BaseObject.gname.fget, 
-                     _set_gname, 
-                     pug.BaseObject.gname.fdel, 
-                     pug.BaseObject.gname.__doc__)    
+
     def _on_mgr_delete(self):
         Sprite._on_mgr_delete(self)        
         Director.scene.update_node(self) # register self with scene                
@@ -63,8 +61,7 @@ class PugSprite(Sprite, pug.BaseObject):
     def _create_object_code(self, storageDict, indentLevel, exporter):
         # check for valid names
         storage_name = storageDict['storage_name']
-        if storage_name == 'PugSprite' or \
-                storage_name == 'Sprite':
+        if storage_name == 'PugSprite' or storage_name == 'Sprite':
             raise ValueError(''.join(["Can't over-write ",
                                       storage_name," base class."]))
         # clean up
@@ -77,27 +74,24 @@ class PugSprite(Sprite, pug.BaseObject):
         if not base_code.endswith('pass\n'): # clean up pass case (for looks)
             code.append(base_code)
         # custom code
-        baseIndent = _INDENT * indentLevel        
+        baseIndent = _INDENT * indentLevel    
+        hasAttrs = False    
         if storageDict['as_class']:
             code += [baseIndent, _INDENT, 'image = ', 
                      repr(self.image_file),'\n']
             code += [baseIndent, _INDENT, 'layer = ', 
                              repr(self.layer_name),'\n']
             init_code = exporter.create_init_code(*info)
-            if init_code.endswith('pass\n'): # clean up pass case 
-                init_code = init_code.splitlines()[0]
-                code += [init_code,'\n']
-            else:
-                code.append(init_code)
+            code += [init_code]
             xIndent = _INDENT * 2
             name = 'self'
         else:
-            code += [baseindent, name, '.', 'image = ', 
-                                     repr(self.image_file),'\n']
-            code += [baseindent, name, '.', 'layer = ', 
-                                     repr(self.layer_name),'\n']
-            xIndent = _INDENT
             name = storage_name
+            code += [baseIndent, name, '.', 'image = ', 
+                                     repr(self.image_file),'\n']
+            code += [baseIndent, name, '.', 'layer = ', 
+                                     repr(self.layer_name),'\n']
+            xIndent = ''
         vectorList = [('acceleration', (0, 0)),
                       ('position', (0, 0)),
                       ('scale', (1.0, 1.0)),
@@ -108,6 +102,7 @@ class PugSprite(Sprite, pug.BaseObject):
             if (vector.x, vector.y) != default:
                 code += [prefix, attr, '.', 'x = ', repr(vector.x),'\n']
                 code += [prefix, attr, '.', 'y = ', repr(vector.y),'\n']
+        
         # delete dummies from Opioid scene
         dummyList = storageDict['dummy_list']
         for item in dummyList:
@@ -163,10 +158,12 @@ _spriteTemplate = {
 #        ['group', Dropdown, 
 #                      'list_generator':get_available_groups,
 #                      }],
-        ['', pug.Label, {'label':' Physics'}],
-        ['rotation_speed'],
-        ['velocity'],
-        ['acceleration'],
+#        ['', pug.Label, {'label':' Physics'}],
+#        ['rotation_speed'],
+#        ['velocity'],
+#        ['acceleration'],
+        ['', pug.Label, {'label':' Components'}],
+        ['', pug.Components],
         ['', pug.Label, {'label':' Functions'}],
         ['delete'],
 #        ['_delete_test'],

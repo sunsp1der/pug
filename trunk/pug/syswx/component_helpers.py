@@ -53,16 +53,16 @@ Build the popup tree control.  Call when object is changed or set.
                 if not is_valid_component_class(object,component):
                     continue
                 # We have the right kind of component, sort by type
-                _Type = component._Type
-                if not _Type:
-                    _Type = component._Set
-                    if not _Type:
-                        _Type = "~Miscellaneous~"
-                _Type.strip()
-                if not types.has_key(_Type):
-                    types[_Type]=[]
+                _type = component._type
+                if not _type:
+                    _type = component._set
+                    if not _type:
+                        _type = "~Miscellaneous~"
+                _type.strip()
+                if not types.has_key(_type):
+                    types[_type]=[]
                 # Add the component to the list of components of this type
-                types[_Type].append(component)
+                types[_type].append(component)
         # Component's sorted... Now alphabetize
         typeList = types.keys()[:]
         typeList.sort()
@@ -72,9 +72,9 @@ Build the popup tree control.  Call when object is changed or set.
         lastType = [] # we use a list because we're going to split by '/'
         parent = None # start at root
         # go through types, creating sections of the tree
-        for _Type in typeList:
+        for _type in typeList:
             # do some hierarchy magic based on the fact that we sorted the names
-            currentType = _Type.split('/')
+            currentType = _type.split('/')
             level = 0 # level of label to check
             while level < len(lastType) and level < len(currentType):
                 if lastType[level] == currentType[level]:
@@ -88,7 +88,7 @@ Build the popup tree control.  Call when object is changed or set.
             for branch in currentType[-addBranches:]:
                 parent = tree.AddItem(branch,parent=parent)
             # now that we have the branches created, add the list of components
-            componentList = types[_Type]
+            componentList = types[_type]
             for component in componentList:
                 tree.AddItem(component.__name__, parent=parent, 
                              data=component) 

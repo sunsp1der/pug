@@ -14,7 +14,11 @@ projectPath = os.getcwd()
 def get_available_layers():
     """get_available_layers() -> list of available layers in Director"""
     try:
-        return Opioid2D.Director.scene.layers
+        # hide '__selections__' layer
+        layers = Opioid2D.Director.scene.layers[:]
+        if '__selections__' in layers:
+            layers.remove('__selections__')
+        return layers        
     except:
         return []
     
@@ -71,7 +75,7 @@ def save_object(obj, name = None):
             if name == cls.__name__:
                 name = ''.join(['My',name])
         dlg = wx.TextEntryDialog( None, "Enter the object's class/file name", 
-                                  "Enter name", name)
+                                  "Save Object", name)
         objName = ''
         while not objName:
             if dlg.ShowModal() == wx.ID_OK:
@@ -96,7 +100,7 @@ def save_object(obj, name = None):
     else:
         path = os.path.join('objects',''.join([name,'.py']))
     code_export( obj, path, True, {'name':objName})    
-        
+    
 def close_scene_windows( scene=None):
     """_close_scene_windows( scene=None)
     
@@ -123,5 +127,5 @@ Note: for this to work on nodes, it must be run BEFORE the scene is changed.
                 if nodescene == scene:
                     doclose = True
         if doclose:
-            frame.Close()
+            frame.Close()    
         

@@ -80,12 +80,7 @@ holds multiple PugWindows in tabbed (or other) form.
             self.set_object(obj, objectpath, title)     
         else:
             app.pugframe_opened(self.GetParent(), "Empty")                     
-            
-        if self.shortPath:
-            self.defaultFilename = self.shortPath
-        else:
-            self.defaultFilename = 'object'
-        
+                    
     def get_optimal_size(self):
         size = self.pugSizer.CalcMin()
         if self.pugSizer.GetColWidths():
@@ -102,6 +97,7 @@ holds multiple PugWindows in tabbed (or other) form.
         wx.BeginBusyCursor()
         self.Hide()
         self.shortPath = get_simple_name(obj, objectpath)
+        self.defaultFilename = self.shortPath
         if objectpath == "unknown":
             self.objectPath = self.shortPath
         else:
@@ -181,6 +177,7 @@ To return to object view, call display_puglist().
 
     def create_puglist(self):
         wx.BeginBusyCursor()
+        self.Freeze()
         filterUnderscore = 0
         if self.settings['hide_1_underscore']:
             filterUnderscore = 1
@@ -194,7 +191,7 @@ To return to object view, call display_puglist().
                                               filterUnderscore)
         elif self._currentView == 'Raw Data':
             self.pugList = create_raw_puglist(self.object, self, 
-                                              ['Default', 'ObjectButtons'],
+                                              ['Default', 'Objects'],
                                               filterUnderscore)
         elif self._currentView == 'Raw Methods':
             self.pugList = create_raw_puglist(self.object, self,['Routine'],
@@ -211,11 +208,13 @@ To return to object view, call display_puglist().
             else:
                 self.persist = None
         self.display_puglist()
+        self.Thaw()
         wx.EndBusyCursor()
 
     def display_puglist(self):
+        wx.BeginBusyCursor()    
+        self.Freeze()
         if self.object:
-            wx.BeginBusyCursor()    
             if self.pugList:         
                 sizer = self.pugSizer
                 #clear pugList
@@ -261,6 +260,7 @@ To return to object view, call display_puglist().
                 self.SetSize((20,20))
                 self.SetSize(size)
                 # end hack
+        self.Thaw()
         wx.EndBusyCursor()
 
     def resize_puglist(self):

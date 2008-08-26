@@ -2,12 +2,12 @@
     
 def is_valid_component_class(object, comp):
     validClass = False
-    if comp._ClassList:
+    if comp._class_list:
         if hasattr(object,'componentClassList'):
             objectClassList = object.componentClassList
         else:
             objectClassList = []
-        for cls in comp._ClassList:
+        for cls in comp._class_list:
             if isinstance(object,cls):
                 validClass = True
                 break
