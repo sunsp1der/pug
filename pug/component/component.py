@@ -4,36 +4,53 @@ from new import code as _code, function as _function, \
     instancemethod as _instancemethod
 from types import MethodType as _MethodType
 
+from pug.code_storage.constants import _INDENT
+
 # TODO: make classlist work
 # TODO: make attributeList work
 
 class Component(object):
-    """Component - pug uses components to add python code to objects at runtime
+    """Component( **kwargs)
+    
+Pug uses components to add python code to objects at runtime
+
+kwargs: Component.__init__ will assign kwargs as attributes. For example...
+MyComponent( size=10, name='biggy') 
+When MyComponent is created, an attribute 'size' will be created with value 10
+and an attribute 'name' will be created with value 'biggy'
+    
     
 Class attributes:        
-_Type: a string denoting the general type of component (i.e. 'Mouse' for 
+_set: a string with the name of the set that this component comes from 
+        (i.e if it were a bunch of shoot-em-up behaviors, you might call the set
+        'shooter' or 'shoot_em_up' or even "Bart's shooter pack")
+_type: a string denoting the general type of component (i.e. 'Mouse' for 
         components having to do with mouse controls).  Use a '/' to denote a 
         sub-type if you want. Standard is first letter capital, as short a
         string as possible.
-_Set: a string with the name of the set that this component comes from 
-        (i.e if it were a bunch of shoot-em-up behaviors, you might call the set
-        'shooter' or 'shoot_em_up' or even "Bart's shooter pack")
-_ClassList: a list of classes that this component is meant to work with.
+_class_list: a list of classes that this component is meant to work with.
         This is only checked by the pug system, using isinstance. Pug will also
         check to see if an object has a 'componentClassList' attribute, which
         can contain a list of classes that the object is compatible with for
         component usage.
-_attributeList: attributes (can include methods) that will be shown in the 
-        default component view in the pug system. Default is to show all non-
-        private attributes, but no methods.  Methods can be viewed in the 
-        Component Methods view.
-component_method: methods in a component with this decorator are made available
+_attribute_dict: Dictionary of attribute:docstring. This is a dictionary of the
+        official attributes of the Component. These are the attributes that will
+        be serialized when the component is saved, and are the attributes that 
+        will be shown in pug's default component view. docstring can be left
+        blank, but it's nice to provide info about attributes.
+*Other: component attribute defaults should be set at the class level.
+@component_method: methods in a component with this decorator are made available
         to the object with this component
 """    
-    _Type = None
-    _Set = None
-    _ClassList = []
-
+    _set = None
+    _type = None
+    _class_list = []
+    _attribute_dict = {}
+    
+    def __init__(self, **kwargs):
+        for attr, val in kwargs.iteritems():
+            setattr(self, attr, val)
+                            
     def _component_method_names(doc):
 
         """Returns a generator of component method names."""
@@ -46,6 +63,49 @@ component_method: methods in a component with this decorator are made available
     _component_method_names = \
         _component_method_names(_component_method_names.__doc__)
 		
+    def _create_object_code(self, storageDict, indentLevel, exporter):
+        if storageDict['as_class']:
+            return exporter.create_object_code(self, storageDict, indentLevel, 
+                                               exporter)
+        else:
+            storage_name = storageDict['storage_name']
+            baseIndent = _INDENT * indentLevel
+            code = []
+            code += [baseIndent,storage_name," = ",self.__class__.__name__,"("]
+            code += [self._create_argument_code( indentLevel)]
+            code += [')\n']
+        return ''.join(code)
+
+    def _create_argument_code(self, indentLevel):
+        """_create_argument_code( indentLevel)
+   
+Creates the list of arguments for a component's init function. This sets all the
+items in the component's _attribute_dict, as long as they are different from the
+default values. They are formatted to be indented twice beyond indentLevel, with
+line breaks between each. To create a single-line argument list, strip out all
+'\n' characters.        
+"""
+        dummy = self.__class__()
+        argIndent = _INDENT * (indentLevel + 2)
+        code = []
+        for attr in self._attribute_dict:
+            store = True
+            try:
+                val = getattr(self, attr)
+                dummyval = getattr(dummy, attr)
+                if val == dummyval:
+                    store = False
+            except:
+                store = False
+            if store:
+                code += ['\n',argIndent, attr, '=', repr(val),', ']
+        return ''.join(code)
+    _codeStorageDict = {
+                  'custom_export_func': _create_object_code,
+                  'as_class': True,
+                  'skip_attributes': ['_component_method_names']
+                  }
+        
 class ComponentList(object):
 
     def __del__(self):
@@ -56,8 +116,20 @@ class ComponentList(object):
         self.__components = []
         self.__methods = {}
 
-    def add(self, component):
-        assert isinstance(component, Component)
+    def add(self, component, **kwargs):
+        """add( component, **kwargs)
+        
+component: must either be a component instance or a component class.
+kwargs: will be assigned to component attributes as per component.__init__
+"""
+        if isinstance(component, Component):
+            component.__init__( **kwargs)
+        elif issubclass( component, Component):
+            component = component( **kwargs)
+        else:
+            raise TypeError(message=''.join(['ComponentList.add: ',
+                                             repr(component), 
+                                             "is not a component"]))
         methods = self.__methods
         for key in component._component_method_names:
             value = getattr(component, key)

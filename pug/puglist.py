@@ -211,7 +211,7 @@ def get_attribute_family(obj, attribute):
 Returns a string: 
     'Default' for basic python types
     'Routine' for callables
-    'ObjectButtons' for anything else
+    'Objects' for anything else
 """
 
     value = getattr(obj,attribute)
@@ -222,7 +222,7 @@ Returns a string:
         guiType = 'Routine'
     else:
     # if we don't have a type, we'll just let the user open a pug for it
-        guiType = 'ObjectButtons'
+        guiType = 'Objects'
     return guiType
 
 def create_puglist(obj, window, template = None):

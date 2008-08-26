@@ -15,7 +15,7 @@ from pug.syswx.SelectionFrame import SelectionFrame
 # TODO: create 'Initializing Pug' window
 # TODO: create a link between project closing and app closing
 
-class pugApp(wx.PySimpleApp):
+class pugApp(wx.App):
     """pugApp: wx.App for the pug system
     
 arguments:
@@ -29,7 +29,8 @@ projectFolder="": where file menus start at.  Defaults to current working dir.
 """
     def __init__(self, projectObject=None, projectObjectName='',
                  projectName='PUG', projectFolder = "" ):
-        wx.PySimpleApp.__init__(self)
+        #wx.PySimpleApp.__init__(self)
+        wx.App.__init__(self)
         self.SetExitOnFrameDelete(False)
         self.quitting = False
         self.progressDialog = None
@@ -159,6 +160,7 @@ called every second until the object is initialized"""
                                wx.YES_NO | wx.NO_DEFAULT)
         #TODO: would be nice if the dlg could be forced above other apps
             if dlg.ShowModal() != wx.ID_YES:
+                dlg.Destroy()
                 return
         self.quit()
         if event:

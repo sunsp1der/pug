@@ -1,11 +1,21 @@
-now:	
-	make very simple editor interface... 
-		nudge with arrows
-		ctrl-c, ctrl-v, ctrl-x, delete
-	create example out of opioid bricks
-		html tutorial
-		function to open browser for tutorial
-	write basic tutorial - Using pug as a level builder
+current version:
+	'__selections__' layer showing in scene
+	save dialogs always child to scene?
+	add save button to scene template
+	pugwindow apply on close
+	change scene leaves selection box hanging around
+	Play - Stop - Rewind Controls
+	demo components
+		spawn area
+		set-physics
+		keyboard controls
+	Open/New project	
+	html tutorial
+		create project
+		create scene
+		create sprites
+		add components
+	function to open browser for tutorial
 	create zip tarball exe?
 	release 0.2!!!
 
@@ -14,6 +24,23 @@ bugs:
 	trying to look at a SpriteRect causes crash	
 
 later: 
+	grid and snap-to
+	make component_methods pythonic by removing argument processing
+	add soupascript functionality to pug.base_object
+		^ indicates gnamed object
+		* indicates python code
+		way to indicate filter?
+	make subobjects work for code storage... move components to end
+	put gname in instantiation line as gname= argument
+	only create one dummy node
+		make dummyList a dummyDict... class: dummy
+		check for class before creating dummy
+	code_storage list ala templates... no functionality in object
+	create example out of opioid bricks
+		write basic tutorial - Using pug as a level builder
+	app = showPugFrame/getPugFrame should return lists
+	make very simple editor interface... 
+		ctrl-c, ctrl-v, ctrl-x, delete
 	log all exceptions that are glossed over by automation
 	indent text a little to make it not push into left edge in big labels
 	make standalone work right
@@ -77,7 +104,6 @@ useability:
 	
 big needs later... help from outside?:
 	undo/redo system
-	editor mode - dragging sprites... selection boxes... all that
 	 
 Python Questions:
 	Other ways to load/scan all modules in a folder

@@ -22,14 +22,21 @@ Object that manages selection graphics in the Opioid2D frame
     def __init__(self):
         self.boxDict = CallbackWeakKeyDictionary()
     
-    def on_set_selection(self, selectRefSet):
-        """on_set_selection( selectRefSet)
+    def on_set_selection(self, selectedRefSet):
+        """on_set_selection( selectedRefSet)
+        
+Callback from pug.App...
+"""
+        self.set_selection( selectedRefSet)
+        
+    def set_selection(self, selectedRefSet):
+        """on_set_selection( selectedRefSet)
         
 Set the selection to the given list of objects. Draw a box around each one.
 """
         keySet = set(self.boxDict.keys())
         selectSet = set()
-        for ref in selectRefSet:
+        for ref in selectedRefSet:
             selectSet.add(ref())
         deselectSet = keySet.difference(selectSet)
         for deselect in deselectSet:
@@ -45,7 +52,7 @@ Set the selection to the given list of objects. Draw a box around each one.
             rect = node.get_rect()
             if box.area.dragging:
                 if box.rect != box.area.rect:
-                    layer = Opioid2D.Director.scene.get_layer("selections")
+                    layer = Opioid2D.Director.scene.get_layer("__selections__")
                     position = Mouse.get_position()
                     world_position = layer.convert_pos(position[0], position[1])
                     box.area.position = (0,0)
@@ -53,6 +60,7 @@ Set the selection to the given list of objects. Draw a box around each one.
                     box.set_position(world_position)
             else:
                 if box.rect != rect:
+                    box.base.rotation = node.rotation
                     box.set_rect( rect)
             
 selectionManager = SelectionManager()
@@ -122,14 +130,14 @@ node: any object containing a 'rect' attribute that is a pygame rect
         
 class SelectBoxLineSprite( Opioid2D.gui.GUISprite):
     image = _line_sprite_file
-    layer = "selections"
+    layer = "__selections__"
 
 class SelectBoxBaseSprite( Opioid2D.Sprite):
-    layer = "selections"
+    layer = "__selections__"
     
 class SelectBoxAreaSprite( Opioid2D.gui.GUISprite):
     image = _empty_sprite_file
-    layer = "selections"
+    layer = "__selections__"
     draggable = True
     dragging = False
     

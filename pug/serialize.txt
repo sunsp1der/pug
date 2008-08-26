@@ -27,8 +27,9 @@ class Main(PugScene):
 		crunchedGname_or_sprite_1 = PugSprite()
 		crunchedGname_or_sprite_1.set_image("explosion1.py")
 		crunchedGname_or_sprite_1.group = "thegroup"
-			
-		
+		crunchedGname_or_sprite_1.components.add( My_Component(
+				My_Component_Attribute=12,))
+				
 		# components
 		self.add_component(
 			collision_callback, {

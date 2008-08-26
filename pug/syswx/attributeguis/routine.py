@@ -141,6 +141,7 @@ See Base attribute gui for other argument info
                          )
         err.ShowModal()
         err.Destroy()
+        wx.EndBusyCursor()
                 
     def openExecuteWindow(self, event = None):
         value = self.get_attribute_value()

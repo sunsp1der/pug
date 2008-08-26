@@ -26,12 +26,12 @@ Register a component class with the component manager. This makes the component
 available through the pug system.
 """
     if not issubclass(component,Component):
-        raise TypeError("".join(["invalid component:",str(component)]))
+        raise TypeError("".join(["Not a Component:",str(component)]))
     if component in _globalComponentManager.componentList:
         return
     _globalComponentManager.componentList.append(component)
     _globalComponentManager.lastUpdate = time()
-    
+        
 def get_component_manager():
     return _GlobalComponentManager
 
@@ -40,4 +40,4 @@ def get_component_list():
     return x
 
 def get_last_component_update():
-    return _globalComponentManager.lastUpdate
+    return _globalComponentManager.lastUpdate    

@@ -1,12 +1,9 @@
-import wx
 import Opioid2D
-from Example_Project.scenes.pug_action_timing import TimingScene
+import wx
+from Example_Project.scenes.Diagonals2 import Diagonals2
 
-wxapp = wx.PySimpleApp()
+startScene = Diagonals2
 
-frame = wx.Frame(None)
-widget = wx.Button(frame)
-frame.Show()
 Opioid2D.Display.init((800, 600), title='Scene')
-Opioid2D.Director.run(TimingScene)
-wxapp.MainLoop()
+Opioid2D.Director.start_game = True
+Opioid2D.Director.run(startScene)

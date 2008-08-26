@@ -77,14 +77,22 @@ any object.
                 button.set_object(obj, self.attribute, self._window)
         
     def set_control_value(self, obj):
+        text = self.label_text(obj)
+        self.infoText.SetLabel(text)
+        self.control.value = obj
+
+    def label_text(self, obj):
         if hasattr(obj,'gname') and obj.gname:
             text = obj.gname
         else:
             text = type(obj).__name__
             if text == 'type':
                 text = str(obj)
-        self.infoText.SetLabel(text)
-        self.control.value = obj
+        return text
+    
+    def refresh(self, event=None):
+        Base.refresh(self, event)
+        self.set_control_value(self.control.value)
         
     def get_control_value(self):
        return self.control.value

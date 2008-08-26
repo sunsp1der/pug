@@ -17,6 +17,7 @@ object to be viewed as an argument on creation of the frame."""
 
 import wx
 
+from pug.syswx.util import get_icon
 from pug.syswx.wxconstants import *
 from pug.syswx.pugwindow import PugWindow
 
@@ -54,15 +55,16 @@ PugFrame(self, obj=None, objectpath="object", title="", show=True, parent=None)
         wx.Frame.__init__(self, parent=parent, size=WX_PUGFRAME_DEFAULT_SIZE, 
                           title=title)        
         self.SetMinSize(wx.Size(250, 130))
-        
-        #self.SetIcon('../Images/pug.png')
+        self.SetIcon(get_icon())
+        self.objectpath = objectpath
+        self.title = title
         #toolbarSeparator = wx.StaticLine(self, size=(1,2))
         #toolbarSeparator.SetMinSize((-1,-1))
         #sizer.AddWindow(toolbarSeparator, flag=wx.EXPAND)
         self.SetSizer(sizer)        
         pugWindow = PugWindow(self)
         self.set_pugwindow( pugWindow)
-        self.set_pugwindow_object( obj, objectpath, title)
+        self.set_object( obj, objectpath, title)
         bar = self.CreateStatusBar()        
         bar.Bind(wx.EVT_LEFT_DCLICK, self.show_all_attributes)        
         self.Bind(wx.EVT_MENU, self._evt_passmenu)
@@ -70,7 +72,7 @@ PugFrame(self, obj=None, objectpath="object", title="", show=True, parent=None)
         if show:
             self.Show()
             
-    def set_pugwindow_object(self, obj, objectpath, title):
+    def set_object(self, obj, objectpath="unknown", title=""):
         self.activePugWindow.set_object(obj, objectpath, title)
         self.SetTitle(self.activePugWindow.title)        
         
