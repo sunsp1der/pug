@@ -1,43 +1,78 @@
-"""Various utility functions for pug_opioid"""
+"""Various ingame functions to make life easier when using pug_opioid"""
+
+import math
 import os.path
 import sys
-from inspect import getmro
-import wx
+
+import pug
+from pug.util import get_folder_classes, find_classes_in_module
 
 import Opioid2D
 
-from pug import code_export
-from pug.util import get_folder_classes
-
 projectPath = os.getcwd()
+_revertScene = None
 
-def get_available_layers():
-    """get_available_layers() -> list of available layers in Director"""
-    try:
-        # hide '__selections__' layer
-        layers = Opioid2D.Director.scene.layers[:]
-        if '__selections__' in layers:
-            layers.remove('__selections__')
-        return layers        
-    except:
-        return []
+def angle_to( from_position, to_position):
+    """angle_to(from_position, to_position) -> angle
     
-def get_available_groups():
-    """get_available_groups() -> list of available groups in Director"""
-    try:
-        return Opioid2D.Director.scene._groups.keys()
-    except:
-        return []
+from_position and to_position in the form (x, y)
+"""
+    return math.degrees(math.atan2(
+                            to_position[0] - from_position[0],
+                            from_position[1] - to_position[1]))
     
-def get_available_scenes( doReload=False):
-    """get_available_scenes( doReload=False) -> list of Opioid2D.Scenes
+def start_scene():
+    """Start a scene running"""
+    Opioid2D.Director.start_game = True
+    Opioid2D.Director.scene.state = None
+    Opioid2D.Director.scene.start()    
     
-Get all Scenes available in modules in Scenes folder. Return list of available 
-Scene sub-classes.    
-doReload: if True, don't just import scene modules, but reload them"""
+def save_game_settings( game_settings):
+    pug.code_export( game_settings, "_game_settings.py", True, 
+                 {'name':'game_settings'})            
+    
+def get_available_scenes( doReload=False, useWorking=True):
+    """get_available_scenes( doReload=False, useWorking=False) -> dict
+    
+Get all Scenes available in modules in Scenes folder. Return dict of available 
+Scene sub-classes {"sceneName":sceneClass}.    
+doReload: if True, don't just import scene modules, but reload them
+useWorking: if True, and the class in the __Working__.py file is in the class
+    list, use the __Working__ scene to replace the one in the list.
+"""
     sceneFolder = os.path.join(projectPath,'scenes')
     sceneList = get_folder_classes(sceneFolder, Opioid2D.Scene, doReload)
-    return sceneList
+    if useWorking:
+        # use __Working__ scene as override
+        workingModule = 'scenes.__Working__'
+        try:
+            module = __import__(workingModule)
+        except:
+            return sceneList
+        needsReload = workingModule in sys.modules
+        if doReload and needsReload:
+            sys.modules.pop(workingModule)
+            module = __import__(workingModule)
+            #reload(module.__Working__)
+        workingScene = find_classes_in_module(module.__Working__, 
+                                              Opioid2D.Scene)[0]
+        for idx in range(len(sceneList)):
+            if sceneList[idx].__name__ == workingScene.__name__:
+                global _revertScene
+                _revertScene = sceneList[idx]
+                sceneList[idx] = workingScene
+    sceneDict = {}
+    for item in sceneList:
+        sceneDict[item.__name__]=item
+    return sceneDict
+
+def get_committed_scene():
+    """get_committed_scene()->Opioid2D scene
+    
+The working scene normally replaces the committed disk version. This function
+returns the committed version.
+"""
+    return _revertScene
 
 def get_available_objects( doReload=False):
     """get_available_objects( doReload=False) -> list of Opioid2D.Nodes
@@ -59,73 +94,4 @@ def set_project_path( path):
         
 def get_project_path():
     return projectPath
-
-def save_object(obj, name = None):
-    """save_object(obj): Export obj as a class to objects folder"""
-    if not isinstance(obj, Opioid2D.public.Node.Node):
-        raise TypeError('save_object() arg 1 must be a Node')
-    if not name:
-        name = obj.gname
-        if not name:
-            name = obj.__class__.__name__
-        # we generally don't want to save with the same name as 
-        # a base class of the same object
-        superclasses = getmro(obj.__class__)[1:]
-        for cls in superclasses:
-            if name == cls.__name__:
-                name = ''.join(['My',name])
-        dlg = wx.TextEntryDialog( None, "Enter the object's class/file name", 
-                                  "Save Object", name)
-        objName = ''
-        while not objName:
-            if dlg.ShowModal() == wx.ID_OK:
-                name = dlg.GetValue()
-                path = os.path.join('objects',''.join([name,'.py']))
-                try:
-                    file(path)
-                except:
-                    objName = name
-                else:
-                    confirmDlg = wx.MessageDialog( dlg, 
-                           "Object file already exists. Overwrite?",
-                           "Confirm Replace",
-                           wx.YES_NO | wx.NO_DEFAULT)
-                    if confirmDlg.ShowModal() == wx.ID_YES:
-                        objName = name
-                    confirmDlg.Destroy()
-            else:
-                dlg.Destroy()
-                return
-        dlg.Destroy()
-    else:
-        path = os.path.join('objects',''.join([name,'.py']))
-    code_export( obj, path, True, {'name':objName})    
     
-def close_scene_windows( scene=None):
-    """_close_scene_windows( scene=None)
-    
-Close all scene and node windows belonging to current scene
-Note: for this to work on nodes, it must be run BEFORE the scene is changed.    
-"""
-    if scene == None:
-        scene = Opioid2D.Director.scene
-    app = wx.GetApp()
-    for frame in app.pugFrameDict:
-        try:
-            frameObj = frame.objectRef()
-        except:
-            continue
-        doclose = False
-        if frameObj == scene:
-            doclose = True
-        else:
-            if isinstance(frameObj, Opioid2D.public.Node.Node):
-                try:
-                    nodescene = frameObj.layer._scene
-                except:
-                    nodescene = 0
-                if nodescene == scene:
-                    doclose = True
-        if doclose:
-            frame.Close()    
-        

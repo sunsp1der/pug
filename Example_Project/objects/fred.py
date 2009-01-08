@@ -14,8 +14,6 @@ class fred(PugSprite):
     layer = 'bar'
     def on_create(self):
         self.gname = 'fred'
-        self.components.add( Set_Rotation_Speed(
-                rotation_speed=33, ) )
         self.position.x = 600.0
         self.position.y = 450.0
         self.scale.x = 3.0

@@ -43,23 +43,65 @@ def register_object_gname(object, name):
     else:
         dict[name] = [ref(object),] 
     
-def get_gnamed_object(name):
-    if _gnameManager.nameDict.has_key(name):
-        nameList = _gnameManager.nameDict[name]
-        while len(nameList):
-            obj = nameList[0]()
+def get_gnamed_object(gname):
+    """get_gnamed_object( gname) -> object gnamed 'gname'
+    
+return the object _most recently_ named 'gname'
+"""
+    if _gnameManager.nameDict.has_key(gname):
+        refList = _gnameManager.nameDict[gname]
+        while len(refList):
+            obj = refList[0]()
             if obj:
                 return obj
             else:
-                nameList.pop(0)
+                refList.pop(0)
     return None
+
+def get_gnamed_object_list(gname):
+    """get_gnamed_object_list( gname) -> list of objects gnamed gname
+    
+return a list of all objects gnamed 'gname'
+"""
+    list = []
+    if _gnameManager.nameDict.has_key(gname):
+        refList = _gnameManager.nameDict[gname]
+        removeList = []
+        for ref in refList:
+            obj = ref()
+            if obj:
+                list.append(obj)
+            else:
+                removeList.append(ref)
+        for ref in removeList:
+            refList.remove(ref)
+    return list
+
+def get_gnames(class_list=[]):
+    """get_gnames(class_list=[]) -> a list of gnames
+    
+returns a list of all the managed gnames.
+
+class_list: if provided, only gnamed objects of these classes will be returned
+"""
+    list = []
+    for gname, ref_list in _gnameManager.nameDict.iteritems():
+        for ref in ref_list:
+            obj = ref()
+            if obj:
+                if class_list and not isinstance(obj,class_list):
+                    continue
+                list.append(gname)
+                break
+    return list
 
 class GnamedObject(object):
     """Has a 'gname' property that auto-registers with the gname manager"""
     def __init__(self, gname = ''):
         self.__gname = ''
         # take care of a class with a default gname
-        if self.__class__.gname != GnamedObject.gname:
+        if hasattr(self.__class__, 'gname') and \
+                not isinstance(self.__class__.gname, property):
             gname = self.gname
             self.__class__.gname = GnamedObject.gname
         self.gname = gname
@@ -98,6 +140,10 @@ if __name__ == "__main__":
     print get_gnamed_object('ax') #should yield ax
     ax.gname = 'test'
     print get_gnamed_object('test') #should yield ax
+    print get_gnamed_object_list('ax') #should yield empty list 
+    print get_gnamed_object_list('test') #should yield list containing ax
+    print get_gnames() # should yield ['test']
+    print get_gnames((str))
     del(ax)
     print get_gnamed_object('test') #should yield None
     

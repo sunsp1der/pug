@@ -6,19 +6,22 @@ import pug
 from pug.syswx.attributeguis import *
 from pug.code_storage import add_subclass_skip_attributes
 from pug.code_storage.constants import _INDENT
-from pug_opioid.util import get_available_layers, save_object
+from pug_opioid.editor.util import get_available_layers, save_object
 
 import sys
 class PugSprite(Sprite, pug.BaseObject):
-    """PugSprite - Opioid2d Sprite with features for use with pug"""
+    """PugSprite( img=None, gname='')
+    
+Opioid2d Sprite with features for use with pug
+"""
     __metaclass__ = SpriteMeta
-    _pugTemplateClass = 'PugSprite'
+    _pug_template_class = 'PugSprite'
 
     # image stuff... allows entry and storage of filename
     _image_file = None   
-    def __init__(self):
-        pug.BaseObject.__init__(self)
-        Sprite.__init__(self)
+    def __init__(self, img=None, gname=''):
+        pug.BaseObject.__init__(self, gname=gname)
+        Sprite.__init__(self, img)
     def get_image_file(self):
         # TODO: find a way to actually look up this filename in the image
         if self._image_file is None:
@@ -34,6 +37,9 @@ class PugSprite(Sprite, pug.BaseObject):
     def _set_gname(self, value):
         pug.BaseObject._set_gname(self, value)
         Director.scene.update_node(self)
+    gname = property( pug.BaseObject._get_gname, _set_gname, 
+                      pug.BaseObject._del_gname,
+                      "An easily accessed global name for this object")
 
     def _on_mgr_delete(self):
         Sprite._on_mgr_delete(self)        
@@ -129,16 +135,20 @@ supposed to be deleted.
     
     _codeStorageDict = {
             'skip_attributes': ['_actions', '_image_file', 'image_file', 
-                                'layer_name'], 
+                                'layer_name','_init_image','_init_layer'], 
             'instance_attributes': ['*'],
             'init_method':'on_create',
+#            'init_method_args': None, 
             'custom_export_func': _create_object_code,
             'as_class': True,
                         }
     add_subclass_skip_attributes(_codeStorageDict, pug.BaseObject)    
-    
+
+# force derived classes to use PugSprite as a base
+PugSprite._codeStorageDict['base_class'] = PugSprite
+
 _spriteTemplate = {
-    'name':'Basic',
+    'name':'Editor',
     'attributes':
     [
         ['', pug.Label, {'label':'Sprite','font_size':10}],

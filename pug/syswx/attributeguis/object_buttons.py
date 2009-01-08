@@ -3,6 +3,7 @@ import weakref
 
 import wx
 
+from pug.util import get_type_name
 from pug.syswx.wxconstants import *
 from pug.syswx.attributeguis.base import Base
 from pug.syswx.pugbutton import PugButton
@@ -38,7 +39,7 @@ any object.
         controlSizer = wx.BoxSizer(orient=wx.HORIZONTAL)
 
         obj = getattr(frame.object,attribute)
-        control.value = ''
+        control.value = obj
         
         if aguidata['new_view_button']:
             new_view_button = PugButton(control, obj,
@@ -79,13 +80,14 @@ any object.
     def set_control_value(self, obj):
         text = self.label_text(obj)
         self.infoText.SetLabel(text)
+        self.infoText.SetToolTipString(repr(obj))
         self.control.value = obj
 
     def label_text(self, obj):
-        if hasattr(obj,'gname') and obj.gname:
+        if hasattr(obj,'gname') and obj.gname and obj.gname == str(obj.gname):
             text = obj.gname
         else:
-            text = type(obj).__name__
+            text = get_type_name(obj)
             if text == 'type':
                 text = str(obj)
         return text

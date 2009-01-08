@@ -3,8 +3,10 @@ from sys import exc_info
 import weakref
 
 import wx
+import wx.lib.buttons as buttons
 import wx.lib.scrolledpanel as scrolled
 
+from pug.util import get_type_name
 from pug.syswx.pugbutton import PugButton
 from pug.syswx.wxconstants import *
 
@@ -13,14 +15,20 @@ from pug.syswx.wxconstants import *
 class HelpFrame(wx.Frame):
     """HelpFrame(...): Return a frame showing basic info for 'object'. 
     
-(object, parent=none,  attribute='', objectPath='', showPugButton = True) 
+(object=None, parent=none,  attribute='', objectPath='', showPugButton=True, 
+    showRetypeButton=True, text=None) 
 
-    parent is the frame's parent
-    title is the frame's title. Generally, this should be the object's name
-    showPugButton': include a button for opening a pugFrame for the object
+    object: the object to show help for
+    parent: frame's parent
+    title: frame's title. Generally, this should be the object's name
+    attribute: the attribute being viewed, if any
+    objectPath: a text path to the object (programmatic path)
+    showPugButton: include a button for opening a pugFrame for the object
+    showRetypeButton: show a button that allows you to change the obj's type
+    text: a string that will override the default help info
 """
     def __init__(self, object, parent=None, attribute='', objectPath='', 
-                 showPugButton=False):
+                 showPugButton=False, showRetypeButton=True, text=None):
         wx.Frame.__init__(self, parent, -1, title = 'Help')
         self.scrollPanel = scrolled.ScrolledPanel(self, -1)
         self.Sizer = wx.BoxSizer(wx.VERTICAL)
@@ -30,22 +38,23 @@ class HelpFrame(wx.Frame):
             bmp = wx.ArtProvider.GetBitmap(wx.ART_REDO, 
                                            wx.ART_TOOLBAR, WX_BUTTON_BMP_SIZE)
             tooltip = "Change object's type"
-            retypebutton = wx.BitmapButton(self, 
-                              size=WX_BUTTON_SIZE,
-                              bitmap = bmp
-                              )
-            retypebutton.SetToolTipString(tooltip)
-            retypebutton.Bind(wx.EVT_BUTTON, self.retype_object)
-            self.ButtonSizer.Add(retypebutton,0)            
+            if showRetypeButton:
+                retypebutton = buttons.ThemedGenBitmapButton(self, 
+                                  size=WX_BUTTON_SIZE,
+                                  bitmap = bmp
+                                  )
+                retypebutton.SetToolTipString(tooltip)
+                retypebutton.Bind(wx.EVT_BUTTON, self.retype_object)
+                self.ButtonSizer.Add(retypebutton,0)            
         if showPugButton:
             # button for viewing object in pug
             pugbutton = PugButton(self, object, True, objectPath)
             self.ButtonSizer.Add(pugbutton, 0)
         self.Sizer.AddSizer(self.ButtonSizer, 0, wx.ALIGN_RIGHT)
-        self.Sizer.Add(self.scrollPanel, 1, flag = wx.EXPAND)
+        self.Sizer.Add(self.scrollPanel, 1, wx.EXPAND | wx.ALL, 3)
         self.flexGridSizer = None
         self.CreateStatusBar()
-        self.set_object(object, objectPath, showPugButton)
+        self.set_object(object, objectPath, text)
         self.attribute = attribute
     
     def retype_object(self, Event = None):
@@ -84,7 +93,7 @@ class HelpFrame(wx.Frame):
                 self.GetParent().create_puglist()
                 self.Close()
         
-    def set_object(self, object, objectPath = None, showPugButton = False):
+    def set_object(self, object, objectPath = "", overrideText = None):
         self.objectPath = objectPath
         self.object = object        
         self.SetTitle(' - '.join(['Help', objectPath]))
@@ -92,6 +101,13 @@ class HelpFrame(wx.Frame):
         if self.flexGridSizer:
             self.flexGridSizer.Clear(True)
             self.flexGridSizer.Destroy()
+            
+        if overrideText:
+            flex = self.scrollPanel.Sizer = wx.FlexGridSizer(1,1,0,0)
+            control = wx.StaticText(self.scrollPanel, -1, label=overrideText)
+            flex.Add(control)
+            self.scrollPanel.SetupScrolling()         
+            return   
             
         info = []
         doc = getdoc(object)
@@ -113,7 +129,7 @@ class HelpFrame(wx.Frame):
         if doc and (isroutine(object) or not builtin):
             info += ["Doc:",doc]
         info += ["Value:", repr(object)]
-        info += ["Type:", type(object).__name__]
+        info += ["Type:", get_type_name(object)]
         if module:
             info += ["Module:", str(module)]
         if mro and not builtin and not isroutine(object):

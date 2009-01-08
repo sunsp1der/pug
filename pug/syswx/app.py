@@ -1,6 +1,7 @@
 """wx app for pug"""
 import weakref
 import os
+import traceback
 # from dummy_threading import Thread
 # import dummy_thread as thread
 # import thread
@@ -9,11 +10,14 @@ from inspect import getsourcefile
 
 import wx
 
+from pug.util import make_name_valid
 from pug.syswx.pugframe import PugFrame
 from pug.syswx.SelectionFrame import SelectionFrame
 
 # TODO: create 'Initializing Pug' window
 # TODO: create a link between project closing and app closing
+
+_RECTPREFIX = '_rect_'
 
 class pugApp(wx.App):
     """pugApp: wx.App for the pug system
@@ -27,14 +31,19 @@ projectName="PUG": name of the project/title of initial frame.
     to projectObjectName 
 projectFolder="": where file menus start at.  Defaults to current working dir.
 """
+    quitting = False
+    busyState = False
+    progressDialog = None
+    initTryCounter = 0
+    settingsObj = None
     def __init__(self, projectObject=None, projectObjectName='',
                  projectName='PUG', projectFolder = "" ):
         #wx.PySimpleApp.__init__(self)
         wx.App.__init__(self)
-        self.SetExitOnFrameDelete(False)
-        self.quitting = False
-        self.progressDialog = None
-        self.initTryCounter = 0 #so we don't loop on post_init_forever
+        #self.SetExitOnFrameDelete(False)
+        
+        # global menus
+        self.globalMenuDict = {'__order__':[],'__ids__':{}}
         
         # selection manager stuff
         self.selectedRefSet = set()
@@ -60,7 +69,6 @@ projectFolder="": where file menus start at.  Defaults to current working dir.
         
         # default save and load folder 
         self.set_project_object(projectObject)        
-
         self.MainLoop()
         
         
@@ -80,10 +88,11 @@ projectFolder="": where file menus start at.  Defaults to current working dir.
                                             parent=None,
                                             style=wx.PD_ELAPSED_TIME,
                                             maximum=23)
-        self.initProgressDialog.SetSize((400,
-                                         self.initProgressDialog.GetSize()[1]))
+#        self.initProgressDialog.SetSize((400,
+#                                         self.initProgressDialog.GetSize()[1]))
         self.initProgressDialog.Bind(wx.EVT_CLOSE, self.abort_init)
         self.initProgressDialog.Update(0)
+        self.initProgressDialog.Raise()
         if object:
             self.post_init(object)
                     
@@ -114,23 +123,25 @@ called every second until the object is initialized"""
                     if self.initProgressDialog:
                         self.initProgressDialog.Update(self.initTryCounter, 
                                                        error)
+                        self.initProgressDialog.Raise()
                     self.post_init_failed(error)
                     return
                 if self.initProgressDialog:
                     msg = ''.join(['PUG system initializing... tries: ',
                                    str(self.initTryCounter)])
                     self.initProgressDialog.Update(self.initTryCounter, msg)
+                    self.initProgressDialog.Raise()
         if not hasattr(object,'_isReady') or object._isReady:        
+            msg = 'Opening Project...'
             self.initProgressDialog.Update(22, msg)
+            self.initProgressDialog.Raise()
             self.finalize_project_object( object)
         else:
             wx.CallLater(500,self.post_init,object)
 
     def finalize_project_object(self, object):
-        msg = 'PUG system initialized...'
         self.open_project_frame(object) 
         self.register_selection_watcher(object)
-        self.initTryCounter = 1
         if self.initProgressDialog:
             self.initProgressDialog.Destroy()
         self.SetExitOnFrameDelete(True)
@@ -150,8 +161,9 @@ called every second until the object is initialized"""
         raise Exception(msg)
 
     def _evt_project_frame_close(self, event = None):
-        if self.quitting:
-            event.Skip()
+        if (event and not event.CanVeto()) or self.quitting:
+            if event:
+                event.Skip()
             return
         if self.projectObject in self.projectFrame.get_object_list():
             dlg = wx.MessageDialog(self.projectFrame,
@@ -168,18 +180,21 @@ called every second until the object is initialized"""
 
     def quit(self, event = None):
         if self.quitting:
-            event.Skip()
+            if event:
+                event.Skip()
             return
         self.quitting = True
-        for pugframe in self.pugFrameDict:
-            if pugframe:
-                pugframe.Close()
         try:
             projectObject = self.projectObject
             if hasattr(projectObject, '_on_pug_quit'):
                 projectObject._on_pug_quit()
         except:
-            pass
+            print "Exception during _on_pug_quit"
+            print traceback.format_exc()
+        for pugframe in self.pugFrameDict:
+            if pugframe:
+                pugframe.Close()
+        self.Exit()
         
     def pugframe_opened(self, frame, object=None):
         """pugframe_opened(frame)
@@ -204,16 +219,22 @@ object: the object being viewed. Alternatively, this can be a string identifying
         else:
             self.pugFrameDict[frame]= [objId]
             
+    def pugframe_stopped_viewing(self, frame, object):
+        if frame in self.pugFrameDict:
+            if object in self.pugFrameDict[frame]:
+                self.pugFrameDict[frame].remove(object)
+            
     def get_object_pugframe(self, object):
         """get_object_pugframe(object)
         
 Return the PugFrame currently viewing 'object', or None if not found.
 """
         searchid = id(object)
+        pugframe = None
         for frame, objlist in self.pugFrameDict.iteritems():
             if frame and searchid in objlist:
-                return frame
-        return None
+                pugframe = frame
+        return pugframe
         
     def show_object_pugframe(self, object):
         """show_object_pugframe(object)
@@ -261,7 +282,10 @@ duplicates will be automatically eliminated.
         self.setting_selection = True
         self.selectedRefSet.clear()
         for item in selectList:
-            self.selectedRefSet.add( weakref.ref(item))
+            if isinstance(item,weakref.ReferenceType):
+                self.selectedRefSet.add(item)
+            else:
+                self.selectedRefSet.add( weakref.ref(item))
         for obj in self.selectionWatcherDict:
             if obj == skipObj:
                 continue
@@ -284,12 +308,133 @@ selectedRefSet can be changed using the set_selection method.
         else:
             frame = None
 
+    def selection_refresh(self):
+        """selection_refresh()
+        
+Send a on_selection_refresh message to all objects in the selectionWatcherDict.
+This will not be called automatically... only when requested by the user.
+"""
+        for obj in self.selectionWatcherDict:
+            if hasattr(obj, 'on_selection_refresh'):
+                obj.on_selection_refresh()
+
     def register_selection_watcher(self, obj):
         """register_selection_watcher(obj)
         
 Register an object to receive 'on_set_selection( selectedRefSet)' callback 
 when the App's selectedRefSet changes. selectedRefSet is a set of references to
-selected objects. Project object will automatically be registered if it has an
-attribute called on_set_selection
+selected objects. Registered objects will also receive a 'on_selection_refresh' 
+callback when a selected object changes (must be implemented by user). 
+Project object will automatically be registered if it has an attribute called 
+on_set_selection.
 """
         self.selectionWatcherDict[obj] = id(obj)
+        
+    def add_global_menu(self, name, entryList):
+        """add_global_menu(name, entryList) 
+        
+Add a global menu to be placed on all pugframes. 
+
+name: menu name. Do not use __ids__ or __order__ as names
+entryList: a list of entries in this form: 
+   [command name, function to be run, tooltip (optional)]
+   For hotkeys set command name to: NAME\tHOTKEY with HOTKEY like Shift+Ctrl+A
+"""
+        order = self.globalMenuDict['__order__']
+        if name in order:
+            order.remove(name)
+        order.append(name)
+        self.globalMenuDict[name] = entryList
+        
+    def remove_global_menu(self, name):
+        """remove_global_menu(name): remove the named menu"""
+        self.globalMenuDict['__order__'].remove(name)
+        return self.globalMenuDict.pop(name,None)
+
+    def append_global_menus(self, menubar):
+        """append_global_menus( menubar)
+
+menubar: the wx.MenuBar to add the global menus to
+"""
+        menuList = self.globalMenuDict['__order__']
+        for menuName in menuList:
+            newMenu = wx.Menu()
+            menubar.Append(menu=newMenu, title=menuName)
+            menuEntries = self.globalMenuDict.get(menuName, [])
+            for entry in menuEntries:
+                id = wx.NewId()
+                name = entry[0]
+                func = entry[1]
+                if len(entry) > 2:
+                    tooltip = entry[2]
+                else:
+                    tooltip = name
+                self.globalMenuDict['__ids__'][id] = func
+                newMenu.Append(help=tooltip, id=id, text=name)
+                self.Bind(wx.EVT_MENU, self._evt_on_global_menu, id=id)
+                
+    def _evt_on_global_menu(self, event):
+        func = self.globalMenuDict['__ids__'][event.Id]
+        func()
+        
+    def set_busy_state(self, On=True):
+        """set_busy_state(On=True)
+
+If 'On', start busy cursor and send on_set_busy_state(True) callback to project 
+object. If not 'On', end busy cursor and send on_set_busy_state(False) callback.
+"""
+        if On and not self.busyState:
+            wx.BeginBusyCursor()
+        elif not On and self.busyState:
+            wx.EndBusyCursor()
+        else:
+            return
+        self.busyState = On
+        if hasattr(self.projectObject, 'on_set_busy_state'):
+            self.projectObject.on_set_busy_state(On)
+            
+    def set_pug_settings(self, settingsObj):
+        """set_pug_settings(settingsObj)
+        
+settingsObj: a class with values like those created in create_frame_settings.
+"""        
+        self.settings = settingsObj
+            
+    def get_rect_setting_name(self, frame):
+        return make_name_valid(''.join([_RECTPREFIX,frame.Name]))
+            
+    def create_frame_settings(self, settingsObj=None):
+        """create_frame_settings(settingsObj=None)->setting data class
+        
+settingsObj: any frame settings members will be replaced
+"""
+        class frame_settings():
+            pass
+        for frame in wx.GetTopLevelWindows():
+            # setting entry like: framename_rect = (x, y, width, height)
+            if not frame.Name:
+                continue
+            name = self.get_rect_setting_name(frame)
+            data = (frame.Position[0], frame.Position[1], 
+                    frame.Size[0], frame.Size[1])
+            setattr(frame_settings, name, data)
+        if settingsObj:
+            # erase old rects
+            keys = settingsObj.__dict__.keys()
+            for attr in keys:
+                if attr.startswith(_RECTPREFIX):
+                    delattr( settingsObj, attr) 
+            # add new rects
+            for attr, data in frame_settings.__dict__.iteritems():
+                setattr(settingsObj,attr, data)
+            return settingsObj
+        else:
+            return frame_settings            
+            
+    def set_default_pos(self, frame):
+        name = self.get_rect_setting_name(frame)
+        if getattr(self.settings, name, None):
+            rect = getattr(self.settings, name)
+            frame.SetPosition((rect[0],rect[1]))
+            frame.SetSize((rect[2],rect[3]))
+            

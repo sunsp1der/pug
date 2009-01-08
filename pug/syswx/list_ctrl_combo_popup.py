@@ -6,14 +6,16 @@ import wx.combo
 class ListCtrlComboPopup(wx.combo.ComboPopup):
     """Popup control containing a list. Created because the built-in combo-box
 doesn't have as many features/accessors as the combo.ComboCtrl"""
+
     selected = -1      
     selectCallback = None  
     popupCallback = None
         
     def Create(self, parent):
-        self.list = wx.ListBox(parent, style = wx.LB_SINGLE)
+        self.list=wx.ListBox(parent, style=wx.LB_SINGLE)
+#        self.list = FindPrefixListBox(parent, style = wx.LB_SINGLE)
         self.list.Bind(wx.EVT_MOTION, self.OnMotion)
-        self.list.Bind(wx.EVT_LEFT_DOWN, self.OnSelect)
+        self.list.Bind(wx.EVT_LEFT_DOWN, self.OnMouseSelect)
         
     def DeselectAll(self):
         return self.list.DeselectAll()
@@ -56,14 +58,22 @@ callback(self)
     def GetAdjustedSize(self, minWidth, prefHeight, maxHeight):
         return wx.Size(minWidth, min(200,maxHeight))
     
-    def OnSelect(self, event):
-        selected = self.list.HitTest(event.GetPosition())
+    def OnEnter(self, event):
+        selected = self.list.GetSelection()
+        self.OnSelect( event, selected)
+
+    def OnSelect(self, event, selected):
         if selected != -1:
             self.selected = selected
+        
         self.Dismiss()
-        event.Skip()    
+        event.Skip()
         if self.selectCallback:
-            self.selectCallback( event)    
+            self.selectCallback(event)        
+    
+    def OnMouseSelect(self, event):
+        selected = self.list.HitTest(event.GetPosition())
+        self.OnSelect(event, selected)    
         
     def SetSelectCallback(self, callback):
         """SetSelectCallback( callback)
@@ -108,3 +118,60 @@ The callback will be called just after a selection is made.
             if itemtext == text:
                 return i
         return -1
+    
+#---------------------------------------------------------------------------
+
+# This listbox subclass lets you type the starting letters of what you want to
+# select, and scrolls the list to the match if it is found.
+class FindPrefixListBox(wx.ListBox):
+    def __init__(self, parent, id=-1, pos=wx.DefaultPosition, 
+                 size=wx.DefaultSize, choices=[], style=0, 
+                 validator=wx.DefaultValidator):
+        wx.ListBox.__init__(self, parent, id, pos, size, choices, style, validator)
+        self.typedText = ''
+        self.Bind(wx.EVT_KEY_DOWN, self.OnKey)
+
+
+    def FindPrefix(self, prefix):
+        if prefix:
+            prefix = prefix.lower()
+            length = len(prefix)
+
+            # Changed in 2.5 because ListBox.Number() is no longer supported.
+            # ListBox.GetCount() is now the appropriate way to go.
+            for x in range(self.GetCount()):
+                text = self.GetString(x)
+                text = text.lower()
+
+                if text[:length] == prefix:
+                    return x
+
+        return -1
+
+
+    def OnKey(self, evt):
+        key = evt.GetKeyCode()
+        if key >= 32 and key <= 127:
+            self.typedText = self.typedText + chr(key)
+            item = self.FindPrefix(self.typedText)
+
+            if item != -1:
+                self.SetSelection(item)
+
+        elif key == wx.WXK_BACK:   # backspace removes one character and backs up
+            self.typedText = self.typedText[:-1]
+
+            if not self.typedText:
+                self.SetSelection(0)
+            else:
+                item = self.FindPrefix(self.typedText)
+
+                if item != -1:
+                    self.SetSelection(item)
+        else:
+            self.typedText = ''
+            evt.Skip()
+
+    def OnKeyDown(self, evt):
+        pass
+   

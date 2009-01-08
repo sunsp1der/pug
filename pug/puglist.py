@@ -2,14 +2,20 @@ from inspect import *
 from sys import exc_info
 
 from pug.constants import *
+from pug.util import get_type
 from pug.templatemanager import get_agui_default_dict
 
+_DEBUG = False
+
 def create_template_puglist(obj, window, template, filterUnderscore = 2):
-    """create_template_pug(obj, window) -> pugList (list of pug aguis for obj)
+    """create_template_pug(obj, window, template, filterUnderscore) -> pugList 
+    
+    pugList is a list of pug aguis for obj
     
 obj: object to be examined
 window: the pugFrame object  
 template: template to be used.
+filterUnderscore: 2 = don't show __attributes, 1 = don't show _attributes either
 
 Create a gui based on template. A class' template can be created as follows:
 pugTemplate  = \
@@ -42,19 +48,29 @@ pugTemplate  = \
     
     # a custom puglist creation function can be specified here
     # this is optional
-    'create_pug_list_function': fn # fn(obj, window) will be called
+    'create_pug_list_function': fn 
+    # fn(obj, window, filterUnderscore) will be called 
+    # arguments are as per this function
+    
+    # a custom info function can be specified here
+    # this is optional
+    'info_function': fn
+    # fn( obj, window, objectPath) -> info frame
+    # arguments are as per this function. objectPath is a string representing
+    # the programatic path to obj. If fn opens a frame, it should return it.
 }
 import pug
 pug.add_template(myClass, pugTemplate)
 
-Additionally, an instance or class can have a '_pugTemplateClass' attribute 
+Additionally, an instance or class can have a '_pug_template_class' attribute 
 which contains the class whose templates can be used. For example:
 
 class otherClass( myClass):
-    _pugTemplateClass = myClass
+    _pug_template_class = myClass
 """
     if template.has_key('create_pug_list_function'):
-        pugList = template['create_pug_list_function'](obj, window)
+        pugList = template['create_pug_list_function'](obj, 
+                                                       window, filterUnderscore)
     else:
         dirList = dir(obj)
         if template.has_key('attributes'):
@@ -67,8 +83,10 @@ class otherClass( myClass):
             defaultDict = {}
         pugList = []
         # go through list of attributes in template
+        if _DEBUG: print obj
         for entry in attributeList:
             attribute = entry[0]
+            if _DEBUG: print attribute
             if attribute == '*':
                 #create default gui for all attributes we haven't made a gui for
                 for attribute in dirList:
@@ -105,7 +123,10 @@ class otherClass( myClass):
                     attributeValue = getattr(obj,attribute)
                 except:
                     continue
-                attributeClass = attributeValue.__class__
+                if isclass(attributeValue):
+                    attributeClass = attributeValue
+                else:
+                    attributeClass = get_type(attributeValue)
                 if defaultDict.has_key(attributeClass):
                     info = defaultDict[attributeClass]
                     agui = info[0]
@@ -130,6 +151,7 @@ class otherClass( myClass):
             pugList.append(attributegui)
             if entry[0] in dirList:
                 dirList.remove(entry[0])
+    if _DEBUG: print "***DONE***"
     return pugList
 
 def create_raw_puglist(obj, window, familyList = None, filterUnderscore = 2):
@@ -187,7 +209,10 @@ aguidata: this dictionary will update the default aguidata dictionary
 """
     value = getattr(obj, attribute)
     aguiDefaultDict = get_agui_default_dict()
-    attributeClass = value.__class__
+    if isclass(value):
+        attributeClass = value
+    else:
+        attributeClass = get_type(value)
     if aguiDefaultDict.has_key(attributeClass):
         guiType = attributeClass
     else:

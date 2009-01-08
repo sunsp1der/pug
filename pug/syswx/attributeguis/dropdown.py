@@ -10,8 +10,7 @@ from pug.syswx.attributeguis.base import Base
 class Dropdown (Base):
     """Customizable dropdown attribute GUI
     
-Dropdown(attribute, frame, list=[], readonly=True, generator=None, 
-            callback=None, **kwargs)
+Dropdown(attribute, window, aguidata, **kwargs)
 
 attribute: what attribute of window.object is being controlled
 window: the parent pugFrame
@@ -21,20 +20,24 @@ aguidata: {
         converted into the tuple (itemtext, itemdata=object).  Itemtext will be
         item.__name__ if possible... otherwise str(object). When the user makes 
         a selection in the dropdown, the attribute will be set to itemdata 
-    'allow_typing': if True, user can type their own items
+    'allow_typing': if True, user can type their own items. if the value typed
+         is not in the list, itemdata will be set to itemtext. Default: false
     'list_generator': as an alternative to the static list, this callable will 
         be called when the dropdown is displayed.  It should return a list as 
         described in the 'list' entry above.
-    'callback': this function will be called when an item is selected. It will
-        be passed the itemtext and itemdata selected.
+    'callback': this function will be called when an item is selected, after the
+        itemdata is applied to the attribute... callback( itemtext, itemdata)
 
 For kwargs optional arguments, see the Base attribute GUI
 """
-    def __init__(self, attribute, frame, aguidata={}, **kwargs):
+    def __init__(self, attribute, window, aguidata={}, **kwargs):
         style = wx.TE_PROCESS_ENTER
-        if not aguidata.get('allow_typing', False):
+        if aguidata.get('allow_typing', False):
+            self.allow_typing = True
+        else:
+            self.allow_typing = False
             style |= wx.CB_READONLY
-        control = wx.combo.ComboCtrl(parent=frame.get_control_window(),
+        control = wx.combo.ComboCtrl(parent=window.get_control_window(),
                                      style=style)
         control.SetMinSize((-1,WX_STANDARD_HEIGHT))
         listctrl = ListCtrlComboPopup()
@@ -51,7 +54,7 @@ For kwargs optional arguments, see the Base attribute GUI
         self.setup_listctrl(list)
 
         kwargs['control_widget'] = control
-        Base.__init__(self, attribute, frame, aguidata, **kwargs)
+        Base.__init__(self, attribute, window, aguidata, **kwargs)
         
     def setup_listctrl(self, list=None):
         if not list and not callable(self.list_generator):
@@ -59,6 +62,7 @@ For kwargs optional arguments, see the Base attribute GUI
         selectedData = self.listctrl.GetSelectedData()
         list = self.list_generator()
         self.listctrl.DeleteAllItems()
+        namedict = {}
         for item in list:
             if isinstance(item, tuple):
                 self.listctrl.AddItem( item[0], item[1])
@@ -67,7 +71,11 @@ For kwargs optional arguments, see the Base attribute GUI
                     name = item.__name__
                 else:
                     name = str(item)
-                self.listctrl.AddItem( name, item)
+                namedict[name] = item
+        namelist = namedict.keys()
+        namelist.sort()
+        for key in namelist:
+            self.listctrl.AddItem( key, namedict[key])
         i = self.listctrl.FindData(selectedData)
         if i:
             self.listctrl.SelectItem(i)
@@ -75,11 +83,16 @@ For kwargs optional arguments, see the Base attribute GUI
         
         
     def item_selected(self, event=None):
-        self.data = self.listctrl.GetSelectedData()
+        if self.allow_typing and \
+                self.listctrl.GetStringValue() != self.control.Value:
+            self.data = self.control.Value
+            self.text = self.control.Value
+        else:
+            self.data = self.listctrl.GetSelectedData()
+            self.text = self.listctrl.GetStringValue()
         self.apply()
         if self.callback:
-            self.callback(self.listctrl.GetStringValue(), 
-                          self.listctrl.GetSelectedData())
+            self.callback(self.text, self.data)
         if not self.tooltip:
             self.doc_to_tooltip()
         

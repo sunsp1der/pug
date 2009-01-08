@@ -12,3 +12,14 @@ class PugImageDialog(ImageDialog):
         num = self.fl_list.index(val)
         self.tb.Select(num)
         self.SetListValue(num)
+    def GetFiles(self):
+        """Get the file list using directory and extensions"""
+        #Fix a bug in wx that shows all files twice and .* files
+        ImageDialog.GetFiles(self)
+        newlist = []
+        for item in self.fl_list:
+            if item[0:1] == "." and item != "." and item != "..":
+                continue
+            newlist.append(item)
+        self.fl_list = list(set(newlist))
+        self.fl_list.sort()

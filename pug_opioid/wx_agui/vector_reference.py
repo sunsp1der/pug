@@ -103,10 +103,12 @@ any object.
 
 #make the above the default attribute gui for VectorReference
 get_agui_default_dict().update({_opioidVectorReference:
-                                [SubObject,{'sub_attributes':['x','y']}]
+                                [SubObject,{'sub_attributes':['x','y'],
+                                            'no_button':True}]
                                 })
 get_agui_default_dict().update({Vector:
-                                [SubObject,{'sub_attributes':['x','y']}]
+                                [SubObject,{'sub_attributes':['x','y'],
+                                            'no_button':True}]
                                 })
         
 #pug template

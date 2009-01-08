@@ -2,6 +2,7 @@ import re
 
 import wx
 
+from pug.util import get_type_name
 from pug.syswx.wxconstants import *
 from pug.syswx.attributeguis.base import Base
 from pug.syswx.pugbutton import PugButton
@@ -53,8 +54,5 @@ any object.
         kwargs['control_widget'] = control
         Base.__init__(self, attribute, window, **kwargs)
         
-
-        
     def set_control_value(self, val):
-        self.infoText.SetLabel(type(val).__name__)
-                
+        self.infoText.SetLabel(get_type_name(val))                

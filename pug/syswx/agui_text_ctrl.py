@@ -5,7 +5,6 @@ import wx
 from pug.syswx.wxconstants import *
 
 # TODO: deals with tab stuff
-# TODO: applies when losing focus
 # TODO: doesn't apply when has focus
 # TODO: select all on get focus
 
@@ -19,11 +18,11 @@ This is a wx.TextCtrl with some special features:
     SetValue:
         None displays '#None#'
 """
-    def __init__(self, parent, Id=-1):
-        wx.TextCtrl.__init__(self, parent, Id, 
+    def __init__(self, parent):
+        wx.TextCtrl.__init__(self, parent, 
                           size=wx.Size(30, WX_STANDARD_HEIGHT), 
-                          style=wx.TE_PROCESS_ENTER)
-        self.SetMinSize(wx.Size(0, WX_STANDARD_HEIGHT))
+                          style=wx.TE_PROCESS_ENTER)# | wx.TAB_TRAVERSAL)
+        self.SetMinSize(wx.Size(-1, WX_STANDARD_HEIGHT))
         
     def GetValue(self):
         value = wx.TextCtrl.GetValue(self)
@@ -45,6 +44,7 @@ This is a wx.TextCtrl with some special features:
         retvalue = wx.TextCtrl.SetValue(self, str(value))
         wx.CallAfter(self.SetInsertionPointEnd)
         return retvalue
+    
         
                           
 

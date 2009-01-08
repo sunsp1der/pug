@@ -27,12 +27,23 @@ def pug_frame( obj=None, *args, **kwargs):
 Open a PugFrame, or if one exists AND control is not being held down, bring it 
 to the top. For arguments, see the doc for PugFrame.  This is exactly the same, 
 except if there is already a PugFrame for obj, it is brought to the front rather 
-than opening a new frame."""
+than opening a new frame.
+This function will create a pugApp(wx.App) if one does not exist.
+"""
+    newApp = False
     app = wx.GetApp()
+    if not app:
+        newApp = True
+        from pug import App
+        app = App()
     if not app.show_object_pugframe(obj) or wx.GetKeyState(wx.WXK_CONTROL):
         retvalue = PugFrame(obj, *args, **kwargs)
     else:
         retvalue = None
+    if newApp:
+        import threading
+        thread = threading.Thread(target=app.MainLoop)
+        thread.start()
     return retvalue
 
 class PugFrame(wx.Frame):
@@ -48,19 +59,22 @@ PugFrame(self, obj=None, objectpath="object", title="", show=True, parent=None)
     toolBar = None
     menuBar = None
     activePugWindow = None
+    passingMenuEvent = None
     def __init__(self, obj=None, objectpath="unknown", title="", 
-                  show=True, parent=None):        
+                  show=True, parent=None, **kwargs):        
         sizer = wx.BoxSizer()
-
+        self.lockedName = kwargs.get('name',False)
         wx.Frame.__init__(self, parent=parent, size=WX_PUGFRAME_DEFAULT_SIZE, 
-                          title=title)        
+                          title=title,**kwargs)        
         self.SetMinSize(wx.Size(250, 130))
         self.SetIcon(get_icon())
         self.objectpath = objectpath
         self.title = title
-        #toolbarSeparator = wx.StaticLine(self, size=(1,2))
-        #toolbarSeparator.SetMinSize((-1,-1))
-        #sizer.AddWindow(toolbarSeparator, flag=wx.EXPAND)
+        self.Bind(wx.EVT_CLOSE, self._evt_on_close)
+        self.Bind(wx.EVT_ACTIVATE, self._evt_on_activate)
+#        toolbarSeparator = wx.StaticLine(self, size=(1,2))
+#        toolbarSeparator.SetMinSize((-1,-1))
+#        sizer.AddWindow(toolbarSeparator, flag=wx.EXPAND)
         self.SetSizer(sizer)        
         pugWindow = PugWindow(self)
         self.set_pugwindow( pugWindow)
@@ -68,31 +82,68 @@ PugFrame(self, obj=None, objectpath="object", title="", show=True, parent=None)
         bar = self.CreateStatusBar()        
         bar.Bind(wx.EVT_LEFT_DCLICK, self.show_all_attributes)        
         self.Bind(wx.EVT_MENU, self._evt_passmenu)
-        self.show_all_attributes()
+        wx.GetApp().set_default_pos( self)
         if show:
             self.Show()
             
+    def _evt_on_close(self, event=None):
+        if self.activePugWindow:
+            self.activePugWindow._evt_on_close()
+        if event:
+            event.Skip()
+            
+    def _evt_on_activate(self, event=None):
+        if self.activePugWindow:
+            if event.Active:
+                self.activePugWindow.refresh_all()
+            else:
+                if self.activePugWindow.settings['auto_apply']:
+                    self.activePugWindow.apply_all()
+            
     def set_object(self, obj, objectpath="unknown", title=""):
-        self.activePugWindow.set_object(obj, objectpath, title)
-        self.SetTitle(self.activePugWindow.title)        
+        """set_object(obj, objectpath, title)
         
-    def show_all_attributes(self, event = None):
+Set the object that this frame's activePugWindow is viewing
+"""
+        oldObject = self.activePugWindow.object
+        self.Freeze()
+        self.activePugWindow.set_object(obj, objectpath, title)
+        self.SetTitle(self.activePugWindow.title)
+        if not self.lockedName:
+            self.Name = self.Title        
+        if not oldObject:
+            self.show_all_attributes()        
+        self.Thaw()
+        
+    def show_all_attributes(self, event=None):
         """Expand the frame's size so that all attributes are visible"""
         bestSize = self.activePugWindow.get_optimal_size()
+        if event == None:
+            # called from frame, before toolbar is properly processed
+            toolbarFudge = self.ToolBar.Size[1]
+        else:
+            toolbarFudge = 0
         # give some space for scrollbars
         newSize = (bestSize[0] + WX_SCROLLBAR_FUDGE[0], 
-                   bestSize[1] + WX_SCROLLBAR_FUDGE[1])
+                   bestSize[1] + WX_SCROLLBAR_FUDGE[1] + toolbarFudge)
         # show the whole toolbar
         toolbarWidth = self.GetToolBar().GetSize()[0]
         if newSize[0] < toolbarWidth:
             newSize = (toolbarWidth, newSize[1])
-            
         self.SetClientSize(newSize)
         self.activePugWindow.GetSizer().Layout()
             
-    def _evt_passmenu(self, event):
-        if self.activePugWindow:
-            self.activePugWindow.ProcessEvent(event)
+    def _evt_passmenu(self, event): 
+        # this checking stuff is necessary so that we don't have an infinite
+        # recursion with us passing event down then it getting passed up again
+        if self.passingMenuEvent:
+            self.passingMenuEvent = None
+            event.Skip()
+        else:
+            self.passingMenuEvent = event
+            if self.activePugWindow:
+                self.activePugWindow.ProcessEvent(event)
+        self.passingMenuEvent = None
             
     def set_pugwindow(self, pugWindow):
         if self.activePugWindow:
@@ -105,10 +156,13 @@ PugFrame(self, obj=None, objectpath="object", title="", show=True, parent=None)
             toolBar = pugWindow.toolBar
             self.SetToolBar(toolBar)
             toolBar.Show()
+            self.toolBar = toolBar
+            toolBar.Realize()
         if pugWindow.menuBar:
             menuBar = pugWindow.menuBar
             self.SetMenuBar(menuBar)
             menuBar.Show()
+            self.menuBar = menuBar
         self.GetSizer().AddWindow(pugWindow, 1, border=0, flag=wx.EXPAND)
         self.activePugWindow = pugWindow
         
