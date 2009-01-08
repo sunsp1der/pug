@@ -19,6 +19,8 @@ window: the parent pugWindow.
 kwargs:
     sub_attributes: a list of the object's attributes to be shown. For example,
                     a point object might have ['x', 'y']
+    no_button: normally this agui has a button to open a pugview for the object.
+                    If this is true, there will be no button. Default: False
 For other kwargs arguments, see the Base attribute GUI
 
 Contains one row for each attribute listed in kwarg: 'sub_attributes'. Each row 
@@ -47,10 +49,6 @@ simple objects that contain a few values in them (i.e. X and Y)
         
         # control
         control = wx.Panel(window.get_control_window())
-        newViewButton = PugButton(control, object, True, attribute, window,
-                                  targetObjectFn=self.get_object)
-        self.newViewButton = newViewButton      
-
         controlSizer = wx.BoxSizer(orient=wx.VERTICAL)
         control.SetSizer(controlSizer)
 
@@ -68,6 +66,7 @@ simple objects that contain a few values in them (i.e. X and Y)
             controlText = AguiTextCtrl( control)
             controlText.SetMinSize((-1, WX_STANDARD_HEIGHT))
             controlText.Bind(wx.EVT_TEXT_ENTER, self.apply)
+            controlText.Bind(wx.EVT_KILL_FOCUS, self.apply)
             controlHSizer = wx.BoxSizer(orient=wx.HORIZONTAL)
             controlHSizer.Add(controlText,1)
             controlSizer.AddSizer(controlHSizer, flag = wx.EXPAND)               
@@ -76,26 +75,29 @@ simple objects that contain a few values in them (i.e. X and Y)
                                        flag=wx.ALIGN_RIGHT)
             rightLabel.SetMinSize((-1,controlText.MinSize[1]+1))
             if subnum == 1:
-                # show view button in top row of control
-                controlHSizer.AddSpacer((SPACING,SPACING))
-                controlHSizer.Add(newViewButton)
-                # show main label in top row of label
+                if aguidata.get('no_button', False):
+                    button_spacing = 0
+                else:
+                    # show view button in top row of control
+                    newViewButton = PugButton(control, object, True, attribute, 
+                                              window,
+                                              targetObjectFn=self.get_object)
+                    self.newViewButton = newViewButton      
+                    button_spacing = SPACING + newViewButton.Size[0]
+                    controlHSizer.AddSpacer((SPACING,SPACING))
+                    controlHSizer.Add(newViewButton)
+                    # show main label in top row of label
                 leftLabel = AguiLabelSizer( label, labelText, subcount == 1)
                 label.text = leftLabel.text # tooltip target
-               
-                # FOR SASH
-                # label.preferredWidth = leftLabel.text.Size[0] + \
-                #                        rightLabel.text.Size[0] + SPACING
-    
+                    
             else:
-                if subnum == subcount:
+                if subnum == subcount and button_spacing:
                     #add line at far right for bottom subattribute
                     underline = AguiLabelSizer( control, '')
-                    underline.SetMinSize((SPACING + newViewButton.Size[0], -1))
+                    underline.SetMinSize((button_spacing, -1))
                     controlHSizer.AddSizer(underline,0, flag = wx.EXPAND)
                 else:
-                    controlHSizer.AddSpacer((SPACING + newViewButton.Size[0],
-                                         SPACING))
+                    controlHSizer.AddSpacer((button_spacing, SPACING))
                 # empty left area for rows 2 and on
                 leftLabel = AguiLabelSizer( label, '', subnum == subcount)    
             leftLabel.SetMinSize((-1,controlText.MinSize[1]+1))

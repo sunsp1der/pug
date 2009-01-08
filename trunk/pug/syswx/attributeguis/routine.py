@@ -1,10 +1,11 @@
 from inspect import getargspec, getdoc
-from sys import exc_info
-import weakref
 
 import wx
+import wx.lib.buttons as buttons
 
 from pug.constants import *
+from pug.util import get_type_name
+from pug.syswx.util import ShowExceptionDialog
 from pug.syswx.wxconstants import *
 from pug.syswx.attributeguis.base import Base
 
@@ -35,14 +36,24 @@ See Base attribute gui for other argument info
         # check if the callable is provided or if it's a true attribute
         if aguidata.get('routine', False):
             value = aguidata['routine']
+            self.routine = value
             if not aguidata.get('label', None):
                 if attribute:
                     aguidata['label'] = attribute
                 else:
-                    aguidata['label'] = value.__name__
+                    aguidata['label'] = self.routine.__name__
             attribute = ''
+            isMethod = False
         else:
             value = getattr(window.object,attribute, None)
+            isMethod = True
+        doc = None
+        if aguidata.has_key('tooltip'):
+            doc = aguidata['tooltip']
+        else:
+            doc = getdoc(value)
+            if doc:
+                aguidata['tooltip'] = doc
 
         # analyze the routine's arguments 
         if callable(value):
@@ -56,11 +67,12 @@ See Base attribute gui for other argument info
                 arguments = "?args unknown?"
             else:
                 arglist = []
+                if isMethod:
+                    argspec[0].pop(0)
                 if argspec[0]:
-                    if len(argspec[0])>1:
-                        self.takesargs = True
+                    self.takesargs = True
                     if argspec[3]:
-                        if len(argspec[0]) < len(argspec[3]) + 1:
+                        if len(argspec[0]) < len(argspec[3]):
                             self.needsargs = True
                     arglist += argspec[0]
                 if argspec[1]:
@@ -69,8 +81,6 @@ See Base attribute gui for other argument info
                 if argspec[2]:
                     arglist += [''.join([ '**',argspec[2]])]
                     self.takesargs = True
-                if arglist[0] == "self":
-                    arglist.pop(0)
                 arguments = ', '.join(arglist)
                 arguments = ''.join(["(",arguments,")"])
         else:
@@ -82,17 +92,24 @@ See Base attribute gui for other argument info
         if (self.takesargs or self.notpython) and \
                 not(use_defaults and not self.needsargs):
             bmp = wx.ART_HELP_SIDE_PANEL
-            tooltip = "Open execute window"       
+            if doc:
+                tooltip = doc
+            else:
+                tooltip = "Enter arguments"       
             fn = self.openExecuteWindow
         else:
             bmp = wx.ART_GO_FORWARD
-            tooltip = "Execute"
+            if doc:
+                tooltip = doc
+            else:
+                tooltip = "Execute"
             fn = self.execute
             arguments = '()'
         run_bmp = wx.ArtProvider.GetBitmap(bmp, 
                                         wx.ART_TOOLBAR, buttonSize)        
-        runButton = wx.BitmapButton(control, bitmap = run_bmp,
-                            size = WX_BUTTON_SIZE)
+        runButton = buttons.ThemedGenBitmapButton(control,  
+                                                  size=WX_BUTTON_SIZE)
+        runButton.SetBitmapLabel(run_bmp)
         runButton.SetToolTipString(tooltip)
         control.Bind(wx.EVT_BUTTON, fn, runButton)        
         infoText = wx.StaticText(control, label = arguments)
@@ -120,60 +137,66 @@ See Base attribute gui for other argument info
         from pug.syswx.pugframe import pug_frame
         self.pug_frame = pug_frame
         
+    def get_routine(self):
+        routine = getattr(self, 'routine', False)
+        if routine:
+            return routine
+        else:
+            return self.get_attribute_value()
+            
+        
     def execute(self, event = None):
-        value = self.get_attribute_value()
-        if callable(value):
+        routine = self.get_routine()
+        if callable(routine):
             try:
-                retValue = value.__call__()
+                wx.BeginBusyCursor()
+                retValue = routine.__call__()
             except:
-                self.exception_dialog(exc_info())
+                wx.EndBusyCursor()                
+                ShowExceptionDialog( self.control)
             else:
+                wx.EndBusyCursor()                
                 try:
                     self.display_retvalue( retValue)
                     self.refresh_window()                
                 except:
                     # anything could have happened, like deleting the object etc.
                     pass
-
-    def exception_dialog(self, info):
-        err = wx.MessageDialog(self.control, str(info[1]), info[0].__name__,
-                         wx.ICON_ERROR | wx.OK
-                         )
-        err.ShowModal()
-        err.Destroy()
-        wx.EndBusyCursor()
-                
+        
     def openExecuteWindow(self, event = None):
-        value = self.get_attribute_value()
-        doc = getdoc(value)
+        routine = self.get_routine()
+        doc = getdoc(routine)
         if (doc):
             text = doc
         else:
             text = ''.join([self.attribute,self.arguments])
         dlg = wx.TextEntryDialog(self.control, text,
-                ''.join(['Enter Arguments for ',self.attribute]))
+                ''.join(['Enter Arguments for ',routine.__name__]))
 
         if dlg.ShowModal() == wx.ID_OK:
             attribute = self.attribute
             actualSelf = self
             self = self._window.object
             retValue = None
-            command = ''.join(['retValue = self.',attribute,'(',
+            command = ''.join(['retValue = self.',routine.__name__,'(',
                                dlg.GetValue(),')'])
             try:
+                wx.BeginBusyCursor()
                 exec(command)
             except:
+                wx.EndBusyCursor()                
                 self = actualSelf
-                self.exception_dialog(exc_info())
+                ShowExceptionDialog( self.control)
                 self.openExecuteWindow()
             else:
+                wx.EndBusyCursor()
                 self = actualSelf
                 self.display_retvalue( retValue)
                 self.refresh_window()
         dlg.Destroy()
 
     def display_retvalue(self, retValue):
-        do_retvalue = self._aguidata.get('no_return_popup', True)
+        do_retvalue = not self._aguidata.get('no_return_popup', False)
         if not do_retvalue:
             return
         if retValue is not None:
@@ -191,8 +214,8 @@ See Base attribute gui for other argument info
                                    'Return Value', wx.YES_NO | wx.NO_DEFAULT)
                 showframe = None
                 if retDlg.ShowModal() == wx.ID_YES:
-                    self.pug_frame(obj=retValue, 
-                             objectpath=retValue.__class__.__name__, 
+                    showframe = self.pug_frame(obj=retValue, 
+                             objectpath=get_type_name(retValue), 
                              parent=self._window)
             try:
                 retDlg.Destroy()

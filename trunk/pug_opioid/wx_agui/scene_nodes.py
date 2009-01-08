@@ -1,17 +1,15 @@
-"""Scene Nodes attribute gui... opens a tree window (also defined here)"""
+"""Scene Nodes attribute gui... a tree window (also defined here)"""
+import weakref
 
 import wx
 from wx.gizmos import TreeListCtrl
-from wx.lib.scrolledpanel import ScrolledPanel
 
 from pug.syswx.attributeguis import Base
-from pug.syswx.agui_label_sizer import AguiLabelSizer
-from pug.syswx.wxconstants import WX_STANDARD_HEIGHT, WX_BUTTON_SIZE
 
 class SceneNodes (Base):
-    """An attribute gui that opens a tree window for working with Scene nodes
+    """An attribute gui that's a tree window for working with Scene nodes
 
-Scene Nodes(attribute, window, aguidata, **kwargs)
+SceneNodes(attribute, window, aguidata, **kwargs)
 aguidata: possible entries-
     'auto_open': automatically open the tree view when gui is created. 
                 Default is False
@@ -19,6 +17,7 @@ attribute: what attribute of window.object is being controlled
 window: the parent window. 
 For other kwargs arguments, see the Base attribute GUI
 """
+    refreshing = False
     def __init__(self, attribute, window, aguidata, **kwargs):
         self.tree = None
         # control
@@ -77,6 +76,7 @@ class NodeTreeListCtrl( TreeListCtrl):
     
 A tree control that shows all the nodes in an Opioid2D scene.
 """
+    changing_sel = False
     def __init__(self, scene, *args, **kwargs):
         """__init__(scene, *args, **kwargs) 
         
@@ -95,26 +95,77 @@ Special kwargs:
                     | wx.TR_DEFAULT_STYLE \
                     | wx.TR_HAS_BUTTONS  \
                     | wx.TR_FULL_ROW_HIGHLIGHT \
-                    | wx.TR_ROW_LINES
+                    | wx.TR_SINGLE 
+            # can't figure out how to make the list single selection
+            # hacked below
         self.object.nodes.register(self.nodes_changed)
         TreeListCtrl.__init__(self, style=style, *args, **kwargs)
         # columns
         self.Indent = 5 # doesn't seem to work
-        self.AddColumn("class")
         self.AddColumn("gname")
+        self.AddColumn("class")
         self.AddColumn("layer")
         self.SetColumnWidth(0,150)
-        self.root = self.AddRoot("Invisible Root") # this won't be shown
         self.refresh_tree()
-        self.GetMainWindow().Bind(wx.EVT_LEFT_DCLICK, self.dclick)
+        self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_sel_changed)
+#        self.GetMainWindow().Bind(wx.EVT_LEFT_DCLICK, self.dclick)
+        self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_activated)
+        wx.GetApp().register_selection_watcher(self)
         from pug.syswx.pugframe import PugFrame
         self.PugFrame = PugFrame
         
-    def dclick(self, event):
-        pos = event.GetPosition()
-        item, flags, col = self.HitTest(pos)
+    def on_set_selection(self, selectedRefSet):
+        """Callback from pug App"""
+        self.changing_sel = True
+        self.UnselectAll()
+        if selectedRefSet:
+            count = 0
+            for ref in selectedRefSet:
+                item = self.find_item_by_data( ref)
+                if item:
+                    self.SelectItem(item)
+                    if count == 0:
+                        self.EnsureVisible(item)
+                    count += 1
+        self.changing_sel = False
+        
+    def find_item_by_data(self, data, parentItem=None):  
+        if parentItem == None:
+            parentItem = self.GetRootItem()
+        item, cookie = self.GetFirstChild(parentItem)
+        while item:
+            if self.GetPyData(item) == data:
+                return item
+            if self.ItemHasChildren(item):
+                item = self.find_item_by_data(data, item)
+                if item:
+                    return item
+            item, cookie = self.GetNextChild(parentItem, cookie)
+        return None
+    
+    def on_sel_changed(self, event):
+        if self.changing_sel:
+            # let's avoid infinite recursion, shall we?
+            return
+        item = event.Item
         if item:
-            node = self.GetPyData(item)()
+            node = self.GetPyData(item)
+            if node:
+                node = node()
+            if node:
+                self.changing_sel = True
+                self.UnselectAll()
+                self.SelectItem(item)
+                self.changing_sel = False
+                app = wx.GetApp()
+                app.set_selection([node])
+        
+    def on_activated(self, event):
+        item = event.Item
+        if item:
+            node = self.GetPyData(item)
+            if node:
+                node = node()
             if node:
                 app = wx.GetApp()
                 if not app.show_object_pugframe(node) or \
@@ -123,18 +174,19 @@ Special kwargs:
  
     def nodes_changed(self, nodes, func, arg1, arg2):
         # TODO: make this more efficient by making more specific changes
-        self.refresh_tree()
+        if not self.refreshing:
+            wx.CallAfter(self.refresh_tree)
+        self.refreshing = True
         
     def refresh_tree(self):
+        self.Freeze()
         nodes = self.object.nodes
-        self.DeleteChildren(self.root)
-        self.SetMainColumn(0)
-        for noderef in nodes.iterkeyrefs():
-            if not noderef:
-                continue
-            node = noderef()
-            if not node:
-                continue
+        self.DeleteAllItems()
+        self.root = self.AddRoot("Invisible Root") # this won't be shown        
+#        self.DeleteChildren(self.root)
+        self.SetMainColumn(1)
+        nodes = self.object.get_ordered_nodes()
+        for node in nodes:
             cls = node.__class__.__name__
             gname = getattr(node, 'gname', '')
             if not gname:
@@ -144,11 +196,12 @@ Special kwargs:
             except:
                 layer = ''
             item = self.AppendItem(self.root, cls)
-            self.SetPyData(item, noderef)
-            self.SetItemText(item, gname, 1)
+            self.SetPyData(item, weakref.ref(node))
+            self.SetItemText(item, gname, 0)
             self.SetItemText(item, layer, 2)
         self.SetMainColumn(2)
-        self.SortChildren(self.root)
+        self.refreshing = False
+        self.Thaw()
         
     def get_full_width(self):
         w = 0

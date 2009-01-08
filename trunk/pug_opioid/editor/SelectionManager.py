@@ -19,6 +19,7 @@ class SelectionManager():
 
 Object that manages selection graphics in the Opioid2D frame
 """
+    new_selection = None
     def __init__(self):
         self.boxDict = CallbackWeakKeyDictionary()
     
@@ -30,7 +31,17 @@ Callback from pug.App...
         self.set_selection( selectedRefSet)
         
     def set_selection(self, selectedRefSet):
-        """on_set_selection( selectedRefSet)
+        """set_selection( selectedRefSet)
+        
+Set the selection to the given list of objects. Draw a box around each one.
+This action will be deferred until after current update...
+"""
+        if not isinstance(selectedRefSet, set):
+            selectedRefSet = set(selectedRefSet)
+        self.new_selection = selectedRefSet
+
+    def do_set_selection(self,  selectedRefSet):
+        """do_set_selection( selectedRefSet)
         
 Set the selection to the given list of objects. Draw a box around each one.
 """
@@ -47,21 +58,48 @@ Set the selection to the given list of objects. Draw a box around each one.
                 continue
             self.boxDict[item] = SelectBox(item)
     
+    def update(self):
+        if self.new_selection is not None:
+        # don't do anything if we're in the middle of a drag
+            new_selection = self.new_selection
+            self.new_selection = None
+            for box in self.boxDict.itervalues():
+                if box.area.dragging:
+                    return
+            self.do_set_selection(new_selection)
+        self.update_boxes()
+        
     def update_boxes(self):
-        for node, box in self.boxDict.iteritems():
-            rect = node.get_rect()
-            if box.area.dragging:
-                if box.rect != box.area.rect:
-                    layer = Opioid2D.Director.scene.get_layer("__selections__")
-                    position = Mouse.get_position()
-                    world_position = layer.convert_pos(position[0], position[1])
-                    box.area.position = (0,0)
-                    node.position = world_position
-                    box.set_position(world_position)
-            else:
-                if box.rect != rect:
-                    box.base.rotation = node.rotation
-                    box.set_rect( rect)
+        """update_boxes()
+        
+update all selection boxes. 
+"""
+#This whole thing is in a try clause because of sync issues.
+        try:
+            for node, box in self.boxDict.iteritems():
+                # try to remove deleted items
+                if getattr(node,'deleted',True):
+                    self.boxDict.pop(node)
+                    # messed with the dict, so start over
+                    self.update_boxes()
+                    break
+                rect = node.get_rect()
+                if box.area.dragging:
+                    if box.rect != box.area.rect:
+                        layer = Opioid2D.Director.scene.get_layer(
+                                                            "__selections__")
+                        position = Mouse.get_position()
+                        world_position = layer.convert_pos(position[0], 
+                                                           position[1])
+                        box.area.position = (0,0)
+                        node.position = world_position
+                        box.set_position(world_position)
+                else:
+                    if box.rect != rect:
+                        box.surround_node( node)
+            return
+        except:
+            pass
             
 selectionManager = SelectionManager()
         
@@ -93,7 +131,7 @@ node: any object containing a 'rect' attribute that is a pygame rect
             line.attach_to(base)
             self.lines[side] = line
         if node:
-            self.set_rect( node.rect)
+            self.surround_node( node)
             
     def __del__(self):
         self.base.delete()
@@ -101,7 +139,8 @@ node: any object containing a 'rect' attribute that is a pygame rect
         for line in self.lines.itervalues():
             line.delete()
 
-    def set_rect(self, rect=None):
+    def surround_node(self, node):
+        rect = node.rect
         if self.rect == rect:
             return
         elif self.rect.size != rect.size:
@@ -123,6 +162,7 @@ node: any object containing a 'rect' attribute that is a pygame rect
             self.rect.size = rect.size
             self.area.scale = (rect.width, rect.height)
         self.set_position(rect.center)
+        self.base.rotation = node.rotation
 
     def set_position(self, position):
         self.rect.center = position
@@ -142,8 +182,11 @@ class SelectBoxAreaSprite( Opioid2D.gui.GUISprite):
     dragging = False
     
     def on_drag_begin(self):
+        Opioid2D.Director.scene.state.selectOnUp = None
         self.dragging = True
 
     def on_drag_end(self):
+        Opioid2D.Director.scene.state.selectOnUp = None
         selectionManager.update_boxes()
+        wx.CallAfter(wx.GetApp().selection_refresh)
         self.dragging = False

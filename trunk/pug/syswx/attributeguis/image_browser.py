@@ -3,6 +3,7 @@
 import os.path
 
 import wx
+import wx.lib.buttons as buttons
 
 from pug.syswx.wxconstants import *
 from pug.syswx.attributeguis import Base
@@ -31,10 +32,11 @@ Uses a browser dialog to facilitate picking a graphics file
         control.SetMinSize((-1,WX_STANDARD_HEIGHT))
         control.value = ''
         text = AguiTextCtrl(control)
+        text.SetEditable(False)
         control.text = text
         browseBmp = wx.ArtProvider.GetBitmap( wx.ART_FILE_OPEN, wx.ART_TOOLBAR,
                                               WX_BUTTON_BMP_SIZE)
-        browseButton = wx.BitmapButton(control, bitmap=browseBmp, 
+        browseButton = buttons.ThemedGenBitmapButton(control, bitmap=browseBmp, 
                                        size=WX_BUTTON_SIZE)
         browseButton.SetToolTipString('Browse')
         browseButton.Bind(wx.EVT_BUTTON, self.browse, browseButton)

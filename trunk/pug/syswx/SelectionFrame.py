@@ -17,6 +17,7 @@ A PugFrame that tracks the selected objects using the methods in the pug App.
 """
     selectionRefSet = None
     def __init__(self, *args, **kwargs):
+        kwargs['title'] = 'Selection'
         PugFrame.__init__(self, *args, **kwargs)
         
     def on_set_selection(self, selectionRefSet=None):
@@ -25,6 +26,8 @@ A PugFrame that tracks the selected objects using the methods in the pug App.
 selectionRefSet: a set of references for this frame to display a pug view of.
 Callback from PugApp...        
 """
+        if not self.activePugWindow:
+            return
         if self.selectionRefSet == selectionRefSet:
             self.activePugWindow.refresh_all()
             return
@@ -36,16 +39,27 @@ Callback from PugApp...
         elif len(selectionRefSet) == 1:
             objRef = selectionRefSet.pop()
             obj = objRef()
-            self.activePugWindow.set_object(obj)
-            self.SetTitle(''.join(['Selection: ',self.activePugWindow.title]))
+            wx.CallAfter(self.set_object, obj)
             selectionRefSet.add(objRef)
         else:
             self.activePugWindow.display_message("Multiple Objects Selected")
             self.SetTitle("Selection: Multiple")
             #TODO: make this work
-        if not oldObject:
-            self.show_all_attributes()
             
+    def on_selection_refresh(self):
+        if self.activePugWindow:
+            self.activePugWindow.refresh_all()
+            
+    def set_object(self, obj, objectpath="unknown", title=""):
+        """set_object(*args, **kwargs)
+        
+same as pugframe set_object except the title is prepended with 'Selection: '
+"""
+        PugFrame.set_object(self, obj, objectpath, title)
+        title = ''.join(['Selection: ',self.activePugWindow.title])
+        self.SetTitle(title)
+        self.Name = "Selection"
+       
     def on_view_object_deleted(self, window, obj):
         """on_view_object_deleted( window, obj)
         

@@ -1,20 +1,17 @@
 #Boa:Frame:PugFrame
-"""The basic pug display window
+"""The basic pug display window.
 
-This is generally meant to be created by the pug function. You can send the 
-object to be viewed as an argument on creation of the window."""
+A scrolled panel that holds all the pug aguis. Also creates menus and a toolbar,
+though you need a frame for those...
+"""
 #some code looks a little mumbo-jumboey because it was made by BOA
 
-# TODO: intercept tabbing stuff with EVT_NAVIGATION_KEY - apply/skip buttons
-# TODO: apply when a control loses focus
 # TODO: scroll to active control
 
 # TODO: provide interface for creating attribute
 # TODO: menu option to go to file where this is defined
 # TODO: send puglist a specific list of attributes
-# TODO: breakout PugListWindow into its own control derived from splitWindow
 # TODO: allow personalized toolbars
-# TODO: put all settings in menu
 
 import re
 import os.path
@@ -22,20 +19,21 @@ from weakref import ref, proxy, ProxyTypes
 from sys import exc_info
 
 import wx
-import wx.lib
+import wx.lib.scrolledpanel as scrolled
 
 from pug.puglist import create_raw_puglist, create_template_puglist
 from pug.util import pugSave, pugLoad, get_simple_name
 from pug.constants import *
 from pug.syswx.helpframe import HelpFrame
 from pug.syswx.wxconstants import *
+from pug.syswx.util import ShowExceptionDialog
 from pug.templatemanager import get_template_info
 from pug.code_storage import code_export
 
 #DEBUG
-import sys
+_DEBUG = True
 
-class PugWindow(wx.ScrolledWindow):
+class PugWindow(scrolled.ScrolledPanel):
     """A scrolled window that holds a Python Universal GUI
     
 PugWindow(self, parent, obj=None, objectpath="object", title="", show=True)
@@ -55,6 +53,7 @@ holds multiple PugWindows in tabbed (or other) form.
     _helpFrame =  None # currently open help frame
     _auto_refresh_timer = None # timer object that refreshes frame
     _doingApply = False # currently in the middle of an apply all
+    _currentView = None
     def __init__(self, parent, obj=None, objectpath="unknown", title=""):        
         self.hasSavedAs = {} # save/export event.Id: (folder, filename)
         self.pugList = [] # list of pug attribute guis describing object
@@ -66,15 +65,13 @@ holds multiple PugWindows in tabbed (or other) form.
         self.objectPath = objectpath
         self.defaultFolder = app.projectFolder
         #windows
-        wx.ScrolledWindow.__init__(self, parent=parent, pos=wx.Point(0, 0),
-              size=WX_PUGFRAME_DEFAULT_SIZE, style=wx.HSCROLL | wx.VSCROLL)
+        scrolled.ScrolledPanel.__init__(self, parent=parent, pos=wx.Point(0, 0),
+              size=WX_PUGFRAME_DEFAULT_SIZE)#, style=wx.HSCROLL | wx.VSCROLL)
         self.SetScrollRate(1,5)
         self.pugSizer = wx.GridBagSizer()
         self.SetSizer(self.pugSizer)
         self._init_ctrls(parent) #BOA STUFF
-        #events
-#        self.Bind(wx.EVT_CLOSE, self._evt_on_close)
-#        self.Bind(wx.EVT_KILL_FOCUS, self._evt_kill_focus)
+        
         #set up actual object gui
         if obj:
             self.set_object(obj, objectpath, title)     
@@ -95,7 +92,7 @@ holds multiple PugWindows in tabbed (or other) form.
             self.display_puglist()
             return
         wx.BeginBusyCursor()
-        self.Hide()
+        self.Freeze()
         self.shortPath = get_simple_name(obj, objectpath)
         self.defaultFilename = self.shortPath
         if objectpath == "unknown":
@@ -110,6 +107,7 @@ holds multiple PugWindows in tabbed (or other) form.
                     title = ''.join([title, ' (',self.objectPath,')'])
         self.title = title
         
+        wx.GetApp().pugframe_stopped_viewing(self.GetParent(), obj)
         if not obj:
             self.objectRef = None
             self.object = obj
@@ -117,7 +115,7 @@ holds multiple PugWindows in tabbed (or other) form.
             self.pugSizer.Clear(True)
             self.display_message("No object")
         else:
-            wx.GetApp().pugframe_opened(self.GetParent(),obj)             
+            wx.GetApp().pugframe_opened(self.GetParent(), obj)             
             try:
                 self.objectRef = ref(obj)
                 obj = proxy(obj, self._schedule_object_deleted)
@@ -127,19 +125,16 @@ holds multiple PugWindows in tabbed (or other) form.
                 self.objectRef = objectRef
             self.object = obj
             self._init_viewMenu_Items(self.viewMenu)
-            self._init_fileMenu_Items(self.fileMenu)
+            self._init_fileMenu_Items(self.exportMenu)
             self.create_puglist()
-            # hack to make scrollbars refresh
-            parent = self.GetParent()
-            size = parent.GetSize()
-            parent.SetSize((1,1))
-            parent.SetSize(size)
-            # end hack
-        self.Show()                   
+        self.Thaw()                   
         wx.EndBusyCursor()        
 
     def _schedule_object_deleted(self=None, obj=None):
+        if not wx.GetApp():
+            return
         wx.CallAfter(self._object_deleted, obj)
+        
     def _object_deleted(self, obj=None):
         title = self.title
         self.set_object(None)
@@ -174,6 +169,7 @@ To return to object view, call display_puglist().
             sizer.RemoveGrowableCol(col)
         sizer.SetRows(0)
         sizer.SetCols(0)
+        self.SetupScrolling()
 
     def create_puglist(self):
         wx.BeginBusyCursor()
@@ -254,12 +250,17 @@ To return to object view, call display_puglist().
                         #    self.labelWidth = item.label.preferredWidth
                         row+=1
                 self.pugSizer.AddGrowableCol(1)                        
-                sizer.Layout()
                 # hack to make scrollbars resize
-                size = self.GetSize()
-                self.SetSize((20,20))
-                self.SetSize(size)
+                # sizer.Layout()
+                # self.GetParent().GetSizer().Layout()
+                # size = self.GetSize()
+                # self.SetSize((20,20))
+                # self.SetSize(size)
                 # end hack
+                parent = self.GetParent()
+                size = parent.GetSize()
+                parent.SetSize((1,1))
+                parent.SetSize(size)                
         self.Thaw()
         wx.EndBusyCursor()
 
@@ -285,8 +286,9 @@ Generally, this is called when an attribute gui has changed size.
             if hasattr(self.object,'__class__'):
                 templateInfo = get_template_info( self.object.__class__)
             # if necessary, look for templates assigned to object
-            if not templateInfo and hasattr(self.object, '_pugTemplateClass'):
-                templateInfo = get_template_info(self.object._pugTemplateClass)
+            if not templateInfo and hasattr(self.object, '_pug_template_class'):
+                templateInfo = get_template_info(
+                                        self.object._pug_template_class)
             # as a last resort, use the default template
             if not templateInfo:
                 templateInfo = get_template_info('default_template_info')
@@ -329,19 +331,22 @@ Generally, this is called when an attribute gui has changed size.
         
     def apply_all(self, event = None):
         self._doingApply = True
+        if _DEBUG: print "pugwindow.apply_all", self.object
         for item in self.pugList:
+            if _DEBUG: print item.attribute
             item.apply()
         self._doingApply = False
         self.refresh_all()
-        
-    def _evt_kill_focus(self, event):
-        pass
-            
+        if _DEBUG: print "DONE apply_all\n"
+
     def refresh_all(self, event = None):
         if self._doingApply:
             return
+        if _DEBUG: print "pugwindow.refresh_all", self.object
         for item in self.pugList:
+            if _DEBUG: print item.attribute
             item.refresh()
+        if _DEBUG: print "DONE refresh_all\n"
         
     def get_label_window(self):
         return self
@@ -350,22 +355,43 @@ Generally, this is called when an attribute gui has changed size.
         return self
 
     def show_help(self, event = None, object=None, attribute=""):
-        if (object is None and attribute == "") or object == self:
-            object = self.object
-            objectPath = self.objectPath
-            pugButton = False
-        else:
-            if self.objectPath:
-                objectPath = ''.join([self.objectPath,".",attribute])
+        customFrame = None
+        try:
+            if event and event.Id == _HELP_INFO:
+                # this indicates that the 'info' button was pushed
+                object = self.objectRef()
+                objectPath = self.objectPath
+                pugButton = False
+                retypeButton = False
+                if self.template.has_key('info_function'):
+                    customFrame = self.template['info_function'](object, 
+                                                            self, objectPath)
+            elif (object is None and attribute == ""):    
+                # context help pushed, but no valid context            
+                return
             else:
-                objectPath = attribute
-            pugButton = True
-        if (self._helpFrame):
-            self._helpFrame.Destroy()
-        self._helpFrame = HelpFrame(object, self, attribute, objectPath, 
-                                    pugButton)
-        self._helpFrame.Center()
-        self._helpFrame.Show()
+                # context help
+                if self.objectPath:
+                    objectPath = ''.join([self.objectPath,".",attribute])
+                else:
+                    objectPath = attribute
+                pugButton = True
+                retypeButton = True
+            if (self._helpFrame):
+                self._helpFrame.Destroy()
+            if customFrame:
+                self._helpFrame = customFrame
+            else:
+                self._helpFrame = HelpFrame(object, self, attribute, objectPath, 
+                                            pugButton, retypeButton)
+            self._helpFrame.Center()
+            self._helpFrame.Show()
+        except:
+            retDlg = wx.MessageDialog(self, 'Unable To Open Help',
+                                      'Error', 
+                                       wx.ICON_ERROR | wx.OK)
+            retDlg.ShowModal()    
+            retDlg.Destroy()                      
         
     def _attach_setting(self, settingname, widget, id = None, default = None):
         """_attach_setting(self, setting, widget)
@@ -443,18 +469,19 @@ Automatically calls on_<setting>(val, event) callback.
             
     def _evt_on_close(self, event=None):
         self.on_auto_refresh(False)
-        event.Skip()
+        if event:
+            event.Skip()
                     
     def _init_fileMenu_Items(self, menu):
         for item in menu.MenuItems:
             menu.DestroyItem(item)
 
         menu.Append(help='Save object state as...', id = _MENU_SAVE_AS, 
-                      text = 'Save State As...\tShift+Ctrl+S')
+                      text = 'Save State As...')
         menu.Append(help='Save object state', id = _MENU_SAVE, 
-                      text = 'Save State\tCtrl+S')
+                      text = 'Save State')
         menu.Append(help='Load a saved object state', id = _MENU_LOAD, 
-                      text = 'Load State\tCtrl+L')
+                      text = 'Load State')
         self.Bind(wx.EVT_MENU, self.save_object_state_as, id = _MENU_SAVE_AS)
         self.Bind(wx.EVT_MENU, self.save_object_state, id = _MENU_SAVE)
         self.Bind(wx.EVT_MENU, self.load_object_state, id = _MENU_LOAD)
@@ -462,17 +489,17 @@ Automatically calls on_<setting>(val, event) callback.
         menu.AppendSeparator()
         menu.Append(help='Export object as python class code',
                       id = _MENU_EXPORT_CLASS, 
-                      text='Export class code\tCtrl+E')
+                      text='Export class code')
         menu.Append(help='Export object as python class code as ...',
                       id = _MENU_EXPORT_CLASS_AS, 
-                      text='Export class code as ...\tShift+Ctrl+E')
+                      text='Export class code as ...')
         menu.AppendSeparator()
         menu.Append(help='Export object as python object code',
                       id = _MENU_EXPORT_OBJECT, 
-                      text='Export object code\tCtrl+O')
+                      text='Export object code')
         menu.Append(help='Export object as python object code as ...',
                       id = _MENU_EXPORT_OBJECT_AS, 
-                      text='Export object code as ...\tShift+Ctrl+O')
+                      text='Export object code as ...')
         self.Bind(wx.EVT_MENU, self.code_export, id = _MENU_EXPORT_OBJECT)
         self.Bind(wx.EVT_MENU, self.code_export_as, id = _MENU_EXPORT_OBJECT_AS)
         self.Bind(wx.EVT_MENU, self.code_export, id = _MENU_EXPORT_CLASS)
@@ -491,11 +518,7 @@ Automatically calls on_<setting>(val, event) callback.
                             os.path.join(lastfolder, lastfilename), 
                             asClass)
             except:
-                retDlg = wx.MessageDialog(self, ':'.join([str(exc_info()[0]),
-                                                          str(exc_info()[1])]),
-                                          'Unable To Export', 
-                                           wx.ICON_ERROR | wx.OK)
-                retDlg.ShowModal()                
+                ShowExceptionDialog(self)
         else:
             event.Id += 1
             self.code_export_as(event)
@@ -526,10 +549,10 @@ Automatically calls on_<setting>(val, event) callback.
     def _init_PrivateDataMenu_Items(self, parent):
         parent.Append(help='Hide "_" and "__" attributes in raw views',
                    id=_MENU_HIDE1UNDERSCORE, kind=wx.ITEM_CHECK, 
-                   text=u'Hide "_" attributes\tCtrl+1')
+                   text=u'Hide "_" attributes')
         parent.Append(help='Hide "__" attributes in raw views', 
                    id=_MENU_HIDE2UNDERSCORE, kind=wx.ITEM_CHECK, 
-                   text=u'Hide "__" attributes\tCtrl+2')
+                   text=u'Hide "__" attributes')
         self.Bind(wx.EVT_MENU, self._evt_setting,
               id=_MENU_HIDE1UNDERSCORE)
         self.Bind(wx.EVT_MENU, self._evt_setting,
@@ -547,7 +570,8 @@ Automatically calls on_<setting>(val, event) callback.
             except:
                 retDlg = wx.MessageDialog(self, str(exc_info()[0]),
                                           'Unable To Save State', wx.OK)
-                retDlg.ShowModal()                            
+                retDlg.ShowModal()     
+                retDlg.Destroy()                                       
         else:
             event.Id += 1
             self.save_object_state_as( event)
@@ -623,38 +647,23 @@ Automatically calls on_<setting>(val, event) callback.
         self._attach_setting("auto_apply", self.toolBar, _TOOL_AUTOAPPLY, 
                      True)        
         
-        helpID = wx.NewId()
         bmp = wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, 
                                            wx.ART_TOOLBAR, buttonsize)
-        self.toolBar.AddSimpleTool(helpID, bmp, "View help", 
+        self.toolBar.AddSimpleTool(_HELP_INFO, bmp, "View help", 
                                 "View help info for this object")
         context = wx.ContextHelpButton(self.toolBar)
         context.SetToolTipString(
                              "Click here, then click on any attribute label")
         self.toolBar.AddControl(context)
-        self.toolBar.Bind(wx.EVT_TOOL, self.show_help, id=helpID)
+        self.toolBar.Bind(wx.EVT_TOOL, self.show_help, id=_HELP_INFO)
         self.toolBar.Realize()
         
-#    USED TO BE FOR ADJUSTABLE LABEL/CONTROL SPLIT POINT
-#    def _evt_splitter_dclick( self, event=None):
-#        self.splitterWindow.SetSashPosition( self.labelWidth)        
-                    
     def _init_ctrls(self, prnt):
         # generated method, don't edit
         self._init_utils()
-        #self.SetMinSize(wx.Size(150, 130))
+        self.SetMinSize(wx.Size(-1,-1))
         
         self.make_toolbar()
-                
-    def show_all_attributes(self, event = None):
-        """Expand the frame's size so that all attributes are visible"""
-        self._evt_splitter_dclick( self)     
-           
-        maximizeSize = self.splitterWindow.GetSize()
-        # fudge it for now... not sure how to get exactly the right size
-        maximizeSize[0] += 20
-        maximizeSize[1] += 20
-        self.GetParent().SetClientSize(maximizeSize)
 
     def _init_optionsMenu_Items(self, parent):
         # generated method, don't edit
@@ -665,15 +674,15 @@ Automatically calls on_<setting>(val, event) callback.
         
     def _init_menuBar_Menus(self, parent):
         # generated method, don't edit
-
-        parent.Append(menu=self.fileMenu, title=u'Export')
+        wx.GetApp().append_global_menus(parent)
+        parent.Append(menu=self.exportMenu, title=u'Export')
         parent.Append(menu=self.viewMenu, title=u'View')
         parent.Append(menu=self.optionsMenu, title=u'Options')
 
     def _init_utils(self):
         # generated method, don't edit
         self.menuBar = wx.MenuBar()
-        self.fileMenu = wx.Menu()
+        self.exportMenu = wx.Menu()
         self.viewMenu = wx.Menu()
         self.optionsMenu = wx.Menu()
         self.privateDataMenu = wx.Menu()
@@ -695,6 +704,7 @@ _MENU_EXPORT_CLASS = wx.NewId()
 _MENU_EXPORT_CLASS_AS = wx.NewId()
 _MENU_EXPORT_OBJECT = wx.NewId()
 _MENU_EXPORT_OBJECT_AS = wx.NewId()
+_HELP_INFO = wx.NewId()
 
 #settingDict contains correspondences between controls and setting fields
 _settingDict = {_TOOL_AUTOAPPLY:"auto_apply", 

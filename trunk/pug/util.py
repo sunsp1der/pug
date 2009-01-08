@@ -7,11 +7,21 @@ import copy
 from weakref import WeakKeyDictionary, ref
 import sys
 import os
+import inspect
 
 PUGIMAGEPATH = os.path.join(os.path.dirname(__file__),"Images")
 def imagePath(file):
-    return os.path.join (PUGIMAGEPATH,file)
+    return os.path.join (PUGIMAGEPATH, file)
 
+def make_name_valid(name):
+    name = re.sub(r'^\d*','',name) # remove digits from front
+    name = re.sub(r'\W','_',name) # replace non alpha numerics with _
+    return name
+
+def check_name_valid(name):
+    validname = make_name_valid(name)
+    return name == validname
+    
 def get_folder_classes( folder=None, superClass=object, doReload=False):
     """get_folder_classes( folder=None, objectClass=object, doReload=False)>list
     
@@ -32,22 +42,47 @@ doReload: force a reload on any modules found
         if ext == '.py':
             # import the .py file
             try:
-                needsReload = modulename in sys.modules
                 module = __import__(modulename)
             except:
                 continue
-            if doReload and needsReload:
-                reload(module)
-            items = dir(module)
-            for item in items:
-                if item.startswith('_'):
-                    continue
-                obj = getattr(module, item)
-                if hasattr(obj,'__module__') and \
-                        obj.__module__ == modulename and \
-                        issubclass( obj, superClass):
-                    classList.append(obj)
+            classList += find_classes_in_module(module, superClass, doReload)
+    sys.path.remove(folder)
     return classList
+
+def find_classes_in_module(module, superClass=object, doReload=False):
+    """find_classes_in_module(module, superClass=Object)->list of classes
+    
+return a list of classes from given module. They must all be derived from
+superClass
+"""
+    classList = []
+    modulename = module.__name__
+    needsReload = modulename in sys.modules
+    if doReload and needsReload:
+        reload(module)
+    items = dir(module)
+    for item in items:
+        if item.startswith('_'):
+            continue
+        obj = getattr(module, item)
+        if hasattr(obj,'__module__') and \
+                obj.__module__ == modulename and \
+                issubclass( obj, superClass):
+            classList.append(obj)  
+    return classList  
+            
+def get_type(obj):
+    if hasattr(obj,'__class__'):
+        t = obj.__class__
+    else:
+        t = type(obj)
+    return t                
+                     
+def get_type_name(obj):
+    if inspect.isclass(obj):
+        return obj.__name__
+    else:
+        return get_type(obj).__name__
                                        
 def get_simple_name(obj, objectpath='unknown'):
     """analyze_path( obj, objectpath) -> shortpath
@@ -62,7 +97,7 @@ like pugframe titles...
     if gname:
         simplename = gname
     elif objectpath == 'unknown':
-        simplename = obj.__class__.__name__
+        simplename = get_type_name(obj)
     else:
         simplename = re.split('\.',objectpath)[-1:][0]           
         if not simplename:

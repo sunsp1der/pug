@@ -2,8 +2,14 @@
 
 contains the pug system's component manager
 """
+import imp, sys
 from time import time
+
+import pug
 from pug.component.component import Component
+
+all_components = imp.new_module('all_components')
+sys.modules['all_components'] = all_components
 
 class _GlobalComponentManager():
     """The component manager is used to register all components available for
@@ -31,6 +37,7 @@ available through the pug system.
         return
     _globalComponentManager.componentList.append(component)
     _globalComponentManager.lastUpdate = time()
+    setattr(all_components, component.__name__, component)
         
 def get_component_manager():
     return _GlobalComponentManager

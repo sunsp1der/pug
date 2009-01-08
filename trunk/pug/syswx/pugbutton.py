@@ -2,13 +2,14 @@ import re
 import weakref
 
 import wx
+import wx.lib.buttons as buttons
 
 from pug.syswx.wxconstants import *
 
 # TODO: I think myPugFrame could be removed if I can figure out how to get
 #        parent's top level window
 
-class PugButton(wx.BitmapButton):
+class PugButton(buttons.ThemedGenBitmapButton):
     """A button that opens a pug frame, either in the current or in a new frame
     
 PugButton(parent, targetObject, objectName="the object", doOpenNew=True, 
@@ -25,6 +26,7 @@ targetObjectFn: a function that returns a targetObject, as an alternative to
 size: the button size
 """
     targetObjectRef = None
+    myPugFrame = None
     def __init__(self, parent, targetObject=None, doOpenNew=True, 
                  objectName="object", myPugFrame=None, 
                  targetObjectFn=None, size=None):
@@ -44,7 +46,9 @@ size: the button size
                                             wx.ART_TOOLBAR, WX_BUTTON_BMP_SIZE)
             tooltip = ''.join(["View '",objectName,"' in this window"])
             fn = self.on_view_button                
-        wx.BitmapButton.__init__(self, parent=parent, size=size, bitmap=bmp)
+        buttons.ThemedGenBitmapButton.__init__(self, parent=parent, 
+                                               size=size)
+        self.SetBitmapLabel(bmp)
         self.SetToolTipString(tooltip)
         self.Bind(wx.EVT_BUTTON, fn, self)   
         if targetObject:
@@ -70,14 +74,30 @@ size: the button size
             self.myPugFrame = myPugFrame
             
     def on_view_button(self, event = None):
-        obj = self.get_obj()
-        if obj:
-            self.myPugFrame.set_object(obj, objectpath=self._getNewPath())
+        try:
+            obj = self.get_obj()
+            if obj:
+                self.myPugFrame.set_object(obj, objectpath=self._getNewPath())
+        except:
+            retDlg = wx.MessageDialog(self, 'Error Changing PugFrame',
+                                      'PugFrame Error', 
+                                       wx.ICON_ERROR | wx.OK)
+            retDlg.ShowModal()  
+            retDlg.Destroy()          
+                          
         
     def on_new_view_button(self, event = None):  
-        obj = self.get_obj()
-        if obj:
-            self.PugFrame(obj=obj, objectpath=self._getNewPath())
+        try:
+            obj = self.get_obj()
+            if obj:
+                self.PugFrame(obj=obj, objectpath=self._getNewPath())
+        except:
+            retDlg = wx.MessageDialog(self, 'Unable To Open PugFrame',
+                                      'PugFrame Error', 
+                                       wx.ICON_ERROR | wx.OK)
+            retDlg.ShowModal()      
+            retDlg.Destroy()          
+            wx.EndBusyCursor()
 
     def get_obj(self):
         if self.targetObjectFn:

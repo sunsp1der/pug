@@ -1,5 +1,7 @@
 """Constants for use with the pug system"""
-from types import *
+from types import BooleanType, IntType, LongType, FloatType, ComplexType, \
+                       StringType, UnicodeType, TupleType, ListType, DictType, \
+                       NoneType
 
 BASIC_TYPES = [BooleanType, IntType, LongType, FloatType, ComplexType, 
                        StringType, UnicodeType, TupleType, ListType, DictType, 

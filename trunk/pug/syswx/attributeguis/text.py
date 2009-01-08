@@ -32,5 +32,5 @@ For kwargs optional arguments, see the Base attribute GUI
     
     def set_control_value(self, value):
         if (value == str(value)):
-            value = ''.join(["'",value,"'"])
+            value = repr(value)
         return self.control.SetValue(str(value))

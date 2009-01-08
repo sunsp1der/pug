@@ -3,7 +3,7 @@ from pug.component import *
 class XComponent(Component):
     _type = 'effect/special'
     _set = 'Testers'
-    _attribute_dict = {'defaultsize':'The default size'}
+    _attribute_list = [['defaultsize', 'The default size']]
     def __init__(self, **kwargs):
         self.defaultsize = 12
         Component.__init__(self, **kwargs)
@@ -36,11 +36,6 @@ if __name__ == "__main__":
     obj.components.add(xcomp)
     print "--- obj.explode with XComponent"
     obj.explode("some size", 3)
-
-    #x2comp = X2Component()
-    #obj2.add_component(x2comp)
-    #print "--- obj2.explode with X2Component"
-    #obj2.explode()
     
     x2comp2 = X2Component()
     obj.components.add(x2comp2)
@@ -56,10 +51,32 @@ if __name__ == "__main__":
     xcomp.defaultsize = 33
     print xcomp._create_object_code({'storage_name':'xcomp', 'as_class':0},0,0)
     print "----"
-    print "BAD"
+
+    print "Component delete when owner is deleted test..."
+    obj2.components.add(XComponent)
+    import weakref, gc
+    compref = weakref.ref(obj2.components.get_one(XComponent))
+    print "component: ",compref()
+    del(obj2)
+    print "might be None: ",compref()
+    gc.collect()
+    print "should be None: ", compref()
+    if compref():
+        func = compref().explode
+        non_comp_func = compref()._set_owner
+        g = gc.get_referrers(compref())   
+        for ob in g:
+            print ob
+            b = gc.get_referrers(ob)
+            for ob2 in b:
+                print "   ", ob2 
+            print "_______________________"     
+    
+    print "SHOULD FAIL"
     obj.components.remove(x2comp2)
     print "--- obj.explode with no components"
-    obj.explode("some not work size", 20)
-    print "----"
+    obj.explode("not work", 20)
+    print "----"    
+    
 
 

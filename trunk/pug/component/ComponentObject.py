@@ -39,6 +39,7 @@ If it's a class, an instance will be created and added.
         component_list = self.__component_list
         component_list.add(component)
         obj = self.__obj()
+        component.owner = obj
         original_methods = self.__original_methods
         sentinel = self.__sentinel
         for name in component._component_method_names:
@@ -49,8 +50,13 @@ If it's a class, an instance will be created and added.
                 original_methods[name] = original_method
 
             def component_wrapper(*args, **kw_args):
+                if not self.__obj():
+                    # my object has been destroyed
+                    return
                 for method in component_methods:
-                    method(obj, *args, **kw_args)
+                    if not method.im_self.enabled:
+                        continue
+                    method( *args, **kw_args)
                 original_method = self.__original_methods[name]
                 if original_method is not None:
                     return original_method(*args, **kw_args)
@@ -71,6 +77,8 @@ If it's a class, an instance will be created and added.
 
     def remove(self, component):
         component_list = self.__component_list
+        if component not in component_list.get_components():
+            return
         component_list.remove(component)
         obj = self.__obj()
         original_methods = self.__original_methods

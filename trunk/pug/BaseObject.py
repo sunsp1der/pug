@@ -11,8 +11,8 @@ GnamedObject: can have a global name (gname) so it can be located with
     pug.get_gnamed_object(gname)
 ComponentObject: can use the pug component system
 """
-    def __init__(self):
-        pug.GnamedObject.__init__(self)
+    def __init__(self, gname=''):
+        pug.GnamedObject.__init__(self, gname=gname)
         pug.ComponentObject.__init__(self)
 
     _codeStorageDict = {}

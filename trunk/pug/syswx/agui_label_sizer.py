@@ -27,7 +27,7 @@ next line.
         self.AddSpacer((1, WX_TEXTEDIT_LABEL_YOFFSET))
         textSizer = wx.BoxSizer(orient=wx.HORIZONTAL)
         textSizer.Add(text, 1, wx.EXPAND | wx.WEST, 2)
-        self.AddSizer(textSizer)
+        self.AddSizer(textSizer, 1)
         if line:
             line = wx.StaticLine(parent=parent, style = 0)            
             self.Add(line, flag=wx.EXPAND)

@@ -1,87 +1,162 @@
 import time
 
 import wx
-from Opioid2D import Director
-from Opioid2D import Scene, Sprite
+
+import Opioid2D
 from Opioid2D.public.Node import Node
+
 import pug
+from pug.syswx.wxconstants import WX_STANDARD_HEIGHT
 from pug.util import CallbackWeakKeyDictionary
 from pug.code_storage.constants import _INDENT
 from pug.code_storage import add_subclass_skip_attributes
 
 from pug_opioid import PugSprite
-from pug_opioid.wx_agui import SceneNodes
-from pug_opioid.util import get_available_objects, get_available_layers
+from pug_opioid.editor import EditorState
+from pug_opioid.wx_agui import SceneNodes, SceneLayers
+from pug_opioid.util import get_available_objects
+from pug_opioid.editor.util import get_available_layers
 
-class PugScene( Scene, pug.BaseObject):
+class PugScene( Opioid2D.Scene, pug.BaseObject):
     """PugScene - Opioid2d Scene with features for use with pug"""
-    _pugTemplateClass = 'PugScene'
-    
+    _pug_template_class = 'PugScene'
+    __nodes_changed = False
+    __node_num = 0
+    def __init__(self, gname=''):
+        Opioid2D.Scene.__init__(self)
+        pug.BaseObject.__init__(self, gname)
+
+    def handle_keydown(self, ev):
+        if ev.key == Opioid2D.K_ESCAPE:
+            Opioid2D.Director.quit()
+
     def start(self):
         """call after enter() and before state changes"""
-        if not getattr(Director, 'game_started', False):
-            if getattr(Director, 'start_game', False):
+        if not getattr(Opioid2D.Director, 'game_started', False):
+            if getattr(Opioid2D.Director, 'start_game', False):
                 self.all_nodes_callback( 'on_added_to_scene', self)        
                 self.all_nodes_callback( 'on_game_start')
-                Director.game_started = True                        
+                Opioid2D.Director.game_started = True                        
             else:
                 # do nothing if we're not starting the game
                 return
-        self.all_nodes_callback( 'on_scene_start', self)                        
+        self.all_nodes_callback( 'on_scene_start', self)             
+    
+    def stop(self):
+        """Stop a level that is playing"""
+        Opioid2D.Director.game_started = False  
+        Opioid2D.Director.start_game = False                     
     
     def all_nodes_callback(self, callback, *args, **kwargs):
+        """Send a callback to all nodes in the scene"""
         for node in self.nodes:
             self.node_callback( node, callback, *args, **kwargs)
                 
     def node_callback(self, node, callback, *args, **kwargs):
+        """Send a callback to a node in the scene"""
         if hasattr(node, callback):
             func = getattr(node, callback)
             func( *args, **kwargs)
         
     # node info storage
-    def get_nodes(self):
+    def _get_nodes(self):
+        """_get_nodes()->CallbackWeakKeyDictionary of nodes"""
         if not hasattr(self,'_nodes'):
             self._nodes = CallbackWeakKeyDictionary()
         return self._nodes
-    nodes = property (get_nodes,doc="dictionary of Scene nodes:layers")
-    def update_node(self, node):
-        if node.deleted:
-            if self.nodes.has_key(node):
-                self.nodes.__delitem__(node)
-            return            
-        if not self.nodes.has_key(node) and \
-                            getattr(Director,'game_started', False):
-            self.node_callback(node, "on_added_to_scene", self)
-        try:
-            gname = node.gname
-        except:
-            gname = ''
-        try:
-            layer = node.layer.name
-        except:
-            layer = ''
-        self.nodes[node] = (gname, layer)
+
+    nodes = property (_get_nodes,doc="dictionary of Scene nodes:node_num")
+
+    def get_ordered_nodes(self):
+        """get_ordered_nodes()->list of nodes sorted by layer then create-time
         
-    addObjectClass = PugSprite
-    def add_object(self, nodeclass=None):
-        """add_object( nodeclass=None)
-        
-Add an object to the scene
+Note that due to the non-deterministic nature of Opioid zordering, the order
+returned will be from top to bottom in terms of layers, but pseudo-random in
+terms of nodes within the layers"""
+        nodelist = []
+        if self.nodes:
+            # create ordered list of nodes
+            layers = self.get_scene_layers()[:]
+            layersort = {}
+            a = 0
+            for layer in layers:
+                layersort[layer] = '%03d'%a
+                a+=1
+            ordered_nodes = {}
+            for node in self.nodes.iterkeys():
+                nodesorter = '_'.join([layersort[node.layer.name],
+                                       '%04d'%self.nodes[node]])
+                ordered_nodes[nodesorter] = node
+            nodenums = ordered_nodes.keys()
+            nodenums.sort()
+            nodenums.reverse()
+            for num in nodenums:
+                nodelist.append(ordered_nodes[num])
+        return nodelist
+
+    def pick_all(self, x, y):
+        """pick_all(x,y)
+
+Get all nodes whose rects overlap (x,y)
 """
-        if nodeclass is None:
-            objectclass = self.addObjectClass
-        if not issubclass(objectclass, Node):
-            raise TypeError("add_object(): arg 1 must be a subclass of Node")
-        node = objectclass()
-        if objectclass == PugSprite:
-            # set a default image for basic sprite
-            node.image = "art/pug.png"
-            if len(Director.scene.layers) > 1:
-                # skip 'selection' layer
-                node.layer = Director.scene.layers[-2]
-            else:
-                node.layer = "new_layer"
-    
+        nodelist = self.get_ordered_nodes()
+        picklist = []
+        for node in nodelist:
+            rect = node.rect
+            if rect.collidepoint(x, y):
+                picklist.append(node)  
+        return picklist
+
+    def pick(self, x, y, selectedRefSet=[]):
+        """pick(x, y, selection)->return a node to select at x,y
+        
+x,y: coordinates
+selection: a list of selected objects. If possible, pick will return an object 
+    at x,y that is NOT in the list.
+"""
+        picklist = self.pick_all(x, y)
+        if not len(picklist):
+            return None
+        if len(picklist) == 1 or not selectedRefSet:
+            return picklist[0]
+        start_node = None
+        selected_list = []
+        for ref in selectedRefSet:
+            selected_node = ref()
+            selected_list.append(selected_node)
+            if not start_node and selected_node in picklist:
+                start_node = selected_node
+        if start_node:
+            start_idx = picklist.index(start_node)
+            idx = start_idx + 1
+            while idx != start_idx:
+                if idx >= len(picklist):
+                    idx = 0
+                try_node = picklist[idx]
+                if try_node in selected_list:
+                    idx = idx + 1
+                    continue
+                else:
+                    return try_node
+        else:
+            return picklist[0]
+
+    def update_node(self, node):
+        nodes = self.nodes
+        if getattr(node,'deleted',False):
+            if nodes.has_key(node):
+                nodes.__delitem__(node)
+            return            
+        if not nodes.has_key(node):
+            if getattr(Opioid2D.Director,'game_started', False):
+                self.node_callback(node, "on_added_to_scene", self)
+            node_num = self.__node_num
+            self.__node_num += 1
+        else:
+            node_num = nodes[node]
+        nodes[node] = node_num # node_num tracks the order of node additions
+        self.__nodes_changed = True
+            
     def get_scene_layers(self):
         return get_available_layers()
 
@@ -110,8 +185,10 @@ Add an object to the scene
             # enter function
             custom_code_list += [baseIndent, _INDENT, 'def enter(self):\n']
             custom_code_list += [baseIndent, _INDENT*2, '# Sprites etc.\n']
-            nodes = self.nodes.keys()
-            if nodes:
+            if self.nodes:
+                # create ordered list of nodes
+                nodes = self.get_ordered_nodes()
+                nodes.reverse() # store them from bottom-most to top-most
                 for node in nodes:
                     nodeStorageDict = exporter.get_custom_storageDict(node)
                     nodeStorageDict['as_class'] = False # export as object
@@ -120,6 +197,7 @@ Add an object to the scene
                                                             indentLevel + 2,
                                                             False)                    
                     custom_code_list+=[node_code,'\n']
+                    # hack - nasty hack
                     # give Opioid some time to catch up
                     starttime = time.time()
                     while time.time()-starttime < 0.05:
@@ -130,63 +208,44 @@ Add an object to the scene
             # clean up pass case (for looks)
             base_code = base_code.splitlines()[0:-1]
             base_code.append('\n')
-                     
+        else:
+            base_code = [base_code]
+        #add layers line
+        base_code += [baseIndent, _INDENT,'layers = ', 
+                      str(get_available_layers()),'\n']
         code = ''.join(base_code + custom_code_list)
         return code
     
     _codeStorageDict = {
             'custom_export_func': _create_object_code,
             'as_class':True,
-            'skip_attributes': ['_nodes','_groups','scene_layers']
+            'skip_attributes': ['_nodes','_groups','scene_layers','layers',
+                                '_PugScene__node_num',
+                                '_PugScene__nodes_changed']
              }   
     add_subclass_skip_attributes(_codeStorageDict, pug.BaseObject)
-    
-    
-# pug template stuff
 
-def _object_list_generator():
-    """_object_list_generator()-> list of objects + 'New'
-    
-Return a list of node classes available in the objects folder. Append to that
-list a tuple ("Sprite", PugSprite) for use in the add object dropdown"""
-    list = get_available_objects()
-    list.insert(0,("New Sprite", PugSprite))
-    return list    
+# force derived classes to use PugScene as base class
+PugScene._codeStorageDict['base_class']=PugScene
+# pug template stuff
             
-def _reload_object_list(self):
-    """Reload all saved object classes from disk"""
-    try:
-        scene = Opioid2D.Director.scene
-    except:
-        return
-    get_available_objects( True)
-    addName = scene.addObjectClass.__name__
-    for object in objectlist:
-        if object.__name__ == addName:
-            scene.addObjectClass = object
-                        
+from pug_opioid.editor.util import save_scene_as, save_scene
+                                                
 _sceneTemplate = {
-    'name':'Basic',
+    'name':'Editor',
     'attributes':
     [
         ['', pug.Label, {'label':'Scene','font_size':10}],
-        ['gname'],
-        ['scene_layers', None, {'label':'   layers','read_only':True}],
-        ['', pug.Label, {'label':' Functions'}],
-        ['add_layer'],
-        ['delete_layer'],
-        ['', pug.Label, {'label':' Add Object'}],
-        ['addObjectClass', pug.Dropdown, 
-             {'list_generator':_object_list_generator,
-              'label':'   Object to add',
-              'tooltip':'Select an object type for the add button below'}],
-        ['add_object', None, {'tooltip':\
-              'Add an object to the scene.\nSelect object type above.',
-                              'use_defaults':True,
-                              'label':'   Add Object'}],                              
-        ['', pug.Routine, {'label':'   Reload Objects', 
-                    'routine':_reload_object_list}],
-        ['', pug.Label, {'label':' Scene Nodes'}],
+        ['scene_layers', SceneLayers],
+#        ['scene_groups', SceneGroups],
+#        ['scene_layers', None, {'label':'   layers','read_only':True}],
+#        ['   Save Scene', pug.Routine, {'routine':save_scene, 
+#                                        'use_defaults':True}],        
+#        ['   Save Scene As', pug.Routine, {
+#                               'routine':save_scene_as, 
+#                               'use_defaults':True,
+#                               'tooltip':"Save scene to disk with new name"}],        
+        ['', pug.Label, {'label':' Scene Graph'}],
         ['nodes', SceneNodes, {'growable':True}],
     ]
 }

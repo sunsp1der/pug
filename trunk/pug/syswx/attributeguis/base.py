@@ -1,8 +1,10 @@
 """Base class for attribute guis"""
 import time
+from inspect import isclass
 
 import wx
 
+from pug.util import get_type_name, get_type
 from pug.constants import *
 from pug.syswx.helpframe import HelpFrame
 from pug.syswx.wxconstants import *
@@ -47,6 +49,7 @@ get_control_value and get_attribute_value return it. Likewise, get_control_value
 should return data in the same form the set_control_value and 
 set_attribute_value expect it.
 """
+    applying = False
     def __init__(self, attribute, window, aguidata = {}, control_widget = None, 
                  label_widget = None, **kwargs):
         if attribute is None:
@@ -95,8 +98,11 @@ set_attribute_value expect it.
             self.tooltip = aguidata['tooltip']
         else:
             try: # check if this is a property
-                prop = getattr(self._window.object.__class__, 
-                               attribute, None)
+                if isclass(window.object):
+                    cls = window.object
+                else:
+                    cls = get_type(window.object)
+                prop = getattr(cls, attribute, None)
                 if type(prop) == property:
                     self.tooltip = prop.__doc__
             except:
@@ -155,13 +161,13 @@ By default, this returns the attribute value
     def doc_to_tooltip(self):
         doc = ''
         value = self.get_attribute_value()
-        if value.__class__ not in BASIC_TYPES:
+        if get_type(value) not in BASIC_TYPES:
             doc = getattr(value,'__doc__','')
         elif value is not None:
             try:
-                doc = type(value).__name__
+                doc = get_type_name(value)
             except:
-                pass   
+                pass
         try:
             self.label.text.SetToolTipString(doc)
         except:
@@ -192,25 +198,39 @@ When auto apply is off, skip apply events that were created by the event system
             return True
         # we need to set, but make sure attribute is not readonly
         if self.readonly:
+            # this creates a loop by changing focus automatically
+            if self.applying:
+                return
+            self.applying = True
             retDlg = wx.MessageDialog(self.control, 
                               ''.join([self.attribute,
                                        ' cannot be editted via gui']), 
                                'Read Only', wx.OK)
-            retDlg.ShowModal()       
+            retDlg.ShowModal() 
+            self.applying = False
+            retDlg.Destroy()          
             applied = False   
         else:                
             applied = self.set_attribute_value()
         if applied:
             starttime = time.time()
-            while self.get_attribute_value() != control_value:                
+            while self.get_attribute_value() != control_value:
                 # sometimes we have to wait a bit for it to take effect
-                # if this takes more than 3 seconds, forget it
+                # if this takes more than 0.5 seconds, forget it
+                
+                # HACK check for weird float case
+                if type(control_value) == type(0.1):
+                    if type(self.get_attribute_value()) == type(0.1) and \
+                            str(self.get_attribute_value()) == \
+                            str(control_value):
+                        break            
                 time.sleep(0.01)
-                if time.time() - starttime > 3: 
+                if time.time() - starttime > 0.5: 
                     applied = False
+                    self.refresh()
                     break
             self.refresh_window()        
-            self.set_control_value(self.get_control_value())          
+            #self.set_control_value(self.get_control_value())          
         else:
             # bad apply... just revert
             self.refresh()  

@@ -3,19 +3,27 @@
 utility for storing customized pug templates for classes
 """
 
-# stored in this form:
-#{<class>:
-    #{'templates': 
-        #{'template 1':templateobj1,
-        #'listo':templateobj2(named)},
-    #'default':'listo',
-    #'nextdefaultnum' = 1}
-
 import copy
 
 from pug.constants import *
 
 class _TemplateManager(object):
+    """_TemplateManager()
+    
+Singleton that stores template info for all objects.
+
+stored in this form:
+{<class>:
+    {'templates': 
+        {'template 1':templateobj1,
+        'listo':templateobj2(named)},
+    'default':'listo',
+    'next_num' = 2} # unnamed template will be autonamed 'template 2'
+
+note that the 'templates' dict will contain 'Raw', 'Raw Data', and 
+'Raw Methods', which are all special auto-templates.
+"""
+
     def __init__(self):
         self.templateDict = {
             'default_template_info':{
@@ -28,7 +36,6 @@ class _TemplateManager(object):
     
 _templateManager = _TemplateManager()
 
-global _aguiDefaultDict
 _aguiDefaultDict = {}
 
 def get_template_manager():
