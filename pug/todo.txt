@@ -7,7 +7,6 @@ current version:
 		hide it when no selection
 	add object_template flag to pugSprite... like template behavior
 	add psyco... check for efficiencies if possible
-	key to bring all windows to front
 	
 Finalize:
 	Open/New project	
@@ -48,7 +47,7 @@ later:
 	custom menu creation
 		in templates:
 		'menus': {'__order__':[],name1:[]...,name2:[]...}
-	move OpioidInterface into editor
+	make pugwindow faster by making labels a separate sizer?
 	key/input event registry in scene
 	create groups gui for scene	
 	create get_groups function for pugsprite... checks against scene groups
@@ -97,6 +96,10 @@ later:
 	auto-refresh -- leave the attribute being editted alone
 	project windows... show all frames available
 	particles
+	list agui
+		create accessor object
+			listob.item1
+			dictob.str(key)
 	
 not understand:
 

@@ -35,7 +35,7 @@ projectFolder="": where file menus start at.  Defaults to current working dir.
     busyState = False
     progressDialog = None
     initTryCounter = 0
-    settingsObj = None
+    settings = object()
     def __init__(self, projectObject=None, projectObjectName='',
                  projectName='PUG', projectFolder = "" ):
         #wx.PySimpleApp.__init__(self)
@@ -166,14 +166,19 @@ called every second until the object is initialized"""
                 event.Skip()
             return
         if self.projectObject in self.projectFrame.get_object_list():
-            dlg = wx.MessageDialog(self.projectFrame,
+            if hasattr(self.projectObject, "_pre_quit_func"):
+                doquit = self.projectObject._pre_quit_func( event)
+                if not doquit:
+                    return
+            else:
+                dlg = wx.MessageDialog(self.projectFrame,
                                "Close all windows and exit project?",
                                'Project Frame Closed', 
-                               wx.YES_NO | wx.NO_DEFAULT)
+                    wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
         #TODO: would be nice if the dlg could be forced above other apps
-            if dlg.ShowModal() != wx.ID_YES:
-                dlg.Destroy()
-                return
+                if dlg.ShowModal() != wx.ID_YES:
+                    dlg.Destroy()
+                    return
         self.quit()
         if event:
             event.Skip()
@@ -437,4 +442,16 @@ settingsObj: any frame settings members will be replaced
             rect = getattr(self.settings, name)
             frame.SetPosition((rect[0],rect[1]))
             frame.SetSize((rect[2],rect[3]))
+            
+    def raise_all_frames(self):
+        windows = wx.GetTopLevelWindows()
+        win = None
+        for frame in windows:
+            if frame.IsActive():
+                win = frame
+        for frame in windows:
+            if win != frame:
+                frame.Raise()
+        if win:
+            win.Raise()
             
