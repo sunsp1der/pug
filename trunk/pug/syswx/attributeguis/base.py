@@ -295,13 +295,15 @@ Try to set the aguis attribute to the value shown in the control
         """Notify the window that this attribute gui has changed size"""
         self._window.resize_puglist()
         
-    def match_label_size(self):
+    def match_label_size(self, doWindowResize=False):
         """Match the label height to the control height"""
         self.control.SetMinSize((-1,self.label.Size[1]))
-        self.changed_size()
+        if doWindowResize:
+            self.changed_size()
         
-    def match_control_size(self):
+    def match_control_size(self, doWindowResize=False):
         """Match the control height to the label height"""
         self.label.SetMinSize((-1,self.control.Size[1]))
-        self.changed_size()
+        if doWindowResize:
+            self.changed_size()
         
