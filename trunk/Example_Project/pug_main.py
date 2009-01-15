@@ -6,7 +6,7 @@ import Opioid2D
 import pug
 
 from pug_opioid.editor.OpioidInterface import OpioidInterface
-    
+
 def init_pug():
     """start mainScene with a pug interface"""         
     interface = OpioidInterface(__file__)
