@@ -1,26 +1,20 @@
-import time
-
-import wx
+import os.path
 
 import Opioid2D
-from Opioid2D.public.Node import Node
 
 import pug
-from pug.syswx.wxconstants import WX_STANDARD_HEIGHT
 from pug.util import CallbackWeakKeyDictionary
 from pug.code_storage.constants import _INDENT
 from pug.code_storage import add_subclass_skip_attributes
 
-from pug_opioid import PugSprite
-from pug_opioid.editor import EditorState
-from pug_opioid.wx_agui import SceneNodes, SceneLayers
-from pug_opioid.util import get_available_objects
-from pug_opioid.editor.util import get_available_layers
+from pug_opioid.editor.wx_agui import SceneNodes, SceneLayers
+from pug_opioid.editor.util import get_available_layers, save_object
+
+DEBUG = True
 
 class PugScene( Opioid2D.Scene, pug.BaseObject):
     """PugScene - Opioid2d Scene with features for use with pug"""
     _pug_template_class = 'PugScene'
-    __nodes_changed = False
     __node_num = 0
     def __init__(self, gname=''):
         Opioid2D.Scene.__init__(self)
@@ -34,9 +28,12 @@ class PugScene( Opioid2D.Scene, pug.BaseObject):
         """call after enter() and before state changes"""
         if not getattr(Opioid2D.Director, 'game_started', False):
             if getattr(Opioid2D.Director, 'start_game', False):
-                self.all_nodes_callback( 'on_added_to_scene', self)        
-                self.all_nodes_callback( 'on_game_start')
+                for node in self.get_ordered_nodes():
+                    if node.is_template:
+                        node.delete()
                 Opioid2D.Director.game_started = True                        
+                self.all_nodes_callback( 'on_game_start')
+                self.all_nodes_callback( 'on_added_to_scene', self)        
             else:
                 # do nothing if we're not starting the game
                 return
@@ -83,9 +80,19 @@ terms of nodes within the layers"""
                 layersort[layer] = '%03d'%a
                 a+=1
             ordered_nodes = {}
-            for node in self.nodes.iterkeys():
-                nodesorter = '_'.join([layersort[node.layer.name],
+            myNodes = self.nodes.keys()
+            for node in myNodes:
+                if hasattr(node.layer,'name'):
+                    nodesorter = '_'.join([layersort[node.layer.name],
                                        '%04d'%self.nodes[node]])
+                else:
+                    import gc
+                    gc.collect()
+                    if DEBUG: print "get_ordered-------------------------------"
+                    if DEBUG: print str(node), node.gname
+                    self.nodes.pop(node)
+                    node._test_referrers()
+                    continue
                 ordered_nodes[nodesorter] = node
             nodenums = ordered_nodes.keys()
             nodenums.sort()
@@ -107,13 +114,15 @@ Get all nodes whose rects overlap (x,y)
                 picklist.append(node)  
         return picklist
 
-    def pick(self, x, y, selectedRefSet=[]):
-        """pick(x, y, selection)->return a node to select at x,y
+    def pick(self, x, y, selectedRefSet=None):
+        """pick(x, y, selectedRefSet=[])->return a node to select at x,y
         
 x,y: coordinates
-selection: a list of selected objects. If possible, pick will return an object 
-    at x,y that is NOT in the list.
+selectedRefSet: a list of selected objects. If possible, pick will return an 
+    object at x,y that is NOT in the list.
 """
+        if selectedRefSet is None:
+            selectedRefSet = []
         picklist = self.pick_all(x, y)
         if not len(picklist):
             return None
@@ -141,21 +150,33 @@ selection: a list of selected objects. If possible, pick will return an object
         else:
             return picklist[0]
 
-    def update_node(self, node):
+    def update_node(self, node, command=None):
+        """update_node(node, command=None)
+        
+Update the PugScene's node tracking dict for node. Possible commands: 'Delete'
+"""
         nodes = self.nodes
-        if getattr(node,'deleted',False):
+        if DEBUG: print "pugscene.update_node", node, command
+        if getattr(node,'deleted',False) or command == 'Delete':
             if nodes.has_key(node):
-                nodes.__delitem__(node)
+                try:
+                    nodes.__delitem__(node)
+                    if DEBUG: print "   deleted"
+                except:
+                    if DEBUG: print "   could not delete (already gone?)"
+            else:
+                if DEBUG: print "   unable to delete"
             return            
         if not nodes.has_key(node):
-            if getattr(Opioid2D.Director,'game_started', False):
+            if DEBUG: print "   added"
+            if getattr(Opioid2D.Director, 'game_started', False):
                 self.node_callback(node, "on_added_to_scene", self)
             node_num = self.__node_num
             self.__node_num += 1
         else:
             node_num = nodes[node]
-        nodes[node] = node_num # node_num tracks the order of node additions
-        self.__nodes_changed = True
+        # node_num tracks the order of node additions
+        nodes[node] = node_num # this call sets off callbacks for nodes gui
             
     def get_scene_layers(self):
         return get_available_layers()
@@ -165,6 +186,7 @@ selection: a list of selected objects. If possible, pick will return an object
     
     # code storage customization
     def _create_object_code(self, storageDict, indentLevel, exporter):
+        if DEBUG: print "*******************enter scene save"
         storage_name = storageDict['storage_name']
         if storage_name == 'PugScene' or \
                 storage_name == 'Scene':
@@ -191,6 +213,33 @@ selection: a list of selected objects. If possible, pick will return an object
                 nodes.reverse() # store them from bottom-most to top-most
                 for node in nodes:
                     nodeStorageDict = exporter.get_custom_storageDict(node)
+                    if node.is_template:
+                        # this node is a class template, figure out a save name
+                        if node.gname:
+                            savename = node.gname
+                        else:
+                            # no gname, so find an available filename
+                            tryname = base_tryname = 'MyObjectClass'
+                            savename = ''
+                            suffix = 1
+                            while not savename:
+                                path = os.path.join('objects',
+                                                    ''.join([tryname,'.py']))
+                                try:
+                                    file(path)
+                                except:
+                                    savename = tryname
+                                else:
+                                    suffix+=1
+                                    tryname = ''.join([base_tryname, 
+                                                       str(suffix)])
+                            node.gname = savename
+                        save_object( node, savename)
+                        module = __import__('.'.join(['objects',savename]),
+                                           fromlist=[savename])
+                        reload(module)
+                        node.__class__ = getattr(module,savename)
+                        nodeStorageDict['name'] =''.join([savename,'_instance'])
                     nodeStorageDict['as_class'] = False # export as object
                     node_code = exporter.create_object_code(node, 
                                                             nodeStorageDict, 
@@ -199,9 +248,9 @@ selection: a list of selected objects. If possible, pick will return an object
                     custom_code_list+=[node_code,'\n']
                     # hack - nasty hack
                     # give Opioid some time to catch up
-                    starttime = time.time()
-                    while time.time()-starttime < 0.05:
-                        time.sleep(0.01)
+#                    starttime = time.time()
+#                    while time.time()-starttime < 0.5:
+#                        time.sleep(0.01)
             custom_code_list += [baseIndent, _INDENT*2, '# Pug auto-start\n']
             custom_code_list += [baseIndent, _INDENT * 2, 'self.start()','\n']
         if base_code.endswith('pass\n') and custom_code_list: 
@@ -214,14 +263,14 @@ selection: a list of selected objects. If possible, pick will return an object
         base_code += [baseIndent, _INDENT,'layers = ', 
                       str(get_available_layers()),'\n']
         code = ''.join(base_code + custom_code_list)
+        if DEBUG: print "*******************exit scene save"
         return code
     
     _codeStorageDict = {
             'custom_export_func': _create_object_code,
             'as_class':True,
             'skip_attributes': ['_nodes','_groups','scene_layers','layers',
-                                '_PugScene__node_num',
-                                '_PugScene__nodes_changed']
+                                '_PugScene__node_num']
              }   
     add_subclass_skip_attributes(_codeStorageDict, pug.BaseObject)
 
@@ -229,8 +278,6 @@ selection: a list of selected objects. If possible, pick will return an object
 PugScene._codeStorageDict['base_class']=PugScene
 # pug template stuff
             
-from pug_opioid.editor.util import save_scene_as, save_scene
-                                                
 _sceneTemplate = {
     'name':'Editor',
     'attributes':

@@ -5,6 +5,7 @@ import os
 import time
 import thread
 import subprocess
+import sys
 
 import wx
 
@@ -27,10 +28,16 @@ class OpioidInterface(pug.ProjectInterface):
     _pug_template_class = 'OpioidInterface'
     _scene = ''
     component_browser = None
-    _working_scene = True
+    _use_working_scene = True
     def __init__(self, rootfile, scene=PugScene):
-        filepath = os.path.join(os.getcwd(),rootfile)
-        projectPath = os.path.dirname(os.path.realpath(filepath))
+        # put this folder on search path so absolute package names will work
+        sys.path.insert( 0, os.path.dirname(os.path.dirname(rootfile))) 
+        # for process watching purposes
+        import dl
+        libc = dl.open('/lib/libc.so.6')
+        libc.call('prctl', 15, 'python_Pug_Opioid', 0, 0, 0)
+        
+        projectPath = os.path.dirname(os.path.realpath(rootfile))
         set_project_path( projectPath)
         self.create_scene_dict()
         
@@ -55,6 +62,7 @@ class OpioidInterface(pug.ProjectInterface):
         app = pug.App(projectObject=self, 
                       projectFolder=projectPath,
                       projectObjectName=title)
+        Opioid2D.Director.realquit()
 
     def create_default_game_settings(self, settingsObj=None):
         """create_default_game_settings(settingsObj=None)->setting data class
@@ -141,9 +149,9 @@ settingsObj: an object similar to the one below... if it is missing any default
     def _post_init(self):
         wx.GetApp().set_pug_settings( self.pug_settings)
         wx.GetApp().add_global_menu("Pug_Opioid",
-                    [["Save Working Scene\tCtrl+S", self.save_working_scene],
-                     ["Show All Windows\tCtrl+W", wx.GetApp().raise_all_frames],
-                     ["Quit\tCtrl+Q", project_quit]])
+                [["Save Working Scene\tCtrl+S", self.save_using_working_scene],
+                 ["Show All Windows\tCtrl+W", wx.GetApp().raise_all_frames],
+                 ["Quit\tCtrl+Q", project_quit]])
         if self.pug_settings.initial_scene:
             self.sceneclass = self.pug_settings.initial_scene
         
@@ -229,7 +237,7 @@ value can be either an actual scene class, or the name of a scene class
     def create_scene_dict(self, doReload=True):
         """Create dict of available scene classes in scenes folder"""
         self.sceneDict = {}
-        self.sceneDict = get_available_scenes( doReload, self.working_scene)
+        self.sceneDict = get_available_scenes( doReload, self.use_working_scene)
         
     def set_selection(self, selectList):
         """set_selection( selectList)
@@ -275,7 +283,7 @@ Callback from PugApp...
             wx.YES_NO | wx.CANCEL | wx.YES_DEFAULT | wx.ICON_QUESTION)
         answer = dlg.ShowModal() 
         if answer == wx.ID_YES:
-            self.save_working_scene()
+            self.save_using_working_scene()
         elif answer == wx.ID_CANCEL:
             return False
         return True
@@ -287,12 +295,12 @@ Callback from PugApp...
             self.component_browser = ComponentBrowseFrame()
             self.component_browser.Show()
 
-    def _get_working_scene(self): 
-        return self._working_scene
-    def _set_working_scene(self, value):
-        if self._working_scene == value:
+    def _get_use_working_scene(self): 
+        return self._use_working_scene
+    def _set_use_working_scene(self, value):
+        if self._use_working_scene == value:
             return
-        self._working_scene = value
+        self._use_working_scene = value
         self.create_scene_dict(True)
         if value:
             for cls in self.sceneDict.values():
@@ -302,13 +310,13 @@ Callback from PugApp...
         else:
             if self.Director.scene.__module__ == 'scenes.__Working__':
                 self.revert_scene()
-    working_scene = property(_get_working_scene, _set_working_scene, 
-                             doc="Use a temporary working copy of scene")
-    def save_working_scene(self, event=None):
+    use_working_scene = property(_get_use_working_scene, 
+                                   _set_use_working_scene, 
+                             doc="Using a working copy of the scene")
+    def save_using_working_scene(self, event=None):
         """Save the current scene as scenes/__Working__.py"""
-        save_scene_as( self.scene.__class__.__name__, 
-                       '__Working__')
-        self.working_scene = True
+        save_scene_as( self.scene.__class__.__name__, '__Working__')
+        self.use_working_scene = True
 
     def rewind_scene(self):
         """rewind_scene(): reset the scene and play it again"""
@@ -327,7 +335,7 @@ doSave: save working copy first
             # don't do anything if game started
             return
         if doSave:
-            self.save_working_scene()
+            self.save_using_working_scene()
         #self.revert_scene()
         start_scene()   
     
@@ -401,7 +409,7 @@ def _scene_list_generator():
 Return a list of scene classes available in the scenes folder. Append to that
 list a tuple ("New Scene", PugScene) for use in the sceneclass dropdown"""
     dict = get_available_scenes( 
-                        useWorking = wx.GetApp().projectObject._working_scene)
+                    useWorking = wx.GetApp().projectObject._use_working_scene)
     list = dict.values()
     list.insert(0,("New Scene", PugScene))
     return list               
@@ -435,7 +443,7 @@ _interfaceTemplate = {
                                'tooltip':"Commit current scene to disk"}],
         ['view_scene', pug.Routine,  {'label':'   View Scene'}],
         ['revert_scene', None, {'label':'   Revert Scene'}],
-        ['working_scene', None, {'label':'   Use Working Scene',
+        ['use_working_scene', None, {'label':'   Use Working Scene',
                     'tooltip':'Uncheck to go back to last committed version'}],
  
         [' Objects', pug.Label],

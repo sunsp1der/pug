@@ -1,4 +1,6 @@
-from Opioid2D import Sprite, Director
+import gc
+
+from Opioid2D import Sprite, Director, Delete
 from Opioid2D.public.Node import Node
 from Opioid2D.public.Sprite import SpriteMeta
 
@@ -6,9 +8,13 @@ import pug
 from pug.syswx.attributeguis import *
 from pug.code_storage import add_subclass_skip_attributes
 from pug.code_storage.constants import _INDENT
-from pug_opioid.editor.util import get_available_layers, save_object
+from pug_opioid.editor.util import get_available_layers, save_object, \
+                                exporter_cleanup
 
 import sys
+
+DEBUG = False
+
 class PugSprite(Sprite, pug.BaseObject):
     """PugSprite( img=None, gname='')
     
@@ -16,9 +22,9 @@ Opioid2d Sprite with features for use with pug
 """
     __metaclass__ = SpriteMeta
     _pug_template_class = 'PugSprite'
-
     # image stuff... allows entry and storage of filename
     _image_file = None   
+    is_template = False
     def __init__(self, img=None, gname=''):
         pug.BaseObject.__init__(self, gname=gname)
         Sprite.__init__(self, img)
@@ -36,20 +42,23 @@ Opioid2d Sprite with features for use with pug
     # scene management
     def _set_gname(self, value):
         pug.BaseObject._set_gname(self, value)
+        if DEBUG: print "PugSprite._set_gname callimg scene.update_node"
         Director.scene.update_node(self)
     gname = property( pug.BaseObject._get_gname, _set_gname, 
                       pug.BaseObject._del_gname,
                       "An easily accessed global name for this object")
 
     def _on_mgr_delete(self):
-        Sprite._on_mgr_delete(self)        
-        Director.scene.update_node(self) # register self with scene                
+        Sprite._on_mgr_delete(self)  
+        if DEBUG: print "PugSprite._on_mgr_delete calling scene.update_node"
+        Director.scene.update_node(self, "Delete") # register self with scene                
 
     # layer_name property
     def set_layer(self, layer):
         if layer not in Director.scene.layers:
             Director.scene.add_layer(layer)
         Sprite.set_layer(self, layer)
+        if DEBUG: print "PugSprite.set_layer calling scene.update_node"        
         Director.scene.update_node(self) # register self with scene    
     def get_layer_name(self):
         try:
@@ -65,6 +74,10 @@ Opioid2d Sprite with features for use with pug
     
     # code storage customization
     def _create_object_code(self, storageDict, indentLevel, exporter):
+        if DEBUG: print "*******************enter sprite save: "+str(self)        
+        # make sure we have our dummy node cleanup registered
+        if exporter_cleanup not in exporter.deleteCallbacks:
+            exporter.register_delete_callback( exporter_cleanup)
         # check for valid names
         storage_name = storageDict['storage_name']
         if storage_name == 'PugSprite' or storage_name == 'Sprite':
@@ -77,27 +90,35 @@ Opioid2d Sprite with features for use with pug
         info = (self, storageDict, indentLevel) # for convenience
         code.append(exporter.create_instantiator_code(*info))
         base_code = exporter.create_base_code(*info)
+        dummy = exporter.dummyDict.get(storageDict['base_class'], None)
         if not base_code.endswith('pass\n'): # clean up pass case (for looks)
             code.append(base_code)
         # custom code
         baseIndent = _INDENT * indentLevel    
         hasAttrs = False    
+        custom_code = []
         if storageDict['as_class']:
-            code += [baseIndent, _INDENT, 'image = ', 
-                     repr(self.image_file),'\n']
-            code += [baseIndent, _INDENT, 'layer = ', 
-                             repr(self.layer_name),'\n']
+            if not dummy or dummy.image_file != self.image_file:
+                custom_code += [baseIndent, _INDENT, 'image = ', 
+                                repr(self.image_file),'\n']
+            if not dummy or dummy.layer_name != self.layer_name:
+                custom_code += [baseIndent, _INDENT, 'layer = ', 
+                                repr(self.layer_name),'\n']
             init_code = exporter.create_init_code(*info)
-            code += [init_code]
+            custom_code += [init_code]
             xIndent = _INDENT * 2
             name = 'self'
         else:
             name = storage_name
-            code += [baseIndent, name, '.', 'image = ', 
+            if not dummy or dummy.image_file != self.image_file:
+                custom_code += [baseIndent, name, '.', 'image = ', 
                                      repr(self.image_file),'\n']
-            code += [baseIndent, name, '.', 'layer = ', 
+            if not dummy or dummy.layer_name != self.layer_name:
+                custom_code += [baseIndent, name, '.', 'layer = ', 
                                      repr(self.layer_name),'\n']
             xIndent = ''
+        # instance attributes
+        custom_attr_code = []
         vectorList = [('acceleration', (0, 0)),
                       ('position', (0, 0)),
                       ('scale', (1.0, 1.0)),
@@ -105,15 +126,19 @@ Opioid2d Sprite with features for use with pug
         prefix = ''.join([baseIndent, xIndent, name, '.'])
         for attr, default in vectorList:
             vector = getattr(self, attr)
-            if (vector.x, vector.y) != default:
-                code += [prefix, attr, '.', 'x = ', repr(vector.x),'\n']
-                code += [prefix, attr, '.', 'y = ', repr(vector.y),'\n']
-        
-        # delete dummies from Opioid scene
-        dummyList = storageDict['dummy_list']
-        for item in dummyList:
-            if isinstance(item, Node):
-                item.delete()
+            if not dummy or \
+                    getattr(dummy, attr).radial != getattr(self,attr).radial:
+                custom_attr_code += [prefix, 
+                                     attr, '.', 'x = ', repr(vector.x),'\n']
+                custom_attr_code += [prefix, 
+                                     attr, '.', 'y = ', repr(vector.y),'\n']
+        if not custom_attr_code and storageDict['as_class']:
+            custom_attr_code = [baseIndent, xIndent, 'pass\n']
+        custom_code += custom_attr_code
+        if not custom_code and storageDict['as_class']:
+            custom_code = [baseIndent, 'pass\n']
+        code += custom_code
+        if DEBUG: print "*******************exit sprite save: "+str(self)        
         return ''.join(code)
     
     def _test_referrers(self):
@@ -127,9 +152,9 @@ supposed to be deleted.
         a = gc.get_referrers(self)   
         for ob in a:
             print ob
-            b = gc.get_referrers(ob)
-            for ob2 in b:
-                print "   ", ob2 
+#            b = gc.get_referrers(ob)
+#            for ob2 in b:
+#                print "   ", ob2 
             print "_______________________"
         pass
     
@@ -137,15 +162,17 @@ supposed to be deleted.
             'skip_attributes': ['_actions', '_image_file', 'image_file', 
                                 'layer_name','_init_image','_init_layer'], 
             'instance_attributes': ['*'],
+            'instance_only_attributes':['gname'],
             'init_method':'on_create',
-#            'init_method_args': None, 
+            'init_method_args': None,
+            'force_init_def': True,
             'custom_export_func': _create_object_code,
             'as_class': True,
                         }
     add_subclass_skip_attributes(_codeStorageDict, pug.BaseObject)    
 
 # force derived classes to use PugSprite as a base
-PugSprite._codeStorageDict['base_class'] = PugSprite
+#PugSprite._codeStorageDict['base_class'] = PugSprite
 
 _spriteTemplate = {
     'name':'Editor',
@@ -153,6 +180,10 @@ _spriteTemplate = {
     [
         ['', pug.Label, {'label':'Sprite','font_size':10}],
         ['gname'],
+        ['is_template', None, {'tooltip':
+                '\n'.join(["Select this to automatically save this sprite",
+                           "in the objects folder when the scene is saved.",
+                           "It will not appear in the game."])}],
         ['layer_name', pug.Dropdown, {'list_generator':get_available_layers,}],
         ['save_sprite', None, {'label':'   Save Object',
                                'use_defaults': True}],
