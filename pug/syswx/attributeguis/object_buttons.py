@@ -1,5 +1,4 @@
 import re
-import weakref
 
 import wx
 

@@ -1,6 +1,7 @@
 from weakref import ref as _ref
 
 from pug.component.component import *
+all_components = None
 
 class ComponentSet(object):
 
@@ -66,6 +67,14 @@ If it's a class, an instance will be created and added.
         return component
 
     def get(self, cls=None):
+        if type(cls) == str:
+            global all_components
+            if not all_components:
+                all_components = __import__("all_components")
+            if all_components:
+                cls = getattr(all_components, cls, cls)
+        if cls is not None and not issubclass(cls, Component):
+            raise TypeError(''.join([cls," is not a component"]))
         components = self.__component_list.get_components()
         if cls is None:
             return components

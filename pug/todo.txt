@@ -1,11 +1,20 @@
 now:
+	add object_template flag to pugSprite... like template behavior
+		reload object list after save
+		check for changed template objects and offer to reload level
+	possible ctrl-s in gname problem
 
 current version:
+	setting for playing_in_editor on scene --- return to editor on quit
+	set_attribute callback for template
+		option to cancel
+		intercept at base level?
 	select on create is so slow
 		gotta re-use guis
 		check for class
 		hide it when no selection
-	add object_template flag to pugSprite... like template behavior
+	delete and global keys
+		no delete on pugsprite template
 	add psyco... check for efficiencies if possible
 	
 Finalize:
@@ -18,7 +27,8 @@ Finalize:
 	create zip tarball exe?
 
 fun stuff:
-	demo components
+	so many frickin components to make :) REVIEW POWERPACK
+		demo components
 		spawn point
 			attributes
 				frequency
@@ -26,11 +36,12 @@ fun stuff:
 				object
 				offset
 				match_rotation
-				spawn_count
+				add_velocity
+				max_spawns
 			methods		
 				spawn_timer	
 				spawn (object, location)
-	so many frickin components to make :)
+	
 
 bugs: 
 	leftover items in scene graph after deleting both layers
@@ -38,6 +49,7 @@ bugs:
 	crash - selecting an object while changing selectionwin to another view 
 
 later: 
+	make imports absolute
 	editable code_storage
 	code_storage special gname treatment only on GnamedObjects
 	no autocode if no data
