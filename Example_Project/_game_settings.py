@@ -4,11 +4,11 @@
 # "game_settings" autocode #
 ############################
 class game_settings():
-    fullscreen = True
-    initial_scene = 'Diagonals2'
+    fullscreen = False
+    initial_scene = 'Three'
     opioid_window_rect = (20, 20, 800, 600)
     save_settings_on_quit = True
-    title = 'Rockersquat'
+    title = 'Pug_Opioid Game'
 ################################
 # End "game_settings" autocode #
 ################################
