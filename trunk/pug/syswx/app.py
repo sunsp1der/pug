@@ -21,15 +21,17 @@ _RECTPREFIX = '_rect_'
 
 class pugApp(wx.App):
     """pugApp: wx.App for the pug system
-    
-arguments:
-projectObject=None: the object to show in the initial pug view
-projectObjectName="": for use in sub-frame titles. If not provided and
+
+pugApp((self, projectObject=None, projectObjectName='',
+                 projectName='PUG', projectFolder = "" )   
+
+projectObject: the object to show in the initial pug view
+projectObjectName: for use in sub-frame titles. If not provided and
     projectObject.gname exists, this will be set to projectObject.gname
-projectName="PUG": name of the project/title of initial frame.
+projectName: name of the project/title of initial frame.
     If this is not provided and projectObjectName is not "", this will be set
     to projectObjectName 
-projectFolder="": where file menus start at.  Defaults to current working dir.
+projectFolder: where file menus start at.  Defaults to current working dir.
 """
     quitting = False
     busyState = False
@@ -287,7 +289,7 @@ duplicates will be automatically eliminated.
         self.setting_selection = True
         self.selectedRefSet.clear()
         for item in selectList:
-            if isinstance(item,weakref.ReferenceType):
+            if isinstance(item, weakref.ReferenceType):
                 self.selectedRefSet.add(item)
             else:
                 self.selectedRefSet.add( weakref.ref(item))
@@ -431,7 +433,8 @@ settingsObj: any frame settings members will be replaced
                     delattr( settingsObj, attr) 
             # add new rects
             for attr, data in frame_settings.__dict__.iteritems():
-                setattr(settingsObj,attr, data)
+                if attr.startswith(_RECTPREFIX):
+                    setattr(settingsObj,attr, data)
             return settingsObj
         else:
             return frame_settings            

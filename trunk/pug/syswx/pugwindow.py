@@ -279,10 +279,14 @@ Generally, this is called when an attribute gui has changed size.
 
     def _init_viewMenu_Items(self, menu):
         #clear out menu items
-        #wx has a bug with totally emptying radio items, so use satan as fake
-        menu.AppendRadioItem(id=666, text='satan')
+        #wx has a bug with totally emptying radio items, so use a dummy
+        if not hasattr(menu,'options'):
+            menu.AppendSeparator()
+            self._add_options_menu( menu) 
+            menu.options = True               
+        menu.AppendRadioItem(id=1, text='dummy')
         for item in menu.MenuItems:
-            if item.Id != 666:
+            if item.Id != 1 and item.Kind > 0:
                 menu.DestroyItem(item)
         self._defaultView = 'Raw'
         self._currentView = None
@@ -312,21 +316,20 @@ Generally, this is called when an attribute gui has changed size.
                 templateList.sort()
                 rawList.sort()
                 templateList+=rawList
+                templateList.reverse()
                 # create _viewDict and menu items
                 for name in templateList:
                     Id = wx.NewId()
                     template = templateInfo['templates'][name]
                     self._viewDict[Id] = template
                     self.Bind(wx.EVT_MENU, self._evt_viewmenu, id=Id)                    
-                    menuItem = menu.Append(id=Id, 
+                    menuItem = menu.Prepend(id=Id, 
                                      help=' '.join(['Show',name,'view']),
                                      text=name, kind=wx.ITEM_CHECK)
                     if name == defaultViewName:
                         self._defaultView = templateInfo['templates'][name]
                         menuItem.Check(True)
-            menu.AppendSeparator()
-        self._add_options_menu( menu)    
-        menu.DestroyId(666)
+        menu.DestroyId(1)
 
     def _evt_viewmenu(self, event):
         for Id in self._viewDict:

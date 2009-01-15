@@ -3,7 +3,8 @@
 import time
 from inspect import isclass, getmro
 import os.path
-import compiler
+import imp
+import sys
 
 from pug.code_storage.constants import _INDENT, _STORE_UNICODE
 from pug.component import ComponentObject, Component
@@ -11,6 +12,8 @@ from pug.component.ComponentObject import ComponentSet
 from pug.gname import GnamedObject
 from pug.util import make_name_valid, get_type_name
 import all_components
+
+DEBUG = False
 
 class CodeStorageExporter():
     """Object that manages exporting autocode
@@ -39,6 +42,8 @@ Possible entries in storageDict:
     'skip_attributes': list... when using ['*'] above, sometimes it is easier to 
         specify attributes to skip. Default is []. Note that __module__,
         __dict__, and empty __doc__ attributes are always skipped.
+    'instance_only_attributes': list... these attributes only appear in 
+        instances and are never saved in classes
     'init_method': the name of the initialization method of the object. This is 
         used to set instance_attributes when 'as_class' is true. Default is
         '__init__'. If you don't want an init_method automatically created, you
@@ -48,11 +53,14 @@ Possible entries in storageDict:
         is set to None, there will be no args passed to the init method AND the
         base class' init method will not be called. This argument should be
         passed as a list of strings. Default is: ['*args', '**kwargs']
+    'force_init_def': always put in the def line for the init method, even if 
+        there is no code in the method itself. This is used to facilitate
+        custom additions to the method. Default is False
     'name': the name of the object to be stored. If this is not possible or no 
         name is provided, the default is class name for templates or 
         'classname_instance' for objects. Any duplicate names will have a number 
         appended to them. The final name to be used can be found in 
-        storageDict['storage_name'] after calling set_storageDict_defaults. 
+        storageDict['storage_name'] after calling prepare_storageDict. 
         TODO: The value will be converted to a valid variable name. 
     'custom_export_func': this function will be called instead of the usual 
         exporter.create_object_code(). it will be passed the same arguments as
@@ -65,19 +73,31 @@ Possible entries in storageDict:
         from this object
     'storage_name': see 'name' above. DO NOT SET THIS MANUALLY! For reference 
         only!
-    'defaults_set': Just a flag indicating that set_storageDict_defaults has
+    'defaults_set': Just a flag indicating that prepare_storageDict has
         been called on the storageDict. DO NOT SET THIS MANUALLY!
-    'dummy_list': any dummy objects created will be placed here in case special
-        measures need to be taken to delete them. If necessary, these measures 
-        must be in the custom_export_func. Default is []. DO NOT SET MANUALLY
 """
     def __init__(self):
         self.modulesToImport = {} # dict of modules to import
                                   # { 'module':['item1','item2','item3']} etc.
-        self.objectsToExport = [] # list of objects to be exported when export
+        self.specialImports = {} # { 'module': [[importItem, Name],...]}
+                                # from module import importItem as Name
+        self.exportDictList = [] # list of objects to be exported when export
                                   # is called. [(obj,storageDict)]
         self.objCode = {} # chunks of object code {'storage_name':code}
-        self.storage_names = []
+        self.storageNames = [] # names of objects in the exported code
+        self.deleteCallbacks = [] # fns to be called on delete
+        self.dummyDict = {} # dummy objects for attribute comparisons
+        
+    def register_delete_callback(self, fn):
+        """register_delete_callback(self, fn, args, kwargs)
+        
+fn will be called with exporter as an argument in exporter's __del__ method
+"""
+        self.deleteCallbacks.append(fn)
+        
+    def __del__(self):
+        for fn in self.deleteCallbacks:
+            fn( self)
 
     def export(self, filename, obj=None, asClass=None, storageDict=None):
         """export(filename, obj=None)
@@ -94,17 +114,28 @@ asClass: If True, force obj to export as a class, if False, force export as
 """
         if obj is not None:
             storageDict = self.add_object (obj, asClass, storageDict)
-        try:
             fname = os.path.basename(filename)
             label = ''.join(['"""',fname,'"""\n\n'])
-            code = ''.join([label, self.create_code()])
+            code = label
+        try:
+            code = ''.join([code, self.create_code()])
             exportfile = open(filename, 'w')
+            exec code           
         except:
-            # if there were any problems creating the code, make sure we don't
-            # write to the file
-            raise
-            return
-        compiler.parse(code)            
+            if code:
+                errorfilename = ''.join([filename,'.err'])
+                errorfile = open( errorfilename, 'w')
+                errorfile.write(code)
+                errorfile.close()
+                # if there were any problems creating the code, make sure we don't
+                # write to the file
+                info = ''.join([str(sys.exc_info()[1]), 
+                                '\nSaved to: ', errorfilename])
+                raise sys.exc_info()[0]( info)
+            else:
+                raise
+        # test load
+        
         exportfile.write(code)
         exportfile.close()
         
@@ -117,24 +148,22 @@ asClass: If True, force obj to export as a class, if False, force export as
     or, if not there, default to False.
 storageDict: will be created if necessary (see class definition) 
 """
-        if storageDict is None:
-            storageDict = getattr(obj, '_codeStorageDict', {}).copy()
-        if asClass is not None:
-            storageDict['as_class']=asClass
-        if not storageDict.get('defaults_set'):
-            self.set_storageDict_defaults(obj, storageDict)
-        self.objectsToExport.append((obj, storageDict))
+        self.prepare_storageDict(obj, storageDict, asClass)
+        self.exportDictList.append( storageDict)
         return storageDict
 
-    def set_storageDict_defaults(self, obj, storageDict):
-        """set_storageDict_defaults(self, obj, storageDict):
+    def prepare_storageDict(self, obj, storageDict=None, asClass=None):
+        """prepare_storageDict(self, obj, storageDict=None):
 
-Set up default values for storageDict.  See CodeStorageExporter documentation 
-for details.
+Set up storageDict.  See CodeStorageExporter documentation for details.
 """
-        if storageDict.get('defaults_set'):
-            return
-            
+        if storageDict and storageDict.get('defaults_set', False):
+            return storageDict
+        if storageDict == None:
+            storageDict = self.get_custom_storageDict(obj)
+        if asClass is not None:
+            storageDict['as_class'] = asClass
+        storageDict.setdefault('obj', obj)   
         storageDict.setdefault('attributes', ['*'])
         storageDict.setdefault('init_method', '__init__')
         storageDict.setdefault('init_method_args', ['*args','**kwargs'])
@@ -142,18 +171,19 @@ for details.
         storageDict.setdefault('as_class', False)
         storageDict.setdefault('skip_attributes', [])
         storageDict.setdefault('instance_attributes', [])
-        storageDict.setdefault('dummy_list', [])
+        storageDict.setdefault('base_class', None)
+        storageDict.setdefault('instance_only_attributes', [])
+        storageDict.setdefault('force_init_def', False)
         # set the default name
-        # TODO: convert name to valid variable name
         if 'name' in storageDict:
             if not storageDict.get('name'):
                 storageDict.pop('name')
-        else:
-            if getattr(obj, 'gname', None) and isinstance(obj, GnamedObject):
+        if getattr(obj, 'gname', None) and isinstance(obj, GnamedObject):
+            storageDict['gname'] = obj.gname
+            if not storageDict.get('name', None):
                 storageDict['name'] = obj.gname
-                storageDict['gname'] = obj.gname
-            else:
-                storageDict['gname'] = None
+        else:
+            storageDict['gname'] = None
         if storageDict['as_class']:
             storage_name = storageDict.get('name', get_type_name(obj))
         else:
@@ -163,44 +193,90 @@ for details.
                 suffix = '_instance'
             storage_name = storageDict.get('name', 
                        ''.join([get_type_name(obj), suffix]).lower())            
-        if storage_name in self.storage_names:
+        storageDict['storage_name'] = \
+                self.create_valid_storage_name(storage_name)
+        # base_class and import_module
+        if storageDict['base_class']:
+            obj_class = storageDict['base_class']
+            import_module = obj_class.__module__
+        else:
+            if isclass(obj):
+                #TODO: this won't work for multiple inheritance
+                mro = getmro(obj)
+                if len(mro) > 1:
+                    obj_class = mro[1]
+                    import_module = mro[1].__module__
+                else:
+                    obj_class = None
+                    import_module = None
+            elif get_type_name(obj) == storageDict['storage_name']:
+                if storageDict['as_class']:
+                    cls = obj.__class__
+                    mro = getmro(cls)
+                    obj_class = mro[1]
+                    import_module = mro[1].__module__
+                else:
+                    storageDict['storage_name'] = ''.join(
+                                    [storageDict['storage_name'],'_instance'])
+                    obj_class = obj.__class__
+                    import_module = obj_class.__module__
+            else:
+                obj_class = obj.__class__
+                import_module = obj_class.__module__
+            storageDict['base_class'] = obj_class
+        storageDict.setdefault('import_module', import_module)              
+        storageDict.setdefault('defaults_set', True)
+        return storageDict
+    
+    def create_valid_storage_name(self, name):
+        storage_name = make_name_valid(name)
+        if storage_name in self.storageNames:
             suffix = 2
             base_name = storage_name
-            while storage_name in self.storage_names:
+            while storage_name in self.storageNames:
                 storage_name = ''.join([base_name, '_', str(suffix)])
                 suffix+=1
-        self.storage_names.append(storage_name)
-        storageDict['storage_name'] = make_name_valid(storage_name)
-              
-        storageDict.setdefault('defaults_set', True)
-    
-    def add_import(self, module, item):   
-        """add_import(module, import): add import info to modulesDict 
-    
-module: the module to import from
-item: the item to import
+        self.storageNames.append(storage_name)
+        return storage_name
+        
+    def setup_import(self, module, itemName):   
+        """setup_import(module, itemName)->import name
+        
+module: name of the module to import from
+itemName: name of the item to import
+
+Add import info to modulesDict. Returns the import name, which may be different
+from itemName due to name conflicts.
 """
         # set up for import statements
-        if module is not '__builtin__':
+        if module is '__builtin__':
+            return itemName
+        else:
+            importName = self.create_valid_storage_name( itemName)
             modulesDict = self.modulesToImport
-            if modulesDict.has_key(module):
-                imports = modulesDict[module]
-                if item in imports:
-                    return
-                imports.append(item)
+            if itemName == importName:
+                if modulesDict.has_key(module):
+                    modulesDict[module].append(itemName)
+                else:
+                    modulesDict[module] = [itemName]
             else:
-                modulesDict[module] = [item]
+                if modulesDict.has_key(module) and \
+                        itemName in modulesDict[module]:
+                    return itemName
+                self.specialImports[module] = [itemName, importName]
+            return importName
         
     def create_code(self):
         """create all the code for exporting"""
         # create code for individual objects
-        for obj, storageDict in self.objectsToExport:
+        for storageDict in self.exportDictList:
+            obj = storageDict['obj']
             name, code = self.create_object_block(obj, storageDict)
             self.objCode.setdefault(name, code)
         
         # create code for imports and other initialization
         code = [self.create_import_code()]
-        for obj, storageDict in self.objectsToExport:
+        for storageDict in self.exportDictList:
             obj_name = storageDict['storage_name']
             obj_code = self.objCode[obj_name]
             code.append(obj_code)
@@ -214,64 +290,25 @@ item: the item to import
 Creates object code including comment blocks before and after.
 
 obj: obj to create block for
-storageDict: storageDict to use. If not provided, self.objectsToExport will be
+storageDict: storageDict to use. If not provided, self.exportDictList will be
     searched for the storageDict that matches obj
 """        
         # create code block
         if storageDict is None:
-            for searchObj, searchStorageDict in self.objectsToExport:
-                if searchObj is obj:
+            for searchStorageDict in self.exportDictList:
+                if searchStorageDict['obj'] is obj:
                     storageDict = searchStorageDict
                     break
             # none found, so start from scratch
-            storageDict = {}
-        storageDict = self.get_storage_info(obj, storageDict)[0]
+            storageDict = None
+        storageDict = self.prepare_storageDict( obj, storageDict)
         storage_name = storageDict['storage_name']
         label = ''.join(['"', storage_name, '" autocode'])
         startblock = self.create_comment_block(label)
         endblock = self.create_comment_block(''.join(['End ', label]))
-        codeblock = self.create_object_code(obj, storageDict)
+        codeblock = self.create_object_code( obj, storageDict)
         code = ''.join([startblock, codeblock, endblock,'\n'])
         return (storage_name, code)
-    
-    def get_storage_info(self, obj, storageDict=None):
-        """get_storage_info(self, obj, storageDict=None) 
-        
-return (storage name, object class, module). set_storageDict_defaults will be
-called on storageDict if necessary.
-
-obj: obj to get info for
-storageDict: the storageDict to use. If not provided, a copy of the object's 
-    _codeStorageDict attribute will be used. If that doesn't exist, defaults
-    will be used.
-"""
-        if storageDict is None:
-            storageDict = self.get_custom_storageDict(obj)
-        if not storageDict.get('defaults_set'):
-            self.set_storageDict_defaults(obj, storageDict)
-        obj_class = storageDict.get('base_class', None)
-        if obj_class:
-            import_module = obj_class.__module__
-        else:
-            if isclass(obj):
-                #TODO: this won't work for multiple inheritance
-                mro = getmro(obj)
-                if len(mro) > 1:
-                    obj_class = mro[1]
-                    import_module = mro[1].__module__
-                else:
-                    obj_class = ""
-                    import_module = None
-            elif get_type_name(obj) == storageDict['storage_name']:
-                cls = obj.__class__
-                mro = getmro(cls)
-                obj_class = mro[1]
-                import_module = mro[1].__module__
-            else:
-                obj_class = obj.__class__
-                import_module = obj_class.__module__
-            storageDict['base_class']=obj_class
-        return (storageDict, obj_class, import_module)
 
     def get_custom_storageDict(self, obj):
         storageDict = getattr(obj, '_codeStorageDict', {})
@@ -293,8 +330,7 @@ ignoreCustom: default is False. If True, the storageDict['custom_export_func']
     will be ignored. This is useful when calling this function from within the
     custom export function of an object.
 """
-        storageDict, obj_class, import_module = \
-                                        self.get_storage_info(obj, storageDict)
+        storageDict = self.prepare_storageDict(obj, storageDict)
         # use custom func if it's provided
         if storageDict.get('custom_export_func') and not ignoreCustom:
             return storageDict['custom_export_func'](obj, storageDict, 
@@ -322,21 +358,23 @@ create_instantiator_code(self, obj, storageDict, indentLevel=0)
 Create the first line of code (obj instantiation or class decl) and set up 
 imports.
 """
-        storageDict, obj_class, import_module = \
-                                        self.get_storage_info(obj, storageDict)
+        storageDict = self.prepare_storageDict(obj, storageDict)
+        import_module = storageDict['import_module']
+        base_class = storageDict['base_class']
         name = storageDict['storage_name']
-        if import_module and obj_class:
-            self.add_import(import_module, obj_class.__name__)
+        if import_module and base_class:
+            class_name = self.setup_import( import_module, base_class.__name__)
+        elif base_class:
+            class_name = base_class.__name__
 
         isClass = storageDict['as_class']
         baseIndent = _INDENT*indentLevel
         if isClass:
-            if obj_class:
-                baseClass = obj_class.__name__
+            if base_class:
+                baseClass = class_name
             else:
                 baseClass = ''
-            codeList = [baseIndent, 'class ', name, '(', 
-                        baseClass, '):\n']
+            codeList = [baseIndent, 'class ', name, '(', baseClass, '):\n']
         else:
             # put gname in instantiator
             attrList, instanceAttrList = self.create_attribute_lists( obj,
@@ -345,7 +383,7 @@ imports.
                 gname_code = ''.join(['gname=',repr(storageDict['gname'])])
             else:
                 gname_code = ''            
-            codeList = [baseIndent, name, ' = ', obj_class.__name__, '(',
+            codeList = [baseIndent, name, ' = ', class_name, '(',
                         gname_code,')\n']
         return ''.join(codeList)
     
@@ -358,8 +396,7 @@ Create the code that sets obj's attributes. If storageDict['as_class'] is true,
 then this returns the class attributes only, not the attributes that belong in 
 the init method.
 """
-        storageDict, obj_class, import_module = \
-                                        self.get_storage_info(obj, storageDict)
+        storageDict = self.prepare_storageDict(obj, storageDict)
         isClass = storageDict['as_class']
         baseIndent = _INDENT*indentLevel
         attrList, instanceAttrList = self.create_attribute_lists( obj,
@@ -386,7 +423,7 @@ Create the init_method code.
         attributeCode = self.create_attribute_code(obj, storageDict, 
                                                    indentLevel + 2, 'self.',
                                                    instanceAttrList)
-        if not attributeCode:
+        if not attributeCode and not storageDict['force_init_def']:
             return ''
         else:
             baseIndent = _INDENT*indentLevel
@@ -394,26 +431,26 @@ Create the init_method code.
             argList = storageDict['init_method_args']
             if argList:
                 for arg in argList:
-                    initCode+=[',',arg]
+                    initCode+=[', ',arg]
             initCode += [')']                
             codeList = [baseIndent, _INDENT, 'def '] + initCode + [':\n']
-            codeList.append(attributeCode)            
             if storageDict['init_method_args'] != None:
                 # call base class init method
                 codeList+=[baseIndent, _INDENT*2, 
                            storageDict['base_class'].__name__,'.'] + \
                            initCode + ['\n']
+            codeList.append(attributeCode)            
             return ''.join(codeList)
     
     def create_attribute_code(self, obj, storageDict, indentLevel, prefix, 
                                 attributeList):
-        storageDict, obj_class, import_module = \
-                                        self.get_storage_info(obj, storageDict)
+        storageDict = self.prepare_storageDict(obj, storageDict)
+        obj_class = storageDict['base_class']
         baseIndent = _INDENT*indentLevel        
         codeList = []
-        dummyList = storageDict['dummy_list']
-        if dummyList:
-            dummy = dummyList[0]
+        dummyDict = self.dummyDict
+        if obj_class in dummyDict:
+            dummy = dummyDict[obj_class]
         else:
             # try for a couple seconds to create a dummy object to compare to
             dummy = None
@@ -429,7 +466,8 @@ Create the init_method code.
                     dummy = None
                 else:
                     if dummy is not None:
-                        dummyList.append(dummy)
+                        dummyDict[obj_class] = dummy
+                        if DEBUG: print "CSE created dummy" + str(dummy)
                     else:
                         # this is a little odd, but necessary due to threading
                         dummy = None
@@ -504,8 +542,7 @@ iAttrList: When storing 'as_class', these attributes will be set in the init
     method rather than in the class definition. iAttrList will be empty if 
     'as_class' is False.
 """       
-        storageDict, obj_class, import_module = \
-                                        self.get_storage_info(obj, storageDict)
+        storageDict = self.prepare_storageDict(obj, storageDict)
         name = storageDict['storage_name']
         attrList = []
         instanceAttrList = []
@@ -519,6 +556,7 @@ iAttrList: When storing 'as_class', these attributes will be set in the init
             else:
                 attrList = dir(obj)
             if 'components' in attrList:
+                # put components at end
                 attrList.remove('components')
                 attrList.append('components')
         else:
@@ -526,6 +564,7 @@ iAttrList: When storing 'as_class', these attributes will be set in the init
         if '*' in storageDict['instance_attributes']:
             instanceAttrList = dir(obj)
             if 'components' in instanceAttrList:
+                # put components at end
                 instanceAttrList.remove('components')
                 instanceAttrList.append('components')
         else:
@@ -535,7 +574,7 @@ iAttrList: When storing 'as_class', these attributes will be set in the init
             if '*' in storageDict['instance_attributes']:
                 for attr in attrList:
                     instanceAttrList.remove(attr)
-            # all property attributes should be moved to InitAttributes
+            # all property attributes should be moved to instanceAttributes
             propList = ['components']
             for attr in attrList:
                 if isclass(obj):
@@ -543,7 +582,7 @@ iAttrList: When storing 'as_class', these attributes will be set in the init
                 else:
                     clsAttr = getattr(obj.__class__, attr, None)
                 # properties need to go be instance attributes except gname 
-                # which works nice and fancy-like
+                # which works differently
                 if isinstance(clsAttr, property) and attr is not 'gname':
                     propList.append(attr)
             for prop in propList:
@@ -551,21 +590,30 @@ iAttrList: When storing 'as_class', these attributes will be set in the init
                     attrList.remove( prop)
                     if prop not in instanceAttrList:
                         instanceAttrList.append(prop)
+            for attr in storageDict['instance_only_attributes']:
+                if attr in attrList:
+                    attrList.remove(attr)
+                if attr in instanceAttrList:
+                    instanceAttrList.remove(attr)
         else:
             for attr in instanceAttrList:
+                if attr not in attrList:
+                    attrList.append(attr)
+            for attr in storageDict['instance_only_attributes']:
                 if attr not in attrList:
                     attrList.append(attr)
             instanceAttrList = []
             # we put the gname in instantiator, so don't list it here
             if 'gname' in attrList:
                 attrList.remove('gname')
-            
         
         # pull out a few attributes that we never want to save
         skip_attributes = ['__module__', '__dict__']
         skip_attributes += storageDict['skip_attributes']
         # __doc__ is a special case that acts funny...
-        if '__doc__' in attrList:
+        if '__doc__' in instanceAttrList:
+            skip_attributes.append('__doc__')
+        elif '__doc__' in attrList:
             if isclass(obj) and obj.__doc__ == None or \
                     obj.__class__.__doc__ == None:
                 skip_attributes.append('__doc__')
@@ -622,8 +670,7 @@ iAttrList: When storing 'as_class', these attributes will be set in the init
         return '\n'.join([startblock, comment, startblock, '']) 
     
     def create_component_code(self, obj, storageDict, indentLevel):
-        storageDict, obj_class, import_module = \
-                self.get_storage_info(obj, storageDict)
+        storageDict = self.prepare_storageDict(obj, storageDict)
         componentCode = []
         if storageDict['as_class']:
             parentName = 'self'
@@ -633,16 +680,19 @@ iAttrList: When storing 'as_class', these attributes will be set in the init
         for comp in componentList:
             compStorageDict = self.get_custom_storageDict(comp)
             compStorageDict['as_class'] = False
-            compStorageDict, compObjClass, compImportModule = \
-                                    self.get_storage_info(comp, compStorageDict)
+            compStorageDict = self.prepare_storageDict(comp, compStorageDict)
+            compObjClass = compStorageDict['base_class']
+            compImportModule = compStorageDict['import_module']
             # just drop in the all_components magic
-            if compObjClass.__name__ in dir(all_components):
-                self.add_import('all_components', compObjClass.__name__)     
+            if all_components and compObjClass.__name__ in dir(all_components):
+                import_name = self.setup_import('all_components', 
+                                                compObjClass.__name__)     
             else:                               
-                self.add_import(compImportModule, compObjClass.__name__)
+                import_name = self.setup_import(compImportModule, 
+                                                compObjClass.__name__)
             
             comp_code = [indentLevel * _INDENT, parentName, '.components.add( ',
-                            comp.__class__.__name__,'(']
+                            import_name,'(']
             comp_code += [comp._create_argument_code(indentLevel)]
             componentCode += comp_code
             componentCode += [') )\n']

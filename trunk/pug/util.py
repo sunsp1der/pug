@@ -4,10 +4,12 @@ from __future__ import with_statement
 import re
 import cPickle
 import copy
-from weakref import WeakKeyDictionary, ref
+from weakref import WeakKeyDictionary, ref, ReferenceType
 import sys
 import os
 import inspect
+
+DEBUG = False
 
 PUGIMAGEPATH = os.path.join(os.path.dirname(__file__),"Images")
 def imagePath(file):
@@ -22,18 +24,24 @@ def check_name_valid(name):
     validname = make_name_valid(name)
     return name == validname
     
-def get_folder_classes( folder=None, superClass=object, doReload=False):
-    """get_folder_classes( folder=None, objectClass=object, doReload=False)>list
+def get_package_classes(  package='', superClass=object, doReload=False, 
+                          folder=None):
+    """get_package_classes( package, superClass, doReload, folder) > list
     
-Find all classes defined in a folder. Return a list of those classes.
-folder: what folder to look in
-superClass: only classes that are a subclass of this will be returned
-doReload: force a reload on any modules found
+Find all classes defined in a package. Will search all modules found within the 
+given package. Returns a list of those classes.
+package='': string of path to package, as in an import statement
+superClass=object: only classes that are a subclass of this will be returned
+doReload=False: force a reload on any modules found
+folder=None: this folder will be added to the sys.path for the search. Note that
+    this may create inaccessible __module__ paths in the found classes
 """
-    if folder not in sys.path:
+    if folder and folder not in sys.path:
         sys.path.insert(0, folder)
     classList = []
-    filelist = os.listdir(folder)
+    packagePath = package.split('.')
+    searchFolder = os.path.join(os.getcwd(),*packagePath)
+    filelist = os.listdir(searchFolder)
     for filename in filelist:
         # look through files in 'scenes' folder for non-private .py files
         if filename.startswith('_'):
@@ -42,11 +50,18 @@ doReload: force a reload on any modules found
         if ext == '.py':
             # import the .py file
             try:
-                module = __import__(modulename)
+                module = __import__('.'.join([package, modulename]))
             except:
                 continue
-            classList += find_classes_in_module(module, superClass, doReload)
-    sys.path.remove(folder)
+            depth = 0
+            while depth+1 < len(packagePath):
+                module = getattr(module, packagePath[depth+1])
+            module = getattr(module, modulename, None)
+            if module:
+                classList += find_classes_in_module(module, superClass, 
+                                                    doReload)
+    if folder:
+        sys.path.remove(folder)
     return classList
 
 def find_classes_in_module(module, superClass=object, doReload=False):
@@ -292,7 +307,7 @@ remove func from callback and deleteCallback registries"""
         self.doCallbacks('__setitem__', key, value)
         
     def __delitem__(self, key):
-        value = self.data[key]
+        value = self[key]
         WeakKeyDictionary.__delitem__(self, key)
         self.doCallbacks('__delitem__', key, value)
         

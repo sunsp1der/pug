@@ -1,7 +1,7 @@
 from pug.code_storage import CodeStorageExporter
 
-def code_export( obj, filename, asClass=None, storageDictUpdate = {}):
-    """code_export(obj, filename, asClass, storageDict)
+def code_export( obj, filename, asClass=False, storageDictUpdate = {}):
+    """code_export(obj, filename, asClass, storageDict)->exporter
 
 Simple export of object obj to filename  
 asClass: If True, force export as a class, if False, force export as an object,
@@ -14,6 +14,7 @@ storageDictUpdate: This dict will be used to update obj's storageDict for this
     dict = getattr(obj, '_codeStorageDict', {}).copy()
     dict.update(storageDictUpdate)
     exporter.export(filename, obj, asClass, dict)
+    return exporter
 
 def add_subclass_attributes( storageDict, subclass):
     """add_subclass_attributes( storageDict, subclass)->list of adds
