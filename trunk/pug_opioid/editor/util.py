@@ -3,6 +3,7 @@
 import os.path
 from inspect import getmro
 import wx
+import time
 
 import Opioid2D
 from Opioid2D.public.Node import Node
@@ -57,7 +58,6 @@ parentWindow: the parent window of name dialog. If not provided, the
             if name == cls.__name__:
                 name = ''.join(['My',name])
         name = make_name_valid(name)
-        name = name.capitalize()
         if parentWindow == None:
             parentWindow = wx.GetActiveWindow()
         dlg = wx.TextEntryDialog( parentWindow, 
@@ -74,7 +74,8 @@ parentWindow: the parent window of name dialog. If not provided, the
                     objName = name
                 else:
                     confirmDlg = wx.MessageDialog( dlg, 
-                           "Object file already exists. Overwrite?",
+                            "\n".join([path,
+                           "File already exists. Overwrite?"]),
                            "Confirm Replace",
                            wx.YES_NO | wx.NO_DEFAULT)
                     if confirmDlg.ShowModal() == wx.ID_YES:
@@ -85,14 +86,20 @@ parentWindow: the parent window of name dialog. If not provided, the
                 return
         dlg.Destroy()
     else:
+        objName = name
         path = os.path.join('objects',''.join([name,'.py']))
     try:
-        code_export( obj, path, True, {'name':objName})    
+        if getattr(obj, 'is_template', False):
+            obj.is_template = False
+            is_template = True
+        else:
+            is_template = False
+        retValue = code_export( obj, path, True, {'name':objName})    
+        if is_template:
+            obj.is_template = True
+        return retValue
     except:
-        ShowExceptionDialog
-    else:
-        if not obj.gname:
-            obj.gname = objName
+        ShowExceptionDialog()
     
 def save_scene():
     """Save scene to disk"""
@@ -197,6 +204,16 @@ Note: for this to work on nodes, it must be run BEFORE the scene is changed.
                     doclose = True
         if doclose:
             frame.Close()    
+
+def exporter_cleanup( exporter):
+    # delete dummies from Opioid scene
+    dummyDict = exporter.dummyDict
+    dummyKeys = dummyDict.keys()
+    for cls in dummyKeys:
+        if issubclass(cls, Node):
+            dummyDict[cls].delete()
+    # wait for Opioid to catch up
+    time.sleep(0.25)
 
 #hack for quitting pug when opioid quits
 QUITTING = False

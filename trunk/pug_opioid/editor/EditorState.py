@@ -1,4 +1,5 @@
 """Code for pug_opioid editor mode"""
+import weakref
 
 import wx
 
@@ -35,13 +36,15 @@ class EditorState(Opioid2D.State):
             #node = scene.get_layer(layer).pick(x,y)
             node = scene.pick(x, y, wx.GetApp().selectedRefSet)
             if node is not None:
-                self.selectOnUp = node
+                self.selectOnUp = weakref.ref(node)
             else:
                 wx.CallAfter(self.interface.set_selection,[])
         
     def handle_mousebuttonup(self, event):
-        if self.selectOnUp and self.selectOnUp.rect.collidepoint(event.pos):
-            wx.CallAfter(self.interface.set_selection,[self.selectOnUp])
+        if self.selectOnUp and self.selectOnUp() and \
+                self.selectOnUp().rect.collidepoint(event.pos):
+            wx.CallAfter(self.interface.set_selection,[self.selectOnUp()])
+            self.selectOnUp = None
         
     def handle_keydown(self, ev):
         # nudge keys

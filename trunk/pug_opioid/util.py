@@ -5,7 +5,7 @@ import os.path
 import sys
 
 import pug
-from pug.util import get_folder_classes, find_classes_in_module
+from pug.util import get_package_classes, find_classes_in_module
 
 import Opioid2D
 
@@ -40,27 +40,31 @@ doReload: if True, don't just import scene modules, but reload them
 useWorking: if True, and the class in the __Working__.py file is in the class
     list, use the __Working__ scene to replace the one in the list.
 """
-    sceneFolder = os.path.join(projectPath,'scenes')
-    sceneList = get_folder_classes(sceneFolder, Opioid2D.Scene, doReload)
+    sceneList = get_package_classes('scenes', Opioid2D.Scene, doReload)
     if useWorking:
         # use __Working__ scene as override
         workingModule = 'scenes.__Working__'
+        needsReload = workingModule in sys.modules
         try:
             module = __import__(workingModule)
+        except ImportError:
+            pass
         except:
-            return sceneList
-        needsReload = workingModule in sys.modules
-        if doReload and needsReload:
-            sys.modules.pop(workingModule)
-            module = __import__(workingModule)
-            #reload(module.__Working__)
-        workingScene = find_classes_in_module(module.__Working__, 
-                                              Opioid2D.Scene)[0]
-        for idx in range(len(sceneList)):
-            if sceneList[idx].__name__ == workingScene.__name__:
-                global _revertScene
-                _revertScene = sceneList[idx]
-                sceneList[idx] = workingScene
+            print "Exception while loading working module."
+            print sys.exc_info()[1]
+            print "Using committed module instead."
+        else:
+            if doReload and needsReload:
+                sys.modules.pop(workingModule)
+                module = __import__(workingModule)
+                #reload(module.__Working__)
+            workingScene = find_classes_in_module(module.__Working__, 
+                                                  Opioid2D.Scene)[0]
+            for idx in range(len(sceneList)):
+                if sceneList[idx].__name__ == workingScene.__name__:
+                    global _revertScene
+                    _revertScene = sceneList[idx]
+                    sceneList[idx] = workingScene
     sceneDict = {}
     for item in sceneList:
         sceneDict[item.__name__]=item
@@ -80,13 +84,14 @@ def get_available_objects( doReload=False):
 Get all Nodes available in modules in Objects folder. Return a list of available
 Node sub-classes.
 doReload: if True don't just import node modules"""
-    moduleFolder = os.path.join(projectPath,'objects')
-    moduleList = get_folder_classes(moduleFolder, Opioid2D.public.Node.Node,
+    moduleList = get_package_classes('objects', Opioid2D.public.Node.Node,
                                     doReload)
     return moduleList
 
 def set_project_path( path):
     global projectPath
+    if projectPath:
+        sys.path.remove(projectPath)
     projectPath = path
     if projectPath not in sys.path:
         sys.path.insert(0,projectPath)
