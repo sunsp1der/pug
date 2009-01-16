@@ -9,6 +9,9 @@ asClass: If True, force export as a class, if False, force export as an object,
     default to export as object (False).
 storageDictUpdate: This dict will be used to update obj's storageDict for this
     export (useful for names)
+The exporter is returned, which has some useful attributes including 'code' with
+the exported code and 'file_changed' which tells if the resulting file was
+actually different from the original.
 """    
     exporter = CodeStorageExporter()
     dict = getattr(obj, '_codeStorageDict', {}).copy()

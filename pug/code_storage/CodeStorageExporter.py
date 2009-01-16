@@ -76,6 +76,9 @@ Possible entries in storageDict:
     'defaults_set': Just a flag indicating that prepare_storageDict has
         been called on the storageDict. DO NOT SET THIS MANUALLY!
 """
+    file_changed = False
+    code = ''
+    filename = ''
     def __init__(self):
         self.modulesToImport = {} # dict of modules to import
                                   # { 'module':['item1','item2','item3']} etc.
@@ -112,14 +115,22 @@ asClass: If True, force obj to export as a class, if False, force export as
     an object, if None, use default as set in obj._codeStorageDict or, if not 
     there, default to False.
 """
+        self.filename = filename
+        # set object
         if obj is not None:
-            storageDict = self.add_object (obj, asClass, storageDict)
-            fname = os.path.basename(filename)
-            label = ''.join(['"""',fname,'"""\n\n'])
-            code = label
+            storageDict = self.add_object (obj, asClass, storageDict)            
+        # read old file so we can check for changes
         try:
-            code = ''.join([code, self.create_code()])
-            exportfile = open(filename, 'w')
+            oldfile = open(filename, 'r')
+        except:
+            pass
+        else:
+            oldcode = oldfile.read()
+            oldfile.close()
+        # create code
+        code = ''
+        try:
+            code = self.create_code()
             exec code           
         except:
             if code:
@@ -135,9 +146,13 @@ asClass: If True, force obj to export as a class, if False, force export as
             else:
                 raise
         # test load
-        
-        exportfile.write(code)
-        exportfile.close()
+        self.code = code
+        if code != oldcode:
+            exportfile = open(filename, 'w')
+            self.file_changed = True
+            exportfile.write(code)
+            exportfile.close()
+        return self.file_changed
         
     def add_object(self, obj, asClass=None, storageDict=None):
         """add_object(self, obj, storageDict=None)->initialized storageDict
@@ -271,11 +286,13 @@ from itemName due to name conflicts.
         # create code for individual objects
         for storageDict in self.exportDictList:
             obj = storageDict['obj']
-            name, code = self.create_object_block(obj, storageDict)
-            self.objCode.setdefault(name, code)
-        
+            name, objCode = self.create_object_block(obj, storageDict)
+            self.objCode.setdefault(name, objCode)
+        # create file label
+        fname = os.path.basename(self.filename)
+        code = [''.join(['"""',fname,'"""\n\n'])]            
         # create code for imports and other initialization
-        code = [self.create_import_code()]
+        code += [self.create_import_code()]
         for storageDict in self.exportDictList:
             obj_name = storageDict['storage_name']
             obj_code = self.objCode[obj_name]

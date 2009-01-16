@@ -1,14 +1,12 @@
 now:
-	add object_template flag to pugSprite... like template behavior
-		reload object list after save
-		check for changed template objects and offer to reload level
+	multiple save problem (add yellowpug archetype)
+	save warning dialog
+		unnamed archetype
+		multiple archetypes with same name
 	possible ctrl-s in gname problem
 
 current version:
-	setting for playing_in_editor on scene --- return to editor on quit
-	set_attribute callback for template
-		option to cancel
-		intercept at base level?
+	open console window
 	select on create is so slow
 		gotta re-use guis
 		check for class
@@ -16,6 +14,7 @@ current version:
 	delete and global keys
 		no delete on pugsprite template
 	add psyco... check for efficiencies if possible
+	setting for playing_in_editor on scene --- return to editor on quit
 	
 Finalize:
 	Open/New project	
@@ -49,7 +48,10 @@ bugs:
 	crash - selecting an object while changing selectionwin to another view 
 
 later: 
-	make imports absolute
+	set_attribute callback for template
+		option to cancel
+		intercept at base level?
+	make objects imports absolute
 	editable code_storage
 	code_storage special gname treatment only on GnamedObjects
 	no autocode if no data
