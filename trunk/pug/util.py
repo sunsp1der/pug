@@ -4,16 +4,16 @@ from __future__ import with_statement
 import re
 import cPickle
 import copy
-from weakref import WeakKeyDictionary, ref, ReferenceType
+from weakref import WeakKeyDictionary, ref
 import sys
 import os
 import inspect
 
 DEBUG = False
 
-PUGIMAGEPATH = os.path.join(os.path.dirname(__file__),"Images")
-def imagePath(file):
-    return os.path.join (PUGIMAGEPATH, file)
+_IMAGEPATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Images")
+def get_image_path(filename):
+    return os.path.join (_IMAGEPATH, filename)
 
 def make_name_valid(name):
     name = re.sub(r'^\d*','',name) # remove digits from front

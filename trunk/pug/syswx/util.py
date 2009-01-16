@@ -5,7 +5,7 @@ import wx
 from wx.lib.dialogs import ScrolledMessageDialog
 
 
-from pug.util import imagePath
+from pug.util import get_image_path
 
 class TestEventHandler( wx.EvtHandler):
     def __init__(self, *args, **kwargs):
@@ -14,7 +14,7 @@ class TestEventHandler( wx.EvtHandler):
         print event
         
 def get_icon():
-    return wx.Icon( imagePath('pug.ico'), wx.BITMAP_TYPE_ICO)
+    return wx.Icon( get_image_path('pug.ico'), wx.BITMAP_TYPE_ICO)
 
 def ShowExceptionDialog( parent=None):
     """ExceptionDialog(parent): show exception info in a dialog"""
@@ -22,7 +22,7 @@ def ShowExceptionDialog( parent=None):
     err = ScrolledMessageDialog(parent, 
                                    str(traceback.format_exc()),
                                    info[0].__name__,
-                                   size=(500, 120))
+                                   size=(500, 220))
     # scroll to bottom
     err.Children[0].ShowPosition(len(traceback.format_exc()))
     err.ShowModal()
