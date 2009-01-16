@@ -188,6 +188,8 @@ Special kwargs:
         nodes = self.object.get_ordered_nodes()
         for node in nodes:
             cls = node.__class__.__name__
+            if node.archetype:
+                cls = ''.join(['* ',cls])
             gname = getattr(node, 'gname', '')
             if not gname:
                 gname = ''

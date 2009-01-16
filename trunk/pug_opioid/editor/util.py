@@ -2,8 +2,9 @@
 
 import os.path
 from inspect import getmro
-import wx
 import time
+
+import wx
 
 import Opioid2D
 from Opioid2D.public.Node import Node
@@ -13,12 +14,15 @@ from pug.syswx.util import ShowExceptionDialog
 from pug.syswx.SelectionFrame import SelectionFrame
 from pug.util import make_name_valid
 
-from pug_opioid.util import get_available_scenes
+from pug_opioid.util import get_available_scenes, get_available_objects
 from pug_opioid.editor import EditorState
-from pug_opioid.editor import selectionManager
 
 # constant to set up component agui
 GNAMED_NODE = {'agui':GnameDropdown, 'aguidata':{'class_list':[Node]}}
+
+_IMAGEPATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Images")
+def get_image_path(filename):
+    return os.path.join (_IMAGEPATH, filename)
 
 def get_available_layers():
     """get_available_layers() -> list of available layers in Director"""
@@ -89,17 +93,52 @@ parentWindow: the parent window of name dialog. If not provided, the
         objName = name
         path = os.path.join('objects',''.join([name,'.py']))
     try:
-        if getattr(obj, 'is_template', False):
-            obj.is_template = False
-            is_template = True
+        if getattr(obj, 'archetype', False):
+            # we don't want every instance to be an archetype
+            obj.archetype = False
+            archetypeClass = obj.__class__
         else:
-            is_template = False
-        retValue = code_export( obj, path, True, {'name':objName})    
-        if is_template:
-            obj.is_template = True
-        return retValue
+            archetypeClass = None
+        exporter = code_export( obj, path, True, {'name':objName})
+        if archetypeClass:
+            # return archetype status after saving
+            obj.archetype = True
+            if exporter.file_changed:
+                archetype_changed( archetypeClass)
+        get_available_objects( True)
+        return exporter
     except:
         ShowExceptionDialog()
+    
+_changedArchetypeList = []    
+def archetype_changed( cls):
+    if _changedArchetypeList == []:
+        wx.CallAfter( archetype_change_query)
+    _changedArchetypeList.append(cls)
+def archetype_change_query():
+    global _changedArchetypeList
+    names = []
+    for cls in _changedArchetypeList:
+        has_instance = False
+        nodes = Opioid2D.Director.scene.nodes.keys()
+        for node in nodes:
+            if node.__class__ == cls and not node.archetype:
+                has_instance = True
+                break
+        if has_instance:
+            names.append(cls.__name__)
+    if not names:
+        return
+    names.sort()
+    query = """Some object's archetypes changed on disk. Reload level?\n
+Changed archetypes: """
+    query = ''.join([query, names[0]])
+    for name in names[1:]: 
+        query = ''.join([query, ', ', name])
+    dlg = wx.MessageDialog( None, query, "Reload Level?", style=wx.YES_NO)
+    if dlg.ShowModal() == wx.ID_YES:
+        wx.GetApp().projectObject.revert_scene()
+    _changedArchetypeList = []
     
 def save_scene():
     """Save scene to disk"""
@@ -153,6 +192,7 @@ parentWindow: the parent window of name dialog. If not provided, the
     path = os.path.join('scenes',''.join([fileName,'.py']))
     app = wx.GetApp()
     selection = app.selectedRefSet.copy()
+    oldscene = Opioid2D.Director.scene
     scene.state = None          
     wx.BeginBusyCursor()
     try:
@@ -173,7 +213,8 @@ parentWindow: the parent window of name dialog. If not provided, the
     finally:
         wx.EndBusyCursor()        
         scene.state = EditorState
-        app.set_selection(selection)
+        if Opioid2D.Director.scene == oldscene:
+            app.set_selection(selection)
     
 def close_scene_windows( scene=None):
     """_close_scene_windows( scene=None)

@@ -9,10 +9,12 @@ from pygame import Rect
 
 from pug.util import CallbackWeakKeyDictionary
 
-_line_sprite_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                 "Images/dot.png")
-_empty_sprite_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                 "Images/empty.png")
+from pug_opioid.editor.util import get_image_path
+
+_line_sprite_file = get_image_path("dot.png")
+_empty_sprite_file = get_image_path("empty.png")
+
+DEBUG = True
 
 class SelectionManager():
     """SelectionManager()
@@ -99,6 +101,10 @@ update all selection boxes.
                         box.surround_node( node)
             return
         except:
+            if DEBUG: 
+                import sys
+                print "SelectionManager.update_boxes: exception"
+                print sys.exc_info()[1]
             pass
             
 selectionManager = SelectionManager()

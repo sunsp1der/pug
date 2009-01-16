@@ -24,7 +24,7 @@ Opioid2d Sprite with features for use with pug
     _pug_template_class = 'PugSprite'
     # image stuff... allows entry and storage of filename
     _image_file = None   
-    is_template = False
+    archetype = False
     def __init__(self, img=None, gname=''):
         pug.BaseObject.__init__(self, gname=gname)
         Sprite.__init__(self, img)
@@ -52,6 +52,9 @@ Opioid2d Sprite with features for use with pug
         Sprite._on_mgr_delete(self)  
         if DEBUG: print "PugSprite._on_mgr_delete calling scene.update_node"
         Director.scene.update_node(self, "Delete") # register self with scene                
+
+    def delete(self):
+        Sprite.delete(self)
 
     # layer_name property
     def set_layer(self, layer):
@@ -132,8 +135,6 @@ Opioid2d Sprite with features for use with pug
                                      attr, '.', 'x = ', repr(vector.x),'\n']
                 custom_attr_code += [prefix, 
                                      attr, '.', 'y = ', repr(vector.y),'\n']
-        if not custom_attr_code and storageDict['as_class']:
-            custom_attr_code = [baseIndent, xIndent, 'pass\n']
         custom_code += custom_attr_code
         if not custom_code and storageDict['as_class']:
             custom_code = [baseIndent, 'pass\n']
@@ -164,7 +165,7 @@ supposed to be deleted.
             'instance_attributes': ['*'],
             'instance_only_attributes':['gname'],
             'init_method':'on_create',
-            'init_method_args': None,
+            'init_method_args': [],
             'force_init_def': True,
             'custom_export_func': _create_object_code,
             'as_class': True,
@@ -180,9 +181,9 @@ _spriteTemplate = {
     [
         ['', pug.Label, {'label':'Sprite','font_size':10}],
         ['gname'],
-        ['is_template', None, {'tooltip':
+        ['archetype', None, {'label':'   archetype', 'tooltip':
                 '\n'.join(["Select this to automatically save this sprite",
-                           "in the objects folder when the scene is saved.",
+                           "to the objects folder when the scene is saved.",
                            "It will not appear in the game."])}],
         ['layer_name', pug.Dropdown, {'list_generator':get_available_layers,}],
         ['save_sprite', None, {'label':'   Save Object',
