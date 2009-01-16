@@ -29,7 +29,7 @@ class PugScene( Opioid2D.Scene, pug.BaseObject):
         if not getattr(Opioid2D.Director, 'game_started', False):
             if getattr(Opioid2D.Director, 'start_game', False):
                 for node in self.get_ordered_nodes():
-                    if node.is_template:
+                    if node.archetype:
                         node.delete()
                 Opioid2D.Director.game_started = True                        
                 self.all_nodes_callback( 'on_game_start')
@@ -213,8 +213,8 @@ Update the PugScene's node tracking dict for node. Possible commands: 'Delete'
                 nodes.reverse() # store them from bottom-most to top-most
                 for node in nodes:
                     nodeStorageDict = exporter.get_custom_storageDict(node)
-                    if node.is_template:
-                        # this node is a class template, figure out a save name
+                    if node.archetype:
+                        # this node is a class archetype, figure out a save name
                         if node.gname:
                             savename = node.gname
                         else:

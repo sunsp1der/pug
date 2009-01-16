@@ -5,6 +5,8 @@ import wx
 
 import Opioid2D
 
+DEBUG = True
+
 class EditorState(Opioid2D.State):
     layers = ["__selections__",]
     selectOnUp = None
@@ -63,6 +65,13 @@ class EditorState(Opioid2D.State):
             self.interface.nudge((0, -nudge))
         if ev.key == Opioid2D.K_DOWN:
             self.interface.nudge((0, nudge))
+        if ev.key == Opioid2D.K_DELETE:
+            selectedRefList = list(wx.GetApp().selectedRefSet)
+            for ref in selectedRefList:
+                item = ref()
+                if isinstance(item, Opioid2D.public.Node.Node):
+                    if DEBUG: print 'callafter'
+                    wx.CallAfter(item.delete)
             
     def handle_quit(self, ev):
         wx.CallAfter(wx.GetApp()._evt_project_frame_close)

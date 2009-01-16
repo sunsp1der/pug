@@ -39,7 +39,7 @@ class OpioidInterface(pug.ProjectInterface):
         
         projectPath = os.path.dirname(os.path.realpath(rootfile))
         set_project_path( projectPath)
-        self.create_scene_dict()
+        self.reload_scenes()
         
         self.import_settings()
 
@@ -171,6 +171,8 @@ settingsObj: an object similar to the one below... if it is missing any default
 
 value can be either an actual scene class, or the name of a scene class        
 """
+        if (forceReload):
+            self.reload_scenes()
         if value == str(value):
             if self.sceneDict.has_key(value):
                 value = self.sceneDict[value]
@@ -234,7 +236,7 @@ value can be either an actual scene class, or the name of a scene class
         """Revert scene to last saved version"""
         self.set_scene(self.scene.__class__.__name__, True)
     
-    def create_scene_dict(self, doReload=True):
+    def reload_scenes(self, doReload=True):
         """Create dict of available scene classes in scenes folder"""
         self.sceneDict = {}
         self.sceneDict = get_available_scenes( doReload, self.use_working_scene)
@@ -301,14 +303,14 @@ Callback from PugApp...
         if self._use_working_scene == value:
             return
         self._use_working_scene = value
-        self.create_scene_dict(True)
+        self.reload_scenes(True)
         if value:
             for cls in self.sceneDict.values():
-                if cls.__module__ == 'scenes.__Working__':
+                if '__Working__' in cls.__module__:
                     self.set_scene(cls)
                     break
         else:
-            if self.Director.scene.__module__ == 'scenes.__Working__':
+            if '__Working__' in self.Director.scene.__module__:
                 self.revert_scene()
     use_working_scene = property(_get_use_working_scene, 
                                    _set_use_working_scene, 
@@ -462,7 +464,7 @@ _interfaceTemplate = {
         ['pug_settings'],
 
         [' Utilities', pug.Label],
-        ['create_scene_dict', None, {'label':'   Reload Scenes',
+        ['reload_scenes', None, {'label':'   Reload Scenes',
                                      'use_defaults':True}],
         ['open_selection_frame', None, 
                 {'label':'   View Selection'}],

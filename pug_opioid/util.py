@@ -58,13 +58,18 @@ useWorking: if True, and the class in the __Working__.py file is in the class
                 sys.modules.pop(workingModule)
                 module = __import__(workingModule)
                 #reload(module.__Working__)
-            workingScene = find_classes_in_module(module.__Working__, 
-                                                  Opioid2D.Scene)[0]
-            for idx in range(len(sceneList)):
-                if sceneList[idx].__name__ == workingScene.__name__:
-                    global _revertScene
-                    _revertScene = sceneList[idx]
-                    sceneList[idx] = workingScene
+            classes = find_classes_in_module(module.__Working__, Opioid2D.Scene)
+            if classes:
+                workingScene = classes[0]
+                for idx in range(len(sceneList)):
+                    if sceneList[idx].__name__ == workingScene.__name__:
+                        global _revertScene
+                        _revertScene = sceneList[idx]
+                        sceneList[idx] = workingScene
+                        break
+            else:
+                print "No scene in working module.", \
+                        "Using committed module instead."
     sceneDict = {}
     for item in sceneList:
         sceneDict[item.__name__]=item
