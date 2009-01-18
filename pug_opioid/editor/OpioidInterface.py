@@ -23,6 +23,8 @@ from pug_opioid.util import get_available_scenes, get_available_objects, \
 from pug_opioid.editor import EditorState, selectionManager
 from pug_opioid.editor.util import close_scene_windows, save_scene_as, \
                                     project_quit
+                                    
+DEBUG = False
 
 class OpioidInterface(pug.ProjectInterface):
     _pug_template_class = 'OpioidInterface'
@@ -39,17 +41,14 @@ class OpioidInterface(pug.ProjectInterface):
         
         projectPath = os.path.dirname(os.path.realpath(rootfile))
         set_project_path( projectPath)
-        self.reload_scenes()
-        
-        self.import_settings()
-
         path, self.projectName = os.path.split(projectPath)
-        title = ''.join([self.projectName,' - Opioid2D Project'])
+
+        self.reload_scenes()        
+        self.import_settings()
 
         self.Display = Opioid2D.Display
         self.Director = Opioid2D.Director   
         self.Director.editorMode = True
-
                 
         pug.ProjectInterface.__init__(self)
         os.environ['SDL_VIDEO_WINDOW_POS'] = \
@@ -57,8 +56,10 @@ class OpioidInterface(pug.ProjectInterface):
         Opioid2D.Display.init(self.pug_settings.opioid_window_rect[2:4], 
                               title='Pug_Opioid Scene')
         Opioid2D.Director.game_started = False
-
+        Opioid2D.Director.playing_in_editor = True
         thread.start_new_thread(self.Director.run, (scene,))
+        
+        title = ''.join([self.projectName,' - Opioid2D Project'])
         app = pug.App(projectObject=self, 
                       projectFolder=projectPath,
                       projectObjectName=title)
@@ -151,7 +152,7 @@ settingsObj: an object similar to the one below... if it is missing any default
         wx.GetApp().add_global_menu("Pug_Opioid",
                 [["Save Working Scene\tCtrl+S", self.save_using_working_scene],
                  ["Show All Windows\tCtrl+W", wx.GetApp().raise_all_frames],
-                 ["Quit\tCtrl+Q", project_quit]])
+                 ["Quit\tCtrl+Q", self.quit]])
         if self.pug_settings.initial_scene:
             self.sceneclass = self.pug_settings.initial_scene
         
@@ -161,6 +162,9 @@ settingsObj: an object similar to the one below... if it is missing any default
         self.view_scene()
         # open selection frame
         self.open_selection_frame()
+        
+    def quit(self):
+        project_quit()
         
     def view_scene(self):
         """Show scene data in a window"""
@@ -237,7 +241,7 @@ value can be either an actual scene class, or the name of a scene class
         self.set_scene(self.scene.__class__.__name__, True)
     
     def reload_scenes(self, doReload=True):
-        """Create dict of available scene classes in scenes folder"""
+        """Load changes made to scene class files"""
         self.sceneDict = {}
         self.sceneDict = get_available_scenes( doReload, self.use_working_scene)
         
@@ -291,6 +295,7 @@ Callback from PugApp...
         return True
     
     def browse_components(self):
+        """Open up a component browser window"""
         if self.component_browser:
             self.component_browser.Raise()
         else:
@@ -349,6 +354,7 @@ Stop the current scene from playing. Reload original state from disk.
         if not Opioid2D.Director.game_started:
             return
         self.scene.stop()
+        time.sleep(0.25) # give Opioid a little time to stop
         self.revert_scene()
         
     def execute_scene( self):
@@ -410,6 +416,7 @@ def _scene_list_generator():
     
 Return a list of scene classes available in the scenes folder. Append to that
 list a tuple ("New Scene", PugScene) for use in the sceneclass dropdown"""
+    if DEBUG: print "_scene_list_generator"
     dict = get_available_scenes( 
                     useWorking = wx.GetApp().projectObject._use_working_scene)
     list = dict.values()
@@ -421,6 +428,7 @@ def _object_list_generator():
     
 Return a list of node classes available in the objects folder. Append to that
 list a tuple ("Sprite", PugSprite) for use in the add object dropdown"""
+    if DEBUG: print "_object_list_generator"
     list = get_available_objects()
     list.insert(0,("New Sprite", PugSprite))
     return list    
@@ -457,7 +465,6 @@ _interfaceTemplate = {
               'Add an object to the scene.\nSelect object type above.',
                               'use_defaults':True,
                               'label':'   Add Object'}],                              
-        ['reload_object_list', pug.Routine, {'label':'   Reload Objects'}],        
 
         [' Settings', pug.Label],
         ['game_settings'],
@@ -466,6 +473,7 @@ _interfaceTemplate = {
         [' Utilities', pug.Label],
         ['reload_scenes', None, {'label':'   Reload Scenes',
                                      'use_defaults':True}],
+        ['reload_object_list', pug.Routine, {'label':'   Reload Objects'}],        
         ['open_selection_frame', None, 
                 {'label':'   View Selection'}],
         ['browse_components', None, 

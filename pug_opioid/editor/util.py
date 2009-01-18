@@ -17,6 +17,8 @@ from pug.util import make_name_valid
 from pug_opioid.util import get_available_scenes, get_available_objects
 from pug_opioid.editor import EditorState
 
+DEBUG = False
+
 # constant to set up component agui
 GNAMED_NODE = {'agui':GnameDropdown, 'aguidata':{'class_list':[Node]}}
 
@@ -140,6 +142,51 @@ Changed archetypes: """
         wx.GetApp().projectObject.revert_scene()
     _changedArchetypeList = []
     
+def get_scene_errors(showDialog=True):
+    """get_scene_errors(showDialog=True)->error string
+    
+Check the scene for probable user errors. If showDialog is False, returns a list
+of errors or None if none found. If showDialog is True, brings up a dialog to
+allow the user to ignore the errors. This function checks for unnamed 
+archetypes, and multiple archetypes with the same name...
+"""
+    scene = Opioid2D.Director.scene
+    errors = []
+    if not scene:
+        error = "No scene loaded!"
+        errors.append(error)
+    else:
+        archetypeNames = []
+        for node in scene.nodes:
+            if node.archetype:
+                if node.gname:
+                    if node.gname in archetypeNames:
+                        error = ''.join(["Duplicate archetype name: ",
+                                         node.gname])
+                        errors.append(error)
+                    else:
+                        archetypeNames.append(node.gname)
+                else:
+                    error = ''.join(["Unnamed archetype: class ", 
+                                     node.__class__.__name__, " at ",
+                                     str(node.position.x), ", ",
+                                     str(node.position.y)])
+                    errors.append(error)
+    if errors:
+        if showDialog:
+            errorend = ['\nIgnore errors and save (not recommended)?']
+            errormsg = '\n'.join(errors + errorend)
+            dlg = wx.MessageDialog( None, errormsg, "Scene Errors",
+                                    style = wx.YES_NO | wx.NO_DEFAULT)
+            if dlg.ShowModal() == wx.ID_YES:
+                return None
+            else:
+                return errors
+        else:
+            return errors
+    else:
+        return None
+    
 def save_scene():
     """Save scene to disk"""
     name = Opioid2D.Director.scene.__class__.__name__
@@ -152,6 +199,10 @@ sceneName: string with name to save as. If None, a dialog will be opened.
 parentWindow: the parent window of name dialog. If not provided, the 
     wx.ActiveWindow will be used
 """
+    wx.GetApp().apply_all()
+    if get_scene_errors():
+        return
+    if DEBUG: print "util: save_scene_as"
     scene = Opioid2D.Director.scene
     if not sceneName:
         name = scene.gname
@@ -172,10 +223,11 @@ parentWindow: the parent window of name dialog. If not provided, the
                 name = dlg.GetValue()
                 path = os.path.join('scenes',''.join([name,'.py']))
                 try:
-                    file(path)
+                    test = file(path)
                 except:
                     sceneName = name
                 else:
+                    test.close()
                     confirmDlg = wx.MessageDialog( dlg, 
                            "Scene file already exists. Overwrite?",
                            "Confirm Replace",
@@ -187,6 +239,9 @@ parentWindow: the parent window of name dialog. If not provided, the
                 dlg.Destroy()
                 return
         dlg.Destroy()
+    else:
+        if sceneName == 'PugScene' or sceneName == 'Scene':
+            save_scene_as( sceneName, fileName)
     if not fileName:
         fileName = sceneName
     path = os.path.join('scenes',''.join([fileName,'.py']))
@@ -196,7 +251,9 @@ parentWindow: the parent window of name dialog. If not provided, the
     scene.state = None          
     wx.BeginBusyCursor()
     try:
+        if DEBUG: print "util: save_scene_as enter code_export"
         code_export( scene, path, True, {'name':sceneName})
+        if DEBUG: print "util: save_scene_as exit code_export"
     except:
         ShowExceptionDialog()
     else:
