@@ -43,8 +43,8 @@ The callback will be called just before the popup control is popped up. It will
 be called with one argument, which is this control, i.e. 
 callback(self)
 """
-        if not callable(callback):
-            raise ''.join([str(callback)," not callable"])
+        if not callable(callback) and callback is not None:
+            raise ValueError(''.join([str(callback)," not callable"]))
         self.popupCallback = callback  
     
     def AddItem(self, text, data=None):

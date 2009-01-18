@@ -80,6 +80,13 @@ For kwargs arguments, see the Base attribute GUI
         kwargs['control_widget'] = control
         Base.__init__(self, attribute, window, aguidata, **kwargs) 
         
+    def setup(self, attribute, window, aguidata):
+        if self._aguidata != aguidata:
+            self.__init__(attribute, window, aguidata)
+            return
+        else:
+            Base.setup( self, attribute, window, aguidata)        
+        
     def button_press(self, event):  
         """Call the appropriate function"""
         try:

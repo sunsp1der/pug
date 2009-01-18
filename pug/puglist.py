@@ -5,7 +5,7 @@ from pug.constants import *
 from pug.util import get_type
 from pug.templatemanager import get_agui_default_dict
 
-_DEBUG = False
+DEBUG = False
 
 def create_template_puglist(obj, window, template, filterUnderscore = 2):
     """create_template_pug(obj, window, template, filterUnderscore) -> pugList 
@@ -68,6 +68,7 @@ which contains the class whose templates can be used. For example:
 class otherClass( myClass):
     _pug_template_class = myClass
 """
+    if DEBUG: print "create_template_puglist: begin"
     if template.has_key('create_pug_list_function'):
         pugList = template['create_pug_list_function'](obj, 
                                                        window, filterUnderscore)
@@ -83,10 +84,11 @@ class otherClass( myClass):
             defaultDict = {}
         pugList = []
         # go through list of attributes in template
-        if _DEBUG: print obj
+        if DEBUG: print obj
         for entry in attributeList:
+            if DEBUG: print "create_template_puglist: attr -", entry[0]
             attribute = entry[0]
-            if _DEBUG: print attribute
+            if DEBUG: print attribute
             if attribute == '*':
                 #create default gui for all attributes we haven't made a gui for
                 for attribute in dirList:
@@ -112,7 +114,7 @@ class otherClass( myClass):
                 agui = entry[1]
                 # do we have special info for the agui?
                 if len(entry) > 2:
-                    aguidata = entry[2]
+                    aguidata = entry[2].copy()
                 else:
                     aguidata = {}
                 # create the agui
@@ -131,7 +133,7 @@ class otherClass( myClass):
                     info = defaultDict[attributeClass]
                     agui = info[0]
                     if len(info) > 2:
-                        aguidata = info[2]
+                        aguidata = info[2].copy()
                     try:
                         attributegui = agui(attribute, window, 
                                             aguidata = aguidata)
@@ -139,7 +141,7 @@ class otherClass( myClass):
                         continue
                 else:
                     if len(entry) > 2:
-                        aguidata = entry[2]
+                        aguidata = entry[2].copy()
                     else:
                         aguidata = {}
                     try:
@@ -151,7 +153,7 @@ class otherClass( myClass):
             pugList.append(attributegui)
             if entry[0] in dirList:
                 dirList.remove(entry[0])
-    if _DEBUG: print "***DONE***"
+    if DEBUG: print "create_template_puglist: end"
     return pugList
 
 def create_raw_puglist(obj, window, familyList = None, filterUnderscore = 2):

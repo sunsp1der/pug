@@ -1,20 +1,12 @@
 now:
-	multiple save problem (add yellowpug archetype)
-	save warning dialog
-		unnamed archetype
-		multiple archetypes with same name
-	possible ctrl-s in gname problem
+	components  agui
+		set default for componentList or whatever it is
 
 current version:
-	open console window
 	select on create is so slow
 		gotta re-use guis
 		check for class
 		hide it when no selection
-	delete and global keys
-		no delete on pugsprite template
-	add psyco... check for efficiencies if possible
-	setting for playing_in_editor on scene --- return to editor on quit
 	
 Finalize:
 	Open/New project	
@@ -48,7 +40,12 @@ bugs:
 	crash - selecting an object while changing selectionwin to another view 
 
 later: 
+	open console window
+	make opioid not respond during modal stuff
 	set_attribute callback for template
+		archetype
+			update scenegraph
+			inquire about name
 		option to cancel
 		intercept at base level?
 	make objects imports absolute

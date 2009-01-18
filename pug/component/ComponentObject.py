@@ -16,9 +16,11 @@ class ComponentSet(object):
         self.__component_list = ComponentList()
         self.__obj = _ref(obj)
         self.__original_methods = {}
+        global all_components
+        if not all_components:
+            all_components = __import__("all_components")
 
     def add(self, component):
-
         """add(component)->component instance
 
 Adds component to the object.  
@@ -68,9 +70,6 @@ If it's a class, an instance will be created and added.
 
     def get(self, cls=None):
         if type(cls) == str:
-            global all_components
-            if not all_components:
-                all_components = __import__("all_components")
             if all_components:
                 cls = getattr(all_components, cls, cls)
         if cls is not None and not issubclass(cls, Component):
@@ -110,9 +109,7 @@ class ComponentObject(object):
         self.__components = ComponentSet(self)
 
     def components(doc):
-
         """Returns the component set associated with this object."""
-
         def get_components(self):
             return self.__components
         return property(get_components, doc=doc)

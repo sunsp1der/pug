@@ -31,10 +31,10 @@ darkened background...
 # TODO: examine some nicer ways to make fonts... FFont etc
 For kwargs optional arguments, see the Base attribute GUI
 """
-    def __init__(self, attribute, frame, aguidata={}, **kwargs):
-        label = wx.Panel(frame.get_label_window(), style=0)
+    def __init__(self, attribute, window, aguidata={}, **kwargs):
+        label = wx.Panel(window.get_label_window(), style=0)
         #background color
-        if not aguidata.has_key('background_color'):
+        if not hasattr(self, 'defaultBackgroundColor'):
             backgroundColor = label.GetBackgroundColour()
             r = backgroundColor[0]
             g = backgroundColor[1]
@@ -46,28 +46,39 @@ For kwargs optional arguments, see the Base attribute GUI
             if g < 0: g = 0
             if b < 0: b = 0
             backgroundColor.Set(r,g,b)
-            aguidata['background_color']=backgroundColor
+            self.__class__.defaultBackgroundColor = backgroundColor
         
         #label
-        if attribute:
-            aguidata['label'] = attribute
-        labelText = aguidata.get('label', '')
-        if aguidata.has_key('font_size'):
-            fontSize = aguidata['font_size']
-        else:
-            if not hasattr(self, 'defaultFontSize'):
-                dummyText = wx.StaticText(label)
-                defaultFont = dummyText.GetFont()
-                dummyText.Destroy()
-                self.__class__.defaultFontSize = defaultFont.GetPointSize()
-            fontSize = self.defaultFontSize
-        font = wx.Font(fontSize, wx.SWISS, wx.NORMAL, wx.FONTWEIGHT_BOLD)    
-        textSizer = AguiLabelSizer(parent=label, label=labelText, 
-                                   line=False, font=font)
+        if not hasattr(self, 'defaultFontSize'):
+            dummyText = wx.StaticText(label)
+            defaultFont = dummyText.GetFont()
+            dummyText.Destroy()
+            self.__class__.defaultFontSize = defaultFont.GetPointSize()
+        aguidata.setdefault('font_size', self.defaultFontSize)
+        font = wx.Font(aguidata['font_size'], wx.SWISS, wx.NORMAL, 
+                                wx.FONTWEIGHT_BOLD)    
+        textSizer = AguiLabelSizer(parent=label, line=False, font=font)
         label.SetSizer(textSizer)
+        label.textCtrl = textSizer.textCtrl
         # label.preferredWidth = textSizer.preferredWidth # FOR SASH
                             
+        self.initAttribute = attribute
         aguidata['control_only'] = True        
         kwargs['aguidata'] = aguidata
         kwargs['control_widget'] = label
-        Base.__init__(self, '', frame, **kwargs)
+        Base.__init__(self, '', window, **kwargs)
+        
+    def setup(self, attribute, window, aguidata):
+        fontsize = aguidata.get('font_size', self.defaultFontSize)
+        if fontsize != self._aguidata.get('font_size', self.defaultFontSize):
+            self.__init__(attribute, window, aguidata)
+            return
+        if attribute:
+            aguidata['label'] = attribute
+        elif self.initAttribute:
+            aguidata['label'] = self.initAttribute
+        labelText = aguidata.get('label', '')
+        self.control.textCtrl.SetLabel(labelText)
+        aguidata.setdefault('background_color', self.defaultBackgroundColor)
+        Base.setup(self, '', window, aguidata)
+        

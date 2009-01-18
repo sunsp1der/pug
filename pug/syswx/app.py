@@ -458,3 +458,7 @@ settingsObj: any frame settings members will be replaced
         if win:
             win.Raise()
             
+    def apply_all(self, event=None):
+        windows = wx.GetTopLevelWindows()
+        for frame in windows:
+            frame.apply()

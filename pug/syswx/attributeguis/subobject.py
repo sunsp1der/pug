@@ -40,6 +40,7 @@ simple objects that contain a few values in them (i.e. X and Y)
         self.subControlList = []
         sub_attributes = aguidata.get('sub_attributes',[])
         if not sub_attributes:
+            aguidata['sub_attributes'] = []
             kwargs['aguidata'] = aguidata
             kwargs['control_widget'] = None
             kwargs['label_widget'] = None
@@ -88,7 +89,7 @@ simple objects that contain a few values in them (i.e. X and Y)
                     controlHSizer.Add(newViewButton)
                     # show main label in top row of label
                 leftLabel = AguiLabelSizer( label, labelText, subcount == 1)
-                label.text = leftLabel.text # tooltip target
+                label.textCtrl = leftLabel.textCtrl # tooltip target
                     
             else:
                 if subnum == subcount and button_spacing:
@@ -112,6 +113,15 @@ simple objects that contain a few values in them (i.e. X and Y)
         kwargs['label_widget'] = label
         Base.__init__(self, attribute, window, **kwargs)
         
+    def setup(self, attribute, window, aguidata):
+        sub_attributes = aguidata.get('sub_attributes',[])
+        old_attributes = self._aguidata['sub_attributes']
+        if sub_attributes != old_attributes:
+            self.__init__(self, attribute, window, aguidata)
+            return
+        else:
+            Base.setup( self, attribute, window, aguidata)
+            
     objRef = None    
     def get_object(self):
         if self.objRef:

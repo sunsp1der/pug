@@ -15,6 +15,7 @@ though you need a frame for those...
 
 import re
 import os.path
+import inspect
 from weakref import ref, proxy, ProxyTypes
 from sys import exc_info
 
@@ -232,7 +233,8 @@ To return to object view, call display_puglist().
                             sizer.Add(item.control, (row,0), (1,2),
                                       flag=wx.EXPAND | wx.SOUTH, 
                                       border=WX_PUGLIST_YSPACER)
-                            item.label.Hide()
+                            if item.label:
+                                item.label.Hide()
                             item.control.Show()
                         else:
                             sizer.Add(item.label, (row,0), 
@@ -296,7 +298,8 @@ Generally, this is called when an attribute gui has changed size.
             if hasattr(self.object,'__class__'):
                 templateInfo = get_template_info( self.object.__class__)
             # if necessary, look for templates assigned to object
-            if not templateInfo and hasattr(self.object, '_pug_template_class'):
+            if not templateInfo and not inspect.isclass(self.object) and \
+                        hasattr(self.object, '_pug_template_class'):
                 templateInfo = get_template_info(
                                         self.object._pug_template_class)
             # as a last resort, use the default template

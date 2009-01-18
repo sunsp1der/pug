@@ -97,8 +97,11 @@ PugFrame(self, obj=None, objectpath="object", title="", show=True, parent=None)
             if event.Active:
                 self.activePugWindow.refresh_all()
             else:
-                if self.activePugWindow.settings['auto_apply']:
-                    self.activePugWindow.apply_all()
+                self.apply()
+                
+    def apply(self, event=None):
+        if self.activePugWindow.settings['auto_apply']:
+            self.activePugWindow.apply_all()
             
     def set_object(self, obj, objectpath="unknown", title=""):
         """set_object(obj, objectpath, title)

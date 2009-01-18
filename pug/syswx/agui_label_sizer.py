@@ -32,9 +32,9 @@ next line.
             line = wx.StaticLine(parent=parent, style = 0)            
             self.Add(line, flag=wx.EXPAND)
             self.line = line        
-        self.text = text
+        self.textCtrl = text
         # FOR SASH
         # self.preferredWidth = self.MinSize[0]
         
-    def set_text(self, text=''):
-        self.text.Label = text
+    def SetLabel(self, text=''):
+        self.textCtrl.Label = text

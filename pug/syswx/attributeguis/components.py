@@ -13,50 +13,35 @@ from pug.syswx.component_browser import ComponentBrowseDlg
 # TODO: make it fold up everything beneath it
 
 class Components (Base):
-    """Label attribute GUI for demarking GUI sections. Not for attributes
+    """Component attribute gui with features for adding, removing, editing
     
-Label(attribute, window, aguidata, **kwargs)
-attribute: this value is ignored
+Components(attribute, window, aguidata, **kwargs)
+attribute: name of component attribute (normally 'components')
 window: the parent pugFrame
-aguidata: {'label':<text to use>,
-    'font_size':<int>, 
-    'background_color': wxColor, colorIDString, Hex number, or int tuple
-    'indent': number of pixels to indent the label
+aguidata: {
+    see Base for possiblities
     }
-aguidata values default to the standard text look with a slightly 
-darkened background...
-    
-# TODO:
-#    'font_color': wxColor, colorIDString, Hex number, or int tuple,
-#    'font_weight': wx.FONTWEIGHT_xxx constant,
-#    'font_underline': bool,
-#    'font_family': 
-# TODO: examine some nicer ways to make fonts... FFont etc
+
 For kwargs optional arguments, see the Base attribute GUI
 """
     expanded = False
+    object = None
     def __init__(self, attribute, frame, aguidata={}, **kwargs):
         #label
-        label = wx.Panel(frame.get_label_window(), style=0)        
-        if not aguidata.has_key('background_color'):
-            backgroundColor = label.GetBackgroundColour()
-            r = backgroundColor[0] - 10
-            g = backgroundColor[1] - 10
-            b = backgroundColor[2] - 10
+        label = wx.Panel(frame.get_label_window(), style=0)
+        if not hasattr(self, 'defaultBackgroundColor'):
+            defaultBackgroundColor = label.GetBackgroundColour()
+            r = defaultBackgroundColor[0] - 10
+            g = defaultBackgroundColor[1] - 10
+            b = defaultBackgroundColor[2] - 10
             if r < 0: r = 0
             if g < 0: g = 0
             if b < 0: b = 0
-            backgroundColor.Set(r,g,b)
-            aguidata['background_color']=backgroundColor
-        if aguidata.has_key('label'):
-            labelText = aguidata['label']
-        else:
-            labelText = '   components'
-        textSizer = AguiLabelSizer(parent=label, label=labelText, line=True)
-        text = textSizer.text
-        # label.preferredWidth = textSizer.preferredWidth # FOR SASH
+            defaultBackgroundColor.Set(r,g,b)
+            self.__class__.defaultBackgroundColor = defaultBackgroundColor
+        textSizer = AguiLabelSizer(parent=label, line=True)
         label.SetSizer(textSizer)
-        self.object = None
+        label.textCtrl = textSizer.textCtrl
                     
         #control
         control = wx.Panel(frame.get_control_window())
@@ -146,12 +131,22 @@ For kwargs optional arguments, see the Base attribute GUI
         self.sizer.Fit(self.control)
         self.match_control_size()
         
-    def refresh(self):
-        if self.object != self._window.object:
-            self.object = self._window.object
+    def setup(self, attribute, window, aguidata):
+        for child in self.control.GetChildren():
+            if isinstance(child, wx.TopLevelWindow):
+                wx.CallAfter( child.Close)
+        aguidata.setdefault('background_color', self.defaultBackgroundColor)
+        aguidata.setdefault('label','   components')
+        selectComponent = self.editList.get_selected()
+        selectAddComponent = self.addTree.tree.GetStringValue()
+        if self.object != window.object:
+            self.object = window.object
             self.addTree.object = self.object
             self.editList.object = self.object
-        Base.refresh(self)
+        self.editList.refresh_components( selectComponent)
+        self.addTree.create_tree( self.object)
+        self.addTree.tree.SetStringValue( selectAddComponent)
+        Base.setup(self, attribute, window, aguidata)
         
     def add_button_click(self, event=None):
         component = self.addTree.get_selected()
