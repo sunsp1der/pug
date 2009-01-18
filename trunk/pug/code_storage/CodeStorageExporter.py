@@ -123,6 +123,7 @@ asClass: If True, force obj to export as a class, if False, force export as
         try:
             oldfile = open(filename, 'r')
         except:
+            oldcode = None
             pass
         else:
             oldcode = oldfile.read()
@@ -134,8 +135,8 @@ asClass: If True, force obj to export as a class, if False, force export as
             exec code           
         except:
             if code:
-                errorfilename = ''.join([filename,'.err'])
-                errorfile = open( errorfilename, 'w')
+                self.errorfilename = ''.join([filename,'.err'])
+                errorfile = open( self.errorfilename, 'w')
                 errorfile.write(code)
                 errorfile.close()
                 # if there were any problems creating the code, make sure we don't

@@ -117,20 +117,25 @@ For kwargs optional arguments, see the Base attribute GUI
         kwargs['control_widget'] = control
         Base.__init__(self, attribute, window, aguidata, **kwargs)
         
+    def setup(self, attribute, window, aguidata):
+        if self._aguidata != aguidata:
+            self.__init__(attribute, window, aguidata)
+            return
+        else:
+            Base.setup( self, attribute, window, aguidata)
+        
     def evt_add_button(self, event=None):
         #TODO:  put in default behavior
-        pass
         self.refresh()
 
     def evt_delete_button(self, event=None):
         #TODO:  put in default behavior
-        pass
         self.refresh()
 
     def evt_info_button(self, event=None):
         frame = HelpFrame( None, self.control, 
                 objectPath=''.join([self._window.objectPath, '.', 
-                                    self.label.text.LabelText.strip()]),
+                                    self.label.textCtrl.LabelText.strip()]),
                 showPugButton=False, showRetypeButton=False, text=self.infotext)
         frame.Show()
         frame.Center()        

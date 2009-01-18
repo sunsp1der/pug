@@ -19,13 +19,13 @@ aguidata: {
     '...': for more see Dropdown    
 
 For kwargs optional arguments, see the Base attribute GUI
-"""
-    def __init__(self, attribute, window, aguidata={}, **kwargs):
+"""      
+    def setup(self, attribute, window, aguidata):    
         special_aguidata = {'allow_typing': True, 
                             'list_generator': self.list_generator_func}
         special_aguidata.update(aguidata)
         self.class_list = aguidata.get('class_list',[])
-        Dropdown.__init__(self, attribute, window, special_aguidata, **kwargs)
+        Dropdown.setup(self, attribute, window, special_aguidata)
         
     def list_generator_func(self):
         return get_gnames(tuple(self.class_list))

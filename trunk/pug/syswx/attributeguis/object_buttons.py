@@ -15,8 +15,8 @@ ObjectButtons(attribute, window, aguidata, **kwargs)
 attribute: what attribute of window.object is being controlled
 window: the parent pugFrame. 
 aguidata: {
-    'view_button': if True, show view_button (see below)... default is true
-    'new_view_button': if True, show new_view_button (see below)... default is true
+    'view_button': if True, show view_button (see below). default: False
+    'new_view_button': if True, show new_view_button (see below). default: True
     }
 For kwargs arguments, see the Base attribute GUI
 
@@ -45,17 +45,21 @@ any object.
                                    True, attribute, frame)
             controlSizer.Add(new_view_button)
             self.new_view_button = new_view_button    
-            self.new_view_button.Bind(wx.EVT_BUTTON, self.evt_view)     
+            self.new_view_button.Bind(wx.EVT_BUTTON, self.evt_view)
+        elif self.new_view_button:
+            self.new_view_button.Destroy()     
 
         if aguidata['view_button']:
             view_button = PugButton(control, obj,
                                    False, attribute, frame)
             self.view_button = view_button
             controlSizer.Add(view_button)
-            self.view_button.Bind(wx.EVT_BUTTON, self.evt_view)     
+            self.view_button.Bind(wx.EVT_BUTTON, self.evt_view) 
+        elif self.view_button:
+            self.view_button.Destroy()     
         
         textSizer = AguiLabelSizer(control)
-        infoText = textSizer.text
+        infoText = textSizer.textCtrl
         self.infoText = infoText
         self.textSizer = textSizer
 
@@ -66,6 +70,15 @@ any object.
 
         kwargs['control_widget'] = control
         Base.__init__(self, attribute, frame, aguidata, **kwargs)
+        
+    def setup(self, attribute, window, aguidata):
+        if aguidata != self._aguidata:
+            self.__init__( attribute, window, aguidata)
+            return
+        else:
+            self.setup_buttons( window.object)
+            self.set_control_value( window.object)
+            Base.setup( self, attribute, window, aguidata)
         
     def evt_view(self, event):
         self.setup_buttons(self.get_control_value())  

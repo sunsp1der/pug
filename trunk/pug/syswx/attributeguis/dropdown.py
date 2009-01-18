@@ -21,7 +21,7 @@ aguidata: {
         item.__name__ if possible... otherwise str(object). When the user makes 
         a selection in the dropdown, the attribute will be set to itemdata 
     'allow_typing': if True, user can type their own items. if the value typed
-         is not in the list, itemdata will be set to itemtext. Default: false
+         is not in the list, itemdata will be set to itemtext. Default: false.
     'list_generator': as an alternative to the static list, this callable will 
         be called when the dropdown is displayed.  It should return a list as 
         described in the 'list' entry above.
@@ -46,15 +46,21 @@ For kwargs optional arguments, see the Base attribute GUI
         listctrl.SetSelectCallback(self.item_selected)
         control.Bind(wx.EVT_TEXT_ENTER, self.item_selected)
         
+        kwargs['control_widget'] = control
+        Base.__init__(self, attribute, window, aguidata, **kwargs)
+        
+    def setup(self, attribute, window, aguidata):
+        if self.allow_typing != aguidata.get('allow_typing', False):
+            self.__init__( attribute, window, aguidata)
+            return
         self.callback = aguidata.get('callback',  None)
         self.list_generator = aguidata.get('list_generator', None)
         if self.list_generator:
-            listctrl.SetPopupCallback(self.setup_listctrl)
-        list = aguidata.get('list',[])
-        self.setup_listctrl(list)
-
-        kwargs['control_widget'] = control
-        Base.__init__(self, attribute, window, aguidata, **kwargs)
+            self.listctrl.SetPopupCallback(self.setup_listctrl)
+        else:
+            self.listctrl.SetPopupCallback(None)
+        Base.setup(self, attribute, window, aguidata)
+        self.setup_listctrl(self._aguidata.get('list',[]))
         
     def setup_listctrl(self, list=None):
         if not list and not callable(self.list_generator):
@@ -80,6 +86,7 @@ For kwargs optional arguments, see the Base attribute GUI
         if i:
             self.listctrl.SelectItem(i)
         self.data = self.listctrl.GetSelectedData()
+        self.set_tooltip()
         
         
     def item_selected(self, event=None):
@@ -93,8 +100,14 @@ For kwargs optional arguments, see the Base attribute GUI
         self.apply()
         if self.callback:
             self.callback(self.text, self.data)
-        if not self.tooltip:
-            self.doc_to_tooltip()
+        self.set_tooltip()
+        
+    def set_tooltip(self):
+        return
+        if hasattr(self.data,'__doc__') and self.data.__doc__:
+            self.control.SetToolTipString(self.data.__doc__)
+        else:
+            self.control.SetToolTipString(' ')
         
     def get_control_value(self):
         return self.data

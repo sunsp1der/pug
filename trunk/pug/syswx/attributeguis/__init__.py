@@ -20,13 +20,15 @@ from pug.syswx.attributeguis.gname_dropdown import GnameDropdown
 from pug.syswx.attributeguis.listedit import ListEdit
  
 # default attribute gui types
+from pug.component.ComponentObject import ComponentSet
 _AGUI_DEFAULT_DICT = {
                       #families
                           'Objects':[ObjectButtons],
                           'Routine':[Routine],
                           'Default':[Generic],
                       #types
-                          bool:[Checkbox]
+                          bool:[Checkbox],
+                          ComponentSet:[Components]
                      }
 
 get_agui_default_dict().update(_AGUI_DEFAULT_DICT)

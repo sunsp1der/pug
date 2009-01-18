@@ -27,7 +27,8 @@ aguidata: dictionary of special agui information. Can be customized for specific
             'SetBackgroundColor' with this value
         'growable': if true, this allows the control to grow vertically
 control_widget: the widget used for input, usually defined by derived classes. 
-label_widget: custom wxWidget label, can be defined by derived classes.
+label_widget: widget used for label. For compatibility, this control should have
+    a textCtrl member that contains the main piece of text.
 
 Attribute guis should almost always be derived from Base. Base.label is the
 label displayed on the left of a pugFrame. Base.control is the control displayed
@@ -36,6 +37,9 @@ on the right of a pugFrame.
 The main functions that attribute guis are meant to over-ride are:
 set_control_value(self, val): make Base.control display val
 get_control_value(self): return the value shown in Base.control
+setup(self, attribute, window, aguidata): reset all values in the agui but
+    don't recreate any wx controls. This is important when a cached agui is
+    re-used.
 
 Override these if get_control_value does not return the attribute's actual 
 value...
@@ -52,47 +56,47 @@ set_attribute_value expect it.
     applying = False
     def __init__(self, attribute, window, aguidata = {}, control_widget = None, 
                  label_widget = None, **kwargs):
-        if attribute is None:
-            attribute = ''
+        self._aguidata = aguidata
         self._window = window
         self.attribute = attribute
-        self._aguidata = aguidata
-        try:
-            value = getattr(window.object, attribute, None)
-        except:
-            value = None
         # control
         if control_widget:
             self.control = control_widget
         else:
             # no control provided, so just make an empty panel
-            self.control = wx.Panel(window.get_label_window(), 
+            self.control = wx.Panel(window.get_control_window(), 
                                     size = (1,WX_STANDARD_HEIGHT))
-        self.readonly = aguidata.get('read_only',False)
             
         # label    
-        labelText = aguidata.get('label', 
-                                 ''.join([PUGFRAME_ATTRIBUTE_PREFIX,attribute]))
         if label_widget:
             self.label = label_widget
-        elif labelText != None:
+        else:
             #panel
             label = wx.Panel(window.get_label_window(), style=0,
                              size=(0, self.control.Size[1]))
             #label
-            textSizer = AguiLabelSizer(label, labelText)
-            label.SetSizer(textSizer)
-            label.text = textSizer.text
-            # label.sizer = textSizer
-            # label.preferredWidth = textSizer.preferredWidth # FOR SASH
+            labelSizer = AguiLabelSizer(label)
+            label.SetSizer(labelSizer)
+            label.textCtrl = labelSizer.textCtrl
             self.label = label
-            #self.label.SetMinSize((-1,self.control.Size[1]))
-        else:
-            # no label info, just make an empty frame
-            self.label = wx.Panel(window.get_label_window(), style=0,
-                             size=(0, self.control.Size[1]))
-            #self.label.SetMinSize((-1,self.control.Size[1]))
+        self.setup( attribute, window, aguidata)
+                
+    def setup(self, attribute, window, aguidata):
+        """setup(attribute, window, aguidata)
         
+Setup agui. Called on creation and when a cached agui is re-used on another 
+object.
+"""
+        self.attribute = attribute            
+        self._aguidata = aguidata
+        self._window = window
+        aguidata.setdefault('read_only',False)
+        #label
+        if hasattr(self.label, 'textCtrl'):
+            labelText = aguidata.get('label', 
+                                 ''.join([PUGFRAME_ATTRIBUTE_PREFIX,attribute]))
+            self.label.textCtrl.SetLabel( labelText)
+        #tooltip
         self.tooltip = None
         if aguidata.has_key('tooltip'):
             self.tooltip = aguidata['tooltip']
@@ -107,10 +111,10 @@ set_attribute_value expect it.
                     self.tooltip = prop.__doc__
             except:
                 pass
-        if self.tooltip and hasattr(self.label, 'text'):
-            self.label.text.SetToolTipString(self.tooltip) 
+        if self.tooltip:
+            self.label.SetToolTipString(self.tooltip) 
         else:
-            self.doc_to_tooltip()           
+            self.doc_to_tooltip()
             
         self.match_control_size()
             
@@ -129,13 +133,7 @@ set_attribute_value expect it.
         
         # these will be shown again when placed in pugwindow panels
         self.label.Hide()
-        self.control.Hide()
-        
-        # FOR SASH
-        # make sure label has a preferredWidth attribute
-        # if not hasattr(self.label,'preferredWidth'):
-        #    label.preferredWidth = 0
-            
+        self.control.Hide()          
         
     def get_control_value(self):
         """get the value of the attribute - defined by derivative classes
@@ -169,11 +167,11 @@ By default, this returns the attribute value
             except:
                 pass
         try:
-            self.label.text.SetToolTipString(doc)
+            self.label.SetToolTipString(doc)
         except:
             if hasattr(self.label, 'text'):
-                if self.label.text.GetToolTip():
-                    self.label.text.SetToolTipString(' ')
+                if self.label.GetToolTip():
+                    self.label.SetToolTipString(' ')
         
     def get_attribute_value(self):
         return getattr(self._window.object, self.attribute, None)
@@ -197,7 +195,7 @@ When auto apply is off, skip apply events that were created by the event system
             # no need to set... effectively, our work is done successfully
             return True
         # we need to set, but make sure attribute is not readonly
-        if self.readonly:
+        if self._aguidata['read_only']:
             # this creates a loop by changing focus automatically
             if self.applying:
                 return

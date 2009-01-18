@@ -31,6 +31,36 @@ See Base attribute gui for other argument info
         control = wx.Panel(window.get_control_window(), 
                            size = (1,WX_STANDARD_HEIGHT))
         control.SetMinSize((-1,WX_STANDARD_HEIGHT))
+        #widgets
+        runButton = buttons.ThemedGenBitmapButton(control,  
+                                                  size=WX_BUTTON_SIZE)
+        
+        infoText = wx.StaticText(control)
+        infoText.SetMinSize((-1,infoText.Size[1]))
+        line = wx.StaticLine(control, style = 0) 
+        self.runButton = runButton
+        self.infoText = infoText
+
+        # sizers
+        textSizer = wx.BoxSizer(orient=wx.VERTICAL)
+        textSizer.AddSpacer((1,WX_TEXTEDIT_LABEL_YOFFSET))
+        textSizer.Add(infoText, 1)
+        textSizer.Add(line, flag = wx.EXPAND | wx.BOTTOM)
+        controlSizer = wx.BoxSizer(orient=wx.HORIZONTAL)
+        control.SetSizer(controlSizer)
+        controlSizer.Add(runButton)
+        controlSizer.AddSpacer((3,3))
+        controlSizer.Add(textSizer,1,wx.EXPAND)
+        control.sizer = controlSizer
+        control.textSizer = textSizer
+        
+        kwargs['control_widget'] = control
+        Base.__init__(self, attribute, window, aguidata, **kwargs)
+        
+        from pug.syswx.pugframe import pug_frame
+        self.pug_frame = pug_frame
+        
+    def setup(self, attribute, window, aguidata):
         use_defaults = aguidata.get('use_defaults', False)
 
         # check if the callable is provided or if it's a true attribute
@@ -87,8 +117,6 @@ See Base attribute gui for other argument info
             arguments = "?Not Callable?"
         self.arguments = arguments
         
-        #widgets
-        buttonSize=WX_BUTTON_BMP_SIZE
         if (self.takesargs or self.notpython) and \
                 not(use_defaults and not self.needsargs):
             bmp = wx.ART_HELP_SIDE_PANEL
@@ -105,37 +133,15 @@ See Base attribute gui for other argument info
                 tooltip = "Execute"
             fn = self.execute
             arguments = '()'
+        buttonSize=WX_BUTTON_BMP_SIZE
         run_bmp = wx.ArtProvider.GetBitmap(bmp, 
                                         wx.ART_TOOLBAR, buttonSize)        
-        runButton = buttons.ThemedGenBitmapButton(control,  
-                                                  size=WX_BUTTON_SIZE)
-        runButton.SetBitmapLabel(run_bmp)
-        runButton.SetToolTipString(tooltip)
-        control.Bind(wx.EVT_BUTTON, fn, runButton)        
-        infoText = wx.StaticText(control, label = arguments)
-        infoText.SetMinSize((-1,infoText.Size[1]))
-        line = wx.StaticLine(control, style = 0) 
-        self.runButton = runButton
-        self.infoText = infoText
-
-        # sizers
-        textSizer = wx.BoxSizer(orient=wx.VERTICAL)
-        textSizer.AddSpacer((1,WX_TEXTEDIT_LABEL_YOFFSET))
-        textSizer.Add(infoText, 1)
-        textSizer.Add(line, flag = wx.EXPAND | wx.BOTTOM)
-        controlSizer = wx.BoxSizer(orient=wx.HORIZONTAL)
-        control.SetSizer(controlSizer)
-        controlSizer.Add(runButton)
-        controlSizer.AddSpacer((3,3))
-        controlSizer.Add(textSizer,1,wx.EXPAND)
-        control.sizer = controlSizer
-        control.textSizer = textSizer
-        
-        kwargs['control_widget'] = control
-        Base.__init__(self, attribute, window, aguidata, **kwargs)
-        
-        from pug.syswx.pugframe import pug_frame
-        self.pug_frame = pug_frame
+        self.runButton.SetBitmapLabel(run_bmp)
+        self.runButton.SetToolTipString(tooltip)
+        self.control.Unbind(wx.EVT_BUTTON, self.runButton)
+        self.control.Bind(wx.EVT_BUTTON, fn, self.runButton)  
+        self.infoText.SetLabel( arguments)   
+        Base.setup(self, attribute, window, aguidata) 
         
     def get_routine(self):
         routine = getattr(self, 'routine', False)

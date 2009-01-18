@@ -29,7 +29,6 @@ For kwargs optional arguments, see the Base attribute GUI
 
         kwargs['control_widget'] = control
         Base.__init__(self, attribute, frame, **kwargs)
-        self.match_control_size()        
         
     def get_control_value(self):
         value = self.checkbox.GetValue()            

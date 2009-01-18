@@ -109,7 +109,7 @@ Return a simple name for obj.  Not unique or anything... just for a basic label
 like pugframe titles...
 """
     gname = getattr(obj,'gname','')
-    if gname:
+    if gname and type(gname) == str:
         simplename = gname
     elif objectpath == 'unknown':
         simplename = get_type_name(obj)
