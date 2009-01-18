@@ -51,11 +51,13 @@ class EditorState(Opioid2D.State):
     def handle_keydown(self, ev):
         # nudge keys
         nudge = 1
-        if Opioid2D.Keyboard.is_pressed(Opioid2D.K_RSHIFT) or \
-                    Opioid2D.Keyboard.is_pressed(Opioid2D.K_LSHIFT):
+        shiftDown = Opioid2D.Keyboard.is_pressed(Opioid2D.K_RSHIFT) or \
+                    Opioid2D.Keyboard.is_pressed(Opioid2D.K_LSHIFT)
+        ctrlDown = Opioid2D.Keyboard.is_pressed(Opioid2D.K_RCTRL) or \
+                    Opioid2D.Keyboard.is_pressed(Opioid2D.K_LCTRL)
+        if shiftDown:
             nudge = nudge * 10
-        if Opioid2D.Keyboard.is_pressed(Opioid2D.K_RCTRL) or \
-                    Opioid2D.Keyboard.is_pressed(Opioid2D.K_LCTRL):
+        if ctrlDown:
             nudge = nudge * 0.1            
         if ev.key == Opioid2D.K_LEFT:
             self.interface.nudge((-nudge, 0))
@@ -72,6 +74,12 @@ class EditorState(Opioid2D.State):
                 if isinstance(item, Opioid2D.public.Node.Node):
                     if DEBUG: print 'callafter'
                     wx.CallAfter(item.delete)
+        if ev.key == Opioid2D.K_s and ctrlDown:
+            wx.CallAfter(self.interface.save_using_working_scene)
+        if ev.key == Opioid2D.K_q and ctrlDown:
+            wx.CallAfter(self.interface.quit)
+        if ev.key == Opioid2D.K_w and ctrlDown:
+            wx.CallAfter(wx.GetApp().raise_all_frames)
             
     def handle_quit(self, ev):
         wx.CallAfter(wx.GetApp()._evt_project_frame_close)

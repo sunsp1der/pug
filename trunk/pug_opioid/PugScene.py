@@ -10,19 +10,23 @@ from pug.code_storage import add_subclass_skip_attributes
 from pug_opioid.editor.wx_agui import SceneNodes, SceneLayers
 from pug_opioid.editor.util import get_available_layers, save_object
 
-DEBUG = True
+DEBUG = False
 
 class PugScene( Opioid2D.Scene, pug.BaseObject):
     """PugScene - Opioid2d Scene with features for use with pug"""
-    _pug_template_class = 'PugScene'
     __node_num = 0
+    _pug_template_class = 'PugScene'
     def __init__(self, gname=''):
         Opioid2D.Scene.__init__(self)
-        pug.BaseObject.__init__(self, gname)
+        pug.BaseObject.__init__(self, gname)        
 
     def handle_keydown(self, ev):
         if ev.key == Opioid2D.K_ESCAPE:
-            Opioid2D.Director.quit()
+            if getattr(Opioid2D.Director, 'playing_in_editor', False):
+                import wx
+                wx.CallAfter(wx.GetApp().projectObject.stop_scene)
+            else:
+                Opioid2D.Director.quit()
 
     def start(self):
         """call after enter() and before state changes"""
@@ -282,7 +286,7 @@ _sceneTemplate = {
     'name':'Editor',
     'attributes':
     [
-        ['', pug.Label, {'label':'Scene','font_size':10}],
+        ['Scene', pug.Label, {'font_size':10}],
         ['scene_layers', SceneLayers],
 #        ['scene_groups', SceneGroups],
 #        ['scene_layers', None, {'label':'   layers','read_only':True}],
@@ -292,7 +296,7 @@ _sceneTemplate = {
 #                               'routine':save_scene_as, 
 #                               'use_defaults':True,
 #                               'tooltip':"Save scene to disk with new name"}],        
-        ['', pug.Label, {'label':' Scene Graph'}],
+        ['Scene Graph', pug.Label],
         ['nodes', SceneNodes, {'growable':True}],
     ]
 }

@@ -18,13 +18,12 @@ DEBUG = False
 class PugSprite(Sprite, pug.BaseObject):
     """PugSprite( img=None, gname='')
     
-Opioid2d Sprite with features for use with pug
-"""
+Opioid2d Sprite with features for use with pug"""
     __metaclass__ = SpriteMeta
-    _pug_template_class = 'PugSprite'
     # image stuff... allows entry and storage of filename
     _image_file = None   
     archetype = False
+    _pug_template_class = 'PugSprite'
     def __init__(self, img=None, gname=''):
         pug.BaseObject.__init__(self, gname=gname)
         Sprite.__init__(self, img)
@@ -72,7 +71,7 @@ Opioid2d Sprite with features for use with pug
                            doc="Name of scene layer")
     
     def save_sprite(self):
-        """Save this object as a class in the project's sprite folder"""
+        """Save this object as a class in the project's object folder"""
         save_object( self)
     
     # code storage customization
@@ -179,20 +178,22 @@ _spriteTemplate = {
     'name':'Editor',
     'attributes':
     [
-        ['', pug.Label, {'label':'Sprite','font_size':10}],
+        ['Sprite', pug.Label, {'font_size':10}],
         ['gname'],
         ['archetype', None, {'label':'   archetype', 'tooltip':
                 '\n'.join(["Select this to automatically save this sprite",
                            "to the objects folder when the scene is saved.",
                            "It will not appear in the game."])}],
-        ['layer_name', pug.Dropdown, {'list_generator':get_available_layers,}],
+        ['__class__', None, {'label':'   class', 'new_view_button':False}],
         ['save_sprite', None, {'label':'   Save Object',
                                'use_defaults': True}],
-        ['', pug.Label, {'label':' Spacial'}],
+        ['Spacial', pug.Label],
+        ['layer_name', pug.Dropdown, {'list_generator':get_available_layers,
+                                      'label':'   layer'}],
         ['position'],
         ['rotation'],
         ['scale'],
-        ['', pug.Label, {'label':' Image'}],
+        ['Image', pug.Label],
         ['image_file', pug.ImageBrowser],
         ['color'],
         ['lighting'],
@@ -204,9 +205,9 @@ _spriteTemplate = {
 #        ['rotation_speed'],
 #        ['velocity'],
 #        ['acceleration'],
-        ['', pug.Label, {'label':' Components'}],
-        ['', pug.Components],
-        ['', pug.Label, {'label':' Functions'}],
+        ['Components', pug.Label],
+        ['components'],
+        ['Functions', pug.Label],
         ['delete'],
 #        ['_delete_test'],
 #        ['_test_referrers'],
