@@ -3,7 +3,7 @@
 ###################
 # import autocode #
 ###################
-from pug_opioid.PugSprite import PugSprite
+from objects.MyObjectClass import MyObjectClass
 #######################
 # End import autocode #
 #######################
@@ -11,15 +11,11 @@ from pug_opioid.PugSprite import PugSprite
 ########################
 # "yellowpug" autocode #
 ########################
-class yellowpug(PugSprite):
-    image = 'art/pug.png'
-    layer = 'bar'
+class yellowpug(MyObjectClass):
     def on_create(self):
-        PugSprite.on_create(self)
-        self.color = (1.0, 1.0, 0.0, 1.0)
-        self.rotation = 40.0
-        self.position.x = 187.0
-        self.position.y = 163.0
+        MyObjectClass.on_create(self)
+        self.position.x = 434.0
+        self.position.y = 287.0
 ############################
 # End "yellowpug" autocode #
 ############################
