@@ -49,12 +49,12 @@ simple objects that contain a few values in them (i.e. X and Y)
         SPACING = 4 # for button
         
         # control
-        control = wx.Panel(window.get_control_window())
+        control = wx.Panel(window)
         controlSizer = wx.BoxSizer(orient=wx.VERTICAL)
         control.SetSizer(controlSizer)
 
         #label
-        label = wx.Panel(window.get_label_window(), 
+        label = wx.Panel(window, 
                          size=(1,WX_STANDARD_HEIGHT))
         labelSizer = wx.FlexGridSizer(1, 2, 0, 0)
         labelSizer.AddGrowableCol(0)
@@ -115,7 +115,7 @@ simple objects that contain a few values in them (i.e. X and Y)
         
     def setup(self, attribute, window, aguidata):
         sub_attributes = aguidata.get('sub_attributes',[])
-        old_attributes = self._aguidata['sub_attributes']
+        old_attributes = self.aguidata['sub_attributes']
         if sub_attributes != old_attributes:
             self.__init__(self, attribute, window, aguidata)
             return
@@ -127,7 +127,7 @@ simple objects that contain a few values in them (i.e. X and Y)
         if self.objRef:
             return self.objRef()
         else:
-            object = getattr(self._window.object, self.attribute)
+            object = getattr(self.window.object, self.attribute)
             self.objRef = weakref.ref(object)
             return object        
 
@@ -147,14 +147,14 @@ simple objects that contain a few values in them (i.e. X and Y)
         return
     
     def get_attribute_value(self, event=None):
-        object = getattr(self._window.object, self.attribute)
+        object = getattr(self.window.object, self.attribute)
         val = []
         for attr, control in self.subControlList:
             val += [getattr(object,attr)]
         return tuple(val)
             
     def set_attribute_value(self):
-        object = getattr(self._window.object, self.attribute)
+        object = getattr(self.window.object, self.attribute)
         val = self.get_control_value()
         i=0
         try:

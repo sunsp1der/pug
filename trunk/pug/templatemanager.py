@@ -4,6 +4,7 @@ utility for storing customized pug templates for classes
 """
 
 import copy
+import inspect
 
 from pug.constants import *
 
@@ -40,6 +41,28 @@ _aguiDefaultDict = {}
 
 def get_template_manager():
     return _templateManager
+
+def get_obj_template_info( obj):
+    """get_template_info( obj)->templateInfo dict for obj"""
+    templateInfo = None
+    # look for templates specific to object's class
+    if hasattr(obj,'__class__'):
+        templateInfo = get_template_info( obj.__class__)
+    # if necessary, look for templates assigned to object
+    if not templateInfo and not inspect.isclass(obj) and \
+                hasattr(obj, '_pug_template_class'):
+        templateInfo = get_template_info(obj._pug_template_class)
+    # as a last resort, use the default template
+    if not templateInfo:
+        templateInfo = get_template_info('default_template_info')
+    return templateInfo    
+
+def get_default_template( obj):
+    """get_default_template( obj)->default pug template for obj"""
+    info = get_obj_template_info(obj)
+    if info.has_key('default'):
+        return info['templates'][info['default']]
+    return None
 
 def add_template( cls, template, setAsDefault=False):
     """add_template( cls, template, setAsDefault=False)

@@ -27,6 +27,8 @@ aguidata: {
         described in the 'list' entry above.
     'callback': this function will be called when an item is selected, after the
         itemdata is applied to the attribute... callback( itemtext, itemdata)
+    'dropdown_tooltip': show a tooltip for the currently selected item in the 
+        dropdown
 
 For kwargs optional arguments, see the Base attribute GUI
 """
@@ -37,7 +39,7 @@ For kwargs optional arguments, see the Base attribute GUI
         else:
             self.allow_typing = False
             style |= wx.CB_READONLY
-        control = wx.combo.ComboCtrl(parent=window.get_control_window(),
+        control = wx.combo.ComboCtrl(parent=window,
                                      style=style)
         control.SetMinSize((-1,WX_STANDARD_HEIGHT))
         listctrl = ListCtrlComboPopup()
@@ -60,7 +62,7 @@ For kwargs optional arguments, see the Base attribute GUI
         else:
             self.listctrl.SetPopupCallback(None)
         Base.setup(self, attribute, window, aguidata)
-        self.setup_listctrl(self._aguidata.get('list',[]))
+        self.setup_listctrl(self.aguidata.get('list',[]))
         
     def setup_listctrl(self, list=None):
         if not list and not callable(self.list_generator):
@@ -103,12 +105,13 @@ For kwargs optional arguments, see the Base attribute GUI
         self.set_tooltip()
         
     def set_tooltip(self):
-        return
-        if hasattr(self.data,'__doc__') and self.data.__doc__:
-            self.control.SetToolTipString(self.data.__doc__)
-        else:
-            self.control.SetToolTipString(' ')
-        
+        if self.aguidata.get('dropdown_tooltip', False):
+            if hasattr(self.data,'__doc__') and self.data.__doc__:
+                self.control.SetToolTipString(self.data.__doc__)
+                self.control.GetToolTip().Enable(True)
+            else:
+                self.control.SetToolTipString(' ')
+                
     def get_control_value(self):
         return self.data
     
@@ -126,5 +129,6 @@ For kwargs optional arguments, see the Base attribute GUI
         self.listctrl.SelectItem(i)
         self.control.SetText(self.listctrl.GetStringValue()) 
         self.data = value
+        self.set_tooltip()
 #        self.control.SetToolTipString( str(value))
         

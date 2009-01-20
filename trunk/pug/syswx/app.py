@@ -2,6 +2,7 @@
 import weakref
 import os
 import traceback
+import time
 # from dummy_threading import Thread
 # import dummy_thread as thread
 # import thread
@@ -17,7 +18,7 @@ from pug.syswx.SelectionFrame import SelectionFrame
 # TODO: create 'Initializing Pug' window
 # TODO: create a link between project closing and app closing
 
-_RECTPREFIX = '_rect_'
+_RECTPREFIX = 'rect_'
 
 class pugApp(wx.App):
     """pugApp: wx.App for the pug system
@@ -88,7 +89,6 @@ projectFolder: where file menus start at.  Defaults to current working dir.
         self.initProgressDialog = wx.ProgressDialog("Python Universal GUI",
                                             'PUG system initializing...',
                                             parent=None,
-                                            style=wx.PD_ELAPSED_TIME,
                                             maximum=23)
 #        self.initProgressDialog.SetSize((400,
 #                                         self.initProgressDialog.GetSize()[1]))
@@ -137,10 +137,11 @@ called every second until the object is initialized"""
             msg = 'Opening Project...'
             self.initProgressDialog.Update(22, msg)
             self.initProgressDialog.Raise()
+            time.sleep(0.1)
             self.finalize_project_object( object)
         else:
             wx.CallLater(500,self.post_init,object)
-
+            
     def finalize_project_object(self, object):
         self.open_project_frame(object) 
         self.register_selection_watcher(object)
@@ -407,7 +408,7 @@ settingsObj: a class with values like those created in create_frame_settings.
 """        
         self.settings = settingsObj
             
-    def get_rect_setting_name(self, frame):
+    def getrect_setting_name(self, frame):
         return make_name_valid(''.join([_RECTPREFIX,frame.Name]))
             
     def create_frame_settings(self, settingsObj=None):
@@ -421,7 +422,7 @@ settingsObj: any frame settings members will be replaced
             # setting entry like: framename_rect = (x, y, width, height)
             if not frame.Name:
                 continue
-            name = self.get_rect_setting_name(frame)
+            name = self.getrect_setting_name(frame)
             data = (frame.Position[0], frame.Position[1], 
                     frame.Size[0], frame.Size[1])
             setattr(frame_settings, name, data)
@@ -440,7 +441,7 @@ settingsObj: any frame settings members will be replaced
             return frame_settings            
             
     def set_default_pos(self, frame):
-        name = self.get_rect_setting_name(frame)
+        name = self.getrect_setting_name(frame)
         if getattr(self.settings, name, None):
             rect = getattr(self.settings, name)
             frame.SetPosition((rect[0],rect[1]))
@@ -453,7 +454,7 @@ settingsObj: any frame settings members will be replaced
             if frame.IsActive():
                 win = frame
         for frame in windows:
-            if win != frame:
+            if frame != win and frame.IsShown():
                 frame.Raise()
         if win:
             win.Raise()
@@ -461,4 +462,5 @@ settingsObj: any frame settings members will be replaced
     def apply_all(self, event=None):
         windows = wx.GetTopLevelWindows()
         for frame in windows:
-            frame.apply()
+            if hasattr( frame, 'apply'):
+                frame.apply()

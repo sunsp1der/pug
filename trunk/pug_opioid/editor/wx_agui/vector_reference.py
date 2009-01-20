@@ -30,12 +30,11 @@ Contains text showing attribute's value and two buttons...
 This control is generally meant to be used for instances, but could be used for
 any object.
 """
-    def __init__(self, attribute, frame, **kwargs):
+    def __init__(self, attribute, window, aguidata, **kwargs):
         #widgets
-        control = wx.Panel(frame.get_control_window(), 
-                           size = (1,WX_STANDARD_HEIGHT))
+        control = wx.Panel(window, size = (1,WX_STANDARD_HEIGHT))
         control.SetMinSize((-1,WX_STANDARD_HEIGHT))
-        self.object = getattr(frame.object,attribute)
+        self.object = getattr(window.object,attribute)
         #x
         xTextSizer = AguiLabelSizer(control, 'X:')
         xText = wx.TextCtrl( control, -1, 
@@ -52,7 +51,7 @@ any object.
         control.Bind(wx.EVT_TEXT_ENTER, self.apply)
         #button
         newViewButton = PugButton(control, self.object,
-                               True, attribute, frame)
+                               True, attribute, window)
         self.xText = xText
         self.yText = yText
         self.xTextSizer = xTextSizer
@@ -70,7 +69,7 @@ any object.
         controlSizer.Add(newViewButton)
 
         kwargs['control_widget'] = control
-        Base.__init__(self, attribute, frame, **kwargs)
+        Base.__init__(self, attribute, window, aguidata, **kwargs)
         
     def get_control_value(self):
         """get_control_value -> (X,Y)"""

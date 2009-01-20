@@ -10,14 +10,14 @@ import Opioid2D
 from Opioid2D.public.Node import Node
 
 from pug import code_export, GnameDropdown
-from pug.syswx.util import ShowExceptionDialog
+from pug.syswx.util import show_exception_dialog
 from pug.syswx.SelectionFrame import SelectionFrame
 from pug.util import make_name_valid
 
 from pug_opioid.util import get_available_scenes, get_available_objects
 from pug_opioid.editor import EditorState
 
-DEBUG = False
+_DEBUG = False
 
 # constant to set up component agui
 GNAMED_NODE = {'agui':GnameDropdown, 'aguidata':{'class_list':[Node]}}
@@ -110,7 +110,7 @@ parentWindow: the parent window of name dialog. If not provided, the
         get_available_objects( True)
         return exporter
     except:
-        ShowExceptionDialog()
+        show_exception_dialog()
     
 _changedArchetypeList = []    
 def archetype_changed( cls):
@@ -202,7 +202,7 @@ parentWindow: the parent window of name dialog. If not provided, the
     wx.GetApp().apply_all()
     if get_scene_errors():
         return
-    if DEBUG: print "util: save_scene_as"
+    if _DEBUG: print "util: save_scene_as"
     scene = Opioid2D.Director.scene
     if not sceneName:
         name = scene.gname
@@ -251,11 +251,11 @@ parentWindow: the parent window of name dialog. If not provided, the
     scene.state = None          
     wx.BeginBusyCursor()
     try:
-        if DEBUG: print "util: save_scene_as enter code_export"
+        if _DEBUG: print "util: save_scene_as enter code_export"
         code_export( scene, path, True, {'name':sceneName})
-        if DEBUG: print "util: save_scene_as exit code_export"
+        if _DEBUG: print "util: save_scene_as exit code_export"
     except:
-        ShowExceptionDialog()
+        show_exception_dialog()
     else:
         if sceneName != Opioid2D.Director.scene.__class__.__name__:
             scenedict = get_available_scenes(True)

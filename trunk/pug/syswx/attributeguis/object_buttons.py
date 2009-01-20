@@ -28,21 +28,20 @@ This control is generally meant to be used for instances, but could be used for
 any object.
 """
     view_button = new_view_button = 0
-    def __init__(self, attribute, frame, aguidata ={}, **kwargs):
+    def __init__(self, attribute, window, aguidata={}, **kwargs):
         aguidata.setdefault('view_button',False)#,True)
         aguidata.setdefault('new_view_button',True)        
         #widgets
-        control = wx.Panel(frame.get_control_window(), 
-                           size=(1,WX_STANDARD_HEIGHT))
+        control = wx.Panel(window, size=(1,WX_STANDARD_HEIGHT))
         control.SetMinSize((-1,WX_STANDARD_HEIGHT))
         controlSizer = wx.BoxSizer(orient=wx.HORIZONTAL)
 
-        obj = getattr(frame.object,attribute)
+        obj = getattr(window.object,attribute)
         control.value = obj
         
         if aguidata['new_view_button']:
             new_view_button = PugButton(control, obj,
-                                   True, attribute, frame)
+                                   True, attribute, window)
             controlSizer.Add(new_view_button)
             self.new_view_button = new_view_button    
             self.new_view_button.Bind(wx.EVT_BUTTON, self.evt_view)
@@ -51,7 +50,7 @@ any object.
 
         if aguidata['view_button']:
             view_button = PugButton(control, obj,
-                                   False, attribute, frame)
+                                   False, attribute, window)
             self.view_button = view_button
             controlSizer.Add(view_button)
             self.view_button.Bind(wx.EVT_BUTTON, self.evt_view) 
@@ -69,10 +68,10 @@ any object.
         controlSizer.AddSizer(textSizer,1,wx.EXPAND)
 
         kwargs['control_widget'] = control
-        Base.__init__(self, attribute, frame, aguidata, **kwargs)
+        Base.__init__(self, attribute, window, aguidata, **kwargs)
         
     def setup(self, attribute, window, aguidata):
-        if aguidata != self._aguidata:
+        if aguidata != self.aguidata:
             self.__init__( attribute, window, aguidata)
             return
         else:
@@ -87,7 +86,7 @@ any object.
     def setup_buttons(self, obj):
         for button in [self.view_button, self.new_view_button]:
             if button:
-                button.set_object(obj, self.attribute, self._window)
+                button.set_object(obj, self.attribute, self.window)
         
     def set_control_value(self, obj):
         text = self.label_text(obj)

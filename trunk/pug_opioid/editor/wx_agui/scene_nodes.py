@@ -18,40 +18,29 @@ window: the parent window.
 For other kwargs arguments, see the Base attribute GUI
 """
     refreshing = False
-    def __init__(self, attribute, window, aguidata, **kwargs):
+    def __init__(self, attribute, window, aguidata={}, **kwargs):
         self.tree = None
         # control
         control = NodeTreeListCtrl(window.object, 
-                                   parent=window.get_control_window())
+                                   parent=window)
         control.SetMinSize((control.get_full_width(), -1))
-        aguidata['control_only']=True
         kwargs['control_widget'] = control
         Base.__init__(self, attribute, window, aguidata, **kwargs)
-
-#        FOR OPENING IN A SEPARATE WINDOW (old style)
-#        control = wx.Panel(frame.get_control_window(), 
-#                           size=(1,WX_STANDARD_HEIGHT))
-#        control.SetMinSize((-1,WX_STANDARD_HEIGHT))
-#        button = wx.Button(control, label='Tree View', style=wx.BU_EXACTFIT)
-#        button.Bind(wx.EVT_BUTTON, self.tree_view)
-#        line = AguiLabelSizer(parent=control, label = '')        
-#        sizer = wx.BoxSizer(orient = wx.HORIZONTAL)   
-#        sizer.Add(button, flag = wx.EXPAND)
-#        sizer.Add(line, 1, flag = wx.EXPAND)
-#        control.SetSizerAndFit(sizer)   
-#        if aguidata.get('auto_open'):
-#            self.tree_view()
+        
+    def setup(self, attribute, window, aguidata={}):
+        aguidata.setdefault('control_only',True)
+        Base.setup( self, attribute, window, aguidata)
         
     def tree_view(self, event=None):
         app = wx.GetApp()        
-        if not app.show_object_pugframe(self._window.object.nodes) and \
+        if not app.show_object_pugframe(self.window.object.nodes) and \
                 not wx.GetKeyState(wx.WXK_CONTROL):
-            name = self._window.shortPath
+            name = self.window.shortPath
             if not name:
-                name = self._window.Title
+                name = self.window.Title
             title = ' '.join([name,'Node-Tree'])
-            self.tree = NodeTreeFrame( self._window.object, 
-                                       parent=self._window, 
+            self.tree = NodeTreeFrame( self.window.object, 
+                                       parent=self.window, 
                                   title=title)
             self.tree.Show()
         
@@ -193,10 +182,7 @@ Special kwargs:
             gname = getattr(node, 'gname', '')
             if not gname:
                 gname = ''
-            try:
-                layer = str(node.layer.name)
-            except:
-                layer = ''
+            layer = str(node.layer_name)
             item = self.AppendItem(self.root, cls)
             self.SetPyData(item, weakref.ref(node))
             self.SetItemText(item, gname, 0)

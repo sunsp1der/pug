@@ -12,8 +12,8 @@ from _game_settings import game_settings
 sys.path.insert( 0, os.path.dirname(os.path.dirname(__file__))) 
 
 # settings
-position = game_settings.opioid_window_rect[0:2]
-resolution = game_settings.opioid_window_rect[2:4]
+position = game_settings.rect_opioid_window[0:2]
+resolution = game_settings.rect_opioid_window[2:4]
 title = game_settings.title
 fullscreen = game_settings.fullscreen
 

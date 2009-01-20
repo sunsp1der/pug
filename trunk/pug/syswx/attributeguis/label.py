@@ -32,7 +32,7 @@ darkened background...
 For kwargs optional arguments, see the Base attribute GUI
 """
     def __init__(self, attribute, window, aguidata={}, **kwargs):
-        label = wx.Panel(window.get_label_window(), style=0)
+        label = wx.Panel(window, style=0)
         #background color
         if not hasattr(self, 'defaultBackgroundColor'):
             backgroundColor = label.GetBackgroundColour()
@@ -62,21 +62,19 @@ For kwargs optional arguments, see the Base attribute GUI
         label.textCtrl = textSizer.textCtrl
         # label.preferredWidth = textSizer.preferredWidth # FOR SASH
                             
-        self.initAttribute = attribute
-        aguidata['control_only'] = True        
+        aguidata.setdefault('label', attribute)
         kwargs['aguidata'] = aguidata
         kwargs['control_widget'] = label
         Base.__init__(self, '', window, **kwargs)
         
     def setup(self, attribute, window, aguidata):
+        aguidata['control_only'] = True        
         fontsize = aguidata.get('font_size', self.defaultFontSize)
-        if fontsize != self._aguidata.get('font_size', self.defaultFontSize):
+        if fontsize != self.aguidata.get('font_size', self.defaultFontSize):
             self.__init__(attribute, window, aguidata)
             return
         if attribute:
-            aguidata['label'] = attribute
-        elif self.initAttribute:
-            aguidata['label'] = self.initAttribute
+            aguidata.setdefault('label', attribute)
         labelText = aguidata.get('label', '')
         self.control.textCtrl.SetLabel(labelText)
         aguidata.setdefault('background_color', self.defaultBackgroundColor)

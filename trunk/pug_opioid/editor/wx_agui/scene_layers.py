@@ -40,7 +40,7 @@ For other kwargs arguments, see the Base attribute GUI
             name = dlg.GetValue()
             name.strip()
             if name:
-                self._window.object.add_layer(str(name))
+                self.window.object.add_layer(str(name))
                 self.refresh()
         dlg.Destroy()
 
@@ -52,7 +52,7 @@ For other kwargs arguments, see the Base attribute GUI
         if dlg.ShowModal() == wx.ID_YES:
             layer = self.listbox.GetStringSelection()
             if layer:
-                self._window.object.delete_layer(str(layer))
+                self.window.object.delete_layer(str(layer))
             self.refresh()
         dlg.Destroy()
         

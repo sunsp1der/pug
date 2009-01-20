@@ -5,7 +5,7 @@ import wx.lib.buttons as buttons
 
 from pug.constants import *
 from pug.util import get_type_name
-from pug.syswx.util import ShowExceptionDialog
+from pug.syswx.util import show_exception_dialog
 from pug.syswx.wxconstants import *
 from pug.syswx.attributeguis.base import Base
 
@@ -28,7 +28,7 @@ special aguidata entries:
     'no_return_popup': if this is true, don't show a return value popup
 See Base attribute gui for other argument info
 """
-        control = wx.Panel(window.get_control_window(), 
+        control = wx.Panel(window, 
                            size = (1,WX_STANDARD_HEIGHT))
         control.SetMinSize((-1,WX_STANDARD_HEIGHT))
         #widgets
@@ -159,7 +159,7 @@ See Base attribute gui for other argument info
                 retValue = routine.__call__()
             except:
                 wx.EndBusyCursor()                
-                ShowExceptionDialog( self.control)
+                show_exception_dialog( self.control)
             else:
                 wx.EndBusyCursor()                
                 try:
@@ -182,7 +182,7 @@ See Base attribute gui for other argument info
         if dlg.ShowModal() == wx.ID_OK:
             attribute = self.attribute
             actualSelf = self
-            self = self._window.object
+            self = self.window.object
             retValue = None
             command = ''.join(['retValue = self.',routine.__name__,'(',
                                dlg.GetValue(),')'])
@@ -192,7 +192,7 @@ See Base attribute gui for other argument info
             except:
                 wx.EndBusyCursor()                
                 self = actualSelf
-                ShowExceptionDialog( self.control)
+                show_exception_dialog( self.control)
                 self.openExecuteWindow()
             else:
                 wx.EndBusyCursor()
@@ -202,7 +202,7 @@ See Base attribute gui for other argument info
         dlg.Destroy()
 
     def display_retvalue(self, retValue):
-        do_retvalue = not self._aguidata.get('no_return_popup', False)
+        do_retvalue = not self.aguidata.get('no_return_popup', False)
         if not do_retvalue:
             return
         if retValue is not None:
@@ -222,7 +222,7 @@ See Base attribute gui for other argument info
                 if retDlg.ShowModal() == wx.ID_YES:
                     showframe = self.pug_frame(obj=retValue, 
                              objectpath=get_type_name(retValue), 
-                             parent=self._window)
+                             parent=self.window)
             try:
                 retDlg.Destroy()
                 if showframe:

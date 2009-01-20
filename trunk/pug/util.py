@@ -9,7 +9,7 @@ import sys
 import os
 import inspect
 
-DEBUG = False
+_DEBUG = False
 
 _IMAGEPATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Images")
 def get_image_path(filename):

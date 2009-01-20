@@ -13,7 +13,7 @@ from pug_opioid.editor.util import get_available_layers, save_object, \
 
 import sys
 
-DEBUG = False
+_DEBUG = False
 
 class PugSprite(Sprite, pug.BaseObject):
     """PugSprite( img=None, gname='')
@@ -41,15 +41,16 @@ Opioid2d Sprite with features for use with pug"""
     # scene management
     def _set_gname(self, value):
         pug.BaseObject._set_gname(self, value)
-        if DEBUG: print "PugSprite._set_gname callimg scene.update_node"
-        Director.scene.update_node(self)
+        if hasattr(Director, '_scene'):
+            if _DEBUG: print "PugSprite._set_gname calling scene.update_node"
+            Director.scene.update_node(self)
     gname = property( pug.BaseObject._get_gname, _set_gname, 
                       pug.BaseObject._del_gname,
                       "An easily accessed global name for this object")
 
     def _on_mgr_delete(self):
         Sprite._on_mgr_delete(self)  
-        if DEBUG: print "PugSprite._on_mgr_delete calling scene.update_node"
+        if _DEBUG: print "PugSprite._on_mgr_delete calling scene.update_node"
         Director.scene.update_node(self, "Delete") # register self with scene                
 
     def delete(self):
@@ -60,7 +61,7 @@ Opioid2d Sprite with features for use with pug"""
         if layer not in Director.scene.layers:
             Director.scene.add_layer(layer)
         Sprite.set_layer(self, layer)
-        if DEBUG: print "PugSprite.set_layer calling scene.update_node"        
+        if _DEBUG: print "PugSprite.set_layer calling scene.update_node"
         Director.scene.update_node(self) # register self with scene    
     def get_layer_name(self):
         try:
@@ -76,7 +77,7 @@ Opioid2d Sprite with features for use with pug"""
     
     # code storage customization
     def _create_object_code(self, storageDict, indentLevel, exporter):
-        if DEBUG: print "*******************enter sprite save: "+str(self)        
+        if _DEBUG: print "*******************enter sprite save: "+str(self)        
         # make sure we have our dummy node cleanup registered
         if exporter_cleanup not in exporter.deleteCallbacks:
             exporter.register_delete_callback( exporter_cleanup)
@@ -138,7 +139,7 @@ Opioid2d Sprite with features for use with pug"""
         if not custom_code and storageDict['as_class']:
             custom_code = [baseIndent, 'pass\n']
         code += custom_code
-        if DEBUG: print "*******************exit sprite save: "+str(self)        
+        if _DEBUG: print "*******************exit sprite save: "+str(self)        
         return ''.join(code)
     
     def _test_referrers(self):
@@ -187,13 +188,13 @@ _spriteTemplate = {
         ['__class__', None, {'label':'   class', 'new_view_button':False}],
         ['save_sprite', None, {'label':'   Save Object',
                                'use_defaults': True}],
-        ['Spacial', pug.Label],
+        [' Spacial', pug.Label],
         ['layer_name', pug.Dropdown, {'list_generator':get_available_layers,
                                       'label':'   layer'}],
         ['position'],
         ['rotation'],
         ['scale'],
-        ['Image', pug.Label],
+        [' Image', pug.Label],
         ['image_file', pug.ImageBrowser],
         ['color'],
         ['lighting'],
@@ -205,9 +206,9 @@ _spriteTemplate = {
 #        ['rotation_speed'],
 #        ['velocity'],
 #        ['acceleration'],
-        ['Components', pug.Label],
+        [' Components', pug.Label],
         ['components'],
-        ['Functions', pug.Label],
+        [' Functions', pug.Label],
         ['delete'],
 #        ['_delete_test'],
 #        ['_test_referrers'],

@@ -12,15 +12,15 @@ attribute: what attribute of window.object is being controlled
 window: the parent pugFrame
 For kwargs optional arguments, see the Base attribute GUI
 """
-    def __init__(self, attribute, window, **kwargs):
-        control = wx.TextCtrl(window.get_control_window(), -1, 
+    def __init__(self, attribute, window, aguidata={}, **kwargs):
+        control = wx.TextCtrl(window, -1, 
                               size=wx.Size(30, WX_STANDARD_HEIGHT), 
                               style=wx.TAB_TRAVERSAL | wx.TE_PROCESS_ENTER)
         control.SetMinSize(wx.Size(0, WX_STANDARD_HEIGHT))
         control.Bind(wx.EVT_TEXT_ENTER, self.apply)
 
         kwargs['control_widget'] = control
-        Base.__init__(self, attribute, window, **kwargs)
+        Base.__init__(self, attribute, window, aguidata, **kwargs)
         
     def get_control_value(self):
         try:

@@ -13,7 +13,7 @@ from pug.gname import GnamedObject
 from pug.util import make_name_valid, get_type_name
 import all_components
 
-DEBUG = False
+_DEBUG = False
 
 class CodeStorageExporter():
     """Object that manages exporting autocode
@@ -485,7 +485,7 @@ Create the init_method code.
                 else:
                     if dummy is not None:
                         dummyDict[obj_class] = dummy
-                        if DEBUG: print "CSE created dummy" + str(dummy)
+                        if _DEBUG: print "CSE created dummy" + str(dummy)
                     else:
                         # this is a little odd, but necessary due to threading
                         dummy = None

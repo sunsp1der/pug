@@ -13,7 +13,7 @@ import Opioid2D
 from Opioid2D.public.Node import Node
 
 import pug
-from pug.syswx.util import ShowExceptionDialog
+from pug.syswx.util import show_exception_dialog, cache_default_view
 from pug.syswx.component_browser import ComponentBrowseFrame
 
 from pug_opioid import PugScene, PugSprite
@@ -24,7 +24,7 @@ from pug_opioid.editor import EditorState, selectionManager
 from pug_opioid.editor.util import close_scene_windows, save_scene_as, \
                                     project_quit
                                     
-DEBUG = False
+_DEBUG = False
 
 class OpioidInterface(pug.ProjectInterface):
     _pug_template_class = 'OpioidInterface'
@@ -52,8 +52,8 @@ class OpioidInterface(pug.ProjectInterface):
                 
         pug.ProjectInterface.__init__(self)
         os.environ['SDL_VIDEO_WINDOW_POS'] = \
-                "%d,%d" % self.pug_settings.opioid_window_rect[0:2]
-        Opioid2D.Display.init(self.pug_settings.opioid_window_rect[2:4], 
+                "%d,%d" % self.pug_settings.rect_opioid_window[0:2]
+        Opioid2D.Display.init(self.pug_settings.rect_opioid_window[2:4], 
                               title='Pug_Opioid Scene')
         Opioid2D.Director.game_started = False
         Opioid2D.Director.playing_in_editor = True
@@ -73,11 +73,11 @@ settingsObj: an object similar to the one below... if it is missing any default
 """    
         # DEFAULT GAME SETTINGS
         class game_settings():
-            opioid_window_rect = (20, 20, 800, 600)
-            initial_scene = None
             title = 'Pug_Opioid Game'
-            save_settings_on_quit = True
+            initial_scene = None
+            rect_opioid_window = (20, 20, 800, 600)
             fullscreen = False
+            save_settings_on_quit = True
             
         if settingsObj:
             for attr, data in game_settings.__dict__.iteritems():
@@ -94,9 +94,9 @@ settingsObj: an object similar to the one below... if it is missing any default
 """
         # DEFAULT PUG SETTINGS
         class pug_settings():
-            opioid_window_rect = (0, 0, 800, 600)
-            save_settings_on_quit = True
             initial_scene = "PugScene"
+            rect_opioid_window = (0, 0, 800, 600)
+            save_settings_on_quit = True
 
         if settingsObj:
             for attr, data in pug_settings.__dict__.iteritems():
@@ -115,7 +115,7 @@ settingsObj: an object similar to the one below... if it is missing any default
                      {'name':'pug_settings'})              
         except:
             if wx.GetApp():
-                ShowExceptionDialog()
+                show_exception_dialog()
             else:
                 raise
         
@@ -140,7 +140,7 @@ settingsObj: an object similar to the one below... if it is missing any default
                 save_game_settings( game_settings)
             except:
                 if wx.GetApp():
-                    ShowExceptionDialog()
+                    show_exception_dialog()
                 else:
                     raise
         else:
@@ -149,20 +149,30 @@ settingsObj: an object similar to the one below... if it is missing any default
                 
     def _post_init(self):
         wx.GetApp().set_pug_settings( self.pug_settings)
+        # cache a sprite view for speed on first selection
+        dummy = PugSprite()
+        cache_default_view( dummy)
+        dummy.delete()
+        while dummy in self.Director.scene.nodes:
+            time.sleep(0.1)
+        # initial scene
+        if self.pug_settings.initial_scene:
+            self.sceneclass = self.pug_settings.initial_scene        
+        if not self.scene:
+            self.sceneclass = self.Director.scene.__class__
+        # cache views for speed
+        cache_default_view(self)
+        cache_default_view(self.scene)
+        # default menus
         wx.GetApp().add_global_menu("Pug_Opioid",
                 [["Save Working Scene\tCtrl+S", self.save_using_working_scene],
                  ["Show All Windows\tCtrl+W", wx.GetApp().raise_all_frames],
                  ["Quit\tCtrl+Q", self.quit]])
-        if self.pug_settings.initial_scene:
-            self.sceneclass = self.pug_settings.initial_scene
-        
-        if not self.scene:
-            self.sceneclass = self.Director.scene.__class__
         # open frame to view scene
         self.view_scene()
         # open selection frame
         self.open_selection_frame()
-        
+            
     def quit(self):
         project_quit()
         
@@ -277,7 +287,7 @@ Callback from PugApp...
             try:
                 save_game_settings( self.game_settings)
             except:
-                ShowExceptionDialog()
+                show_exception_dialog()
         if getattr(self.pug_settings,'save_settings_on_quit',True):
             self.save_pug_settings()
         Opioid2D.Director.realquit()   
@@ -365,7 +375,7 @@ Run the scene being editted in a new process.
         try:
             save_game_settings( self.game_settings)
         except:
-            ShowExceptionDialog()
+            show_exception_dialog()
         subprocess.Popen( ["python","main.py",self.scene.__class__.__name__])
         
     def _on_set_busy_state(self, on):
@@ -416,7 +426,7 @@ def _scene_list_generator():
     
 Return a list of scene classes available in the scenes folder. Append to that
 list a tuple ("New Scene", PugScene) for use in the sceneclass dropdown"""
-    if DEBUG: print "_scene_list_generator"
+    if _DEBUG: print "_scene_list_generator"
     dict = get_available_scenes( 
                     useWorking = wx.GetApp().projectObject._use_working_scene)
     list = dict.values()
@@ -428,7 +438,7 @@ def _object_list_generator():
     
 Return a list of node classes available in the objects folder. Append to that
 list a tuple ("Sprite", PugSprite) for use in the add object dropdown"""
-    if DEBUG: print "_object_list_generator"
+    if _DEBUG: print "_object_list_generator"
     list = get_available_objects()
     list.insert(0,("New Sprite", PugSprite))
     return list    
