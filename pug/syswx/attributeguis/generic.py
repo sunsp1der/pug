@@ -13,10 +13,10 @@ attribute: what attribute of window.object is being controlled
 window: the parent pugWindow
 For kwargs optional arguments, see the Base attribute GUI
 """
-    def __init__(self, attribute, window, **kwargs):
-        #control = wx.Panel(window.get_control_window())
+    def __init__(self, attribute, window, aguidata={}, **kwargs):
+        #control = wx.Panel(window)
         #sizer = wx.BoxSizer()
-        textEntry = AguiTextCtrl( window.get_control_window())
+        textEntry = AguiTextCtrl( window)
         #control.SetSize((30, WX_STANDARD_HEIGHT))
         #sizer.Add(textEntry,1,flag=wx.EXPAND)
         #control.SetSizer(sizer, orient=wx.VERTICAL)
@@ -24,7 +24,7 @@ For kwargs optional arguments, see the Base attribute GUI
         textEntry.Bind(wx.EVT_KILL_FOCUS, self.apply)
 
         kwargs['control_widget'] = textEntry
-        Base.__init__(self, attribute, window, **kwargs)
+        Base.__init__(self, attribute, window, aguidata, **kwargs)
                         
     def get_control_value(self):
         return self.control.GetValue()

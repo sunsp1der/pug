@@ -14,7 +14,7 @@ from pug_opioid.editor.util import get_image_path
 _line_sprite_file = get_image_path("dot.png")
 _empty_sprite_file = get_image_path("empty.png")
 
-DEBUG = True
+_DEBUG = False
 
 class SelectionManager():
     """SelectionManager()
@@ -101,7 +101,7 @@ update all selection boxes.
                         box.surround_node( node)
             return
         except:
-            if DEBUG: 
+            if _DEBUG: 
                 import sys
                 print "SelectionManager.update_boxes: exception"
                 print sys.exc_info()[1]

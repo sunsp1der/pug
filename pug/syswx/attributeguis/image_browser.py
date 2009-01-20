@@ -21,14 +21,13 @@ For other kwargs arguments, see the Base attribute GUI
 
 Uses a browser dialog to facilitate picking a graphics file
 """
-    def __init__(self, attribute, frame, **kwargs):
+    def __init__(self, attribute, window, aguidata={}, **kwargs):
         #attributes
                          
         SPACING = 4 # for button
         
         # control
-        control = wx.Panel(frame.get_control_window(), 
-                           size=(1,WX_STANDARD_HEIGHT))
+        control = wx.Panel(window, size=(1,WX_STANDARD_HEIGHT))
         control.SetMinSize((-1,WX_STANDARD_HEIGHT))
         control.value = ''
         text = AguiTextCtrl(control)
@@ -50,7 +49,7 @@ Uses a browser dialog to facilitate picking a graphics file
 #        control.SetSize(controlSizer.MinSize)
 #        control.SetMinSize((-1,controlSizer.MinSize[1]))
         kwargs['control_widget'] = control
-        Base.__init__(self, attribute, frame, **kwargs)
+        Base.__init__(self, attribute, window, aguidata, **kwargs)
         
     def browse(self, event=None):
         """browse for a new file"""

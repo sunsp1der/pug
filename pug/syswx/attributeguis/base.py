@@ -56,40 +56,48 @@ set_attribute_value expect it.
     applying = False
     def __init__(self, attribute, window, aguidata = {}, control_widget = None, 
                  label_widget = None, **kwargs):
-        self._aguidata = aguidata
-        self._window = window
+        self.aguidata = aguidata
+        self.window = window
         self.attribute = attribute
         # control
         if control_widget:
             self.control = control_widget
         else:
             # no control provided, so just make an empty panel
-            self.control = wx.Panel(window.get_control_window(), 
-                                    size = (1,WX_STANDARD_HEIGHT))
+            self.control = wx.Panel(window, size = (1,WX_STANDARD_HEIGHT))
             
         # label    
         if label_widget:
             self.label = label_widget
         else:
             #panel
-            label = wx.Panel(window.get_label_window(), style=0,
+            label = wx.Panel(window, style=0,
                              size=(0, self.control.Size[1]))
             #label
             labelSizer = AguiLabelSizer(label)
             label.SetSizer(labelSizer)
             label.textCtrl = labelSizer.textCtrl
             self.label = label
+                        
         self.setup( attribute, window, aguidata)
                 
     def setup(self, attribute, window, aguidata):
         """setup(attribute, window, aguidata)
-        
+ 
 Setup agui. Called on creation and when a cached agui is re-used on another 
-object.
+object. Allows an agui to change object, window, or aguidata without recreating
+all controls.
 """
-        self.attribute = attribute            
-        self._aguidata = aguidata
-        self._window = window
+        if attribute is not None:            
+            self.attribute = attribute  
+        if aguidata is not None:         
+            self.aguidata = aguidata
+        if window is not None:
+            self.window = window
+        if self.control.GetParent() != self.window:
+            self.control.Reparent(self.window)
+        if self.label.GetParent() != self.window:
+            self.label.Reparent(self.window)
         aguidata.setdefault('read_only',False)
         #label
         if hasattr(self.label, 'textCtrl'):
@@ -129,18 +137,14 @@ object.
                             
         # context help
         self.setup_context_help(self.label, window)
-        self.setup_context_help(self.control, window)
-        
-        # these will be shown again when placed in pugwindow panels
-        self.label.Hide()
-        self.control.Hide()          
+        self.setup_context_help(self.control, window)        
         
     def get_control_value(self):
         """get the value of the attribute - defined by derivative classes
 
 By default, this returns the attribute value        
 """
-        return getattr(self._window.object, self.attribute, None)
+        return getattr(self.window.object, self.attribute, None)
     
     def set_control_value(self, value):
         """set the value of the attribute - defined by derivative classes"""
@@ -174,7 +178,7 @@ By default, this returns the attribute value
                     self.label.SetToolTipString(' ')
         
     def get_attribute_value(self):
-        return getattr(self._window.object, self.attribute, None)
+        return getattr(self.window.object, self.attribute, None)
  
     def apply(self, event = None):
         """Apply change to object
@@ -183,7 +187,7 @@ When auto apply is off, skip apply events that were created by the event system
 """
         # when auto apply is off, skip apply events that were created by the 
         # event system
-        if not self._window.settings['auto_apply'] and event:
+        if not self.window.settings['auto_apply'] and event:
             return False
         # see if we even need to do anything
         try:
@@ -195,7 +199,7 @@ When auto apply is off, skip apply events that were created by the event system
             # no need to set... effectively, our work is done successfully
             return True
         # we need to set, but make sure attribute is not readonly
-        if self._aguidata['read_only']:
+        if self.aguidata['read_only']:
             # this creates a loop by changing focus automatically
             if self.applying:
                 return
@@ -247,7 +251,7 @@ Try to set the aguis attribute to the value shown in the control
         if attribute_value is None: 
             # attribute type not set
             try:
-                 setattr(self._window.object,self.attribute,control_value)
+                 setattr(self.window.object,self.attribute,control_value)
             except:
                 return False
             else:
@@ -264,21 +268,21 @@ Try to set the aguis attribute to the value shown in the control
                     # no type-casting for special types... don't want any 
                     # weird garbage sitting around
                     typedValue = control_value
-                setattr(self._window.object, self.attribute, typedValue)              
+                setattr(self.window.object, self.attribute, typedValue)              
             except:
                 return False
             else:
                 return True
                 
     def refresh_window(self):
-        self._window.refresh_all()
+        self.window.refresh_all()
         
     def setup_context_help(self, item, window):
         item.Bind(wx.EVT_HELP, self.on_context_help)
         
     def on_context_help(self, event = None):
-        self._window.show_help(
-                      object=getattr(self._window.object, self.attribute, None), 
+        self.window.show_help(
+                      object=getattr(self.window.object, self.attribute, None), 
                       attribute = self.attribute)
         
     def hide(self):
@@ -291,7 +295,7 @@ Try to set the aguis attribute to the value shown in the control
         
     def changed_size(self):
         """Notify the window that this attribute gui has changed size"""
-        self._window.resize_puglist()
+        self.window.resize_puglist()
         
     def match_label_size(self, doWindowResize=False):
         """Match the label height to the control height"""

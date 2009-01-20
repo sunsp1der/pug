@@ -1,12 +1,6 @@
 now:
-	components  agui
-		set default for componentList or whatever it is
-
+ 		
 current version:
-	select on create is so slow
-		gotta re-use guis
-		check for class
-		hide it when no selection
 	
 Finalize:
 	Open/New project	

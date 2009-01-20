@@ -19,7 +19,7 @@ For other kwargs arguments, see the Base attribute GUI
 """
     def __init__(self, attribute, window, aguidata, **kwargs):
         # control
-        control = wx.Panel(parent=window.get_control_window())
+        control = wx.Panel(parent=window)
         height = aguidata.get('height', WX_STANDARD_HEIGHT * 3)
         control.MinSize = (-1, height+2)
         sizer = wx.GridBagSizer()
@@ -75,7 +75,7 @@ For other kwargs arguments, see the Base attribute GUI
             name = dlg.GetValue()
             name.strip()
             if name:
-                self._window.object.add_group(str(name))
+                self.window.object.add_group(str(name))
                 self.refresh()
         dlg.Destroy()
 
@@ -87,14 +87,14 @@ For other kwargs arguments, see the Base attribute GUI
         if dlg.ShowModal() == wx.ID_YES:
             group = self.listbox.GetStringSelection()
             if group:
-                self._window.object.delete_group(str(group))
+                self.window.object.delete_group(str(group))
             self.refresh()
         dlg.Destroy()
 
     def evt_info_button(self, event=None):
         group = self.listbox.GetStringSelection()
         if group:
-            object = self._window.object.get_group(str(group))
+            object = self.window.object.get_group(str(group))
             showButton = True
         else:
             object = None
@@ -104,7 +104,7 @@ For other kwargs arguments, see the Base attribute GUI
                  "To rearrange the order of groups, you must edit the",
                  "groups attribute in this scene's file."])
         frame = HelpFrame( object, self.control, 
-                objectPath=''.join([self._window.objectPath, '.groups']),
+                objectPath=''.join([self.window.objectPath, '.groups']),
                 showPugButton=showButton, showRetypeButton=False, text=text)
         frame.Show()
         frame.Center()

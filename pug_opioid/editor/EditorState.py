@@ -5,7 +5,7 @@ import wx
 
 import Opioid2D
 
-DEBUG = True
+_DEBUG = False
 
 class EditorState(Opioid2D.State):
     layers = ["__selections__",]
@@ -72,7 +72,7 @@ class EditorState(Opioid2D.State):
             for ref in selectedRefList:
                 item = ref()
                 if isinstance(item, Opioid2D.public.Node.Node):
-                    if DEBUG: print 'callafter'
+                    if _DEBUG: print 'callafter'
                     wx.CallAfter(item.delete)
         if ev.key == Opioid2D.K_s and ctrlDown:
             wx.CallAfter(self.interface.save_using_working_scene)

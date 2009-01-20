@@ -42,7 +42,7 @@ For kwargs optional arguments, see the Base attribute GUI
 """
     def __init__(self, attribute, window, aguidata={}, **kwargs):
         #control
-        control = wx.Panel(parent=window.get_control_window())
+        control = wx.Panel(parent=window)
         height = aguidata.get('height', WX_STANDARD_HEIGHT * 3)
         control.MinSize = (-1, height+2)
         sizer = wx.GridBagSizer()
@@ -118,7 +118,7 @@ For kwargs optional arguments, see the Base attribute GUI
         Base.__init__(self, attribute, window, aguidata, **kwargs)
         
     def setup(self, attribute, window, aguidata):
-        if self._aguidata != aguidata:
+        if self.aguidata != aguidata:
             self.__init__(attribute, window, aguidata)
             return
         else:
@@ -134,7 +134,7 @@ For kwargs optional arguments, see the Base attribute GUI
 
     def evt_info_button(self, event=None):
         frame = HelpFrame( None, self.control, 
-                objectPath=''.join([self._window.objectPath, '.', 
+                objectPath=''.join([self.window.objectPath, '.', 
                                     self.label.textCtrl.LabelText.strip()]),
                 showPugButton=False, showRetypeButton=False, text=self.infotext)
         frame.Show()
@@ -173,6 +173,6 @@ For kwargs optional arguments, see the Base attribute GUI
         return self.list
     
     def set_control_value(self, value):
-        if self._aguidata.get('reverse_list', False):
+        if self.aguidata.get('reverse_list', False):
             value.reverse()
         self.setup_listctrl( value)

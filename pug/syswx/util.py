@@ -4,8 +4,11 @@ from sys import exc_info
 import wx
 from wx.lib.dialogs import ScrolledMessageDialog
 
-
 from pug.util import get_image_path
+from pug.templatemanager import get_default_template
+import pug.puglist
+
+_DEBUG = False
 
 class TestEventHandler( wx.EvtHandler):
     def __init__(self, *args, **kwargs):
@@ -16,7 +19,7 @@ class TestEventHandler( wx.EvtHandler):
 def get_icon():
     return wx.Icon( get_image_path('pug.ico'), wx.BITMAP_TYPE_ICO)
 
-def ShowExceptionDialog( parent=None):
+def show_exception_dialog( parent=None):
     """ExceptionDialog(parent): show exception info in a dialog"""
     info = exc_info()
     err = ScrolledMessageDialog(parent, 
@@ -27,3 +30,53 @@ def ShowExceptionDialog( parent=None):
     err.Children[0].ShowPosition(len(traceback.format_exc()))
     err.ShowModal()
     err.Destroy()
+
+def cache_puglist( puglist):
+    for agui in puglist:
+        cache_agui(agui)
+
+_DUMMYFRAME = None
+def get_dummyframe():
+    global _DUMMYFRAME
+    if not _DUMMYFRAME:
+        from pug import frame
+        obj = object()
+        _DUMMYFRAME = wx.Frame(None)
+        _DUMMYFRAME.object = obj
+    return _DUMMYFRAME
+        
+def cache_agui( agui):
+    dummy = get_dummyframe()
+    try:
+        agui.control.Freeze()
+        agui.label.Freeze()
+        agui.control.Reparent(dummy)
+        agui.label.Reparent(dummy)
+    except:
+        pass
+    else:
+        if _DEBUG: print 'cache_agui',agui
+        if agui.control.GetParent() == agui.label.GetParent() == dummy:
+            pug.puglist.cache_agui(agui)
+            
+def cache_default_view( obj):
+    dummy = get_dummyframe()
+    dummy.object = obj
+    try:
+        # hide the cache so we don't use it
+        cacheStash = pug.puglist.aguiCache
+        cache = pug.puglist.aguiCache = {}
+        puglist = pug.puglist.create_puglist( obj, dummy)
+        for agui in puglist:
+            try:
+                cache_agui( agui)
+            except:
+                continue
+        for cls, list in cacheStash.iteritems():
+            if cache.get(cls, False):
+                cache[cls] += cacheStash[cls]
+            else:
+                cache[cls] = cacheStash[cls]
+    except:
+        pass
+        

@@ -12,12 +12,8 @@ attribute: what attribute of window.object is being controlled
 window: the parent pugFrame
 For kwargs optional arguments, see the Base attribute GUI
 """
-    def __init__(self, attribute, frame, **kwargs):
-#        control = wx.CheckBox(frame.get_control_window(), -1, 
-#                              size=wx.Size(30, WX_STANDARD_HEIGHT), 
-#                              style=wx.TAB_TRAVERSAL | wx.TE_PROCESS_ENTER)
-        control = wx.Panel(frame.get_control_window(),                                
-                           size=wx.Size(30, WX_STANDARD_HEIGHT))
+    def __init__(self, attribute, window, aguidata, **kwargs):
+        control = wx.Panel(window, size=wx.Size(30, WX_STANDARD_HEIGHT))
         sizer = wx.BoxSizer(orient=wx.VERTICAL)
         checkbox = wx.CheckBox(control, -1, " ")
         checkbox.Bind(wx.EVT_CHECKBOX, self.apply)
@@ -28,7 +24,7 @@ For kwargs optional arguments, see the Base attribute GUI
         control.SetSizer(sizer)
 
         kwargs['control_widget'] = control
-        Base.__init__(self, attribute, frame, **kwargs)
+        Base.__init__(self, attribute, window, aguidata, **kwargs)
         
     def get_control_value(self):
         value = self.checkbox.GetValue()            

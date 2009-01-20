@@ -21,11 +21,11 @@ aguidata: {
 For kwargs optional arguments, see the Base attribute GUI
 """      
     def setup(self, attribute, window, aguidata):    
-        special_aguidata = {'allow_typing': True, 
+        specialaguidata = {'allow_typing': True, 
                             'list_generator': self.list_generator_func}
-        special_aguidata.update(aguidata)
+        specialaguidata.update(aguidata)
         self.class_list = aguidata.get('class_list',[])
-        Dropdown.setup(self, attribute, window, special_aguidata)
+        Dropdown.setup(self, attribute, window, specialaguidata)
         
     def list_generator_func(self):
         return get_gnames(tuple(self.class_list))

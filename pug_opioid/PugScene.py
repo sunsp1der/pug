@@ -10,7 +10,7 @@ from pug.code_storage import add_subclass_skip_attributes
 from pug_opioid.editor.wx_agui import SceneNodes, SceneLayers
 from pug_opioid.editor.util import get_available_layers, save_object
 
-DEBUG = False
+_DEBUG = False
 
 class PugScene( Opioid2D.Scene, pug.BaseObject):
     """PugScene - Opioid2d Scene with features for use with pug"""
@@ -79,7 +79,7 @@ terms of nodes within the layers"""
             # create ordered list of nodes
             layers = self.get_scene_layers()[:]
             layersort = {}
-            a = 0
+            a = 1
             for layer in layers:
                 layersort[layer] = '%03d'%a
                 a+=1
@@ -87,16 +87,18 @@ terms of nodes within the layers"""
             myNodes = self.nodes.keys()
             for node in myNodes:
                 if hasattr(node.layer,'name'):
-                    nodesorter = '_'.join([layersort[node.layer.name],
+                    nodesorter = '_'.join([layersort[node.layer_name],
                                        '%04d'%self.nodes[node]])
                 else:
-                    import gc
-                    gc.collect()
-                    if DEBUG: print "get_ordered-------------------------------"
-                    if DEBUG: print str(node), node.gname
-                    self.nodes.pop(node)
-                    node._test_referrers()
-                    continue
+                    nodesorter = '_'.join(['000',
+                                       '%04d'%self.nodes[node]])
+                    if _DEBUG:
+                        import gc
+                        gc.collect()
+                        print "get_ordered nolayer", str(node), node.gname
+                        node._test_referrers()
+#                       self.nodes.pop(node)
+#                    continue
                 ordered_nodes[nodesorter] = node
             nodenums = ordered_nodes.keys()
             nodenums.sort()
@@ -160,24 +162,25 @@ selectedRefSet: a list of selected objects. If possible, pick will return an
 Update the PugScene's node tracking dict for node. Possible commands: 'Delete'
 """
         nodes = self.nodes
-        if DEBUG: print "pugscene.update_node", node, command
+        if _DEBUG: print "pugscene.update_node", node, command
         if getattr(node,'deleted',False) or command == 'Delete':
             if nodes.has_key(node):
                 try:
                     nodes.__delitem__(node)
-                    if DEBUG: print "   deleted"
+                    if _DEBUG: print "   deleted"
                 except:
-                    if DEBUG: print "   could not delete (already gone?)"
+                    if _DEBUG: print "   could not delete (already gone?)"
             else:
-                if DEBUG: print "   unable to delete"
+                if _DEBUG: print "   unable to delete"
             return            
         if not nodes.has_key(node):
-            if DEBUG: print "   added"
+            if _DEBUG: print "   added"
             if getattr(Opioid2D.Director, 'game_started', False):
                 self.node_callback(node, "on_added_to_scene", self)
             node_num = self.__node_num
             self.__node_num += 1
         else:
+            if  _DEBUG: print "   check"
             node_num = nodes[node]
         # node_num tracks the order of node additions
         nodes[node] = node_num # this call sets off callbacks for nodes gui
@@ -190,7 +193,7 @@ Update the PugScene's node tracking dict for node. Possible commands: 'Delete'
     
     # code storage customization
     def _create_object_code(self, storageDict, indentLevel, exporter):
-        if DEBUG: print "*******************enter scene save"
+        if _DEBUG: print "*******************enter scene save"
         storage_name = storageDict['storage_name']
         if storage_name == 'PugScene' or \
                 storage_name == 'Scene':
@@ -267,7 +270,7 @@ Update the PugScene's node tracking dict for node. Possible commands: 'Delete'
         base_code += [baseIndent, _INDENT,'layers = ', 
                       str(get_available_layers()),'\n']
         code = ''.join(base_code + custom_code_list)
-        if DEBUG: print "*******************exit scene save"
+        if _DEBUG: print "*******************exit scene save"
         return code
     
     _codeStorageDict = {
@@ -296,7 +299,7 @@ _sceneTemplate = {
 #                               'routine':save_scene_as, 
 #                               'use_defaults':True,
 #                               'tooltip':"Save scene to disk with new name"}],        
-        ['Scene Graph', pug.Label],
+        [' Scene Graph', pug.Label],
         ['nodes', SceneNodes, {'growable':True}],
     ]
 }

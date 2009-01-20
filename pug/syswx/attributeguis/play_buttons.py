@@ -5,7 +5,7 @@ import wx
 import wx.lib.buttons as buttons
 
 from pug.syswx.wxconstants import *
-from pug.syswx.util import ShowExceptionDialog
+from pug.syswx.util import show_exception_dialog
 from pug.syswx.attributeguis.base import Base
 from pug.syswx.agui_label_sizer import AguiLabelSizer
 
@@ -31,7 +31,7 @@ For kwargs arguments, see the Base attribute GUI
 """
     def __init__(self, attribute, window, aguidata ={}, **kwargs):
         #widgets
-        control = wx.Panel(window.get_control_window(), 
+        control = wx.Panel(window, 
                            size=(1,WX_STANDARD_HEIGHT))
         control.SetMinSize((-1, WX_STANDARD_HEIGHT))
         controlSizer = wx.BoxSizer(orient=wx.HORIZONTAL)
@@ -81,7 +81,7 @@ For kwargs arguments, see the Base attribute GUI
         Base.__init__(self, attribute, window, aguidata, **kwargs) 
         
     def setup(self, attribute, window, aguidata):
-        if self._aguidata != aguidata:
+        if self.aguidata != aguidata:
             self.__init__(attribute, window, aguidata)
             return
         else:
@@ -92,6 +92,6 @@ For kwargs arguments, see the Base attribute GUI
         try:
             self.functionDict[event.GetEventObject()]()
         except:
-            ShowExceptionDialog(self.control)
+            show_exception_dialog(self.control)
             wx.StopBusyCursor()
         self.refresh_window()

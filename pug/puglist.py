@@ -3,9 +3,9 @@ from sys import exc_info
 
 from pug.constants import *
 from pug.util import get_type
-from pug.templatemanager import get_agui_default_dict
+from pug.templatemanager import get_agui_default_dict, get_default_template
 
-DEBUG = False
+_DEBUG = False
 
 def create_template_puglist(obj, window, template, filterUnderscore = 2):
     """create_template_pug(obj, window, template, filterUnderscore) -> pugList 
@@ -68,7 +68,7 @@ which contains the class whose templates can be used. For example:
 class otherClass( myClass):
     _pug_template_class = myClass
 """
-    if DEBUG: print "create_template_puglist: begin"
+    if _DEBUG: print "create_template_puglist: begin"
     if template.has_key('create_pug_list_function'):
         pugList = template['create_pug_list_function'](obj, 
                                                        window, filterUnderscore)
@@ -84,11 +84,10 @@ class otherClass( myClass):
             defaultDict = {}
         pugList = []
         # go through list of attributes in template
-        if DEBUG: print obj
+        if _DEBUG: print obj
         for entry in attributeList:
-            if DEBUG: print "create_template_puglist: attr -", entry[0]
             attribute = entry[0]
-            if DEBUG: print attribute
+            if _DEBUG: print "create_template_puglist: attr -", attribute
             if attribute == '*':
                 #create default gui for all attributes we haven't made a gui for
                 for attribute in dirList:
@@ -118,7 +117,8 @@ class otherClass( myClass):
                 else:
                     aguidata = {}
                 # create the agui
-                attributegui = agui(attribute, window, aguidata = aguidata)
+                attributegui = get_agui(agui, 
+                                        attribute, window, aguidata=aguidata)
             else:
                 # no specified agui, so figure out the default
                 try:
@@ -135,8 +135,8 @@ class otherClass( myClass):
                     if len(info) > 2:
                         aguidata = info[2].copy()
                     try:
-                        attributegui = agui(attribute, window, 
-                                            aguidata = aguidata)
+                        attributegui = get_agui(agui, attribute, window, 
+                                                aguidata=aguidata)
                     except:
                         continue
                 else:
@@ -153,7 +153,7 @@ class otherClass( myClass):
             pugList.append(attributegui)
             if entry[0] in dirList:
                 dirList.remove(entry[0])
-    if DEBUG: print "create_template_puglist: end"
+    if _DEBUG: print "create_template_puglist: end"
     return pugList
 
 def create_raw_puglist(obj, window, familyList = None, filterUnderscore = 2):
@@ -229,7 +229,7 @@ aguidata: this dictionary will update the default aguidata dictionary
     else:
         aguidatadefault = {}    
     aguidatadefault.update(aguidata)
-    attributegui = agui(attribute, window, aguidata = aguidatadefault)
+    attributegui = get_agui(agui, attribute, window, aguidata=aguidatadefault)
     return attributegui
 
 def get_attribute_family(obj, attribute):
@@ -268,9 +268,35 @@ For template layout, see create_template_gui.
 """
 # This function is pretty much not used anymore
     if template is None:
+        template = get_default_template( obj)
+    if template is None or not isinstance(template, dict):
         # create an unformatted (raw) pug window
         pugList = create_raw_puglist(obj, window)
     else:
         pugList = create_template_puglist(obj, window, template)
     return pugList
 
+def get_agui( cls, attribute, window, aguidata):
+    """get_agui(cls, attribute, window, aguidata)->agui instance
+
+Get an agui from the cache or create one"""
+    if aguiCache.get(cls, None):
+        agui = aguiCache[cls].pop()
+        try:
+            agui.setup( attribute, window, aguidata)
+            if _DEBUG: print "   cached agui used:", attribute, agui
+        except:
+            pass
+        else:
+            return agui
+    agui = cls( attribute, window, aguidata)
+    return agui
+
+# cache aguis here
+aguiCache = {} # {agui.__class__: [agui, agui...]}
+def cache_agui( agui):
+    if aguiCache.get(agui.__class__, False):
+        if agui not in aguiCache[agui.__class__]:
+            aguiCache[agui.__class__] += [agui]
+    else:
+        aguiCache[agui.__class__] = [agui]           

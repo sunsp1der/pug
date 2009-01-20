@@ -26,9 +26,9 @@ For kwargs optional arguments, see the Base attribute GUI
 """
     expanded = False
     object = None
-    def __init__(self, attribute, frame, aguidata={}, **kwargs):
+    def __init__(self, attribute, window, aguidata={}, **kwargs):
         #label
-        label = wx.Panel(frame.get_label_window(), style=0)
+        label = wx.Panel(window, style=0)
         if not hasattr(self, 'defaultBackgroundColor'):
             defaultBackgroundColor = label.GetBackgroundColour()
             r = defaultBackgroundColor[0] - 10
@@ -44,7 +44,7 @@ For kwargs optional arguments, see the Base attribute GUI
         label.textCtrl = textSizer.textCtrl
                     
         #control
-        control = wx.Panel(frame.get_control_window())
+        control = wx.Panel(window)
         sizer = wx.BoxSizer(orient = wx.VERTICAL)
         self.sizer = sizer
         #edit
@@ -117,7 +117,7 @@ For kwargs optional arguments, see the Base attribute GUI
         kwargs['aguidata'] = aguidata
         kwargs['label_widget'] = label
         kwargs['control_widget'] = control
-        Base.__init__(self, attribute, frame, **kwargs)
+        Base.__init__(self, attribute, window, **kwargs)
         
         # keep the pug function around for button pressing
         # don't know if this is the right way to do it
@@ -172,9 +172,9 @@ For kwargs optional arguments, see the Base attribute GUI
         component = self.editList.get_selected()
         if not component:
             return
-        path = self._window.objectPath
+        path = self.window.objectPath
         if not path:
-            path = self._window.GetTitle()
+            path = self.window.GetTitle()
         obj=component
         app = wx.GetApp()
         if not app.show_object_pugframe(obj) or wx.GetKeyState(wx.WXK_CONTROL):
