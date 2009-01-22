@@ -12,7 +12,8 @@ methods meant for override:
 
 #TODO: add a 'close all project sub-windows' function
 #TODO: add a 'quit project function'
-from sys import exc_info
+import sys
+import traceback
 from time import sleep
 from weakref import ref
 
@@ -28,7 +29,7 @@ Try to exec all the __postInitExecs
         try:
             self._post_init()
         except:
-            return exc_info()
+            return list(sys.exc_info())+[str(traceback.format_exc())]
         self._isReady = True
         return None
     

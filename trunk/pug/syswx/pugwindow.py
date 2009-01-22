@@ -81,9 +81,8 @@ holds multiple PugWindows in tabbed (or other) form.
             app.pugframe_opened(self.GetParent(), "Empty")    
     def __del__(self):
         cache_puglist( self.pugList)
-        wx.lib.scrolledpanel.ScrolledPanel.__del__(self)                 
                     
-    def get_optimal_size(self):
+    def GetBestSize(self):
         size = self.pugSizer.CalcMin()
         if self.pugSizer.GetColWidths():
             # double the label width
@@ -113,7 +112,10 @@ holds multiple PugWindows in tabbed (or other) form.
                     title = ''.join([title, ' (',self.objectPath,')'])
         self.title = title
         
-        wx.GetApp().pugframe_stopped_viewing(self.GetParent(), obj)
+        if self.objectRef:
+            wx.GetApp().pugframe_stopped_viewing(self.GetTopLevelParent(), 
+                                             self.objectRef())
+        oldobject = self.object
         if not obj:
             self.objectRef = None
             self.object = obj
@@ -134,8 +136,17 @@ holds multiple PugWindows in tabbed (or other) form.
             self._init_viewMenu_Items(self.viewMenu)
             self._init_fileMenu_Items(self.exportMenu)
             self.create_puglist()
+            if not oldobject and hasattr(self.GetParent(),
+                                         'show_all_attributes'):
+                self.GetParent().show_all_attributes()
         self.Thaw()                   
         wx.EndBusyCursor()        
+        
+    def SetTitle(self, title):
+        self.title = title
+        parent = self.GetParent()
+        if getattr(parent, 'SetTitle') and not getattr(parent, 'lockedName'):
+            parent.SetTitle(title)        
 
     def _schedule_object_deleted(self=None, obj=None):
         if not wx.GetApp():
@@ -147,9 +158,8 @@ holds multiple PugWindows in tabbed (or other) form.
         self.set_object(None)
         self.display_message(''.join(['Deleted: ', title]))
         parent = self.GetParent()
-        if hasattr(parent, 'on_view_object_deleted'):
-            parent.on_view_object_deleted( self, obj)
-            
+        self.SetTitle(title)
+
     def display_message(self, message):
         """display_message( message)
         
@@ -490,13 +500,14 @@ Automatically calls on_<setting>(val, event) callback.
             self._autoRefreshTimer.Stop()
             
     def _auto_refresh(self, msecs):
-        self.refresh_all()
-        self._autoRefreshTimer = wx.CallLater(msecs, self._auto_refresh, 100)
-            
-    def _evt_on_close(self, event=None):
-        self.on_auto_refresh(False)
-        if event:
-            event.Skip()
+        try:
+            self.refresh_all()
+        except:
+            print "_auto_refresh error:\n",exc_info()
+            show_exception_dialog()
+        else:   
+            self._autoRefreshTimer = wx.CallLater(msecs, 
+                                                  self._auto_refresh, msecs)
                     
     def _init_fileMenu_Items(self, menu):
         for item in menu.MenuItems:
