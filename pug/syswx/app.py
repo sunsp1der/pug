@@ -12,8 +12,9 @@ from inspect import getsourcefile
 import wx
 
 from pug.util import make_name_valid
+from pug.syswx.util import show_exception_dialog
 from pug.syswx.pugframe import PugFrame
-from pug.syswx.SelectionFrame import SelectionFrame
+from pug.syswx.SelectionWindow import SelectionWindow
 
 # TODO: create 'Initializing Pug' window
 # TODO: create a link between project closing and app closing
@@ -36,9 +37,11 @@ projectFolder: where file menus start at.  Defaults to current working dir.
 """
     quitting = False
     busyState = False
+    setting_selection = False
     progressDialog = None
     initTryCounter = 0
     settings = object()
+    projectFrame = None
     def __init__(self, projectObject=None, projectObjectName='',
                  projectName='PUG', projectFolder = "" ):
         #wx.PySimpleApp.__init__(self)
@@ -81,7 +84,7 @@ projectFolder: where file menus start at.  Defaults to current working dir.
         else:
             self.projectFolder = os.getcwd()
                    
-    def set_project_object(self, object):
+    def set_project_object(self, object=None):
         self.projectObject = object
         if not object:
             return
@@ -89,14 +92,17 @@ projectFolder: where file menus start at.  Defaults to current working dir.
         self.initProgressDialog = wx.ProgressDialog("Python Universal GUI",
                                             'PUG system initializing...',
                                             parent=None,
-                                            maximum=23)
+                                            maximum=10)
 #        self.initProgressDialog.SetSize((400,
 #                                         self.initProgressDialog.GetSize()[1]))
         self.initProgressDialog.Bind(wx.EVT_CLOSE, self.abort_init)
         self.initProgressDialog.Update(0)
         self.initProgressDialog.Raise()
+        time.sleep(0.05)
         if object:
             self.post_init(object)
+            return
+        self.finalize_project_object(object)
                     
     def abort_init(self, event=None):
         """Close project while trying to set a project object"""
@@ -114,53 +120,59 @@ called every second until the object is initialized"""
         if hasattr(object,'_isReady') and not object._isReady:
             error = 'unknown error'
             if hasattr(object,'_try_post_init'):
-                exc = object._try_post_init()
-                if exc:
-                    error = ''.join([repr(exc[1])])
+                error = object._try_post_init()
             if self.initTryCounter:
                 # we're only going to do this for 10 tries
                 # then we're gonna guess something's broken
                 self.initTryCounter += 1
-                if self.initTryCounter == 23:
-                    if self.initProgressDialog:
-                        self.initProgressDialog.Update(self.initTryCounter, 
-                                                       error)
-                        self.initProgressDialog.Raise()
+                if self.initProgressDialog:
+                    if error:
+                        msg = error[3].splitlines()[-1]
+                        self.initProgressDialog.Update(self.initTryCounter, msg)
+                        self.initProgressDialog.Fit()
+                    else:
+                        msg = ''.join(['PUG system initializing... tries: ',
+                                   str(self.initTryCounter)])
+                        self.initProgressDialog.Update(self.initTryCounter, msg)
+                    self.initProgressDialog.Raise()
+                if self.initTryCounter == 10:
                     self.post_init_failed(error)
                     return
-                if self.initProgressDialog:
-                    msg = ''.join(['PUG system initializing... tries: ',
-                                   str(self.initTryCounter)])
-                    self.initProgressDialog.Update(self.initTryCounter, msg)
-                    self.initProgressDialog.Raise()
         if not hasattr(object,'_isReady') or object._isReady:        
             msg = 'Opening Project...'
-            self.initProgressDialog.Update(22, msg)
+            self.initProgressDialog.Update(9, msg)
             self.initProgressDialog.Raise()
-            time.sleep(0.1)
+            time.sleep(0.05)
             self.finalize_project_object( object)
         else:
             wx.CallLater(500,self.post_init,object)
+            time.sleep(0.1)
             
     def finalize_project_object(self, object):
-        self.open_project_frame(object) 
+        if object is None:
+            object = self.projectObject
+        if not self.projectFrame:
+            try:
+                frame = PugFrame(obj=object, title=self.projectName, 
+                      objectpath=self.projectObjectName) 
+            except:
+                show_exception_dialog()
+            self.set_project_frame(frame)
         self.register_selection_watcher(object)
         if self.initProgressDialog:
             self.initProgressDialog.Destroy()
         self.SetExitOnFrameDelete(True)
         self.projectFrame.Raise()
             
-    def open_project_frame(self, object = None):
-        if object is None:
-            object = self.projectObject
-        self.projectFrame = PugFrame(obj=object, title=self.projectName, 
-                      objectpath=self.projectObjectName) 
+    def set_project_frame(self,  frame):
+        self.projectFrame = frame 
         self.projectFrame.Bind(wx.EVT_CLOSE, self._evt_project_frame_close, 
                                id=self.projectFrame.GetId()) 
             
     def post_init_failed(self, error):
-        msg = ''.join(['pug.App.post_init error:',error])
+        msg = ''.join(['pug.App.post_init error:\n',error[3]])
         print msg
+        print
         raise Exception(msg)
 
     def _evt_project_frame_close(self, event = None):
@@ -168,20 +180,19 @@ called every second until the object is initialized"""
             if event:
                 event.Skip()
             return
-        if self.projectObject in self.projectFrame.get_object_list():
-            if hasattr(self.projectObject, "_pre_quit_func"):
-                doquit = self.projectObject._pre_quit_func( event)
-                if not doquit:
-                    return
-            else:
-                dlg = wx.MessageDialog(self.projectFrame,
-                               "Close all windows and exit project?",
-                               'Project Frame Closed', 
-                    wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+        if hasattr(self.projectObject, "_pre_quit_func"):
+            doquit = self.projectObject._pre_quit_func( event)
+            if not doquit:
+                return
+        else:
+            dlg = wx.MessageDialog(self.projectFrame,
+                           "Close all windows and exit project?",
+                           'Project Frame Closed', 
+                wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
         #TODO: would be nice if the dlg could be forced above other apps
-                if dlg.ShowModal() != wx.ID_YES:
-                    dlg.Destroy()
-                    return
+            if dlg.ShowModal() != wx.ID_YES:
+                dlg.Destroy()
+                return
         self.quit()
         if event:
             event.Skip()
@@ -285,7 +296,7 @@ Set the interface's selectedRefSet. These objects can be viewed in a PugWindow
 by calling the open_selection_frame method. Selection is tracked in a set, so 
 duplicates will be automatically eliminated.
 """
-        if getattr( self, "setting_selection", False):
+        if self.setting_selection:
             return
         self.setting_selection = True
         self.selectedRefSet.clear()
@@ -301,7 +312,7 @@ duplicates will be automatically eliminated.
                 obj.on_set_selection( self.selectedRefSet)
         self.setting_selection = False
             
-    def open_selection_frame(self, *args, **kwargs):
+    def open_selection_frame(self):
         """open_selection_frame()
 
 Open a SelectionFrame, or if one exists AND control is not being held down, 
@@ -310,9 +321,8 @@ Selection frames display pug views of the objects in self.selectedRefSet. The
 selectedRefSet can be changed using the set_selection method.
 """
         if not self.show_selection_frames() or wx.GetKeyState(wx.WXK_CONTROL):
-            frame = SelectionFrame( *args, **kwargs)
-            self.register_selection_watcher(frame)
-            frame.on_set_selection(self.selectedRefSet)
+            frame = PugFrame( name="Selection")
+            frame.set_pugwindow(SelectionWindow(frame))
         else:
             frame = None
 
@@ -440,12 +450,9 @@ settingsObj: any frame settings members will be replaced
         else:
             return frame_settings            
             
-    def set_default_pos(self, frame):
+    def get_default_pos(self, frame):
         name = self.getrect_setting_name(frame)
-        if getattr(self.settings, name, None):
-            rect = getattr(self.settings, name)
-            frame.SetPosition((rect[0],rect[1]))
-            frame.SetSize((rect[2],rect[3]))
+        return getattr(self.settings, name, None)
             
     def raise_all_frames(self):
         windows = wx.GetTopLevelWindows()

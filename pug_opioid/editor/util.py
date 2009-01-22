@@ -11,7 +11,7 @@ from Opioid2D.public.Node import Node
 
 from pug import code_export, GnameDropdown
 from pug.syswx.util import show_exception_dialog
-from pug.syswx.SelectionFrame import SelectionFrame
+from pug.syswx.SelectionWindow import SelectionWindow
 from pug.util import make_name_valid
 
 from pug_opioid.util import get_available_scenes, get_available_objects
@@ -284,10 +284,10 @@ Note: for this to work on nodes, it must be run BEFORE the scene is changed.
     app = wx.GetApp()
     for frame in app.pugFrameDict:
         try:
-            frameObj = frame.activePugWindow.objectRef()
+            frameObj = frame.pugWindow.objectRef()
         except:
             continue
-        if isinstance(frame, SelectionFrame):
+        if isinstance(frame.pugWindow, SelectionWindow):
             continue
         doclose = False
         if frameObj == scene:

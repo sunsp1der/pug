@@ -23,7 +23,7 @@ For other kwargs arguments, see the Base attribute GUI
         # control
         control = NodeTreeListCtrl(window.object, 
                                    parent=window)
-        control.SetMinSize((control.get_full_width(), -1))
+        #control.SetMinSize((control.get_full_width(), -1))
         kwargs['control_widget'] = control
         Base.__init__(self, attribute, window, aguidata, **kwargs)
         
@@ -49,7 +49,7 @@ class NodeTreeFrame( wx.Frame):
         if title is None:
             title = ''.join([scene.__class__.__name__, ' Node-Tree'])
         wx.Frame.__init__(self, parent, title=title, *args, **kwargs)
-        self.SetMinSize((200,100))
+        #self.SetMinSize((100,100))
         self.CreateStatusBar()
         sizer = wx.BoxSizer()
         self.SetSizer(sizer)

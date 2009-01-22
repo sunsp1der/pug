@@ -290,6 +290,7 @@ _sceneTemplate = {
     'attributes':
     [
         ['Scene', pug.Label, {'font_size':10}],
+        ['__class__', None, {'label':'   class', 'new_view_button':False}],        
         ['scene_layers', SceneLayers],
 #        ['scene_groups', SceneGroups],
 #        ['scene_layers', None, {'label':'   layers','read_only':True}],

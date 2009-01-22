@@ -15,6 +15,7 @@ from Opioid2D.public.Node import Node
 import pug
 from pug.syswx.util import show_exception_dialog, cache_default_view
 from pug.syswx.component_browser import ComponentBrowseFrame
+from pug.syswx.pugmdi import PugMDI
 
 from pug_opioid import PugScene, PugSprite
 from pug_opioid.util import get_available_scenes, get_available_objects, \
@@ -41,10 +42,12 @@ class OpioidInterface(pug.ProjectInterface):
         
         projectPath = os.path.dirname(os.path.realpath(rootfile))
         set_project_path( projectPath)
-        path, self.projectName = os.path.split(projectPath)
+        path, self.project_name = os.path.split(projectPath)
 
         self.reload_scenes()        
         self.import_settings()
+        if getattr(self.game_settings, 'title'):
+            self.project_name = self.game_settings.title      
 
         self.Display = Opioid2D.Display
         self.Director = Opioid2D.Director   
@@ -59,10 +62,9 @@ class OpioidInterface(pug.ProjectInterface):
         Opioid2D.Director.playing_in_editor = True
         thread.start_new_thread(self.Director.run, (scene,))
         
-        title = ''.join([self.projectName,' - Opioid2D Project'])
         app = pug.App(projectObject=self, 
                       projectFolder=projectPath,
-                      projectObjectName=title)
+                      projectObjectName=self.project_name)
         Opioid2D.Director.realquit()
 
     def create_default_game_settings(self, settingsObj=None):
@@ -73,7 +75,7 @@ settingsObj: an object similar to the one below... if it is missing any default
 """    
         # DEFAULT GAME SETTINGS
         class game_settings():
-            title = 'Pug_Opioid Game'
+            title = 'NewGame'
             initial_scene = None
             rect_opioid_window = (20, 20, 800, 600)
             fullscreen = False
@@ -146,32 +148,42 @@ settingsObj: an object similar to the one below... if it is missing any default
         else:
             game_settings = self.create_default_game_settings(game_settings)
         self.game_settings = game_settings
-                
+          
+    cached=[0, 0, 0]      
     def _post_init(self):
-        wx.GetApp().set_pug_settings( self.pug_settings)
+        app = wx.GetApp()
+        app.set_pug_settings( self.pug_settings)
         # cache a sprite view for speed on first selection
-        dummy = PugSprite()
-        cache_default_view( dummy)
-        dummy.delete()
-        while dummy in self.Director.scene.nodes:
-            time.sleep(0.1)
+        if not self.cached[0]:
+            dummy = PugSprite()
+            cache_default_view( dummy)
+            dummy.delete()
+            while dummy in self.Director.scene.nodes:
+                time.sleep(0.1)
+            self.cached[0] = True
         # initial scene
-        if self.pug_settings.initial_scene:
-            self.sceneclass = self.pug_settings.initial_scene        
+        if getattr(self.pug_settings, 'initial_scene'):
+            self.sceneclass = self.pug_settings.initial_scene  
         if not self.scene:
             self.sceneclass = self.Director.scene.__class__
         # cache views for speed
-        cache_default_view(self)
-        cache_default_view(self.scene)
+        if not self.cached[1]:
+            cache_default_view(self)
+            cache_default_view(self.scene)
+            self.cached[1]=True
         # default menus
-        wx.GetApp().add_global_menu("Pug_Opioid",
+        app.add_global_menu("Pug_Opioid",
                 [["Save Working Scene\tCtrl+S", self.save_using_working_scene],
                  ["Show All Windows\tCtrl+W", wx.GetApp().raise_all_frames],
                  ["Quit\tCtrl+Q", self.quit]])
-        # open frame to view scene
-        self.view_scene()
-        # open selection frame
-        self.open_selection_frame()
+        # open MDI frame
+        frame = PugMDI([[self, {'objectpath':"Project",'name':"ProjectFrame"}],
+                        [self.scene, {'title':"Scene",'name':"SceneFrame"}],
+                        'selection',
+                        ],
+                    title=''.join(["Pug_Opioid Editor - ", self.project_name]),
+                    name="Pug_Opioid Editor")
+        app.set_project_frame(frame)
             
     def quit(self):
         project_quit()
@@ -215,7 +227,8 @@ value can be either an actual scene class, or the name of a scene class
                         starttime = time.time()
                 time.sleep(0.05)
             if sceneFrame:
-                sceneFrame.set_object(self.Director.scene)            
+                title = ''.join(['Scene: ', self.Director.scene.__name__])
+                sceneFrame.set_object(self.Director.scene, title=title)            
             close_scene_windows(oldscene)
             self.update_selection()
             self.Director.scene.state = EditorState

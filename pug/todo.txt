@@ -1,4 +1,13 @@
 now:
+	derive mdichildframe from pugframe also
+		add frames to applist
+		sceneFrame in set_scene
+	old scene remains after change scene... refresh scene window
+ 	name in project and scene 
+		win title just scene
+	create menu in parentmdi
+	set menus in childmdis
+ 	default positions for child frames	
  		
 current version:
 	
@@ -14,6 +23,7 @@ Finalize:
 fun stuff:
 	so many frickin components to make :) REVIEW POWERPACK
 		demo components
+		fade in fade out
 		spawn point
 			attributes
 				frequency
@@ -35,6 +45,7 @@ bugs:
 
 later: 
 	open console window
+	font size for scene class
 	make opioid not respond during modal stuff
 	set_attribute callback for template
 		archetype
