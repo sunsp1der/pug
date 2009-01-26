@@ -20,24 +20,22 @@ filterUnderscore: 2 = don't show __attributes, 1 = don't show _attributes either
 Create a gui based on template. A class' template can be created as follows:
 pugTemplate  = \
 {
+    'name': mySpecialView
     # the name of this template
     # if this is not defined, 'Template #' will be assigned
-    'name': mySpecialView
 
+    'size': (400, 300)
     # the start size of the pug frame, in pixels
     # if this is not defined, default size will be assigned
-    'size': (400, 300)
 
-    # defaults are used if agui is unspecified in 'attributes'
-    # if the default isn't found in this list, uses the create_raw_gui defaults 
-    # this is optional
     'defaults':{  
         'int':[Number,{'decimals':0}]
         # attribute class name:[agui,aguidata (dict is standard)]
     },
+    # defaults are used if agui is unspecified in 'attributes'
+    # if the default isn't found in this list, uses the create_raw_gui defaults 
+    # this is optional
 
-    # list of attributes to display. ['*'] = list all remaining using defaults
-    # if this is not defined, ['*'] is assumed
     'attributes':[
         ['<attribute>',<agui>,<aguidata>],
         ['gname'], # use agui from 'defaults'
@@ -45,16 +43,23 @@ pugTemplate  = \
         ['notmesswith', None, {'read_only':True}], # use agui from 'defaults'
         ['*']
     ]
+    # list of attributes to display. ['*'] = list all remaining using defaults
+    # if this is not defined, ['*'] is assumed
     
+    'create_pug_list_function': fn 
     # a custom puglist creation function can be specified here
     # this is optional
-    'create_pug_list_function': fn 
     # fn(obj, window, filterUnderscore) will be called 
     # arguments are as per this function
     
+    'skip_menus': ['menu_name',...]
+    # a list of menus that will NOT be shown in the menubar. Standard menus 
+    # include 'View' and 'Export', but more can be added with 
+    # app.set_global_menus or manually.
+    
+    'info_function': fn
     # a custom info function can be specified here
     # this is optional
-    'info_function': fn
     # fn( obj, window, objectPath) -> info frame
     # arguments are as per this function. objectPath is a string representing
     # the programatic path to obj. If fn opens a frame, it should return it.

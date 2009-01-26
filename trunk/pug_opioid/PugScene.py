@@ -286,7 +286,8 @@ PugScene._codeStorageDict['base_class']=PugScene
 # pug template stuff
             
 _sceneTemplate = {
-    'name':'Editor',
+    'name':'PugScene Editor',
+    'skip_menus':['Export'],    
     'attributes':
     [
         ['Scene', pug.Label, {'font_size':10}],

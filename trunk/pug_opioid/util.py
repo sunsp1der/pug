@@ -41,26 +41,27 @@ useWorking: if True, and the class in the __Working__.py file is in the class
     list, use the __Working__ scene to replace the one in the list.
 """
     sceneList = get_package_classes('scenes', Opioid2D.Scene, doReload)
-    if useWorking:
-        # use __Working__ scene as override
-        workingModule = 'scenes.__Working__'
-        needsReload = workingModule in sys.modules
-        try:
+    # use __Working__ scene as override
+    workingModule = 'scenes.__Working__'
+    needsReload = workingModule in sys.modules
+    sceneDict = {}
+    try:
+        module = __import__(workingModule)
+    except ImportError:
+        pass
+    except:
+        print "Exception while loading working module."
+        print sys.exc_info()[1]
+        print "Using committed module instead."
+    else:
+        if doReload and needsReload:
+            sys.modules.pop(workingModule)
             module = __import__(workingModule)
-        except ImportError:
-            pass
-        except:
-            print "Exception while loading working module."
-            print sys.exc_info()[1]
-            print "Using committed module instead."
-        else:
-            if doReload and needsReload:
-                sys.modules.pop(workingModule)
-                module = __import__(workingModule)
-                #reload(module.__Working__)
-            classes = find_classes_in_module(module.__Working__, Opioid2D.Scene)
-            if classes:
-                workingScene = classes[0]
+            #reload(module.__Working__)
+        classes = find_classes_in_module(module.__Working__, Opioid2D.Scene)
+        if classes:
+            workingScene = classes[0]
+            if useWorking:
                 for idx in range(len(sceneList)):
                     if sceneList[idx].__name__ == workingScene.__name__:
                         global _revertScene
@@ -68,9 +69,10 @@ useWorking: if True, and the class in the __Working__.py file is in the class
                         sceneList[idx] = workingScene
                         break
             else:
-                print "No scene in working module.", \
-                        "Using committed module instead."
-    sceneDict = {}
+                sceneDict['__Working__'] = workingScene
+        else:
+            print "No scene in working module.", \
+                    "Using committed module instead."
     for item in sceneList:
         sceneDict[item.__name__]=item
     return sceneDict

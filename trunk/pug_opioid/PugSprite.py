@@ -176,7 +176,8 @@ supposed to be deleted.
 #PugSprite._codeStorageDict['base_class'] = PugSprite
 
 _spriteTemplate = {
-    'name':'Editor',
+    'name':'PugSprite Editor',
+    'skip_menus':['Export'],
     'attributes':
     [
         ['Sprite', pug.Label, {'font_size':10}],

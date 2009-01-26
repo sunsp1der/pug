@@ -7,7 +7,7 @@ from types import MethodType as _MethodType
 
 from pug.code_storage.constants import _INDENT
 
-# TODO: make attributeDict work in pug view
+_DEBUG = False
 
 class Component(object):
     """Component( **kwargs)
@@ -180,12 +180,14 @@ kwargs: will be assigned to component attributes as per component.__init__
                                              repr(component), 
                                              "is not a component"]))
         methods = self.__methods
+        if _DEBUG: print "ComponentList.add",component,kwargs
         for key in component._component_method_names:
             value = getattr(component, key)
             component_methods = methods.get(key)
             if component_methods is None:
-                component_methods = []
-                methods[key] = component_methods
+                methods[key] = component_methods = []
+            if _DEBUG: print "   methods[",key,']',component_methods
+            if _DEBUG: print "       .append:",value
             component_methods.append(value)
         self.__components.append(component)
 
@@ -207,9 +209,6 @@ kwargs: will be assigned to component attributes as per component.__init__
             methods_list.remove(value)
             if not len(methods_list):
                 del methods[key]
-
-def _dummy_method( *args, **kwargs):
-    return
 
 class ComponentMethod(object):
 

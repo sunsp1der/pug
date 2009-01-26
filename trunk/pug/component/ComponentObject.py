@@ -1,7 +1,39 @@
 from weakref import ref as _ref
+import functools
 
 from pug.component.component import *
 all_components = None
+
+_DEBUG = True
+
+class ComponentObject(object):
+
+    def __del__(self):
+        self.__components = None
+
+    def __init__(self):
+        self.__components = ComponentSet(self)
+
+    def components(doc):
+        """Returns the component set associated with this object."""
+        def get_components(self):
+            return self.__components
+        return property(get_components, doc=doc)
+    components = components(components.__doc__)
+    _codeStorageDict = {
+            'skip_attributes': ['__components']                        
+                        }    
+                
+def component_method_wrapper(*args, **kwargs):
+    if not kwargs.pop('___obj_ref')():
+        return
+    for method in kwargs.pop('___component_methods'):
+        if not method.im_self.enabled:
+            continue
+        method(*args, **kwargs)
+    ___original_method = kwargs.pop('___original_method')
+    if ___original_method:
+        return ___original_method(*args, **kwargs)                
 
 class ComponentSet(object):
 
@@ -51,23 +83,15 @@ If it's a class, an instance will be created and added.
             if original_method is sentinel:
                 original_method = getattr(obj, name, None)
                 original_methods[name] = original_method
-
-            def component_wrapper(*args, **kw_args):
-                if not self.__obj():
-                    # my object has been destroyed
-                    return
-                for method in component_methods:
-                    if not method.im_self.enabled:
-                        continue
-                    method( *args, **kw_args)
-                original_method = self.__original_methods[name]
-                if original_method is not None:
-                    return original_method(*args, **kw_args)
-
-            component_wrapper.__doc__ = original_method.__doc__
-            setattr(obj, name, component_wrapper)
+            wrapper = functools.partial(component_method_wrapper,                             
+                            ___obj_ref=self.__obj, 
+                            ___component_methods=component_methods,
+                            ___original_method=original_method)
+            if original_method:
+                functools.update_wrapper(wrapper, original_method)
+            setattr(obj, name, wrapper)
         return component
-
+    
     def get(self, cls=None):
         if type(cls) == str:
             if all_components:
@@ -99,21 +123,3 @@ If it's a class, an instance will be created and added.
                 else:
                     delattr(obj, name)
                 del original_methods[name]
-
-class ComponentObject(object):
-
-    def __del__(self):
-        self.__components = None
-
-    def __init__(self):
-        self.__components = ComponentSet(self)
-
-    def components(doc):
-        """Returns the component set associated with this object."""
-        def get_components(self):
-            return self.__components
-        return property(get_components, doc=doc)
-    components = components(components.__doc__)
-    _codeStorageDict = {
-            'skip_attributes': ['__components']                        
-                        }    

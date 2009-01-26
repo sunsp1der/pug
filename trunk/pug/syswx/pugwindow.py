@@ -48,40 +48,43 @@ holds multiple PugWindows in tabbed (or other) form.
     objectRef = None # a reference to actual object
     shortPath = '' # a simple name for the object being viewed
     objectPath = '' # a longer programmatic path... parent.child.grandchild
-    title = ''
+    titleBase = ''
     pugList = []
+    template = {}
+    _viewDict = {}
+    _currentView = {}
     msgTextCtrl = None
-    template = None
+    template = {}
     _helpFrame =  None # currently open help frame
     _autoRefreshTimer = None # timer object that refreshes frame
     _doingApply = False # currently in the middle of an apply all
-    _currentView = None
+    _currentView = {}
     def __init__(self, parent, obj=None, objectpath="unknown", title=""):        
-        self.hasSavedAs = {} # save/export event.Id: (folder, filename)
-        self.pugList = [] # list of pug attribute guis describing object
-        self.settings = {} # various display settings
-        self._settingWidgets = {} # internal list of setting control widgets
-        self._viewDict = {}
-        app = wx.GetApp()
-        #attributes
-        self.objectPath = objectpath
-        self.defaultFolder = app.projectFolder
         #windows
         wx.lib.scrolledpanel.ScrolledPanel.__init__(self, parent=parent, 
-                        pos=wx.Point(0, 0), size=WX_PUGFRAME_DEFAULT_SIZE)
+                        pos=wx.Point(0, 0), size=WX_PUGFRAME_DEFAULT_SIZE,
+                        style=wx.SUNKEN_BORDER)
+        #attributes
+        self.hasSavedAs = {} # save/export event.Id: (folder, filename)
+        self.pugList = [] # list of pug attribute guis describing object
+        self.settings = {'hide_1_underscore':True, 'hide_2_underscore':True,
+                         'auto_apply':True, 'auto_refresh':False}
+        self._settingWidgets = {} # internal list of setting control widgets
+        self._viewDict = {}
+        self.objectPath = objectpath
+        self.defaultFolder = wx.GetApp().projectFolder
+        self.MinSize = (-1,-1)
         self.SetScrollRate(1,5)
         self.pugSizer = wx.GridBagSizer()
         self.SetSizer(self.pugSizer)
-        self._init_ctrls(parent) #BOA STUFF
+        self._init_ctrls() #BOA GENERATED STUFF
         
         #set up actual object gui
-        if obj:
-            self.set_object(obj, objectpath, title)     
-        else:
-            app.pugframe_opened(self.GetParent(), "Empty")    
+        self.set_object(obj, objectpath, title)     
+        
     def __del__(self):
         cache_puglist( self.pugList)
-                    
+      
     def GetBestSize(self):
         size = self.pugSizer.CalcMin()
         if self.pugSizer.GetColWidths():
@@ -93,11 +96,8 @@ holds multiple PugWindows in tabbed (or other) form.
         
     def set_object(self, obj, objectpath="unknown", title=None):
         if _DEBUG: print "pugwindow.set_object", obj
-        if self.objectRef and obj and obj is self.objectRef():
-            self.display_puglist()
-            return
-        wx.BeginBusyCursor()
         self.Freeze()
+        wx.BeginBusyCursor()
         self.shortPath = get_simple_name(obj, objectpath)
         self.defaultFilename = self.shortPath
         if objectpath == "unknown":
@@ -110,42 +110,61 @@ holds multiple PugWindows in tabbed (or other) form.
             if self.shortPath != self.objectPath:                
                 if self.objectPath:
                     title = ''.join([title, ' (',self.objectPath,')'])
-        self.title = title
+        self.SetTitle(title)
+        if self.objectRef and obj and obj is self.objectRef():
+            self.display_puglist()
+            wx.EndBusyCursor()
+            return
         
-        if self.objectRef:
-            wx.GetApp().pugframe_stopped_viewing(self.GetTopLevelParent(), 
-                                             self.objectRef())
+        self.stopped_viewing()
         oldobject = self.object
         if not obj:
             self.objectRef = None
             self.object = obj
-            cache_puglist(self.pugList)
-            self.pugList = []
-            self.pugSizer.Clear(False)
             self.display_message("No object")
+            self.setup_menus()
         else:
-            wx.GetApp().pugframe_opened(self.GetParent(), obj)             
             try:
                 self.objectRef = ref(obj)
-                obj = proxy(obj, self._schedule_object_deleted)
+                self.object = proxy(obj, self._schedule_object_deleted)
             except:
                 def objectRef():
                     return obj
                 self.objectRef = objectRef
-            self.object = obj
-            self._init_viewMenu_Items(self.viewMenu)
-            self._init_fileMenu_Items(self.exportMenu)
-            self.create_puglist()
+                self.object = obj # this will prevent object from being deleted
+            oldView = self._currentView
+            self._currentView = {}
+            self.setup_menus()
+            if oldView == self._currentView:
+                self.update_puglist_object()
+                self.Thaw()
+            else:
+                self.create_puglist()
             if not oldobject and hasattr(self.GetParent(),
                                          'show_all_attributes'):
                 self.GetParent().show_all_attributes()
+        self.started_viewing( obj)
         self.Thaw()                   
         wx.EndBusyCursor()        
+    
+    def stopped_viewing(self):
+        """stopped_viewing()
         
+tell app that our parent isn't viewing the current object"""
+        if self.objectRef:
+            wx.GetApp().pugframe_stopped_viewing(self.GetParent(), 
+                                                 self.objectRef())
+
+    def started_viewing(self, obj):
+        """started-viewing(obj)
+tell app that our parent is viewing obj"""
+        wx.GetApp().pugframe_viewing(self.GetParent(), obj)             
+        
+    
     def SetTitle(self, title):
-        self.title = title
+        self.titleBase = title
         parent = self.GetParent()
-        if getattr(parent, 'SetTitle') and not getattr(parent, 'lockedName'):
+        if getattr(parent, 'SetTitle'):
             parent.SetTitle(title)        
 
     def _schedule_object_deleted(self=None, obj=None):
@@ -154,11 +173,9 @@ holds multiple PugWindows in tabbed (or other) form.
         wx.CallAfter(self._object_deleted, obj)
         
     def _object_deleted(self, obj=None):
-        title = self.title
-        self.set_object(None)
-        self.display_message(''.join(['Deleted: ', title]))
-        parent = self.GetParent()
-        self.SetTitle(title)
+        title = ''.join([ self.titleBase," (deleted)"])
+        self.set_object(None, title=title)
+        self.display_message(title)
 
     def display_message(self, message):
         """display_message( message)
@@ -192,13 +209,6 @@ To return to object view, call display_puglist().
     def create_puglist(self):
         wx.BeginBusyCursor()
         self.Freeze()
-        if not self._currentView:
-            self._currentView = self._defaultView
-        if self.template and self.template == self._currentView:
-            self.update_puglist_object()
-            self.Thaw()
-            wx.EndBusyCursor()
-            return
         cache_puglist(self.pugList)
         filterUnderscore = 0
         if self.settings['hide_1_underscore']:
@@ -206,7 +216,7 @@ To return to object view, call display_puglist().
         elif self.settings['hide_2_underscore']:
             filterUnderscore = 2
         oldtemplate = self.template
-        self.template = None
+        self.template = {}
         if self._currentView == 'Raw':
             self.pugList = create_raw_puglist(self.object, self, None, 
                                               filterUnderscore)
@@ -238,7 +248,7 @@ To return to object view, call display_puglist().
         if self.msgTextCtrl:
             self.display_puglist()
         else:
-            self.refresh_all()
+            self.refresh()
 
     def display_puglist(self):
         wx.BeginBusyCursor()    
@@ -316,24 +326,40 @@ Generally, this is called when an attribute gui has changed size.
             pass
         else:
             event.Skip()
-
+            
+    def setup_menus(self):
+        if not hasattr(self, 'menuBar'):
+            self.menuBar = wx.MenuBar()
+        self.menuBar.SetMenus([])
+        wx.GetApp().append_global_menus(self.menuBar)
+        if self.object:
+            self._init_viewMenu_Items(self.viewMenu)
+            self.menuBar.Append(self.viewMenu,'View')
+            self.menuBar.Append(self.exportMenu,'Export')
+            self.menuBar.Append(self.helpMenu,'Help')
+            if isinstance(self._currentView, dict):
+                skipMenus = self._currentView.get('skip_menus',[])
+            else:
+                skipMenus = []
+            for menu in skipMenus:
+                # to remove globals or others
+                skipper = self.menuBar.FindMenu(menu)
+                if skipper:
+                    self.menuBar.Remove(skipper)
+            
     def _init_viewMenu_Items(self, menu):
         #clear out menu items
         #wx has a bug with totally emptying radio items, so use a dummy
-        if not hasattr(menu,'options'):
-            menu.AppendSeparator()
-            self._add_options_menu( menu) 
-            menu.options = True               
         menu.AppendRadioItem(id=1, text='dummy')
+        idDict = {}
         for item in menu.MenuItems:
-            if item.Id != 1 and item.Kind > 0:
-                menu.DestroyItem(item)
-        self._defaultView = 'Raw'
-        self._currentView = None
+            template = self._viewDict.get(item.Id, None)
+            if template:
+                idDict[id(template)] = item.Id
+            menu.DestroyItem(item)
         if (self.object):
             templateInfo = get_obj_template_info(self.object)
-            if templateInfo.has_key('default'):
-                defaultViewName = templateInfo['default']
+            defaultViewName = templateInfo.get('default','Raw')
             if templateInfo.has_key('templates'):
                 # go through templateInfo and get names so we can sort them
                 templateList = []
@@ -345,51 +371,67 @@ Generally, this is called when an attribute gui has changed size.
                         rawList += [name]
                 templateList.sort()
                 rawList.sort()
-                templateList+=rawList
+                templateList += rawList
                 templateList.reverse()
                 # create _viewDict and menu items
                 for name in templateList:
-                    Id = wx.NewId()
                     template = templateInfo['templates'][name]
+                    Id = idDict.get(id(template), wx.NewId())
                     self._viewDict[Id] = template
                     self.Bind(wx.EVT_MENU, self._evt_viewmenu, id=Id)                    
                     menuItem = menu.Prepend(id=Id, 
                                      help=' '.join(['Show',name,'view']),
                                      text=name, kind=wx.ITEM_CHECK)
-                    if name == defaultViewName:
-                        self._defaultView = templateInfo['templates'][name]
+                    if not self._currentView and name == defaultViewName:
+                        self._currentView = templateInfo['templates'][name]
+                    if template == self._currentView:
                         menuItem.Check(True)
+                    else:
+                        menuItem.Check(False)
+            if type(self._currentView) == str:
+                #private data options for Raw menus
+                menu.AppendSeparator()
+                self._add_PrivateDataMenu_Items(menu) 
+            menu.AppendSeparator()
+            self._add_RefreshApply_Items(menu)
+            self.refresh_settings()
         menu.DestroyId(1)
 
     def _evt_viewmenu(self, event):
+        if self._currentView != self._viewDict[event.Id]:
+            self._currentView = self._viewDict[event.Id]
+            self.setup_menus()
+            self.create_puglist()      
         for Id in self._viewDict:
             if Id == event.Id:
                 self.viewMenu.Check(Id, True)
             else:
                 self.viewMenu.Check(Id, False)
-        if self._currentView != self._viewDict[event.Id]:
-            self._currentView = self._viewDict[event.Id]
-            self.create_puglist()        
         
-    def apply_all(self, event = None):
+    def apply(self, event = None):
+        if not self.settings['auto_apply'] and event.Id != _TOOL_APPLY:
+            return
         self._doingApply = True
-        if _DEBUG: print "pugwindow.apply_all", self.object
+        if _DEBUG: print "pugwindow.apply", self.object
         for item in self.pugList:
             if _DEBUG: print item.attribute
             item.apply()
         self._doingApply = False
-        self.refresh_all()
-        if _DEBUG: print "DONE apply_all\n"
+        self.refresh()
+        if _DEBUG: print "DONE apply\n"
 
-    def refresh_all(self, event = None):
+    def refresh(self, event = None):
         if self._doingApply:
             return
-        if _DEBUG: print "pugwindow.refresh_all", self.object
+        if _DEBUG: print "pugwindow.refresh", self.object
         for item in self.pugList:
             if _DEBUG: print item.attribute
             item.refresh()
-        if _DEBUG: print "DONE refresh_all\n"
-        
+        if _DEBUG: print "DONE refresh\n"
+
+    def help_context(self, event=None):
+        wx.ContextHelp( self)
+    
     def show_help(self, event = None, object=None, attribute=""):
         customFrame = None
         try:
@@ -397,7 +439,7 @@ Generally, this is called when an attribute gui has changed size.
                 # this indicates that the 'info' button was pushed
                 object = self.objectRef()
                 objectPath = self.objectPath
-                pugButton = False
+                pugButton = True
                 retypeButton = False
                 if self.template.has_key('info_function'):
                     customFrame = self.template['info_function'](object, 
@@ -442,10 +484,7 @@ Currently accepeted widgets: toolbar togglebutton,  menu item
         if id == None:
             id = widget.Id
         self._settingWidgets[id] = (widget, settingname)
-        if default is not None:
-            self.change_setting(settingname, default)
-        else:
-            self.settings[settingname] = None
+        self.change_setting(settingname, default)
         
     def _evt_setting(self, event):
         """_evt_setting(self, event)
@@ -456,7 +495,7 @@ Event handler for automatic setting system
         widget, settingname = self._settingWidgets[id]
         self.change_setting(settingname, event.Selection, event)
         
-    def change_setting(self, settingname, val, event = None):    
+    def change_setting(self, settingname, val, event=None):    
         """change_setting(self, setting, val)
         
 Change a setting and the state of any widgets that control it
@@ -465,20 +504,26 @@ val: the value to toggle it to. If None, just toggle it
 Sets self.settings[settingname].
 Automatically calls on_<setting>(val, event) callback.
     """
+        oldsetting = self.settings.get(settingname,not val)
         if val is None:
-            val = not self.settings[settingname]  
+            val = not oldsetting
         for id, data in self._settingWidgets.iteritems():
             if settingname == data[1]:
                 widget = data[0]
-                if isinstance(widget, wx.Menu):
+                if widget and isinstance(widget, wx.Menu):
                     widget.Check(id,val)
-                elif isinstance(widget, wx.ToolBar):
+                elif widget and isinstance(widget, wx.ToolBar):
                     widget.ToggleTool(id, val)
         self.settings[settingname] = val
         # do callback
-        callback = ''.join(["on_",settingname])
-        if hasattr(self,callback):
-            getattr(self,callback)(val, event)
+        if val != oldsetting:
+            callback = ''.join(["on_",settingname])
+            if hasattr(self,callback):
+                getattr(self,callback)(val, event)
+            
+    def refresh_settings(self):
+        for setting in self.settings:
+            self.change_setting(setting, self.settings[setting])
 
     def on_hide_1_underscore(self, val, event = None):
         if val and not self.settings['hide_2_underscore']:
@@ -501,7 +546,7 @@ Automatically calls on_<setting>(val, event) callback.
             
     def _auto_refresh(self, msecs):
         try:
-            self.refresh_all()
+            self.refresh()
         except:
             print "_auto_refresh error:\n",exc_info()
             show_exception_dialog()
@@ -509,20 +554,19 @@ Automatically calls on_<setting>(val, event) callback.
             self._autoRefreshTimer = wx.CallLater(msecs, 
                                                   self._auto_refresh, msecs)
                     
+    def _init_helpMenu_Items(self, menu):
+        menu.Append(help='View information about this object', id=_HELP_INFO, 
+                    text='Object Info')
+        menu.Append(help='Get context help on object attributes', 
+                    id=_HELP_CONTEXT, text='Context Info')
+                    
     def _init_fileMenu_Items(self, menu):
-        for item in menu.MenuItems:
-            menu.DestroyItem(item)
-
         menu.Append(help='Save object state as...', id = _MENU_SAVE_AS, 
                       text = 'Save State As...')
         menu.Append(help='Save object state', id = _MENU_SAVE, 
                       text = 'Save State')
         menu.Append(help='Load a saved object state', id = _MENU_LOAD, 
                       text = 'Load State')
-        self.Bind(wx.EVT_MENU, self.save_object_state_as, id = _MENU_SAVE_AS)
-        self.Bind(wx.EVT_MENU, self.save_object_state, id = _MENU_SAVE)
-        self.Bind(wx.EVT_MENU, self.load_object_state, id = _MENU_LOAD)
-        # TODO: put in little save icons
         menu.AppendSeparator()
         menu.Append(help='Export object as python class code',
                       id = _MENU_EXPORT_CLASS, 
@@ -537,15 +581,11 @@ Automatically calls on_<setting>(val, event) callback.
         menu.Append(help='Export object as python object code as ...',
                       id = _MENU_EXPORT_OBJECT_AS, 
                       text='Export object code as ...')
-        self.Bind(wx.EVT_MENU, self.code_export, id = _MENU_EXPORT_OBJECT)
-        self.Bind(wx.EVT_MENU, self.code_export_as, id = _MENU_EXPORT_OBJECT_AS)
-        self.Bind(wx.EVT_MENU, self.code_export, id = _MENU_EXPORT_CLASS)
-        self.Bind(wx.EVT_MENU, self.code_export_as, id = _MENU_EXPORT_CLASS_AS)
-    
+   
     def code_export(self, event = None):
         if self.hasSavedAs.get(event.Id + 1):
             lastfolder, lastfilename = self.hasSavedAs.get(event.Id + 1)
-            self.apply_all()
+            self.apply()
             if event.Id in [ _MENU_EXPORT_CLASS, _MENU_EXPORT_CLASS_AS]:
                 asClass = True
             else:
@@ -582,26 +622,42 @@ Automatically calls on_<setting>(val, event) callback.
             event.Id -= 1
             self.code_export(event)
         dlg.Destroy()
-
-    def _init_PrivateDataMenu_Items(self, parent):
+        
+    def _add_PrivateDataMenu_Items(self, parent):
         parent.Append(help='Hide "_" and "__" attributes in raw views',
                    id=_MENU_HIDE1UNDERSCORE, kind=wx.ITEM_CHECK, 
                    text=u'Hide "_" attributes')
         parent.Append(help='Hide "__" attributes in raw views', 
                    id=_MENU_HIDE2UNDERSCORE, kind=wx.ITEM_CHECK, 
                    text=u'Hide "__" attributes')
-        self.Bind(wx.EVT_MENU, self._evt_setting,
-              id=_MENU_HIDE1UNDERSCORE)
-        self.Bind(wx.EVT_MENU, self._evt_setting,
-              id=_MENU_HIDE2UNDERSCORE)
-        self._attach_setting("hide_1_underscore", parent, _MENU_HIDE1UNDERSCORE)
-        self._attach_setting("hide_2_underscore", parent, _MENU_HIDE2UNDERSCORE)
-        self.change_setting("hide_1_underscore", 1)
+        has_settings = self.settings.has_key('hide_1_underscore')
+        self._attach_setting("hide_1_underscore", parent, 
+                             _MENU_HIDE1UNDERSCORE)
+        self._attach_setting("hide_2_underscore", parent, 
+                             _MENU_HIDE2UNDERSCORE)
+        if not has_settings:
+            self.change_setting("hide_1_underscore", 1)
+
+            
+    def _add_RefreshApply_Items(self, parent):
+        parent.Append(help='Apply values to object',
+                      id=_TOOL_APPLY, text=u'Apply')
+        parent.Append(help='Refresh values', 
+                   id=_TOOL_REFRESH, text=u'Refresh')
+        parent.Append(id=_TOOL_AUTOAPPLY, kind=wx.ITEM_CHECK, 
+            help='When off, only apply changes when Apply is selected',
+            text=u'Auto-Apply')
+        parent.Append(help='Refresh values every 0.25 seconds', 
+                   id=_TOOL_AUTOREFRESH, kind=wx.ITEM_CHECK, 
+                   text=u'Auto-Refresh')        
+        self._attach_setting("auto_apply", parent, _TOOL_AUTOAPPLY, True)        
+        self._attach_setting("auto_refresh", parent, _TOOL_AUTOREFRESH, False)
+        
 
     def save_object_state(self, event = None):
         if self.hasSavedAs.get(event.Id + 1):
             lastfolder, lastfilename = self.hasSavedAs.get(event.Id + 1)
-            self.apply_all()
+            self.apply()
             try:
                 pugSave(self.object, os.path.join(lastfolder, lastfilename))
             except:
@@ -638,7 +694,7 @@ Automatically calls on_<setting>(val, event) callback.
         if dlg.ShowModal() == wx.ID_OK:        
             filepath = dlg.GetPath()
             pugLoad(self.object, filepath)
-            self.refresh_all()
+            self.refresh()
             fname,ext = os.path.splitext(dlg.GetFilename())
             self.defaultFilename = fname
             self.defaultFolder = dlg.GetDirectory()
@@ -664,7 +720,7 @@ Automatically calls on_<setting>(val, event) callback.
         refreshButton = wx.Button(self.toolBar, _TOOL_REFRESH, "Refresh")
         self.toolBar.AddControl(refreshButton)
         self.toolBar.AddSeparator()
-        refreshButton.Bind(wx.EVT_BUTTON, self.refresh_all) 
+        refreshButton.Bind(wx.EVT_BUTTON, self.refresh) 
         self.toolBar.Bind(wx.EVT_TOOL, self._evt_setting, 
                        id=_TOOL_AUTOREFRESH)      
         self._attach_setting("auto_refresh", self.toolBar, _TOOL_AUTOREFRESH, 
@@ -678,7 +734,7 @@ Automatically calls on_<setting>(val, event) callback.
         applyButton = wx.Button(self.toolBar, _TOOL_APPLY, "Apply")
         self.toolBar.AddControl(applyButton)
         self.toolBar.AddSeparator()
-        applyButton.Bind(wx.EVT_BUTTON, self.apply_all)            
+        applyButton.Bind(wx.EVT_BUTTON, self.apply)            
         self.toolBar.Bind(wx.EVT_TOOL, self._evt_setting, 
                        id=_TOOL_AUTOAPPLY)       
         self._attach_setting("auto_apply", self.toolBar, _TOOL_AUTOAPPLY, 
@@ -695,37 +751,31 @@ Automatically calls on_<setting>(val, event) callback.
         self.toolBar.Bind(wx.EVT_TOOL, self.show_help, id=_HELP_INFO)
         self.toolBar.Realize()
         
-    def _init_ctrls(self, prnt):
-        # generated method, don't edit
-        self._init_utils()
-        self.SetMinSize(wx.Size(-1,-1))
-        
-        self.make_toolbar()
-
-    def _add_options_menu(self, parent):
-        # generated method, don't edit
-        parent.AppendMenu(help='Show/Hide private attributes', 
-                          id = wx.NewId(),
-                          submenu=self.privateDataMenu, 
-                          text=u'Private Data')
-        
-    def _init_menuBar_Menus(self, parent):
-        # generated method, don't edit
-        wx.GetApp().append_global_menus(parent)
-        parent.Append(menu=self.exportMenu, title=u'Export')
-        parent.Append(menu=self.viewMenu, title=u'View')
-#        parent.Append(menu=self.optionsMenu, title=u'Options')
-
-    def _init_utils(self):
-        # generated method, don't edit
+    def _init_ctrls(self):
         self.menuBar = wx.MenuBar()
         self.exportMenu = wx.Menu()
         self.viewMenu = wx.Menu()
-#        self.optionsMenu = wx.Menu()
-        self.privateDataMenu = wx.Menu()
-        self._init_menuBar_Menus(self.menuBar)
-#        self._init_optionsMenu_Items(self.optionsMenu)
-        self._init_PrivateDataMenu_Items(self.privateDataMenu)
+        self.helpMenu = wx.Menu()
+        self._init_fileMenu_Items(self.exportMenu)
+        self._init_helpMenu_Items(self.helpMenu)
+        #export menu
+        self.Bind(wx.EVT_MENU, self.save_object_state_as, id = _MENU_SAVE_AS)
+        self.Bind(wx.EVT_MENU, self.save_object_state, id = _MENU_SAVE)
+        self.Bind(wx.EVT_MENU, self.load_object_state, id = _MENU_LOAD)
+        self.Bind(wx.EVT_MENU, self.code_export, id = _MENU_EXPORT_OBJECT)
+        self.Bind(wx.EVT_MENU, self.code_export_as, id = _MENU_EXPORT_OBJECT_AS)
+        self.Bind(wx.EVT_MENU, self.code_export, id = _MENU_EXPORT_CLASS)
+        self.Bind(wx.EVT_MENU, self.code_export_as, id = _MENU_EXPORT_CLASS_AS)
+        #view menu
+        self.Bind(wx.EVT_MENU, self._evt_setting, id=_MENU_HIDE1UNDERSCORE)
+        self.Bind(wx.EVT_MENU, self._evt_setting, id=_MENU_HIDE2UNDERSCORE)
+        self.Bind(wx.EVT_MENU, self._evt_setting, id=_TOOL_AUTOREFRESH)
+        self.Bind(wx.EVT_MENU, self._evt_setting, id=_TOOL_AUTOAPPLY)            
+        self.Bind(wx.EVT_MENU, self.apply(), id=_TOOL_APPLY)
+        self.Bind(wx.EVT_MENU, self.refresh(), id=_TOOL_REFRESH) 
+        #help menu
+        self.Bind(wx.EVT_MENU, self.show_help, id=_HELP_INFO)       
+        self.Bind(wx.EVT_MENU, self.help_context, id=_HELP_CONTEXT)       
 
 _TOOL_AUTOAPPLY = wx.NewId()
 _TOOL_APPLY = wx.NewId()
@@ -740,7 +790,9 @@ _MENU_EXPORT_CLASS = wx.NewId()
 _MENU_EXPORT_CLASS_AS = wx.NewId()
 _MENU_EXPORT_OBJECT = wx.NewId()
 _MENU_EXPORT_OBJECT_AS = wx.NewId()
+_DUMMYID = wx.NewId()
 _HELP_INFO = wx.NewId()
+_HELP_CONTEXT = wx.NewId()
 
 #settingDict contains correspondences between controls and setting fields
 _settingDict = {_TOOL_AUTOAPPLY:"auto_apply", 

@@ -47,8 +47,17 @@ PugMDI(self, objInfoList, title, show, parent)
         sizer = wx.BoxSizer()
         self.SetMinSize(wx.Size(250, 130))
         self.SetIcon(get_icon())
-        self.title = title
         self.Bind(wx.EVT_ACTIVATE, self._evt_on_activate)
+#        menu = wx.Menu()
+#        id = wx.NewId()
+#        menu.Append(help='Tile windows horizontally', id=id, 
+#                    text='Tile horizontal')
+#        self.Bind(wx.EVT_MENU, self.tile_horizontal, id=id)
+#        id = wx.NewId()
+#        menu.Append(help='Tile windows vertically', id=id, 
+#                    text='Tile vertical')
+#        self.Bind(wx.EVT_MENU, self.tile_vertical, id=id)
+        self.SetWindowMenu(None)
         
         if objInfoList and not isinstance(objInfoList, list):
             objInfoList = [objInfoList]
@@ -64,6 +73,11 @@ PugMDI(self, objInfoList, title, show, parent)
             self.SetSize((rect[2],rect[3]))
         if show:
             self.Show()
+            
+    def tile_horizontal(self, event=None):
+        self.Tile(wx.HORIZONTAL)
+    def tile_vertical(self, event=None):
+        self.Tile(wx.VERTICAL)
 
     def open_obj_info_list(self, objInfoList):
         for info in objInfoList:   
@@ -95,30 +109,25 @@ PugMDI(self, objInfoList, title, show, parent)
                 self.apply()
     
     def get_child_list(self):
-        pass
+        childList = []
+        nb = self.GetNotebook()
+        for page in range(nb.GetPageCount()):
+            page = nb.GetPage(page)
+            childList.append(page)
+        return childList
                 
     def refresh(self):
-        for child in self.childDict:
-            if child.settings['auto_refresh']:
-                child.refresh()
+        for child in self.get_child_list():
+            child.refresh()
                 
     def apply(self, event=None):
-        for child in self.childDict:
-            if child.settings['auto_apply']:
-                child.apply_all()
+        for child in self.get_child_list():
+            child.apply()
         
     def show_all_attributes(self, event=None):
-        """Expand the frame's size so that all attributes are visible"""
-        bestSize = self.pugWindow.GetBestSize()
-        # give some space for scrollbars
-        newSize = (bestSize[0] + WX_SCROLLBAR_FUDGE[0], 
-                   bestSize[1] + WX_SCROLLBAR_FUDGE[1] + toolbarFudge)
-        # show the whole toolbar
-        toolbarWidth = self.GetToolBar().GetSize()[0]
-        if newSize[0] < toolbarWidth:
-            newSize = (toolbarWidth, newSize[1])
-        self.SetClientSize(newSize)
-            
+        """Pass. AUI doesn't have an interface for getting the best size"""
+        pass
+    
     def _evt_passmenu(self, event): 
         # this checking stuff is necessary so that we don't have an infinite
         # recursion with us passing event down then it getting passed up again
@@ -127,28 +136,30 @@ PugMDI(self, objInfoList, title, show, parent)
             event.Skip()
         else:
             self.passingMenuEvent = event
-            if self.pugWindow:
-                self.pugWindow.ProcessEvent(event)
+            pugWindow = getattr(self.GetActiveChild(),'pugWindow',None)
+            processed = False
+            if pugWindow:
+                processed = pugWindow.ProcessEvent(event)
+            if not processed:
+                event.Skip()
         self.passingMenuEvent = None
                     
     def get_object_list(self):
-        """get_object_list() > list of objects displayed in this frame
-"""
-        return [self.pugWindow.objectRef()]
+        "get_object_list() > list of objects displayed in this frame"        
+        oblist = []
+        for child in self.get_child_list():
+            if child.pugWindow.objectRef():
+                oblist.append(child.pugWindow.objectRef())
+        return oblist
 
     def show_object(self, obj):
         """show_object(obj) > reveal the tab containing obj. Not implemented"""
-        pass
-    
+        for child in self.get_child_list():
+            if child.pugWindow.objectRef() == obj:
+                child.Activate()
+                
     def on_view_object_deleted(self, window, obj):
-        """on_view_object_deleted(window, obj)
-        
-window: the PugWindow whose object was deleted
-obj: the proxy object
-Override this callback to affect behavior when an object being viewed in the
-pugframe is deleted.
-"""
-        self.SetTitle(''.join(['Deleted: ', self.GetTitle()]))
+        pass
         
 class PugMDIChild(wx.aui.AuiMDIChildFrame, PugFrame):
     """PugMDIChild(...): an MDI child derived which operates like a PugFrame
@@ -161,27 +172,27 @@ called, but PugFrame.setup_window is."""
         wx.aui.AuiMDIChildFrame.__init__(self, parent, -1, '', name=name,
                                          **kwargs)
         self.Bind(wx.EVT_ACTIVATE, self._evt_on_activate)
+        self.Bind(wx.EVT_CLOSE, self._evt_on_close)
 #        wx.GetApp().set_default_pos( self)
         self.setup_window(obj, objectpath, title, name)
+        
+    def on_show_object(self, obj=None):
+        self.Raise()
+        
+    def _evt_on_close(self, event):
+        if event.CanVeto():
+            event.Veto()
         
     def show_all_attributes(self, event=None):
         pass
     
     def setup_tools(self):
-        pass
-    #TODO:
-#        if self.toolBar:
-#            self.toolBar.Hide()
-#        if self.menuBar:
-#            self.menuBar.Hide()
-#        if pugWindow.toolBar:
-#            toolBar = pugWindow.toolBar
-#            self.SetToolBar(toolBar)
-#            toolBar.Show()
-#            self.toolBar = toolBar
-#            toolBar.Realize()
-#        if pugWindow.menuBar:
-#            menuBar = pugWindow.menuBar
-#            self.SetMenuBar(menuBar)
-#            menuBar.Show()
-#            self.menuBar = menuBar        
+        self.SetMenuBar(self.pugWindow.menuBar)
+    
+    def Raise(self):
+        self.GetMDIParentFrame().Show()
+        self.GetMDIParentFrame().Iconize(False)
+        self.GetMDIParentFrame().Raise()
+        self.Iconize(False)
+        self.Activate()
+

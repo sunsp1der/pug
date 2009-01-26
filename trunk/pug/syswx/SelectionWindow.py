@@ -16,7 +16,7 @@ To set the viewed object, use PugApp.set_selection.
 """
     selectionRefSet = None
     def __init__(self, parent):
-        PugWindow.__init__(self, parent, title='Selection')
+        PugWindow.__init__(self, parent)
         app = wx.GetApp()
         app.register_selection_watcher(self)
         self.on_set_selection( app.selectedRefSet)        
@@ -28,13 +28,13 @@ selectionRefSet: a set of references for this window to display a pug view of.
 Callback from PugApp...        
 """
         if self.selectionRefSet == selectionRefSet:
-            self.refresh_all()
+            self.refresh()
             return
         self.selectionRefSet = selectionRefSet.copy()
         oldObject = self.object
         if not selectionRefSet:
             self.display_message("Nothing Selected")
-            self.SetTitle("Selection")
+            self.SetTitle("Selection", False)
         elif len(selectionRefSet) == 1:
             objRef = selectionRefSet.pop()
             obj = objRef()
@@ -42,18 +42,15 @@ Callback from PugApp...
             selectionRefSet.add(objRef)
         else:
             self.display_message("Multiple Objects Selected")
-            self.SetTitle("Selection: Multiple")
+            self.SetTitle("Selection: Multiple", False)
             
     def on_selection_refresh(self):
-        self.refresh_all()
-            
-    def set_object(self, obj, objectpath="unknown", title=""):
-        """set_object(*args, **kwargs)
+        self.refresh()
         
-same as pugframe set_object except the title is prepended with 'Selection: '
-"""
-        PugWindow.set_object(self, obj, objectpath, title)
-        title = ''.join(['Selection: ',self.title])
-        self.SetTitle(title)
-        self.Name = "Selection"
-       
+    def SetTitle(self, title, prefix=True):
+        self.titleBase = title
+        parent = self.GetParent()
+        if prefix:
+            title = ''.join(['Selection: ',self.titleBase])
+        if getattr(parent, 'SetTitle'):
+            parent.SetTitle(title)

@@ -199,7 +199,7 @@ sceneName: string with name to save as. If None, a dialog will be opened.
 parentWindow: the parent window of name dialog. If not provided, the 
     wx.ActiveWindow will be used
 """
-    wx.GetApp().apply_all()
+    wx.GetApp().apply()
     if get_scene_errors():
         return
     if _DEBUG: print "util: save_scene_as"
@@ -283,11 +283,13 @@ Note: for this to work on nodes, it must be run BEFORE the scene is changed.
         scene = Opioid2D.Director.scene
     app = wx.GetApp()
     for frame in app.pugFrameDict:
+        if isinstance(frame.pugWindow, SelectionWindow):
+            continue
+        if frame.Name == 'SceneFrame':
+            continue
         try:
             frameObj = frame.pugWindow.objectRef()
         except:
-            continue
-        if isinstance(frame.pugWindow, SelectionWindow):
             continue
         doclose = False
         if frameObj == scene:

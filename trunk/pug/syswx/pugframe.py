@@ -29,7 +29,7 @@ This function will create a pugApp(wx.App) if one does not exist.
         newApp = True
         from pug import App
         app = App()
-    if not app.show_object_pugframe(obj) or wx.GetKeyState(wx.WXK_CONTROL):
+    if wx.GetKeyState(wx.WXK_CONTROL) or not app.show_object_pugframe(obj):
         retvalue = PugFrame(obj, *args, **kwargs)
     else:
         retvalue = None
@@ -68,18 +68,18 @@ PugFrame(self, obj=None, objectpath="object", title="", show=True, parent=None,
         self.SetMinSize(wx.Size(250, 130))
         self.SetIcon(get_icon())
         self.objectpath = objectpath
-        self.title = title
-        bar = self.CreateStatusBar()        
         self.Bind(wx.EVT_ACTIVATE, self._evt_on_activate)
-        bar.Bind(wx.EVT_LEFT_DCLICK, self.show_all_attributes)        
         self.Bind(wx.EVT_MENU, self._evt_passmenu)        
+        bar = self.CreateStatusBar()        
+        bar.Bind(wx.EVT_LEFT_DCLICK, self.show_all_attributes)  
+        self.setup_window(obj, objectpath, title, name)
+        self.Layout()
         rect = wx.GetApp().get_default_pos( self)
         if rect:
             self.SetPosition((rect[0],rect[1]))
             self.SetSize((rect[2],rect[3]))
         if show:
             self.Show()
-        self.setup_window(obj, objectpath, title, name)
             
     def setup_window(self, obj, objectpath, title, name):
         self.lockedName = name
@@ -92,13 +92,12 @@ PugFrame(self, obj=None, objectpath="object", title="", show=True, parent=None,
     def _evt_on_activate(self, event=None):
         if self.pugWindow:
             if event.Active:
-                self.pugWindow.refresh_all()
-            else:
+                self.pugWindow.refresh()
+            elif self.pugWindow.settings.get('auto_apply', False):
                 self.apply()
                 
     def apply(self, event=None):
-        if self.pugWindow.settings['auto_apply']:
-            self.pugWindow.apply_all()
+        self.pugWindow.apply()
             
     def set_object(self, obj, objectpath="unknown", title=""):
         """set_object(obj, objectpath, title)
@@ -107,21 +106,30 @@ Set the object that this frame's pugWindow is viewing
 """
         self.Freeze()
         self.pugWindow.set_object(obj, objectpath, title)
-        self.SetTitle(self.pugWindow.title)
         if not self.lockedName:
-            self.Name = self.pugWindow.title               
+            self.Name = self.pugWindow.titleBase               
         self.Thaw()
+        
+    def get_object(self):
+        return self.pugWindow.objectRef()
+    
+    def on_show_object(self, object=None):
+        self.Show()
+        self.Iconize(False)
+        self.Raise()
         
     def show_all_attributes(self, event=None):
         """Expand the frame's size so that all attributes are visible"""
         bestSize = self.pugWindow.GetBestSize()
         # give some space for scrollbars
+        newSize = bestSize
         newSize = (bestSize[0] + WX_SCROLLBAR_FUDGE[0], 
                    bestSize[1] + WX_SCROLLBAR_FUDGE[1])
         # show the whole toolbar
-        toolbarWidth = self.GetToolBar().GetSize()[0]
-        if newSize[0] < toolbarWidth:
-            newSize = (toolbarWidth, newSize[1])
+        if self.GetToolBar():
+            toolbarWidth = self.GetToolBar().GetSize()[0]
+            if newSize[0] < toolbarWidth:
+                newSize = (toolbarWidth, newSize[1])
         self.SetClientSize(newSize)
         self.pugWindow.GetSizer().Layout()
             

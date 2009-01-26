@@ -20,6 +20,7 @@ from pug.syswx.SelectionWindow import SelectionWindow
 # TODO: create a link between project closing and app closing
 
 _RECTPREFIX = 'rect_'
+_DEBUG = False
 
 class pugApp(wx.App):
     """pugApp: wx.App for the pug system
@@ -98,7 +99,7 @@ projectFolder: where file menus start at.  Defaults to current working dir.
         self.initProgressDialog.Bind(wx.EVT_CLOSE, self.abort_init)
         self.initProgressDialog.Update(0)
         self.initProgressDialog.Raise()
-        time.sleep(0.05)
+        self.initProgressDialog.Show()
         if object:
             self.post_init(object)
             return
@@ -146,7 +147,7 @@ called every second until the object is initialized"""
             self.finalize_project_object( object)
         else:
             wx.CallLater(500,self.post_init,object)
-            time.sleep(0.1)
+            time.sleep(0.3)
             
     def finalize_project_object(self, object):
         if object is None:
@@ -168,6 +169,9 @@ called every second until the object is initialized"""
         self.projectFrame = frame 
         self.projectFrame.Bind(wx.EVT_CLOSE, self._evt_project_frame_close, 
                                id=self.projectFrame.GetId()) 
+        
+    def get_project_frame(self):
+        return self.projectFrame
             
     def post_init_failed(self, error):
         msg = ''.join(['pug.App.post_init error:\n',error[3]])
@@ -215,8 +219,8 @@ called every second until the object is initialized"""
                 pugframe.Close()
         self.Exit()
         
-    def pugframe_opened(self, frame, object=None):
-        """pugframe_opened(frame)
+    def pugframe_viewing(self, frame, object):
+        """pugframe_viewing(frame)
 
 Notify the app that a PugFrame has opened, so that it can track object views.
 frame: the frame that is being opened
@@ -227,16 +231,14 @@ object: the object being viewed. Alternatively, this can be a string identifying
 #            self.progressDialog.Destroy()
 #            self.progressDialog = None
         if object is None:
-            try:
-                objId = id(frame.objectRef())
-            except:
-                objId = id(frame.object)
+            objList = []
         else:
-            objId = id(object)
+            objList = [id(object)]
+        if _DEBUG: print "app.pugframe_viewing: ",object, objList
         if self.pugFrameDict.get(frame, False):
-            self.pugFrameDict[frame].append( objId)
+            self.pugFrameDict[frame]+=objList
         else:
-            self.pugFrameDict[frame]= [objId]
+            self.pugFrameDict[frame]= objList
             
     def pugframe_stopped_viewing(self, frame, object):
         if frame in self.pugFrameDict:
@@ -250,6 +252,8 @@ Return the PugFrame currently viewing 'object', or None if not found.
 """
         searchid = id(object)
         pugframe = None
+        if _DEBUG: print "app.get_object_pugframe: ",object,searchid,\
+                            "\n Dict:", self.pugFrameDict.data
         for frame, objlist in self.pugFrameDict.iteritems():
             if frame and searchid in objlist:
                 pugframe = frame
@@ -259,13 +263,13 @@ Return the PugFrame currently viewing 'object', or None if not found.
         """show_object_pugframe(object)
         
 Raise the pugframe viewing 'object'. If it exists return the frame... otherwise, 
-return None. 
+return None. If the frame has an 'on_show_object' function, it will be called
+with object as an argument
 """
         frame = self.get_object_pugframe(object)
         if frame:
-            frame.Show()
-            frame.Raise()
-            frame.show_object(object)
+            if hasattr(frame, 'on_show_object'):
+                frame.on_show_object(object)
         return frame
     
     def show_selection_frames(self):
@@ -320,7 +324,7 @@ bring it to the top. For arguments, see the doc for PugFrame.
 Selection frames display pug views of the objects in self.selectedRefSet. The 
 selectedRefSet can be changed using the set_selection method.
 """
-        if not self.show_selection_frames() or wx.GetKeyState(wx.WXK_CONTROL):
+        if wx.GetKeyState(wx.WXK_CONTROL) or not self.show_selection_frames():
             frame = PugFrame( name="Selection")
             frame.set_pugwindow(SelectionWindow(frame))
         else:
@@ -376,8 +380,8 @@ menubar: the wx.MenuBar to add the global menus to
 """
         menuList = self.globalMenuDict['__order__']
         for menuName in menuList:
-            newMenu = wx.Menu()
-            menubar.Append(menu=newMenu, title=menuName)
+            menu = wx.Menu()
+            menubar.Append(menu=menu, title=menuName)
             menuEntries = self.globalMenuDict.get(menuName, [])
             for entry in menuEntries:
                 id = wx.NewId()
@@ -388,7 +392,7 @@ menubar: the wx.MenuBar to add the global menus to
                 else:
                     tooltip = name
                 self.globalMenuDict['__ids__'][id] = func
-                newMenu.Append(help=tooltip, id=id, text=name)
+                menu.Append(help=tooltip, id=id, text=name)
                 self.Bind(wx.EVT_MENU, self._evt_on_global_menu, id=id)
                 
     def _evt_on_global_menu(self, event):
@@ -462,11 +466,12 @@ settingsObj: any frame settings members will be replaced
                 win = frame
         for frame in windows:
             if frame != win and frame.IsShown():
+                frame.Iconize(False)
                 frame.Raise()
         if win:
             win.Raise()
             
-    def apply_all(self, event=None):
+    def apply(self, event=None):
         windows = wx.GetTopLevelWindows()
         for frame in windows:
             if hasattr( frame, 'apply'):

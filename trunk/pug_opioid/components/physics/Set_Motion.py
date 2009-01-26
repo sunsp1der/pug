@@ -18,17 +18,24 @@ added to a scene."""
        "Add to current values instead of setting them. Friction is multiplied."]
     ]
     #defaults
-    velocity_x=0
-    velocity_y=0
-    acceleration_x=0
-    acceleration_y=0
-    rotation_speed=0
-    friction=1.0
+    velocity_x = 0
+    velocity_y = 0
+    acceleration_x = 0
+    acceleration_y = 0
+    rotation_speed = 0
+    friction = 1.0
     additive = False
+    
+    action = None
     
     @component_method
     def on_added_to_scene(self):
-        """Set the rotation when object is added to scene"""
+        """Set the motion when object is added to scene"""
+        self.set_motion()
+        
+    @component_method
+    def set_motion(self):
+        """Apply the motion settings"""
         owner = self.owner
         if self.additive:
             owner.velocity = (owner.velocity[0] + self.velocity_x,
