@@ -28,6 +28,12 @@ from pug_opioid.editor.util import close_scene_windows, save_scene_as, \
 _DEBUG = False
 
 class OpioidInterface(pug.ProjectInterface):
+    """OpioidInterface( rootfile, scene=PugScene)
+    
+rootfile: a file in the root folder of the project, usually the main python 
+    module    
+scene: the scene to load initially
+"""
     _pug_template_class = 'OpioidInterface'
     _scene = ''
     component_browser = None
@@ -47,7 +53,7 @@ class OpioidInterface(pug.ProjectInterface):
         self.reload_scenes()        
         self.import_settings()
         if getattr(self.game_settings, 'title'):
-            self.project_name = self.game_settings.title      
+            self.project_name = self.game_settings.title 
 
         self.Display = Opioid2D.Display
         self.Director = Opioid2D.Director   
@@ -57,7 +63,7 @@ class OpioidInterface(pug.ProjectInterface):
         os.environ['SDL_VIDEO_WINDOW_POS'] = \
                 "%d,%d" % self.pug_settings.rect_opioid_window[0:2]
         Opioid2D.Display.init(self.pug_settings.rect_opioid_window[2:4], 
-                              title='Pug_Opioid Scene')
+                              title='Pug-Opioid Scene')
         Opioid2D.Director.game_started = False
         Opioid2D.Director.playing_in_editor = True
         thread.start_new_thread(self.Director.run, (scene,))
@@ -76,7 +82,7 @@ settingsObj: an object similar to the one below... if it is missing any default
         # DEFAULT GAME SETTINGS
         class game_settings():
             title = 'NewGame'
-            initial_scene = None
+            initial_scene = '__Working__'
             rect_opioid_window = (20, 20, 800, 600)
             fullscreen = False
             save_settings_on_quit = True
@@ -153,6 +159,29 @@ settingsObj: an object similar to the one below... if it is missing any default
     def _post_init(self):
         app = wx.GetApp()
         app.set_pug_settings( self.pug_settings)
+        # initial scene
+        if getattr(self.pug_settings, 'initial_scene'):
+            self.sceneclass = self.pug_settings.initial_scene  
+        if not self.scene:
+            self.sceneclass = self.Director.scene.__class__
+        # default menus
+        if not self.cached[2]:
+            app.add_global_menu("Pug-Opioid",
+                [["Save Working Scene\tCtrl+S", self.save_using_working_scene],
+                 ["Show All Windows\tCtrl+W", app.raise_all_frames],
+                 ["Quit\tCtrl+Q", self.quit]])
+            self.cached[2]=True
+        # open MDI frame
+        if not app.get_project_frame():
+            frame = PugMDI(
+                        [[self, {'objectpath':"Project",'name':"ProjectFrame"}],
+                        [self.scene, {'title':"Scene",'name':"SceneFrame",
+                                'objectpath':self.scene.__class__.__name__}],
+                        'selection',
+                        ],
+                    title=''.join(["Pug-Opioid Editor - ", self.project_name]),
+                    name="Pug-Opioid Editor")
+            app.set_project_frame(frame)
         # cache a sprite view for speed on first selection
         if not self.cached[0]:
             dummy = PugSprite()
@@ -161,36 +190,13 @@ settingsObj: an object similar to the one below... if it is missing any default
             while dummy in self.Director.scene.nodes:
                 time.sleep(0.1)
             self.cached[0] = True
-        # initial scene
-        if getattr(self.pug_settings, 'initial_scene'):
-            self.sceneclass = self.pug_settings.initial_scene  
-        if not self.scene:
-            self.sceneclass = self.Director.scene.__class__
-        # cache views for speed
-        if not self.cached[1]:
-            cache_default_view(self)
-            cache_default_view(self.scene)
-            self.cached[1]=True
-        # default menus
-        app.add_global_menu("Pug_Opioid",
-                [["Save Working Scene\tCtrl+S", self.save_using_working_scene],
-                 ["Show All Windows\tCtrl+W", wx.GetApp().raise_all_frames],
-                 ["Quit\tCtrl+Q", self.quit]])
-        # open MDI frame
-        frame = PugMDI([[self, {'objectpath':"Project",'name':"ProjectFrame"}],
-                        [self.scene, {'title':"Scene",'name':"SceneFrame"}],
-                        'selection',
-                        ],
-                    title=''.join(["Pug_Opioid Editor - ", self.project_name]),
-                    name="Pug_Opioid Editor")
-        app.set_project_frame(frame)
             
     def quit(self):
         project_quit()
         
     def view_scene(self):
         """Show scene data in a window"""
-        pug.frame(self.scene, name="SceneFrame")
+        pug.frame(self.scene)
             
     def set_scene(self, value, forceReload = False):
         """set_scene(value): set the current scene class in the Director
@@ -211,7 +217,6 @@ value can be either an actual scene class, or the name of a scene class
         oldscene = self.Director.scene
         if oldscene.__class__ != value or forceReload:
             oldscene.stop()
-            sceneFrame = wx.GetApp().get_object_pugframe(oldscene)
             self.Director.scene = value
             # wait for completion
             starttime = time.time()
@@ -226,12 +231,12 @@ value can be either an actual scene class, or the name of a scene class
                     else:
                         starttime = time.time()
                 time.sleep(0.05)
-            if sceneFrame:
-                title = ''.join(['Scene: ', self.Director.scene.__name__])
-                sceneFrame.set_object(self.Director.scene, title=title)            
             close_scene_windows(oldscene)
             self.update_selection()
             self.Director.scene.state = EditorState
+            sceneFrame = wx.FindWindowByName("SceneFrame")
+            if sceneFrame:
+                sceneFrame.set_object(self.Director.scene, title="Scene")            
 
     def update_selection(self):
         """update_selection(): remove invalid items in selectedRefSet"""
@@ -459,6 +464,7 @@ list a tuple ("Sprite", PugSprite) for use in the add object dropdown"""
 _interfaceTemplate = {
     'size':(350,350),
     'name':'Basic',
+    'skip_menus':['Export'],    
     'attributes':[ 
         ['Project', pug.Label, {'font_size':10}],
         ['Controls', pug.PlayButtons, {'execute':'execute_scene', 
@@ -474,7 +480,7 @@ _interfaceTemplate = {
                                'routine':save_scene_as, 
                                'use_defaults':True,
                                'tooltip':"Commit current scene to disk"}],
-        ['view_scene', pug.Routine,  {'label':'   View Scene'}],
+#        ['view_scene', pug.Routine,  {'label':'   View Scene'}],
         ['revert_scene', None, {'label':'   Revert Scene'}],
         ['use_working_scene', None, {'label':'   Use Working Scene',
                     'tooltip':'Uncheck to go back to last committed version'}],
@@ -497,12 +503,12 @@ _interfaceTemplate = {
         ['reload_scenes', None, {'label':'   Reload Scenes',
                                      'use_defaults':True}],
         ['reload_object_list', pug.Routine, {'label':'   Reload Objects'}],        
-        ['open_selection_frame', None, 
-                {'label':'   View Selection'}],
+#        ['open_selection_frame', None, 
+#                {'label':'   View Selection'}],
         ['browse_components', None, 
                 {'label':'   Browse Components'}],
-        ['Director'],
-        ['Display'],
+#        ['Director'],
+#        ['Display'],
 #        ['test', pug.Routine, {'routine':test}]
     ]
 }

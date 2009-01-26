@@ -1,15 +1,12 @@
 now:
-	derive mdichildframe from pugframe also
-		add frames to applist
-		sceneFrame in set_scene
-	old scene remains after change scene... refresh scene window
- 	name in project and scene 
-		win title just scene
-	create menu in parentmdi
-	set menus in childmdis
- 	default positions for child frames	
- 		
+	deleted: selection: explosion
+		then no show-pug view when another object is selected
+
 current version:
+	real-time editting of components
+	component view: with methods
+		special routine that adds owner automatically
+	routine that puts in default arguments
 	
 Finalize:
 	Open/New project	
@@ -36,6 +33,7 @@ fun stuff:
 			methods		
 				spawn_timer	
 				spawn (object, location)
+		forward motion
 	
 
 bugs: 
@@ -44,6 +42,11 @@ bugs:
 	crash - selecting an object while changing selectionwin to another view 
 
 later: 
+	component view
+		add view options of all sub-classes
+		open button in label
+	remove close option from main windows
+	change name 'template' to 'view'
 	open console window
 	font size for scene class
 	make opioid not respond during modal stuff

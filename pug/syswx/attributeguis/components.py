@@ -50,7 +50,7 @@ For kwargs optional arguments, see the Base attribute GUI
         #edit
         editSizer = wx.BoxSizer(orient = wx.HORIZONTAL)
         sizer.Add(editSizer,flag=wx.EXPAND)
-        # combo
+        # list of components on object
         editList = ComponentList(parent=control, size=WX_BUTTON_SIZE)
         editList.SetToolTipString("Components attached to object")
         editSizer.Add(editList, 1)
@@ -74,7 +74,7 @@ For kwargs optional arguments, see the Base attribute GUI
         #add
         addSizer = wx.BoxSizer(orient = wx.HORIZONTAL)
         sizer.Add(addSizer, flag=wx.EXPAND)
-        # tree
+        # tree of available components
         addTree = ComponentAddTree(parent=control)
         addTree.SetPopupMinWidth(100)
         addTree.SetToolTipString("Component to add to object")
@@ -114,6 +114,7 @@ For kwargs optional arguments, see the Base attribute GUI
         addTree.SetMinSize((-1,self.addTree.Size[1]))
         editList.SetMinSize((-1,self.editList.Size[1]))
         
+        aguidata.setdefault('tooltip', "")
         kwargs['aguidata'] = aguidata
         kwargs['label_widget'] = label
         kwargs['control_widget'] = control
@@ -139,7 +140,11 @@ For kwargs optional arguments, see the Base attribute GUI
         aguidata.setdefault('label','   components')
         selectComponent = self.editList.get_selected()
         selectAddComponent = self.addTree.tree.GetStringValue()
-        if self.object != window.object:
+        try:
+            resetObject = self.object != window.object
+        except:
+            resetObject = True
+        if resetObject:
             self.object = window.object
             self.addTree.object = self.object
             self.editList.object = self.object
@@ -177,7 +182,7 @@ For kwargs optional arguments, see the Base attribute GUI
             path = self.window.GetTitle()
         obj=component
         app = wx.GetApp()
-        if not app.show_object_pugframe(obj) or wx.GetKeyState(wx.WXK_CONTROL):
+        if wx.GetKeyState(wx.WXK_CONTROL) or not app.show_object_pugframe(obj):
             frame = self.pug(obj=obj, parent=self.control, objectpath=''.join(
                         [self.editList.get_text(), ' component of ', path]))
             self_rect = self.control.GetTopLevelParent().GetScreenRect()

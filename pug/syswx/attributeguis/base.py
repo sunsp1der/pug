@@ -275,7 +275,7 @@ Try to set the aguis attribute to the value shown in the control
                 return True
                 
     def refresh_window(self):
-        self.window.refresh_all()
+        self.window.refresh()
         
     def setup_context_help(self, item, window):
         item.Bind(wx.EVT_HELP, self.on_context_help)

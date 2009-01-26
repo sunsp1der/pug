@@ -3,7 +3,7 @@
 ###################
 # import autocode #
 ###################
-from all_components import Set_Rotation_Speed, Follow_Mouse, Set_Motion, \
+from all_components import Set_Motion, Follow_Mouse, Set_Motion, \
         Face_Object
 from pug_opioid.PugScene import PugScene
 from pug_opioid.PugSprite import PugSprite
@@ -19,7 +19,7 @@ class Diagonals2(PugScene):
     def enter(self):
         # Sprites etc.
         pugsprite_instance = PugSprite()
-        pugsprite_instance.components.add( Set_Rotation_Speed(
+        pugsprite_instance.components.add( Set_Motion(
                 rotation_speed=80, ) )
         pugsprite_instance.image = 'art/sprite.png'
         pugsprite_instance.layer = 'bar'

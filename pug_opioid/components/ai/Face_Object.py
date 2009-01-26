@@ -24,14 +24,25 @@ class Face_Object(Component):
     target = ''
     rotation_speed = -1
     offset = 0
+    
     target_angle = None
     action = None
+    tick_action = None
     
     @component_method
     def on_added_to_scene(self):
-        """Set the rotation when object is added to scene"""
-        act = RealTickFunc( self.check_facing)
-        act.do()
+        """Start facing target when object is added to scene"""
+        self.start_facing_target(self)
+        
+    @component_method
+    def start_facing_target(self):
+        self.tick_action = RealTickFunc( self.check_facing)
+        self.tick_action.do()
+        
+    @component_method
+    def stop_facing_target(self):
+        if self.tick_action:
+            self.tick_action.abort()
         
     def check_facing(self):
         if not self.enabled:

@@ -5,6 +5,7 @@ import wx
 from wx.gizmos import TreeListCtrl
 
 from pug.syswx.attributeguis import Base
+from pug.syswx.wxconstants import WX_SCROLLBAR_FUDGE
 
 class SceneNodes (Base):
     """An attribute gui that's a tree window for working with Scene nodes
@@ -21,20 +22,21 @@ For other kwargs arguments, see the Base attribute GUI
     def __init__(self, attribute, window, aguidata={}, **kwargs):
         self.tree = None
         # control
-        control = NodeTreeListCtrl(window.object, 
-                                   parent=window)
+        control = NodeTreeListCtrl(window.object, parent=window)
         #control.SetMinSize((control.get_full_width(), -1))
         kwargs['control_widget'] = control
         Base.__init__(self, attribute, window, aguidata, **kwargs)
         
     def setup(self, attribute, window, aguidata={}):
         aguidata.setdefault('control_only',True)
+        self.control.set_object( window.object)
+        self.control.SetMinSize( (self.control.get_full_width(), -1))
         Base.setup( self, attribute, window, aguidata)
         
     def tree_view(self, event=None):
         app = wx.GetApp()        
-        if not app.show_object_pugframe(self.window.object.nodes) and \
-                not wx.GetKeyState(wx.WXK_CONTROL):
+        if wx.GetKeyState(wx.WXK_CONTROL) or \
+                    not app.show_object_pugframe(self.window.object.nodes):
             name = self.window.shortPath
             if not name:
                 name = self.window.Title
@@ -55,10 +57,9 @@ class NodeTreeFrame( wx.Frame):
         self.SetSizer(sizer)
         self.tree = NodeTreeListCtrl( scene, parent=self)
         sizer.Add(self.tree, 1, wx.EXPAND)
-        self.GetFullWidth()
         self.SetClientSize((self.tree.get_full_width(), self.Size[1]))
         app = wx.GetApp()
-        app.pugframe_opened( self, scene.nodes)           
+        app.pugframe_viewing( self, scene.nodes)           
             
 class NodeTreeListCtrl( TreeListCtrl):
     """NodeTreeListCtrl( TreeListCtrl)
@@ -66,6 +67,7 @@ class NodeTreeListCtrl( TreeListCtrl):
 A tree control that shows all the nodes in an Opioid2D scene.
 """
     changing_sel = False
+    object = None
     def __init__(self, scene, *args, **kwargs):
         """__init__(scene, *args, **kwargs) 
         
@@ -77,7 +79,6 @@ Special kwargs:
                     | wx.TR_FULL_ROW_HIGHLIGHT \
                     | wx.TR_ROW_LINES
 """
-        self.object = scene
         style = kwargs.pop('style',-1)
         if style is -1:
             style = wx.TR_HIDE_ROOT \
@@ -87,8 +88,8 @@ Special kwargs:
                     | wx.TR_SINGLE 
             # can't figure out how to make the list single selection
             # hacked below
-        self.object.nodes.register(self.nodes_changed)
         TreeListCtrl.__init__(self, style=style, *args, **kwargs)
+        self.set_object(scene)
         # columns
         self.Indent = 5 # doesn't seem to work
         self.AddColumn("gname")
@@ -102,6 +103,13 @@ Special kwargs:
         wx.GetApp().register_selection_watcher(self)
         from pug.syswx.pugframe import PugFrame
         self.PugFrame = PugFrame
+        
+    def set_object(self, scene):
+        if self.object and self.object.nodes:
+            self.object.nodes.unregister(self.nodes_changed)
+        self.object = scene
+        self.object.nodes.register(self.nodes_changed)
+        self.refresh_tree()
         
     def on_set_selection(self, selectedRefSet):
         """Callback from pug App"""

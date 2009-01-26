@@ -5,7 +5,7 @@
 ############################
 class game_settings():
     fullscreen = False
-    initial_scene = 'Jumpers'
+    initial_scene = 'Three'
     rect_opioid_window = (20, 20, 800, 600)
     save_settings_on_quit = True
     title = 'Pug_Opioid Game'

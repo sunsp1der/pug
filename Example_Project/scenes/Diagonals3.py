@@ -1,7 +1,7 @@
 ###################
 # import autocode #
 ###################
-from all_components import Follow_Mouse, Set_Rotation_Speed, Set_Motion, \
+from all_components import Follow_Mouse, Set_Motion, Set_Motion, \
         Face_Object
 from pug_opioid.PugScene import PugScene
 from pug_opioid.PugSprite import PugSprite
@@ -74,7 +74,7 @@ class Diagonals3(PugScene):
         pugsprite_instance_8.position.y = 400.0
 
         pugsprite_instance_9 = PugSprite()
-        pugsprite_instance_9.components.add( Set_Rotation_Speed(
+        pugsprite_instance_9.components.add( Set_Motion(
                 rotation_speed=80, ) )
         pugsprite_instance_9.image = 'art/sprite.png'
         pugsprite_instance_9.layer = 'bar'
@@ -91,7 +91,7 @@ class Diagonals3(PugScene):
 
         pugsprite_instance_11 = PugSprite()
         pugsprite_instance_11.friction = 0.89999997615814209
-        pugsprite_instance_11.components.add( Set_Rotation_Speed() )
+        pugsprite_instance_11.components.add( Set_Motion() )
         pugsprite_instance_11.components.add( Set_Motion(
                 velocity_x=100, 
                 velocity_y=100, 

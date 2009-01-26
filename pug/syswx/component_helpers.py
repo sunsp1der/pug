@@ -43,8 +43,7 @@ class ComponentAddTree(wx.combo.ComboCtrl):
         return self.__object
     
     def set_object(self, object):
-        if self.__object.__class__ != object.__class__:
-            self.set_tree_dirty()
+        self.set_tree_dirty()
         self.__object = object
         
     object = property(get_object,set_object)
@@ -102,8 +101,6 @@ class ComponentList(wx.combo.ComboCtrl):
         return self.__object
      
     def set_object(self, object):
-        if self.__object == object:
-            return
         self.__object = object
         self.refresh_components()
         
