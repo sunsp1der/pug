@@ -90,7 +90,7 @@ class HelpFrame(wx.Frame):
                 err.ShowModal()
                 err.Destroy()
             else:
-                self.GetParent().create_puglist()
+                self.GetParent().create_aguilist()
                 self.Close()
         
     def set_object(self, object, objectPath = "", overrideText = None):

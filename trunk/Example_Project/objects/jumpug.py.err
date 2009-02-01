@@ -1,0 +1,51 @@
+"""jumpug.py"""
+
+###################
+# import autocode #
+###################
+from all_components import Set_Motion, Face_Object
+from pug_opioid.PugSprite import PugSprite
+#######################
+# End import autocode #
+#######################
+
+#####################
+# "jumpug" autocode #
+#####################
+class jumpug(PugSprite):
+    image = 'art/pug.png'
+    layer = 'Layer 1'
+    def on_create(self):
+        self.acceleration.x = 0.0
+        self.acceleration.y = 0.0
+        self.position.x = 102.0
+        self.position.y = 527.0
+        self.scale.x = 1.0
+        self.scale.y = 1.0
+        self.velocity.x = 0.0
+        self.velocity.y = 0.0
+        self._codeStorageDict = {'force_init_def': True, 'init_method_args': [], 'dummy_creator': '_create_dummy', 'as_class': True, 'instance_only_attributes': ['gname'], 'custom_export_func': <function _create_object_code at 0x8955f0c>, 'init_method': 'on_create', 'skip_attributes': ['_actions', '_image_file', 'image_file', 'layer_name', '_init_image', '_init_layer', '_GnamedObject__gname', '_ComponentObject__components'], 'instance_attributes': ['*']}
+        self._pug_pugview_class = 'PugSprite'
+        self.alpha = 1.0
+        self.archetype = False
+        self.color = (1.0, 1.0, 0.0, 1.0)
+        self.color_inheritance = False
+        self.deleted = False
+        self.friction = 1.0
+        self.group = None
+        self.lighting = False
+        self.rotation = 0.0
+        self.rotation_speed = 0.0
+        self.components.add( Set_Motion(
+                velocity_y=-305,
+                acceleration_y=222,
+                rotation_speed=1) )
+        self.components.add( Set_Motion(
+                rotation_speed=222) )
+        self.components.add( Face_Object(
+                target='spawnero') )
+        PugSprite.on_create(self)
+#########################
+# End "jumpug" autocode #
+#########################
+

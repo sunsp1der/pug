@@ -23,8 +23,9 @@ Opioid2d Sprite with features for use with pug"""
     # image stuff... allows entry and storage of filename
     _image_file = None   
     archetype = False
-    _pug_template_class = 'PugSprite'
-    def __init__(self, img=None, gname=''):
+    _pug_pugview_class = 'PugSprite'
+    def __init__(self, img=None, gname='', register=True):
+        self.register = register
         pug.BaseObject.__init__(self, gname=gname)
         Sprite.__init__(self, img)
     def get_image_file(self):
@@ -48,13 +49,21 @@ Opioid2d Sprite with features for use with pug"""
                       pug.BaseObject._del_gname,
                       "An easily accessed global name for this object")
 
-    def _on_mgr_delete(self):
-        Sprite._on_mgr_delete(self)  
-        if _DEBUG: print "PugSprite._on_mgr_delete calling scene.update_node"
-        Director.scene.update_node(self, "Delete") # register self with scene                
-
     def delete(self):
+        self.on_delete()
+        Director.scene.update_node(self, "Delete") # register self with scene                
         Sprite.delete(self)
+        
+    def on_delete(self):
+        "on_delete(): callback called when Sprite is deleted"
+        pass
+    
+    def on_create(self):
+        """on_create(): callback called when Sprite is created.
+
+This calls Director.scene.register_node(self) unless self.register is False""" 
+        if self.register:
+            Director.scene.register_node(self)        
 
     # layer_name property
     def set_layer(self, layer):
@@ -76,11 +85,15 @@ Opioid2d Sprite with features for use with pug"""
         save_object( self)
     
     # code storage customization
-    def _create_object_code(self, storageDict, indentLevel, exporter):
-        if _DEBUG: print "*******************enter sprite save: "+str(self)        
-        # make sure we have our dummy node cleanup registered
+    @classmethod
+    def _create_dummy(cls, exporter):
+        # make sure we have our dummy node and cleanup registered
         if exporter_cleanup not in exporter.deleteCallbacks:
             exporter.register_delete_callback( exporter_cleanup)
+        return cls(register=False)
+        
+    def _create_object_code(self, storageDict, indentLevel, exporter):
+        if _DEBUG: print "*******************enter sprite save: "+str(self)        
         # check for valid names
         storage_name = storageDict['storage_name']
         if storage_name == 'PugSprite' or storage_name == 'Sprite':
@@ -93,12 +106,12 @@ Opioid2d Sprite with features for use with pug"""
         info = (self, storageDict, indentLevel) # for convenience
         code.append(exporter.create_instantiator_code(*info))
         base_code = exporter.create_base_code(*info)
-        dummy = exporter.dummyDict.get(storageDict['base_class'], None)
         if not base_code.endswith('pass\n'): # clean up pass case (for looks)
             code.append(base_code)
         # custom code
         baseIndent = _INDENT * indentLevel    
         hasAttrs = False    
+        dummy = exporter.dummyDict.get(storageDict['base_class'], None)
         custom_code = []
         if storageDict['as_class']:
             if not dummy or dummy.image_file != self.image_file:
@@ -107,8 +120,8 @@ Opioid2d Sprite with features for use with pug"""
             if not dummy or dummy.layer_name != self.layer_name:
                 custom_code += [baseIndent, _INDENT, 'layer = ', 
                                 repr(self.layer_name),'\n']
-            init_code = exporter.create_init_code(*info)
-            custom_code += [init_code]
+            init_def = exporter.create_init_method(docode=False, *info)
+            custom_code += [init_def]
             xIndent = _INDENT * 2
             name = 'self'
         else:
@@ -136,8 +149,9 @@ Opioid2d Sprite with features for use with pug"""
                 custom_attr_code += [prefix, 
                                      attr, '.', 'y = ', repr(vector.y),'\n']
         custom_code += custom_attr_code
-        if not custom_code and storageDict['as_class']:
-            custom_code = [baseIndent, 'pass\n']
+        if storageDict['as_class']:
+            init_code = exporter.create_init_method(dodef=False, *info)  
+            custom_code.append(init_code)          
         code += custom_code
         if _DEBUG: print "*******************exit sprite save: "+str(self)        
         return ''.join(code)
@@ -167,6 +181,7 @@ supposed to be deleted.
             'init_method':'on_create',
             'init_method_args': [],
             'force_init_def': True,
+            'dummy_creator': '_create_dummy',
             'custom_export_func': _create_object_code,
             'as_class': True,
                         }
@@ -175,7 +190,7 @@ supposed to be deleted.
 # force derived classes to use PugSprite as a base
 #PugSprite._codeStorageDict['base_class'] = PugSprite
 
-_spriteTemplate = {
+_spritePugview = {
     'name':'PugSprite Editor',
     'skip_menus':['Export'],
     'attributes':
@@ -183,7 +198,7 @@ _spriteTemplate = {
         ['Sprite', pug.Label, {'font_size':10}],
         ['__class__', None, {'label':'   class', 'new_view_button':False}],
         ['gname'],
-        ['archetype', None, {'label':'   archetype', 'tooltip':
+        ['archetype', None, {'tooltip':
                 '\n'.join(["Select this to automatically save this sprite",
                            "to the objects folder when the scene is saved.",
                            "It will not appear in the game."])}],
@@ -215,4 +230,4 @@ _spriteTemplate = {
 #        ['_test_referrers'],
     ]       
  }
-pug.add_template('PugSprite', _spriteTemplate, True)
+pug.add_pugview('PugSprite', _spritePugview, True)

@@ -5,7 +5,7 @@ from new import code as _code, function as _function, \
 import weakref
 from types import MethodType as _MethodType
 
-from pug.code_storage.constants import _INDENT
+from pug.code_storage.constants import _INDENT, _STORE_UNICODE
 
 _DEBUG = False
 
@@ -16,8 +16,8 @@ Pug uses components to add python code to objects at runtime
 
 kwargs: Component.__init__ will assign kwargs as attributes. For example...
 MyComponent( size=10, name='biggy') 
-When MyComponent is created, an attribute 'size' will be created with value 10
-and an attribute 'name' will be created with value 'biggy'
+When MyComponent is created, its 'size' attribute will be created with value 10
+and its 'name' attribute will be created with value 'biggy'
     
     
 Class attributes:        
@@ -43,6 +43,9 @@ _attribute_list: List of [[attribute, docstring, {extras}],...]. This is a list
     {extras}: Extra info about the attribute. Possible values:
         'agui': the pug attribute-gui type to use
         'aguidata': the aguidata to send to the agui
+enabled: When this is false, the component's component_methods will not
+    intercept calls to its owner's methods. Calls directly to component_methods 
+    will continue to work unless they are explicitly coded not to.
 *Other: component attribute defaults should be set at the class level.
 
 @component_method: methods in a component with this decorator are made available
@@ -64,7 +67,7 @@ _attribute_list: List of [[attribute, docstring, {extras}],...]. This is a list
     _type = None
     _class_list = []
     _attribute_list = []
-    _pug_template_class = 'Component'
+    _pug_pugview_class = 'Component'
     __owner = None
     enabled = True
     
@@ -108,6 +111,17 @@ _attribute_list: List of [[attribute, docstring, {extras}],...]. This is a list
     _component_method_names = \
         _component_method_names(_component_method_names.__doc__)
 		
+    def is_duplicate_of(self, other):
+        duplicate = False
+        if self.__class__ == other.__class__:
+            duplicate = True
+            for attrinfo in self._attribute_list:
+                attr = attrinfo[0]
+                if getattr(self, attr) != getattr(other, attr):
+                    duplicate = False
+                    break
+        return duplicate         
+        
     def _create_object_code(self, storageDict, indentLevel, exporter):
         if storageDict['as_class']:
             return exporter.create_object_code(self, storageDict, indentLevel, 
@@ -132,11 +146,11 @@ line breaks between each. To create a single-line argument list, strip out all
 """
         dummy = self.__class__()
         argIndent = _INDENT * (indentLevel + 2)
-        code = []
         attributes = []
         for item in self._attribute_list:
             attributes.append(item[0])
         attributes.append('enabled')
+        attribute_code = []
         for attr in attributes:
             store = True
             try:
@@ -146,9 +160,15 @@ line breaks between each. To create a single-line argument list, strip out all
                     store = False
             except:
                 store = False
-            if store:
-                code += ['\n',argIndent, attr, '=', repr(val),', ']
-        return ''.join(code)
+            if store:                
+                if not _STORE_UNICODE and val is unicode(val):
+                    # we convert unicode values to strings for pretty's sake
+                    val = str(val)
+                attribute_code += [''.join([attr, '=', repr(val)])]
+        joiner = ''.join([',\n',argIndent])
+        code = joiner.join(attribute_code)
+        code = ''.join(['\n',argIndent,code])
+        return code
     _codeStorageDict = {
                   'custom_export_func': _create_object_code,
                   'as_class': True,
@@ -222,7 +242,7 @@ class ComponentMethod(object):
         cache = self.__cache
         instance_id = id(instance)
         bound_method_ref = cache.get(instance_id)
-        if bound_method_ref is None:
+        if bound_method_ref is None or bound_method_ref() is None:
             bound_method = _instancemethod(self.__func, instance, cls)
 
             #def bound_method(*args, **kw_args):
@@ -242,11 +262,11 @@ class ComponentMethod(object):
         if not (flags & _CO_VARKEYWORDS):
             flags |= _CO_VARKEYWORDS
             locals += 1
-            names.append('')
+            names.insert(1, '')
         if not (flags & _CO_VARARGS):
             flags |= _CO_VARARGS
             locals += 1
-            names.insert(-1, '')
+            names.insert(1, '')
         new_code = _code(n, locals, code.co_stacksize, flags, code.co_code,
                          code.co_consts, code.co_names, tuple(names),
                          code.co_filename, code.co_name, code.co_firstlineno,

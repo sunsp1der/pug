@@ -13,6 +13,7 @@ import Opioid2D
 from Opioid2D.public.Node import Node
 
 import pug
+from pug.component.pugview import _dataPugview, _dataMethodPugview
 from pug.syswx.util import show_exception_dialog, cache_default_view
 from pug.syswx.component_browser import ComponentBrowseFrame
 from pug.syswx.pugmdi import PugMDI
@@ -25,7 +26,7 @@ from pug_opioid.editor import EditorState, selectionManager
 from pug_opioid.editor.util import close_scene_windows, save_scene_as, \
                                     project_quit
                                     
-_DEBUG = False
+_DEBUG = True
 
 class OpioidInterface(pug.ProjectInterface):
     """OpioidInterface( rootfile, scene=PugScene)
@@ -34,7 +35,7 @@ rootfile: a file in the root folder of the project, usually the main python
     module    
 scene: the scene to load initially
 """
-    _pug_template_class = 'OpioidInterface'
+    _pug_pugview_class = 'OpioidInterface'
     _scene = ''
     component_browser = None
     _use_working_scene = True
@@ -184,12 +185,12 @@ settingsObj: an object similar to the one below... if it is missing any default
             app.set_project_frame(frame)
         # cache a sprite view for speed on first selection
         if not self.cached[0]:
-            dummy = PugSprite()
+            dummy = PugSprite( register=False)
             cache_default_view( dummy)
             dummy.delete()
             while dummy in self.Director.scene.nodes:
                 time.sleep(0.1)
-            self.cached[0] = True
+            self.cached[0] = True            
             
     def quit(self):
         project_quit()
@@ -204,6 +205,7 @@ settingsObj: an object similar to the one below... if it is missing any default
 value can be either an actual scene class, or the name of a scene class        
 """
         if (forceReload):
+            self.reload_object_list()
             self.reload_scenes()
         if value == str(value):
             if self.sceneDict.has_key(value):
@@ -232,21 +234,10 @@ value can be either an actual scene class, or the name of a scene class
                         starttime = time.time()
                 time.sleep(0.05)
             close_scene_windows(oldscene)
-            self.update_selection()
             self.Director.scene.state = EditorState
             sceneFrame = wx.FindWindowByName("SceneFrame")
             if sceneFrame:
-                sceneFrame.set_object(self.Director.scene, title="Scene")            
-
-    def update_selection(self):
-        """update_selection(): remove invalid items in selectedRefSet"""
-        refSet = wx.GetApp().selectedRefSet
-        refList = list(refSet)
-        for item in refList:
-            if not item():
-                refSet.remove(item)
-        self.set_selection(refSet)
-            
+                sceneFrame.set_object(self.Director.scene, title="Scene")                        
             
     def _get_sceneclass(self):
         try:
@@ -265,7 +256,7 @@ value can be either an actual scene class, or the name of a scene class
     scene = property(_get_scene, doc="The scene object currently being editted")
     
     def revert_scene(self):
-        """Revert scene to last saved version"""
+        """Revert scene to version on disk"""
         self.set_scene(self.scene.__class__.__name__, True)
     
     def reload_scenes(self, doReload=True):
@@ -281,27 +272,30 @@ highlight them.
 """
         wx.GetApp().set_selection( selectList)
         
-    def on_set_selection(self, selectedRefSet):
-        """on_set_selection( selectedRefSet)
+    def on_set_selection(self, selectedObjectDict):
+        """on_set_selection( selectedObjectDict)
         
 Callback from PugApp...
 """
-        selectionManager.on_set_selection(selectedRefSet)
+        if self.Director.scene.state.__class__ == EditorState:
+            selectionManager.on_set_selection(selectedObjectDict)
         
     def open_selection_frame(self):
         """Open a pug window for selected object"""
         wx.GetApp().open_selection_frame()
         
     def nudge(self, vector):
-        for ref in wx.GetApp().selectedRefSet:
-            obj = ref()
+        for obj in wx.GetApp().selectedObjectDict:
             if hasattr(obj, 'position'):
                 obj.position = (obj.position[0] + vector[0], 
                                 obj.position[1] + vector[1])  
  
     def _on_pug_quit(self):
         if getattr(self.game_settings,'save_settings_on_quit',True):
-            self.game_settings.initial_scene = self.scene.__class__.__name__
+            if '__Working__' in self.Director.scene.__module__:
+                self.game_settings.initial_scene = '__Working__'
+            else:
+                self.game_settings.initial_scene = self.scene.__class__.__name__
             try:
                 save_game_settings( self.game_settings)
             except:
@@ -350,8 +344,11 @@ Callback from PugApp...
                              doc="Using a working copy of the scene")
     def save_using_working_scene(self, event=None):
         """Save the current scene as scenes/__Working__.py"""
+        if self.scene.__class__.__name__ in ['PugScene', 'Scene']:
+            save_scene_as()
         save_scene_as( self.scene.__class__.__name__, '__Working__')
         self.use_working_scene = True
+        wx.GetApp().refresh()
 
     def rewind_scene(self):
         """rewind_scene(): reset the scene and play it again"""
@@ -366,23 +363,29 @@ Callback from PugApp...
 start the current scene playing. 
 doSave: save working copy first
 """
+        if _DEBUG: print "play_scene"
         if Opioid2D.Director.game_started:
             # don't do anything if game started
             return
         if doSave:
             self.save_using_working_scene()
         #self.revert_scene()
-        start_scene()   
+        pug.set_default_pugview("Component", _dataMethodPugview)
+        app = wx.GetApp()
+        app.set_selection([])
+        start_scene()
     
     def stop_scene( self):
         """stop_scene()
         
 Stop the current scene from playing. Reload original state from disk.
 """
+        if _DEBUG: print "stop_scene"
         if not Opioid2D.Director.game_started:
             return
         self.scene.stop()
-        time.sleep(0.25) # give Opioid a little time to stop
+        time.sleep(0.1) # give Opioid a little time to stop
+        pug.set_default_pugview("Component", _dataPugview)
         self.revert_scene()
         
     def execute_scene( self):
@@ -422,22 +425,14 @@ Add an object to the scene
                 # skip 'selection' layer
                 node.layer = self.scene.layers[-2]
             else:
-                node.layer = "Layer 1"
+                node.layer = "Background"
         wx.GetApp().set_selection([node])
         
     def reload_object_list(self):
         """Load changes made to object class files"""
-        objectlist = get_available_objects( True)
-        try:
-            scene = self.scene
-        except:
-            return
         addName = self.addObjectClass.__name__
-        for object in objectlist:
-            if object.__name__ == addName:
-                self.addObjectClass = object     
-                return
-        self.addObjectClass = PugSprite             
+        objectDict = get_available_objects( True)
+        self.addObjectClass = objectDict.get(addName, PugSprite)
          
 def _scene_list_generator():
     """_scene_list_generator( includeNewScene=True)-> list of scenes + 'New'
@@ -445,11 +440,13 @@ def _scene_list_generator():
 Return a list of scene classes available in the scenes folder. Append to that
 list a tuple ("New Scene", PugScene) for use in the sceneclass dropdown"""
     if _DEBUG: print "_scene_list_generator"
-    dict = get_available_scenes( 
+    scenedict = get_available_scenes( 
                     useWorking = wx.GetApp().projectObject._use_working_scene)
-    list = dict.values()
-    list.insert(0,("New Scene", PugScene))
-    return list               
+    scenedict.pop("PugScene")
+    scenelist = scenedict.values()
+    scenelist.sort()
+    scenelist.insert(0,("New Scene", PugScene))
+    return scenelist    
         
 def _object_list_generator():
     """_object_list_generator()-> list of objects + 'New Sprite'
@@ -457,11 +454,14 @@ def _object_list_generator():
 Return a list of node classes available in the objects folder. Append to that
 list a tuple ("Sprite", PugSprite) for use in the add object dropdown"""
     if _DEBUG: print "_object_list_generator"
-    list = get_available_objects()
-    list.insert(0,("New Sprite", PugSprite))
-    return list    
+    objdict = get_available_objects()
+    objdict.pop("PugSprite")
+    objlist = objdict.values()
+    objlist.sort()
+    objlist.insert(0,("New Sprite", PugSprite))
+    return objlist    
                     
-_interfaceTemplate = {
+_interfacePugview = {
     'size':(350,350),
     'name':'Basic',
     'skip_menus':['Export'],    
@@ -512,4 +512,4 @@ _interfaceTemplate = {
 #        ['test', pug.Routine, {'routine':test}]
     ]
 }
-pug.add_template('OpioidInterface', _interfaceTemplate, True)
+pug.add_pugview('OpioidInterface', _interfacePugview, True)

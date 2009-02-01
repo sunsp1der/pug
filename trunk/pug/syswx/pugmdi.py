@@ -7,7 +7,7 @@ object to be viewed as an argument on creation of the frame."""
 import wx
 import wx.aui
 
-from pug.util import CallbackWeakKeyDictionary
+from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.syswx.pugframe import PugFrame
 from pug.syswx.util import get_icon
 from pug.syswx.wxconstants import *
@@ -173,6 +173,7 @@ called, but PugFrame.setup_window is."""
                                          **kwargs)
         self.Bind(wx.EVT_ACTIVATE, self._evt_on_activate)
         self.Bind(wx.EVT_CLOSE, self._evt_on_close)
+        self.Bind(wx.EVT_MENU, self._evt_passmenu)        
 #        wx.GetApp().set_default_pos( self)
         self.setup_window(obj, objectpath, title, name)
         

@@ -116,8 +116,11 @@ choose a given component to be selected after refresh.
         retValue = None
         self.listCtrl.DeleteAllItems()
         componentList = self.__object.components.get()
+        componentList.sort()
         if componentList:
             self.SetText('...')
+            if selectComponent is None or selectComponent not in componentList:
+                selectComponent=componentList[0]
             for component in componentList:
                 item = self.listCtrl.AddItem(component.__class__.__name__, 
                                          component)

@@ -5,8 +5,8 @@
 # code storage
 from pug.code_storage import CodeStorageExporter, code_export
 
-# templates
-from pug.templatemanager import add_template, set_default_template
+# pugviews
+from pug.pugview_manager import add_pugview, set_default_pugview
 
 # projects
 from pug.ProjectInterface import ProjectInterface

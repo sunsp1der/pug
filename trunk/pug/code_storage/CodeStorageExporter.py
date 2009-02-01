@@ -44,24 +44,32 @@ Possible entries in storageDict:
         __dict__, and empty __doc__ attributes are always skipped.
     'instance_only_attributes': list... these attributes only appear in 
         instances and are never saved in classes
+    'base_class': the class the object is to be saved as. Defaults to the 
+        object's class or, if the object is being saved as a class default to
+        the object's top parent. TODO: multiple inheritance is not supported
     'init_method': the name of the initialization method of the object. This is 
         used to set instance_attributes when 'as_class' is true. Default is
         '__init__'. If you don't want an init_method automatically created, you
         can set this to ''.
     'init_method_args': arguments to be passed to the init_method. These
         arguments will be passed to the base class' init method as well. If this
-        is set to None, there will be no args passed to the init method AND the
-        base class' init method will not be called. This argument should be
-        passed as a list of strings. Default is: ['*args', '**kwargs']
+        is set to None, there will be no args passed to the init method. This 
+        argument should be passed as a list of strings. Default is: 
+        ['*args', '**kwargs'] and 'self' is always included.
+    'base_init': If this evaluates to True, call the base_class init method. If
+        the value is "before", the base_class init will be called before 
+        attribute assignments in init_method. Any other value will call the 
+        base_class init method after attribute assignments. Default is True
+    'base_init_args': The arguments to be passed to the base class init method.
+        Default is the value of 'init_method_args' above.
     'force_init_def': always put in the def line for the init method, even if 
         there is no code in the method itself. This is used to facilitate
         custom additions to the method. Default is False
     'name': the name of the object to be stored. If this is not possible or no 
-        name is provided, the default is class name for templates or 
+        name is provided, the default is class name for classes or 
         'classname_instance' for objects. Any duplicate names will have a number 
         appended to them. The final name to be used can be found in 
         storageDict['storage_name'] after calling prepare_storageDict. 
-        TODO: The value will be converted to a valid variable name. 
     'custom_export_func': this function will be called instead of the usual 
         exporter.create_object_code(). it will be passed the same arguments as
         that function AND also the exporter object itself(obj, storageDict, 
@@ -69,6 +77,13 @@ Possible entries in storageDict:
         object. To create the standard export code from within your custom 
         function, remove the 'custom_export_func' entry from storageDict, then 
         call: exporter.create_object_code(obj, storageDict, indentLevel)
+    'dummy_creator': CodeStorage uses dummy objects to figure out what attibutes
+        need to be stored. Normally dummy creation is done simply by creating an
+        object of the stored object's base class. 'dummy_creator' lets you
+        specify a function for creating the dummy object. It can be a callable
+        object or if you wish to specify a classmethod, use the string name of 
+        the method. The function will be called with the exporter object as an 
+        argument.        
     'storage_class': always use this class as the base class of classes derived
         from this object
     'storage_name': see 'name' above. DO NOT SET THIS MANUALLY! For reference 
@@ -79,6 +94,7 @@ Possible entries in storageDict:
     file_changed = False
     code = ''
     filename = ''
+    errorfilename = ''
     def __init__(self):
         self.modulesToImport = {} # dict of modules to import
                                   # { 'module':['item1','item2','item3']} etc.
@@ -142,7 +158,7 @@ asClass: If True, force obj to export as a class, if False, force export as
                 # if there were any problems creating the code, make sure we don't
                 # write to the file
                 info = ''.join([str(sys.exc_info()[1]), 
-                                '\nSaved to: ', errorfilename])
+                                '\nSaved to: ', self.errorfilename])
                 raise sys.exc_info()[0]( info)
             else:
                 raise
@@ -190,6 +206,9 @@ Set up storageDict.  See CodeStorageExporter documentation for details.
         storageDict.setdefault('base_class', None)
         storageDict.setdefault('instance_only_attributes', [])
         storageDict.setdefault('force_init_def', False)
+        storageDict.setdefault('base_init', True)
+        storageDict.setdefault('base_init_args', 
+                               storageDict['init_method_args'])
         # set the default name
         if 'name' in storageDict:
             if not storageDict.get('name'):
@@ -270,6 +289,7 @@ from itemName due to name conflicts.
         else:
             importName = self.create_valid_storage_name( itemName)
             modulesDict = self.modulesToImport
+            specialDict = self.specialImports
             if itemName == importName:
                 if modulesDict.has_key(module):
                     modulesDict[module].append(itemName)
@@ -279,7 +299,10 @@ from itemName due to name conflicts.
                 if modulesDict.has_key(module) and \
                         itemName in modulesDict[module]:
                     return itemName
-                self.specialImports[module] = [itemName, importName]
+                if specialDict.has_key(module):
+                    self.specialImports[module].append((itemName, importName))
+                else:
+                    self.specialImports[module] = [(itemName, importName)]
             return importName
         
     def create_code(self):
@@ -361,7 +384,7 @@ ignoreCustom: default is False. If True, the storageDict['custom_export_func']
             baseCode = self.create_base_code(obj, storageDict, indentLevel)
             codeList = [instantiatorCode, baseCode]
             if asClass:
-                initCode = self.create_init_code(obj, storageDict, indentLevel)
+                initCode = self.create_init_method(obj, storageDict, indentLevel)
                 if not initCode and not baseCode:
                     baseIndent = _INDENT * indentLevel
                     initCode = ''.join([baseIndent, _INDENT, 'pass\n'])
@@ -431,10 +454,14 @@ the init method.
                                                     attrList)
         return attributeCode    
     
-    def create_init_code(self, obj, storageDict, indentLevel=0):
-        """create_init_code(self, obj, storageDict, indentLevel=0)
+    def create_init_method(self, obj, storageDict, indentLevel=0, 
+                           dodef=True, docode=True):
+        """create_init_method(...)
         
-Create the init_method code.
+args: (self, obj, storageDict, indentLevel=0, dodef=True, docode=True)
+dodef: create the def line
+docode: create the method code
+Create the init_method code. dodef and docode are to facilitate customization.
 """
         attrList, instanceAttrList = self.create_attribute_lists( obj,
                                                                   storageDict)
@@ -444,51 +471,44 @@ Create the init_method code.
         if not attributeCode and not storageDict['force_init_def']:
             return ''
         else:
+            codeList = []
             baseIndent = _INDENT*indentLevel
-            initCode = [storageDict['init_method'], '(self']
-            argList = storageDict['init_method_args']
-            if argList:
-                for arg in argList:
-                    initCode+=[', ',arg]
-            initCode += [')']                
-            codeList = [baseIndent, _INDENT, 'def '] + initCode + [':\n']
-            if storageDict['init_method_args'] != None:
-                # call base class init method
-                codeList+=[baseIndent, _INDENT*2, 
-                           storageDict['base_class'].__name__,'.'] + \
-                           initCode + ['\n']
-            codeList.append(attributeCode)            
+            if dodef:
+                initCode = [storageDict['init_method'], '(self']
+                if storageDict['init_method_args']:
+                    initCode += [', ', 
+                                 ', '.join(storageDict['init_method_args'])]
+                initCode += [')']                
+                codeList += [baseIndent, _INDENT, 'def '] + initCode + [':\n']
+            if docode:
+                if storageDict['base_init'] != None:
+                    # call base class init method
+                    initCode = [storageDict['init_method'], '(self']
+                    if storageDict['base_init_args']:
+                        initCode += [', ',', '.join(storageDict['base_init_args'])]
+                    initCode += [')']                
+                    baseclass_init=[baseIndent, _INDENT*2, 
+                               storageDict['base_class'].__name__,'.'] + \
+                               initCode + ['\n']
+                    if storageDict['base_init'] == 'before':
+                        codeList += baseclass_init
+                        codeList.append(attributeCode)
+                    else:
+                        codeList.append(attributeCode)
+                        codeList += baseclass_init
+                else:
+                    codeList.append(attributeCode)            
             return ''.join(codeList)
     
-    def create_attribute_code(self, obj, storageDict, indentLevel, prefix, 
-                                attributeList):
+    def create_attribute_code(self, obj, storageDict, indentLevel=0, prefix='', 
+                                attributeList=None):
+        if attributeList is None:
+            attributeList, instanceAttrList = self.create_attribute_lists( obj,
+                                                                  storageDict)        
         storageDict = self.prepare_storageDict(obj, storageDict)
-        obj_class = storageDict['base_class']
         baseIndent = _INDENT*indentLevel        
         codeList = []
-        dummyDict = self.dummyDict
-        if obj_class in dummyDict:
-            dummy = dummyDict[obj_class]
-        else:
-            # try for a couple seconds to create a dummy object to compare to
-            dummy = None
-            if not isclass(obj):
-                try:
-                    dummy = obj_class()
-                    starttime = time.time()
-                    while dummy is None:
-                        if time.time() - starttime > 2:
-                            break
-                        time.sleep(0.01)
-                except:
-                    dummy = None
-                else:
-                    if dummy is not None:
-                        dummyDict[obj_class] = dummy
-                        if _DEBUG: print "CSE created dummy" + str(dummy)
-                    else:
-                        # this is a little odd, but necessary due to threading
-                        dummy = None
+        dummy = self.get_dummy(storageDict['base_class'])
         # create code for requested attributes, if possible
         for attr in attributeList:
             # make sure we can actually get this attribute
@@ -550,6 +570,52 @@ Create the init_method code.
             line = [baseIndent, prefix, attr, ' = ', repr(val), '\n']
             codeList += line
         return ''.join(codeList)
+
+    def set_dummy(self, obj_class, dummy):
+        "set_dummy(obj_class, dummy) provide a dummy obj for obj_class"
+        self.dummyDict[obj_class] = dummy
+        
+    def get_dummy(self, obj_class):
+        """get_dummy(obj_class) -> a dummy obj of the given class"""
+        if not obj_class:
+            return None
+        dummyDict = self.dummyDict
+        if _DEBUG: print "CSE.get_dummy:",obj_class
+        if _DEBUG: print "   ",dummyDict
+        if obj_class in dummyDict:
+            dummy = dummyDict[obj_class]
+            if _DEBUG: print "   CSE used cached dummy:", dummy
+        else:
+            # try for a couple seconds to create a dummy object to compare to
+            dummy = None
+            try:
+                codeStorageDict = getattr(obj_class, '_codeStorageDict', {})
+                dummyCreator = codeStorageDict.get('dummy_creator')
+                if type(dummyCreator) == str:
+                    dummyCreator = getattr(obj_class, dummyCreator)
+                if dummyCreator:
+                    dummy = dummyCreator( self)
+                else:
+                    dummy = obj_class()
+                starttime = time.time()
+                while dummy is None:
+                    if time.time() - starttime > 2:
+                        break
+                    time.sleep(0.01)
+            except:
+                if _DEBUG:
+                    print "   DUMMY OBJECT CREATE FAILED"
+                    print sys.exc_info()
+                dummy = None
+            else:
+                if dummy is not None:
+                    dummyDict[obj_class] = dummy
+                    if _DEBUG: print "   bCSE created dummy" + str(dummy)
+                else:
+                    # this is a little odd, but necessary due to threading
+                    dummy = None
+        return dummy
+
         
     def create_attribute_lists(self, obj, storageDict=None): 
         """create_attributes_lists(obj, storageDict=None)->(attrList, iAttrList)
@@ -643,17 +709,17 @@ iAttrList: When storing 'as_class', these attributes will be set in the init
         return (attrList, instanceAttrList)
        
 
-    def create_subobject_code(self, obj, parentname, attribute, indentLevel):
+    def create_subobject_code(self, obj, parentname, attribute, indentLevel=0):
         subStorageDict = getattr(obj, '_codeStorageDict', {})
         subStorageDict['as_class'] = False
         subStorageDict['storage_name'] = ''.join([parentname, '.', attribute])
-        sub_code = self.create_base_code(obj, subStorageDict, 
-                                           indentLevel )  
+        sub_code = self.create_base_code(obj, subStorageDict, indentLevel)  
         return sub_code
         
 
     def create_import_code(self):
         modules = self.modulesToImport.keys()
+        modules += self.specialImports.keys()
         if not modules:
             return ''
         importblock = ''
@@ -662,21 +728,29 @@ iAttrList: When storing 'as_class', these attributes will be set in the init
         #import statements
         modules.sort()
         for mod in modules:
-            itemlist = self.modulesToImport[mod]
-            statement = ''.join(['from ', mod, ' import'])
-            count = 0
-            for item in itemlist:
-                if count == 0:
-                    divider = ' '
-                else:
-                    divider = ', '
-                count += 1
-                # create a new line if necessary
-                if len(statement)  + len(divider) + len(item) > 78:
-                    divider = ''.join([divider, '\\\n        '])
-                statement = ''.join([statement, divider, item])
-            statement = ''.join([statement, '\n'])
-            importblock = ''.join([importblock, statement])
+            base_statement = ' '.join(['from', mod, 'import'])
+            if self.modulesToImport.has_key(mod):
+                statement = base_statement
+                itemlist = self.modulesToImport[mod]
+                count = 0
+                for item in itemlist:
+                    if count == 0:
+                        divider = ' '
+                    else:
+                        divider = ', '
+                    count += 1
+                    # create a new line if necessary
+                    if len(statement)  + len(divider) + len(item) > 78:
+                        divider = ''.join([divider, '\\\n        '])
+                    statement = ''.join([statement, divider, item])
+                statement = ''.join([statement, '\n'])
+                importblock = ''.join([importblock, statement])
+            if self.specialImports.has_key(mod):
+                infoList = self.specialImports[mod]
+                for item in infoList:
+                    statement = ' '.join(
+                            [base_statement, item[0], 'as', item[1]])
+                    importblock = ''.join([importblock, statement,'\n'])
         endblock = self.create_comment_block('End import autocode')
         return ''.join([startblock, importblock, endblock,'\n'])
     
@@ -687,15 +761,29 @@ iAttrList: When storing 'as_class', these attributes will be set in the init
         comment = ''.join(['# ', comment, ' #'])
         return '\n'.join([startblock, comment, startblock, '']) 
     
-    def create_component_code(self, obj, storageDict, indentLevel):
+    def create_component_code(self, obj, storageDict, indentLevel=0):
         storageDict = self.prepare_storageDict(obj, storageDict)
+        dummy = self.get_dummy(storageDict['base_class'])
         componentCode = []
         if storageDict['as_class']:
             parentName = 'self'
         else:
             parentName = storageDict['storage_name']
         componentList = obj.components.get()
+        try:
+            dummyList = dummy.components.get()
+        except:
+            dummyList = []
+        # component adding code
         for comp in componentList:
+            duplicate = False
+            for dummyComp in dummyList:
+                if dummyComp.is_duplicate_of(comp):
+                    dummyList.remove(dummyComp)
+                    duplicate = True
+                    break      
+            if duplicate:
+                continue      
             compStorageDict = self.get_custom_storageDict(comp)
             compStorageDict['as_class'] = False
             compStorageDict = self.prepare_storageDict(comp, compStorageDict)
@@ -714,4 +802,22 @@ iAttrList: When storing 'as_class', these attributes will be set in the init
             comp_code += [comp._create_argument_code(indentLevel)]
             componentCode += comp_code
             componentCode += [') )\n']
+        # component removal code
+        for comp in dummyList:
+            compStorageDict = self.get_custom_storageDict(comp)
+            compStorageDict['as_class'] = False
+            compStorageDict = self.prepare_storageDict(comp, compStorageDict)
+            compObjClass = compStorageDict['base_class']
+            compImportModule = compStorageDict['import_module']
+            if all_components and compObjClass.__name__ in dir(all_components):
+                import_name = self.setup_import('all_components', 
+                                                compObjClass.__name__)     
+            else:                               
+                import_name = self.setup_import(compImportModule, 
+                                                compObjClass.__name__)
+            comp_code = [indentLevel * _INDENT, parentName, 
+                         '.components.remove_duplicate_of( ', import_name,'(']
+            comp_code += [comp._create_argument_code(indentLevel)]
+            componentCode += comp_code
+            componentCode += [') )\n']            
         return ''.join(componentCode)

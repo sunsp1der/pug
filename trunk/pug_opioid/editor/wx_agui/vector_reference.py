@@ -1,9 +1,9 @@
-"""Vector reference attribute gui AND template"""
+"""Vector reference attribute gui AND pugview"""
 
 import wx
 
-from pug import add_template
-from pug.templatemanager import get_agui_default_dict
+from pug import add_pugview
+from pug.pugview_manager import get_agui_default_dict
 from pug.syswx.wxconstants import *
 from pug.syswx.attributeguis import Base, Label, SubObject
 from pug.syswx.pugbutton import PugButton
@@ -110,8 +110,8 @@ get_agui_default_dict().update({Vector:
                                             'no_button':True}]
                                 })
         
-#pug template
-_vectorReferenceTemplate = {
+#pug pugview
+_vectorReferencePugview = {
         'name':'Basic',
         'force_persist':True,
         'attributes':
@@ -125,8 +125,8 @@ _vectorReferenceTemplate = {
             ['length']
         ]
 }
-add_template(_opioidVectorReference, _vectorReferenceTemplate, True) 
-add_template(Vector, _vectorReferenceTemplate, True) 
+add_pugview(_opioidVectorReference, _vectorReferencePugview, True) 
+add_pugview(Vector, _vectorReferencePugview, True) 
 
 
         

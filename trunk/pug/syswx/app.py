@@ -12,6 +12,7 @@ from inspect import getsourcefile
 import wx
 
 from pug.util import make_name_valid
+from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.syswx.util import show_exception_dialog
 from pug.syswx.pugframe import PugFrame
 from pug.syswx.SelectionWindow import SelectionWindow
@@ -53,7 +54,8 @@ projectFolder: where file menus start at.  Defaults to current working dir.
         self.globalMenuDict = {'__order__':[],'__ids__':{}}
         
         # selection manager stuff
-        self.selectedRefSet = set()
+        self.selectedObjectDict = CallbackWeakKeyDictionary()
+        self.selectedObjectDict.register(self.on_selectedObjectDict_change)
         self.selectionWatcherDict = weakref.WeakKeyDictionary()        
         
         # track frames and objects they view { 'frame':obj(id)}
@@ -289,40 +291,55 @@ Otherwise, return None.
         else:
             return None
     
-    def set_selection(self, selectList=[], skipObj=None):
-        """set_selection( selectList=[], skipObj=None)
+    def set_selection(self, selection=[], skipObj=None):
+        """set_selection( selection=[], skipObj=None)
         
-selectList: a list of objects that are currently selected in the project. 
+selection: a list of objects that are currently selected in the project. 
 skipObj: this object will not get a callback 
     (convenience to prevent infinite loop)
 
-Set the interface's selectedRefSet. These objects can be viewed in a PugWindow 
+Set the interface's selectedObjectDict. These objects can be viewed in a PugWindow 
 by calling the open_selection_frame method. Selection is tracked in a set, so 
 duplicates will be automatically eliminated.
 """
         if self.setting_selection:
             return
         self.setting_selection = True
-        self.selectedRefSet.clear()
-        for item in selectList:
-            if isinstance(item, weakref.ReferenceType):
-                self.selectedRefSet.add(item)
-            else:
-                self.selectedRefSet.add( weakref.ref(item))
+        selectSet = set(selection)
+        if selectSet != set(self.selectedObjectDict.keys()):
+            self.selectedObjectDict.clear()
+            for item in selection:
+                try:
+                    ref = weakref.ref(item)
+                except:
+                    msg = ''.join([
+                            "PugApp.set_selection can't create ref to:",
+                            item])
+                    raise ValueError(msg) 
+                self.selectedObjectDict[item] = ref
         for obj in self.selectionWatcherDict:
             if obj == skipObj:
                 continue
             if hasattr(obj, 'on_set_selection'):
-                obj.on_set_selection( self.selectedRefSet)
+                obj.on_set_selection( self.selectedObjectDict)
         self.setting_selection = False
+        
+    def get_selection(self):
+        "get_selection() -> selectedObjectDict. WeakKeyDictionary {obj:ref,...}"
+        return self.selectedObjectDict.copy()
+        
+    def on_selectedObjectDict_change(self, dict, func_name, arg1, arg2):
+        if self.setting_selection:
+            return
+        #wx.CallAfter(self.set_selection, dict.keys())
             
     def open_selection_frame(self):
         """open_selection_frame()
 
 Open a SelectionFrame, or if one exists AND control is not being held down, 
 bring it to the top. For arguments, see the doc for PugFrame.  
-Selection frames display pug views of the objects in self.selectedRefSet. The 
-selectedRefSet can be changed using the set_selection method.
+Selection frames display pug views of the objects in self.selectedObjectDict. 
+The selectedObjectDict can be changed using the set_selection method.
 """
         if wx.GetKeyState(wx.WXK_CONTROL) or not self.show_selection_frames():
             frame = PugFrame( name="Selection")
@@ -343,12 +360,12 @@ This will not be called automatically... only when requested by the user.
     def register_selection_watcher(self, obj):
         """register_selection_watcher(obj)
         
-Register an object to receive 'on_set_selection( selectedRefSet)' callback 
-when the App's selectedRefSet changes. selectedRefSet is a set of references to
-selected objects. Registered objects will also receive a 'on_selection_refresh' 
-callback when a selected object changes (must be implemented by user). 
-Project object will automatically be registered if it has an attribute called 
-on_set_selection.
+Register an object to receive 'on_set_selection( selectedObjectDict)' callback 
+when the App's selectedObjectDict changes. selectedObjectDict is a dict of 
+obj:reference of selected objects. Registered objects will also receive an 
+'on_selection_refresh' callback when a selected object changes (must be 
+implemented by user). Project object will automatically be registered if it has 
+an attribute called on_set_selection.
 """
         self.selectionWatcherDict[obj] = id(obj)
         
@@ -470,6 +487,12 @@ settingsObj: any frame settings members will be replaced
                 frame.Raise()
         if win:
             win.Raise()
+            
+    def refresh(self, event=None):
+        windows = wx.GetTopLevelWindows()
+        for frame in windows:
+            if hasattr( frame, 'refresh'):
+                frame.refresh()            
             
     def apply(self, event=None):
         windows = wx.GetTopLevelWindows()

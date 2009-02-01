@@ -5,8 +5,8 @@ import wx
 from wx.lib.dialogs import ScrolledMessageDialog
 
 from pug.util import get_image_path
-from pug.templatemanager import get_default_template
-import pug.puglist
+from pug.pugview_manager import get_default_pugview
+import pug.aguilist
 
 _DEBUG = False
 
@@ -31,8 +31,8 @@ def show_exception_dialog( parent=None):
     err.ShowModal()
     err.Destroy()
 
-def cache_puglist( puglist):
-    for agui in puglist:
+def cache_aguilist( aguilist):
+    for agui in aguilist:
         cache_agui(agui)
 
 _DUMMYFRAME = None
@@ -57,17 +57,17 @@ def cache_agui( agui):
     else:
         if _DEBUG: print 'cache_agui',agui
         if agui.control.GetParent() == agui.label.GetParent() == dummy:
-            pug.puglist.cache_agui(agui)
+            pug.aguilist.cache_agui(agui)
             
 def cache_default_view( obj):
     dummy = get_dummyframe()
     dummy.object = obj
     try:
         # hide the cache so we don't use it
-        cacheStash = pug.puglist.aguiCache
-        cache = pug.puglist.aguiCache = {}
-        puglist = pug.puglist.create_puglist( obj, dummy)
-        for agui in puglist:
+        cacheStash = pug.aguilist.aguiCache
+        cache = pug.aguilist.aguiCache = {}
+        aguilist = pug.aguilist.create_aguilist( obj, dummy)
+        for agui in aguilist:
             try:
                 cache_agui( agui)
             except:

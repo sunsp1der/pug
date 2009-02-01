@@ -1,12 +1,13 @@
 now:
-	deleted: selection: explosion
-		then no show-pug view when another object is selected
 
 current version:
-	real-time editting of components
-	component view: with methods
-		special routine that adds owner automatically
-	routine that puts in default arguments
+	#TODO: object class browser (adapt interface's)
+		option for 'show None'
+	#TODO: integer agui (with spinners?)
+		range
+	#TODO: float agui
+		range
+	#TODO: choice agui
 	
 Finalize:
 	Open/New project	
@@ -18,36 +19,51 @@ Finalize:
 	create zip tarball exe?
 
 fun stuff:
-	so many frickin components to make :) REVIEW POWERPACK
-		demo components
+	so many frickin components to make :) 
+		REVIEW POWERPACK demo components for non collision components
 		fade in fade out
-		spawn point
-			attributes
-				frequency
-				variance
-				object
-				offset
-				match_rotation
-				add_velocity
-				max_spawns
-			methods		
-				spawn_timer	
-				spawn (object, location)
+		grow in grow out
 		forward motion
+		delete off-screen
+		timer delete
+		set name
 	
-
 bugs: 
 	leftover items in scene graph after deleting both layers
 	sometimes selections still not showing up
 	crash - selecting an object while changing selectionwin to another view 
 
 later: 
+	make progress bar move during load
+		loading window... update by percentage in postinit
+	add component label
+		show in parenthesis in dropdown
+		add component(label)
+			if label in components.labellist, replace
+			on codexport no need to delete
+		update archetype:
+			if you have a dupe component and new class has label, label the dupe
+		has_duplicate_of(comp, check_label=True)
+		use gname?
+		find_by_label
+	view a rect from a sprite?
+	sort ignoring capitals? (attributes in puglist)
+	clearer main.py
+		init function where possible... pug_opioid.util
+			import all object classes and scene classes
+	Tools menu 
+		code viewer
+		make object into component/base/gnamed object
 	component view
+		use default of highest level ancestor
+			eliminate most string _pugclass type stuff
 		add view options of all sub-classes
 		open button in label
 	remove close option from main windows
 	change name 'template' to 'view'
 	open console window
+	avoid adding right on top of another instance of same thing 
+		(move one big nudge down and to right)
 	font size for scene class
 	make opioid not respond during modal stuff
 	set_attribute callback for template
@@ -58,8 +74,6 @@ later:
 		intercept at base level?
 	make objects imports absolute
 	editable code_storage
-	code_storage special gname treatment only on GnamedObjects
-	no autocode if no data
 	warn about duplicate gnames
 	multiple selection
 	easy import for scenes and objects would be nice, too
@@ -77,31 +91,21 @@ later:
 	tooltips for component tree
 	validators for pug data
 	option to open editor from pugwindow
-	move as much editor code out of objects as possible
-		assign templates and code_storage stuff in other file
 	function to open browser for tutorial
 	sort component browser
 	make very simple editor interface... 
 		ctrl-c, ctrl-v, ctrl-x, delete (on scenegraph too... maybe pass off)
 		grid and snap-to
 	add soupascript functionality to pug.base_object
-		^ indicates gnamed object
-		* indicates python code
+		^^ indicates gnamed object
+		** indicates python code to eval
 		way to indicate filter?
 	make subobjects work for code storage... move components to end
-	only create one dummy node
-		make dummyList a dummyDict... class: dummy
-		check for class before creating dummy
 	code_storage list ala templates... no functionality in object
 	create example out of opioid bricks
 		write basic tutorial - Using pug as a level builder
 	app = showPugFrame/getPugFrame should return lists
 	log all exceptions that are glossed over by automation
-	make standalone work right
-		app should not auto-close when no windows and no projectwindow
-			or frame should automatically create app if none exists
-		pug.frame() should work (on principle)
-		pug.frame(obj) should work WITHOUT creating app
 	file agui
 		allow text entry in 
 		show absolute path in tooltip
@@ -110,8 +114,6 @@ later:
 		check lists recursively
 		check dicts for keys and items
 		keep list of checked stuff... recursive = NO!
-	make component system something you can add on later
-		not necessary to derive
 	auto-refresh -- leave the attribute being editted alone
 	project windows... show all frames available
 	particles
@@ -119,6 +121,12 @@ later:
 		create accessor object
 			listob.item1
 			dictob.str(key)
+	component upgrades
+		allow option for not adding component_methods to object
+		allow option to add attributes as well as methods
+		make component system something you can add on later
+			not necessary to derive
+	
 	
 not understand:
 
@@ -171,3 +179,6 @@ Wx Questions:
 	component add and browse buttons sizeability
 	weird overlap of subobject labels
 	how do I get default values of font_sizes and colors and shit
+	
+import wxversion
+wxversion.select(wxversion.getInstalled()[0])

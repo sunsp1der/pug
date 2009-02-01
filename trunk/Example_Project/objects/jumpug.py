@@ -1,8 +1,10 @@
+"""jumpug.py"""
+
 ###################
 # import autocode #
 ###################
+from all_components import Face_Object
 from pug_opioid.PugSprite import PugSprite
-from pug_opioid.components.physics.Set_Motion import Set_Motion
 #######################
 # End import autocode #
 #######################
@@ -12,15 +14,16 @@ from pug_opioid.components.physics.Set_Motion import Set_Motion
 #####################
 class jumpug(PugSprite):
     image = 'art/pug.png'
-    layer = 'new_layer'
-    def on_create(self, *args, **kwargs):
-        self.gname = 'jumpug'
-        self.components.add( Set_Motion(
-                velocity_y=-400, 
-                acceleration_y=200, 
-                rotation_speed=1, ) )
+    layer = 'Layer 1'
+    def on_create(self):
         self.position.x = 102.0
         self.position.y = 527.0
+        self.color = (1.0, 1.0, 0.0, 1.0)
+        self.register = True
+        self.components.add( Face_Object(
+                target='spawnero') )
+        PugSprite.on_create(self)
 #########################
 # End "jumpug" autocode #
 #########################
+

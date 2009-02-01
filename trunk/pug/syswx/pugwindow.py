@@ -8,7 +8,7 @@ though you need a frame for those...
 
 # TODO: provide interface for creating attribute
 # TODO: menu option to go to file where this is defined
-# TODO: send puglist a specific list of attributes
+# TODO: send aguilist a specific list of attributes
 # TODO: allow personalized toolbars
 
 import re
@@ -20,13 +20,13 @@ from sys import exc_info
 import wx
 import wx.lib
 
-from pug.puglist import create_raw_puglist, create_template_puglist
+from pug.aguilist import create_raw_aguilist, create_pugview_aguilist
 from pug.util import pugSave, pugLoad, get_simple_name
 from pug.constants import *
 from pug.syswx.helpframe import HelpFrame
 from pug.syswx.wxconstants import *
-from pug.syswx.util import show_exception_dialog, cache_puglist
-from pug.templatemanager import get_obj_template_info
+from pug.syswx.util import show_exception_dialog, cache_aguilist
+from pug.pugview_manager import get_obj_pugview_info
 from pug.code_storage import code_export
 
 #_DEBUG
@@ -49,12 +49,11 @@ holds multiple PugWindows in tabbed (or other) form.
     shortPath = '' # a simple name for the object being viewed
     objectPath = '' # a longer programmatic path... parent.child.grandchild
     titleBase = ''
-    pugList = []
-    template = {}
+    aguilist = []
     _viewDict = {}
     _currentView = {}
     msgTextCtrl = None
-    template = {}
+    pugview = {}
     _helpFrame =  None # currently open help frame
     _autoRefreshTimer = None # timer object that refreshes frame
     _doingApply = False # currently in the middle of an apply all
@@ -66,7 +65,7 @@ holds multiple PugWindows in tabbed (or other) form.
                         style=wx.SUNKEN_BORDER)
         #attributes
         self.hasSavedAs = {} # save/export event.Id: (folder, filename)
-        self.pugList = [] # list of pug attribute guis describing object
+        self.aguilist = [] # list of pug attribute guis describing object
         self.settings = {'hide_1_underscore':True, 'hide_2_underscore':True,
                          'auto_apply':True, 'auto_refresh':False}
         self._settingWidgets = {} # internal list of setting control widgets
@@ -83,7 +82,7 @@ holds multiple PugWindows in tabbed (or other) form.
         self.set_object(obj, objectpath, title)     
         
     def __del__(self):
-        cache_puglist( self.pugList)
+        cache_aguilist( self.aguilist)
       
     def GetBestSize(self):
         size = self.pugSizer.CalcMin()
@@ -105,45 +104,47 @@ holds multiple PugWindows in tabbed (or other) form.
         else:
             self.objectPath = objectpath
         if not title:
-            #set up title
-            title = self.shortPath
-            if self.shortPath != self.objectPath:                
-                if self.objectPath:
-                    title = ''.join([title, ' (',self.objectPath,')'])
-        self.SetTitle(title)
-        if self.objectRef and obj and obj is self.objectRef():
-            self.display_puglist()
-            wx.EndBusyCursor()
-            return
-        
-        self.stopped_viewing()
-        oldobject = self.object
-        if not obj:
-            self.objectRef = None
-            self.object = obj
-            self.display_message("No object")
-            self.setup_menus()
-        else:
-            try:
-                self.objectRef = ref(obj)
-                self.object = proxy(obj, self._schedule_object_deleted)
-            except:
-                def objectRef():
-                    return obj
-                self.objectRef = objectRef
-                self.object = obj # this will prevent object from being deleted
-            oldView = self._currentView
-            self._currentView = {}
-            self.setup_menus()
-            if oldView == self._currentView:
-                self.update_puglist_object()
-                self.Thaw()
+            if obj:                
+                #set up title
+                title = self.shortPath
+                if self.shortPath != self.objectPath:                
+                    if self.objectPath:
+                        title = ''.join([title, ' (',self.objectPath,')'])
             else:
-                self.create_puglist()
-            if not oldobject and hasattr(self.GetParent(),
-                                         'show_all_attributes'):
-                self.GetParent().show_all_attributes()
-        self.started_viewing( obj)
+                title = "Pug Window: No object"
+
+        if self.objectRef and obj and obj is self.objectRef():
+            self.display_aguilist()
+        else:        
+            self.stopped_viewing()
+            oldobject = self.object
+            if not obj:
+                self.objectRef = None
+                self.object = obj
+                self.display_message("No object")
+                self.setup_menus()
+            else:
+                try:
+                    self.objectRef = ref(obj)
+                    self.object = proxy(obj, self._schedule_object_deleted)
+                except:
+                    def objectRef():
+                        return obj
+                    self.objectRef = objectRef
+                    self.object = obj # this will prevent obj from being deleted
+                oldView = self._currentView
+                self._currentView = {}
+                self.setup_menus()
+                if oldView == self._currentView:
+                    self.update_aguilist_object()
+                    self.Thaw()
+                else:
+                    self.create_aguilist()
+                if not oldobject and hasattr(self.GetParent(),
+                                             'show_all_attributes'):
+                    self.GetParent().show_all_attributes()
+            self.started_viewing( obj)
+        self.SetTitle(title)
         self.Thaw()                   
         wx.EndBusyCursor()        
     
@@ -181,7 +182,7 @@ tell app that our parent is viewing obj"""
         """display_message( message)
         
 Set the PugWindow to display a simple text message rather than view an object.
-To return to object view, call display_puglist().
+To return to object view, call display_aguilist().
 """
         sizer = self.pugSizer
         sizer.ShowItems( False)
@@ -206,67 +207,67 @@ To return to object view, call display_puglist().
         sizer.SetCols(0)
         self.SetupScrolling()
 
-    def create_puglist(self):
+    def create_aguilist(self):
         wx.BeginBusyCursor()
         self.Freeze()
-        cache_puglist(self.pugList)
+        cache_aguilist(self.aguilist)
         filterUnderscore = 0
         if self.settings['hide_1_underscore']:
             filterUnderscore = 1
         elif self.settings['hide_2_underscore']:
             filterUnderscore = 2
-        oldtemplate = self.template
-        self.template = {}
+        oldpugview = self.pugview
+        self.pugview = {}
         if self._currentView == 'Raw':
-            self.pugList = create_raw_puglist(self.object, self, None, 
+            self.aguilist = create_raw_aguilist(self.object, self, None, 
                                               filterUnderscore)
         elif self._currentView == 'Raw Data':
-            self.pugList = create_raw_puglist(self.object, self, 
+            self.aguilist = create_raw_aguilist(self.object, self, 
                                               ['Default', 'Objects'],
                                               filterUnderscore)
         elif self._currentView == 'Raw Methods':
-            self.pugList = create_raw_puglist(self.object, self,['Routine'],
+            self.aguilist = create_raw_aguilist(self.object, self,['Routine'],
                                               filterUnderscore)
         else:
-            template = self._currentView
-            self.template = template
-            self.pugList = create_template_puglist(self.object, self, template,
+            pugview = self._currentView
+            self.pugview = pugview
+            self.aguilist = create_pugview_aguilist(self.object, self, pugview,
                                                    filterUnderscore=0)
-            self.SetSize(wx.Size(template['size'][0], 
-                                 template['size'][1]))
-            if template.get('force_persist'):
+            self.SetSize(wx.Size(pugview['size'][0], 
+                                 pugview['size'][1]))
+            if pugview.get('force_persist'):
                 self.persist = self.objectRef()
             else:
                 self.persist = None
-        self.display_puglist()
+        self.display_aguilist()
         self.Thaw()
         wx.EndBusyCursor()
         
-    def update_puglist_object(self):
-        for agui in self.pugList:
+    def update_aguilist_object(self):
+        for agui in self.aguilist:
             agui.setup( agui.attribute, agui.window, agui.aguidata)
         if self.msgTextCtrl:
-            self.display_puglist()
+            self.display_aguilist()
         else:
             self.refresh()
 
-    def display_puglist(self):
+    def display_aguilist(self):
         wx.BeginBusyCursor()    
         self.Freeze()
-        if _DEBUG: print "PugWindow.display_puglist enter"
+        if _DEBUG: print "PugWindow.display_aguilist enter"
         if self.msgTextCtrl:
             self.msgTextCtrl.Destroy()
         if self.object:
-            if self.pugList:         
+            if self.aguilist:         
                 sizer = self.pugSizer
-                #clear pugList
+                #clear aguilist
                 sizer.Clear(False)
                 self.reset_sizer()
                 #set up attributeguis
                 # self.labelWidth = 0 # USED TO BE FOR SASH ADJUST
                 row = 0
-                for item in self.pugList:
-                    if _DEBUG: print "   PugWindow.display_puglist item:", \
+                for item in self.aguilist:
+                    if _DEBUG: print "   PugWindow.display_aguilist item:", \
                                     item.attribute, item
                     try:
                         item.refresh()
@@ -310,12 +311,12 @@ To return to object view, call display_puglist().
                 size = parent.GetSize()
                 parent.SetSize((1,1))
                 parent.SetSize(size)                
-        if _DEBUG: print "PugWindow.display_puglist exit"
+        if _DEBUG: print "PugWindow.display_aguilist exit"
         self.Thaw()
         wx.EndBusyCursor()
 
-    def resize_puglist(self):
-        """Recalculate the size of the puglist.
+    def resize_aguilist(self):
+        """Recalculate the size of the aguilist.
         
 Generally, this is called when an attribute gui has changed size.
 """
@@ -353,38 +354,38 @@ Generally, this is called when an attribute gui has changed size.
         menu.AppendRadioItem(id=1, text='dummy')
         idDict = {}
         for item in menu.MenuItems:
-            template = self._viewDict.get(item.Id, None)
-            if template:
-                idDict[id(template)] = item.Id
+            pugview = self._viewDict.get(item.Id, None)
+            if pugview:
+                idDict[id(pugview)] = item.Id
             menu.DestroyItem(item)
         if (self.object):
-            templateInfo = get_obj_template_info(self.object)
-            defaultViewName = templateInfo.get('default','Raw')
-            if templateInfo.has_key('templates'):
-                # go through templateInfo and get names so we can sort them
-                templateList = []
+            pugviewInfo = get_obj_pugview_info(self.object)
+            defaultViewName = pugviewInfo.get('default','Raw')
+            if pugviewInfo.has_key('pugviews'):
+                # go through pugviewInfo and get names so we can sort them
+                pugviewList = []
                 rawList = []
-                for name, template in templateInfo['templates'].iteritems():
-                    if isinstance(template,dict):
-                        templateList += [name]
+                for name, pugview in pugviewInfo['pugviews'].iteritems():
+                    if isinstance(pugview,dict):
+                        pugviewList += [name]
                     else:
                         rawList += [name]
-                templateList.sort()
+                pugviewList.sort()
                 rawList.sort()
-                templateList += rawList
-                templateList.reverse()
+                pugviewList += rawList
+                pugviewList.reverse()
                 # create _viewDict and menu items
-                for name in templateList:
-                    template = templateInfo['templates'][name]
-                    Id = idDict.get(id(template), wx.NewId())
-                    self._viewDict[Id] = template
+                for name in pugviewList:
+                    pugview = pugviewInfo['pugviews'][name]
+                    Id = idDict.get(id(pugview), wx.NewId())
+                    self._viewDict[Id] = pugview
                     self.Bind(wx.EVT_MENU, self._evt_viewmenu, id=Id)                    
                     menuItem = menu.Prepend(id=Id, 
                                      help=' '.join(['Show',name,'view']),
                                      text=name, kind=wx.ITEM_CHECK)
                     if not self._currentView and name == defaultViewName:
-                        self._currentView = templateInfo['templates'][name]
-                    if template == self._currentView:
+                        self._currentView = pugviewInfo['pugviews'][name]
+                    if pugview == self._currentView:
                         menuItem.Check(True)
                     else:
                         menuItem.Check(False)
@@ -401,7 +402,7 @@ Generally, this is called when an attribute gui has changed size.
         if self._currentView != self._viewDict[event.Id]:
             self._currentView = self._viewDict[event.Id]
             self.setup_menus()
-            self.create_puglist()      
+            self.create_aguilist()      
         for Id in self._viewDict:
             if Id == event.Id:
                 self.viewMenu.Check(Id, True)
@@ -411,9 +412,11 @@ Generally, this is called when an attribute gui has changed size.
     def apply(self, event = None):
         if not self.settings['auto_apply'] and event.Id != _TOOL_APPLY:
             return
+        if not self.objectRef or not self.objectRef():
+            return
         self._doingApply = True
         if _DEBUG: print "pugwindow.apply", self.object
-        for item in self.pugList:
+        for item in self.aguilist:
             if _DEBUG: print item.attribute
             item.apply()
         self._doingApply = False
@@ -423,8 +426,10 @@ Generally, this is called when an attribute gui has changed size.
     def refresh(self, event = None):
         if self._doingApply:
             return
+        if not self.objectRef or not self.objectRef():
+            return
         if _DEBUG: print "pugwindow.refresh", self.object
-        for item in self.pugList:
+        for item in self.aguilist:
             if _DEBUG: print item.attribute
             item.refresh()
         if _DEBUG: print "DONE refresh\n"
@@ -441,8 +446,8 @@ Generally, this is called when an attribute gui has changed size.
                 objectPath = self.objectPath
                 pugButton = True
                 retypeButton = False
-                if self.template.has_key('info_function'):
-                    customFrame = self.template['info_function'](object, 
+                if self.pugview.has_key('info_function'):
+                    customFrame = self.pugview['info_function'](object, 
                                                             self, objectPath)
             elif (object is None and attribute == ""):    
                 # context help pushed, but no valid context            
@@ -471,7 +476,7 @@ Generally, this is called when an attribute gui has changed size.
             retDlg.ShowModal()    
             retDlg.Destroy()                      
         
-    def _attach_setting(self, settingname, widget, id = None, default = None):
+    def _attach_setting(self, settingname, widget, id=None, default='!@#$$^&*'):
         """_attach_setting(self, setting, widget)
 
 settingname: a string of the setting name (self.setting[settingname]) to attach
@@ -484,7 +489,8 @@ Currently accepeted widgets: toolbar togglebutton,  menu item
         if id == None:
             id = widget.Id
         self._settingWidgets[id] = (widget, settingname)
-        self.change_setting(settingname, default)
+        if default != '!@#$$^&*': # assuming that will never be the real default
+            self.change_setting(settingname, default)
         
     def _evt_setting(self, event):
         """_evt_setting(self, event)
@@ -528,14 +534,14 @@ Automatically calls on_<setting>(val, event) callback.
     def on_hide_1_underscore(self, val, event = None):
         if val and not self.settings['hide_2_underscore']:
             self.change_setting('hide_2_underscore', 1, event)
-        elif self.pugList:            
-            self.create_puglist()
+        elif self.aguilist:            
+            self.create_aguilist()
 
     def on_hide_2_underscore(self, val, event = None):
         if not val and self.settings['hide_1_underscore']:
             self.change_setting('hide_1_underscore', 0, event)
-        elif self.pugList:            
-            self.create_puglist()
+        elif self.aguilist:            
+            self.create_aguilist()
 
     def on_auto_refresh(self, val, event = None):
         """if val, do a refresh and set timer to do the next one, else stop"""
@@ -641,9 +647,9 @@ Automatically calls on_<setting>(val, event) callback.
             
     def _add_RefreshApply_Items(self, parent):
         parent.Append(help='Apply values to object',
-                      id=_TOOL_APPLY, text=u'Apply')
+                      id=_TOOL_APPLY, text=u'Apply\tF5')
         parent.Append(help='Refresh values', 
-                   id=_TOOL_REFRESH, text=u'Refresh')
+                   id=_TOOL_REFRESH, text=u'Refresh\tF6')
         parent.Append(id=_TOOL_AUTOAPPLY, kind=wx.ITEM_CHECK, 
             help='When off, only apply changes when Apply is selected',
             text=u'Auto-Apply')
@@ -771,8 +777,8 @@ Automatically calls on_<setting>(val, event) callback.
         self.Bind(wx.EVT_MENU, self._evt_setting, id=_MENU_HIDE2UNDERSCORE)
         self.Bind(wx.EVT_MENU, self._evt_setting, id=_TOOL_AUTOREFRESH)
         self.Bind(wx.EVT_MENU, self._evt_setting, id=_TOOL_AUTOAPPLY)            
-        self.Bind(wx.EVT_MENU, self.apply(), id=_TOOL_APPLY)
-        self.Bind(wx.EVT_MENU, self.refresh(), id=_TOOL_REFRESH) 
+        self.Bind(wx.EVT_MENU, self.apply, id=_TOOL_APPLY)
+        self.Bind(wx.EVT_MENU, self.refresh, id=_TOOL_REFRESH) 
         #help menu
         self.Bind(wx.EVT_MENU, self.show_help, id=_HELP_INFO)       
         self.Bind(wx.EVT_MENU, self.help_context, id=_HELP_CONTEXT)       

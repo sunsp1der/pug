@@ -18,6 +18,7 @@ from time import sleep
 from weakref import ref
 
 import pug
+_PROFILE = False
 
 class ProjectInterface(object):
     """Pug's starting frame"""
@@ -27,7 +28,12 @@ class ProjectInterface(object):
 Try to exec all the __postInitExecs
 """
         try:
-            self._post_init()
+            if _PROFILE:
+                import profile
+                profile.runctx("self._post_init()", globals(), locals(),
+                               '_post_init.prof')
+            else:
+                self._post_init()
         except:
             return list(sys.exc_info())+[str(traceback.format_exc())]
         self._isReady = True

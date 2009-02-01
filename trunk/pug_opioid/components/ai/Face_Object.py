@@ -68,6 +68,7 @@ class Face_Object(Component):
     
     def target_reached(self):
         # opioid has a problem aborting the action if it's complete
+        print "target_reached"
         self.action = None
         
 register_component( Face_Object)

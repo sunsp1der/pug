@@ -3,11 +3,12 @@
 import math
 import os.path
 import sys
+from time import sleep
+
+import Opioid2D
 
 import pug
 from pug.util import get_package_classes, find_classes_in_module
-
-import Opioid2D
 
 projectPath = os.getcwd()
 _revertScene = None
@@ -25,21 +26,28 @@ def start_scene():
     """Start a scene running"""
     Opioid2D.Director.start_game = True
     Opioid2D.Director.scene.state = None
+    # give the Director a second to pull it together
+    while Opioid2D.Director.scene.state:
+        sleep(0.1)
     Opioid2D.Director.scene.start()    
     
 def save_game_settings( game_settings):
     pug.code_export( game_settings, "_game_settings.py", True, 
                  {'name':'game_settings'})            
     
+availableScenes = None
 def get_available_scenes( doReload=False, useWorking=True):
     """get_available_scenes( doReload=False, useWorking=False) -> dict
     
 Get all Scenes available in modules in Scenes folder. Return dict of available 
-Scene sub-classes {"sceneName":sceneClass}.    
+Scene sub-classes {"sceneName":sceneClass}. PugScene is automatically included.  
 doReload: if True, don't just import scene modules, but reload them
 useWorking: if True, and the class in the __Working__.py file is in the class
     list, use the __Working__ scene to replace the one in the list.
 """
+    global availableScenes
+    if availableScenes is not None and not doReload:
+        return availableScenes.copy()
     sceneList = get_package_classes('scenes', Opioid2D.Scene, doReload)
     # use __Working__ scene as override
     workingModule = 'scenes.__Working__'
@@ -73,8 +81,11 @@ useWorking: if True, and the class in the __Working__.py file is in the class
         else:
             print "No scene in working module.", \
                     "Using committed module instead."
+    from pug_opioid import PugScene                
+    sceneList.append(PugScene)
     for item in sceneList:
         sceneDict[item.__name__]=item
+    availableScenes = sceneDict.copy()
     return sceneDict
 
 def get_committed_scene():
@@ -85,15 +96,25 @@ returns the committed version.
 """
     return _revertScene
 
+availableObjects = None
 def get_available_objects( doReload=False):
     """get_available_objects( doReload=False) -> list of Opioid2D.Nodes
     
-Get all Nodes available in modules in Objects folder. Return a list of available
-Node sub-classes.
-doReload: if True don't just import node modules"""
-    moduleList = get_package_classes('objects', Opioid2D.public.Node.Node,
+Get all Nodes available in modules in Objects folder. Return a dict of available
+'name':class. PugSprite is automatically included.
+doReload: if True reload all object modules from disk"""
+    global availableObjects
+    if availableObjects is not None and not doReload:
+        return availableObjects.copy()
+    objectList = get_package_classes('objects', Opioid2D.public.Node.Node,
                                     doReload)
-    return moduleList
+    from pug_opioid import PugSprite
+    objectList.append(PugSprite)
+    objectDict = {}
+    for item in objectList:
+        objectDict[item.__name__]=item
+    availableObjects = objectDict.copy()
+    return objectDict
 
 def set_project_path( path):
     global projectPath

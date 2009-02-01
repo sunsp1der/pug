@@ -4,7 +4,7 @@ Attribute guis are the building blocks of PugWindows. The different aguis are
 different ways of displaying and editing data. 
 """
 
-from pug.templatemanager import get_agui_default_dict
+from pug.pugview_manager import get_agui_default_dict
 from pug.syswx.attributeguis.base import Base
 from pug.syswx.attributeguis.generic import Generic
 from pug.syswx.attributeguis.object_buttons import ObjectButtons
@@ -34,4 +34,4 @@ _AGUI_DEFAULT_DICT = {
 get_agui_default_dict().update(_AGUI_DEFAULT_DICT)
 
 # load other gui default stuff
-from pug.component import pug_template # component fanciness
+from pug.component import pugview # component fanciness
