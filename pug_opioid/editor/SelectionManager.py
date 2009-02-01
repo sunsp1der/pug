@@ -7,14 +7,14 @@ import Opioid2D
 from Opioid2D import Mouse
 from pygame import Rect
 
-from pug.util import CallbackWeakKeyDictionary
+from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 
 from pug_opioid.editor.util import get_image_path
 
 _line_sprite_file = get_image_path("dot.png")
 _empty_sprite_file = get_image_path("empty.png")
 
-_DEBUG = False
+_DEBUG = True
 
 class SelectionManager():
     """SelectionManager()
@@ -25,49 +25,53 @@ Object that manages selection graphics in the Opioid2D frame
     def __init__(self):
         self.boxDict = CallbackWeakKeyDictionary()
     
-    def on_set_selection(self, selectedRefSet):
-        """on_set_selection( selectedRefSet)
+    def on_set_selection(self, selectedObjectDict):
+        """on_set_selection( selectedObjectDict)
         
 Callback from pug.App...
 """
-        self.set_selection( selectedRefSet)
+        if _DEBUG: print 'SelectionManager.on_set_selection', selectedObjectDict
+        self.set_selection( selectedObjectDict)
         
-    def set_selection(self, selectedRefSet):
-        """set_selection( selectedRefSet)
+    def set_selection(self, selectedObjectDict):
+        """set_selection( selectedObjectDict)
         
 Set the selection to the given list of objects. Draw a box around each one.
 This action will be deferred until after current update...
 """
-        if not isinstance(selectedRefSet, set):
-            selectedRefSet = set(selectedRefSet)
-        self.new_selection = selectedRefSet
+        if _DEBUG: print 'SelectionManager.set_selection', selectedObjectDict
+        self.new_selection = selectedObjectDict
 
-    def do_set_selection(self,  selectedRefSet):
-        """do_set_selection( selectedRefSet)
+    def do_set_selection(self,  selectedObjectDict):
+        """do_set_selection( selectedObjectDict)
         
 Set the selection to the given list of objects. Draw a box around each one.
 """
+        if _DEBUG: print 'SelectionManager.do_set_selection', selectedObjectDict
         keySet = set(self.boxDict.keys())
         selectSet = set()
-        for ref in selectedRefSet:
+        for ref in selectedObjectDict.itervalues():
             selectSet.add(ref())
         deselectSet = keySet.difference(selectSet)
         for deselect in deselectSet:
+            if _DEBUG: print '   deselect', deselect
             self.boxDict.pop(deselect)
         selectSet.difference_update(keySet)
         for item in selectSet:
+            if _DEBUG: print '   create SelectBox', item
             if not hasattr(item, 'rect'):
+                if _DEBUG: print '      NO RECT!', item
                 continue
             self.boxDict[item] = SelectBox(item)
     
     def update(self):
         if self.new_selection is not None:
-        # don't do anything if we're in the middle of a drag
-            new_selection = self.new_selection
-            self.new_selection = None
+            # don't do anything if we're in the middle of a drag
             for box in self.boxDict.itervalues():
                 if box.area.dragging:
                     return
+            new_selection = self.new_selection
+            self.new_selection = None
             self.do_set_selection(new_selection)
         self.update_boxes()
         

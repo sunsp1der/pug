@@ -1,4 +1,4 @@
-from inspect import getargspec, getdoc
+from inspect import getargspec, getdoc, ismethod
 
 import wx
 import wx.lib.buttons as buttons
@@ -73,10 +73,9 @@ See Base attribute gui for other argument info
                 else:
                     aguidata['label'] = self.routine.__name__
             attribute = ''
-            isMethod = False
         else:
             value = getattr(window.object,attribute, None)
-            isMethod = True
+        isMethod = bool(ismethod(value) and value.im_self)
         doc = None
         if aguidata.has_key('tooltip'):
             doc = aguidata['tooltip']
@@ -101,10 +100,17 @@ See Base attribute gui for other argument info
                     argspec[0].pop(0)
                 if argspec[0]:
                     self.takesargs = True
+                    mainargs = argspec[0][:]
                     if argspec[3]:
-                        if len(argspec[0]) < len(argspec[3]):
+                        argcount = len(argspec[0])
+                        if argcount < len(argspec[3]):
                             self.needsargs = True
-                    arglist += argspec[0]
+                        for idx in range(argcount):
+                            kwidx = idx - (argcount - len(argspec[3])) 
+                            if kwidx >= 0:
+                                mainargs[idx] = ''.join([argspec[0][idx],
+                                                '=',repr(argspec[3][kwidx])])
+                    arglist += mainargs
                 if argspec[1]:
                     arglist += [''.join([ '*',argspec[1]])]
                     self.takesargs = True

@@ -5,7 +5,7 @@
 ############################
 class game_settings():
     fullscreen = False
-    initial_scene = 'Three'
+    initial_scene = '__Working__'
     rect_opioid_window = (20, 20, 800, 600)
     save_settings_on_quit = True
     title = 'Pug_Opioid Game'

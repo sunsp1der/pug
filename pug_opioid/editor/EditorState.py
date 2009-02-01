@@ -16,11 +16,13 @@ class EditorState(Opioid2D.State):
         self.interface = wx.GetApp().projectObject
         from pug_opioid.editor import selectionManager
         self.selectionManager = selectionManager
-        self.selectionManager.set_selection( wx.GetApp().selectedRefSet)
+        self.selectionManager.set_selection( wx.GetApp().selectedObjectDict)
 
     def exit(self):
+        if _DEBUG: print "EditorState.exit"
         wx.GetApp().set_selection([])
         self.selectionManager.boxDict.clear()
+        if _DEBUG: print "EditorState.exit complete"
         
     def on_set_busy_state(self, On):
         if On:
@@ -36,7 +38,7 @@ class EditorState(Opioid2D.State):
             if layer == "__selections__":
                 continue
             #node = scene.get_layer(layer).pick(x,y)
-            node = scene.pick(x, y, wx.GetApp().selectedRefSet)
+            node = scene.pick(x, y, wx.GetApp().selectedObjectDict)
             if node is not None:
                 self.selectOnUp = weakref.ref(node)
             else:
@@ -68,9 +70,8 @@ class EditorState(Opioid2D.State):
         if ev.key == Opioid2D.K_DOWN:
             self.interface.nudge((0, nudge))
         if ev.key == Opioid2D.K_DELETE:
-            selectedRefList = list(wx.GetApp().selectedRefSet)
-            for ref in selectedRefList:
-                item = ref()
+            selectedDict = list(wx.GetApp().selectedObjectDict)
+            for item in selectedDict:
                 if isinstance(item, Opioid2D.public.Node.Node):
                     if _DEBUG: print 'callafter'
                     wx.CallAfter(item.delete)

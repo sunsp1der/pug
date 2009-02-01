@@ -3,26 +3,26 @@ from sys import exc_info
 
 from pug.constants import *
 from pug.util import get_type
-from pug.templatemanager import get_agui_default_dict, get_default_template
+from pug.pugview_manager import get_agui_default_dict, get_default_pugview
 
 _DEBUG = False
 
-def create_template_puglist(obj, window, template, filterUnderscore = 2):
-    """create_template_pug(obj, window, template, filterUnderscore) -> pugList 
+def create_pugview_aguilist(obj, window, pugview, filterUnderscore = 2):
+    """create_pugview_pug(obj, window, pugview, filterUnderscore) -> aguilist 
     
-    pugList is a list of pug aguis for obj
+    aguilist is a list of pug aguis for obj
     
 obj: object to be examined
 window: the pugFrame object  
-template: template to be used.
+pugview: pugview to be used.
 filterUnderscore: 2 = don't show __attributes, 1 = don't show _attributes either
 
-Create a gui based on template. A class' template can be created as follows:
-pugTemplate  = \
+Create a gui based on pugview. A class' pugview can be created as follows:
+pugview  = \
 {
     'name': mySpecialView
-    # the name of this template
-    # if this is not defined, 'Template #' will be assigned
+    # the name of this pugview
+    # if this is not defined, 'Pugview #' will be assigned
 
     'size': (400, 300)
     # the start size of the pug frame, in pixels
@@ -47,7 +47,7 @@ pugTemplate  = \
     # if this is not defined, ['*'] is assumed
     
     'create_pug_list_function': fn 
-    # a custom puglist creation function can be specified here
+    # a custom aguilist creation function can be specified here
     # this is optional
     # fn(obj, window, filterUnderscore) will be called 
     # arguments are as per this function
@@ -65,34 +65,34 @@ pugTemplate  = \
     # the programatic path to obj. If fn opens a frame, it should return it.
 }
 import pug
-pug.add_template(myClass, pugTemplate)
+pug.add_pugview(myClass, pugview)
 
-Additionally, an instance or class can have a '_pug_template_class' attribute 
-which contains the class whose templates can be used. For example:
+Additionally, an instance or class can have a '_pug_pugview_class' attribute 
+which contains the class whose pugviews can be used. For example:
 
 class otherClass( myClass):
-    _pug_template_class = myClass
+    _pug_pugview_class = myClass
 """
-    if _DEBUG: print "create_template_puglist: begin"
-    if template.has_key('create_pug_list_function'):
-        pugList = template['create_pug_list_function'](obj, 
+    if _DEBUG: print "create_pugview_aguilist: begin"
+    if pugview.has_key('create_pug_list_function'):
+        aguilist = pugview['create_pug_list_function'](obj, 
                                                        window, filterUnderscore)
     else:
         dirList = dir(obj)
-        if template.has_key('attributes'):
-            attributeList = template['attributes']
+        if pugview.has_key('attributes'):
+            attributeList = pugview['attributes']
         else:
             attributeList = [['*']] # show all
-        if template.has_key('defaults'):
-            defaultDict = template['defaults']
+        if pugview.has_key('defaults'):
+            defaultDict = pugview['defaults']
         else:
             defaultDict = {}
-        pugList = []
-        # go through list of attributes in template
+        aguilist = []
+        # go through list of attributes in pugview
         if _DEBUG: print obj
         for entry in attributeList:
             attribute = entry[0]
-            if _DEBUG: print "create_template_puglist: attr -", attribute
+            if _DEBUG: print "create_pugview_aguilist: attr -", attribute
             if attribute == '*':
                 #create default gui for all attributes we haven't made a gui for
                 for attribute in dirList:
@@ -105,7 +105,7 @@ class otherClass( myClass):
                                                            window)
                     except:
                         continue
-                    pugList.append(attributegui)
+                    aguilist.append(attributegui)
                 continue
             # make sure we have an attribute, or a non-attr agui entry
             if not(attribute) and len(entry) == 1:
@@ -155,14 +155,14 @@ class otherClass( myClass):
                                                            aguidata=aguidata)
                     except:
                         continue       
-            pugList.append(attributegui)
+            aguilist.append(attributegui)
             if entry[0] in dirList:
                 dirList.remove(entry[0])
-    if _DEBUG: print "create_template_puglist: end"
-    return pugList
+    if _DEBUG: print "create_pugview_aguilist: end"
+    return aguilist
 
-def create_raw_puglist(obj, window, familyList = None, filterUnderscore = 2):
-    """create_raw_pug(obj, window) -> pugList (list of pug aguis for obj)
+def create_raw_aguilist(obj, window, familyList = None, filterUnderscore = 2):
+    """create_raw_pug(obj, window) -> aguilist (list of pug aguis for obj)
     
 obj: object to be examined
 window: the pugFrame object  
@@ -172,7 +172,7 @@ filter_underscore: 0=no filter, 1=filter _ and __ attributes, 2=filter __ attr's
 take all the objects attributes and make entries based on defaults defined in:
 <guisystem>.attributeguis.__init__
 """
-    pugList = []
+    aguilist = []
     dirList = dir(obj) # the object's attributes
     for attribute in dirList:
         # test underscores
@@ -194,9 +194,10 @@ take all the objects attributes and make entries based on defaults defined in:
             agui = create_default_agui(attribute, obj, window, family)
         except:
             error = exc_info()
+            if _DEBUG: print error
             continue
-        pugList.append(agui)
-    return pugList
+        aguilist.append(agui)
+    return aguilist
 
 def do_filter_underscore(attribute, filterUnderscore):
     if (attribute[:1]=='_' and filterUnderscore==1) \
@@ -206,7 +207,7 @@ def do_filter_underscore(attribute, filterUnderscore):
         return False
     
 def create_default_agui(attribute, obj, window, family = None, aguidata = {}):
-    """Create a default attribute gui for a puglist entry
+    """Create a default attribute gui for a aguilist entry
 
 attribute: the attribute of obj
 obj: the object we're making an agui for
@@ -257,29 +258,29 @@ Returns a string:
         guiType = 'Objects'
     return guiType
 
-def create_puglist(obj, window, template = None):
+def create_aguilist(obj, window, pugview = None):
     """Create the list of attributes for a pug window.
 
-create_pug_list(obj, window, template = None)
+create_pug_list(obj, window, pugview = None)
     obj: object to be examined
     window: the pugFrame object  
-    template: template to be used. None will create a 'Raw' pug window
+    pugview: pugview to be used. None will create a 'Raw' pug window
 
     
 The attributes are returned as a list of attributeGUIs. Generally, attributeGUIs
 have a label and a control to go on the left and right of the pug window.
 Default attribute guis are defined in <guisystem>.attributeguis.__init__.
-For template layout, see create_template_gui.
+For pugview layout, see create_pugview_gui.
 """
 # This function is pretty much not used anymore
-    if template is None:
-        template = get_default_template( obj)
-    if template is None or not isinstance(template, dict):
+    if pugview is None:
+        pugview = get_default_pugview( obj)
+    if pugview is None or not isinstance(pugview, dict):
         # create an unformatted (raw) pug window
-        pugList = create_raw_puglist(obj, window)
+        aguilist = create_raw_aguilist(obj, window)
     else:
-        pugList = create_template_puglist(obj, window, template)
-    return pugList
+        aguilist = create_pugview_aguilist(obj, window, pugview)
+    return aguilist
 
 def get_agui( cls, attribute, window, aguidata):
     """get_agui(cls, attribute, window, aguidata)->agui instance

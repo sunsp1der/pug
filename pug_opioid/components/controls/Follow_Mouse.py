@@ -15,9 +15,9 @@ class Follow_Mouse(Component):
     _attribute_list = [
             ['face_movement','Rotate object to direction of motion']
             ]
-    #defaults
+    # attribute defaults
     face_movement = False
-    
+    # other defaults
     action = None
 
     @component_method
@@ -27,14 +27,14 @@ class Follow_Mouse(Component):
         
     @component_method
     def start_following_mouse(self):
-        self.action = RealTickFunc( self.follow)
-        self.action.do()
+        if not self.action:
+            self.action = RealTickFunc( self.follow).do()
         
     @component_method
     def stop_following_mouse(self):
         if self.action: 
-            self.action.abort()
-        
+            self.action.end()
+
     def follow(self):
         if not self.enabled:
             return

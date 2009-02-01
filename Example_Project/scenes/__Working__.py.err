@@ -1,2 +1,66 @@
 """__Working__.py"""
 
+###################
+# import autocode #
+###################
+from all_components import Spawn_Area, Set_Motion
+from objects.TestSprite import ShipSprite
+from objects.jumpug import jumpug
+from pug_opioid.PugScene import PugScene
+from pug_opioid.PugSprite import PugSprite
+#######################
+# End import autocode #
+#######################
+
+######################
+# "Spawny2" autocode #
+######################
+class Spawny2(PugScene):
+    layers = ['Layer 1']
+    def enter(self):
+        # Archetypes
+        jumpug_instance = jumpug(gname='jumpug')
+        jumpug_instance.archetype = True
+
+        # Sprites
+        spawnero = PugSprite(gname='spawnero')
+        spawnero.register = True
+        spawnero.components.add( Spawn_Area(
+                object=<class 'objects.jumpug.jumpug'>) )
+        spawnero.image = 'art/explosion2.png'
+        spawnero.layer = 'Layer 1'
+        spawnero.position.x = 434.0
+        spawnero.position.y = 310.0
+        spawnero.scale.x = 10.0
+        spawnero.scale.y = 10.0
+
+        jumpug_instance_2 = jumpug()
+        jumpug_instance_2.components.add( Set_Motion(
+                velocity_y=-305,
+                acceleration_y=222,
+                rotation_speed=1,
+                additive=True) )
+        jumpug_instance_2.components.add( Set_Motion(
+                rotation_speed=222,
+                additive=True) )
+        jumpug_instance_2.components.remove_duplicate_of( Set_Motion(
+                velocity_y=-305,
+                acceleration_y=222,
+                rotation_speed=1) )
+        jumpug_instance_2.components.remove_duplicate_of( Set_Motion(
+                rotation_speed=222) )
+        jumpug_instance_2.position.x = 278.0
+        jumpug_instance_2.position.y = 449.0
+
+        corny = ShipSprite(gname='corny')
+        corny.register = True
+        corny.layer = 'Layer 1'
+        corny.position.x = 10.0
+        corny.position.y = 10.0
+
+        # Pug auto-start
+        self.start()
+##########################
+# End "Spawny2" autocode #
+##########################
+

@@ -149,16 +149,18 @@ tree on the left and info on the right.
             self.infosizer.Add(text,0,wx.WEST,15)
             text = wx.StaticText(self.infowin, -1, item[1])
             self.infosizer.Add(text,0,wx.WEST,35)
-        text = wx.StaticText(self.infowin, -1, '\nMethods:\n')
+        text = wx.StaticText(self.infowin, -1, '\nMethods:')
         self.infosizer.Add(text,0,wx.WEST,5)
         for item in dir(component):
-            if isinstance(getattr(component, item), component_method):
-                text = ''.join([item,':'])
+            attr = getattr(component, item)
+            if isinstance(attr, component_method):
+                text = ''.join(['\n',item,':'])
                 text = wx.StaticText(self.infowin, -1, text)
                 self.infosizer.Add(text,0,wx.WEST,15)
-                text = wx.StaticText(self.infowin, -1, 
-                                     getattr(component,item).__doc__)
-                self.infosizer.Add(text,0,wx.WEST,35)
+                if attr.__doc__:
+                    text = wx.StaticText(self.infowin, -1, 
+                                     attr.__doc__)
+                    self.infosizer.Add(text,0,wx.WEST,35)
         self.infosizer.Layout()
         self.infosizer.MinSize = self.infosizer.Size
         self.infowin.SetupScrolling()

@@ -180,11 +180,12 @@ For kwargs optional arguments, see the Base attribute GUI
         path = self.window.objectPath
         if not path:
             path = self.window.GetTitle()
-        obj=component
+        obj = component
         app = wx.GetApp()
+        objectpath = ''.join([self.editList.get_text(), ' component of ', path])
         if wx.GetKeyState(wx.WXK_CONTROL) or not app.show_object_pugframe(obj):
-            frame = self.pug(obj=obj, parent=self.control, objectpath=''.join(
-                        [self.editList.get_text(), ' component of ', path]))
+            frame = self.pug(obj=obj, parent=None, 
+                             objectpath=objectpath, show=False)
             self_rect = self.control.GetTopLevelParent().GetScreenRect()
             frame_rect = frame.GetScreenRect()
             display_size = wx.GetDisplaySize()
@@ -201,6 +202,7 @@ For kwargs optional arguments, see the Base attribute GUI
             else:
                 y = 0
             frame.SetPosition((x,y))
+            frame.Show()
         
     def open_browser(self, event=None):
         browser = ComponentBrowseDlg(self.control, self.object, 

@@ -9,11 +9,11 @@ class XComponent(Component):
         Component.__init__(self, **kwargs)
 
     @component_method
-    def explode(self, owner, size, i=2, *args):
+    def explode(self, size, i=2, *args):
         if size is None:
             size = self.defaultsize
-        print "%s explosion %s" % (size, i)
-        print self,owner
+        print "%s explosion %s" % ( size, i)
+        print self
         
 register_component(XComponent)
 
@@ -22,7 +22,7 @@ class X2Component(Component):
     _set = 'Testers'
 
     @component_method
-    def explode(self, owner, size, i=3, **kw_args):
+    def explode(self, size, i=3, **kw_args):
         print "stuff"
         print "%s explosion2 %s" % (size, i)
         

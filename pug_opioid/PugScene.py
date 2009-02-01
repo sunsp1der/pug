@@ -3,22 +3,25 @@ import os.path
 import Opioid2D
 
 import pug
-from pug.util import CallbackWeakKeyDictionary
+from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.code_storage.constants import _INDENT
 from pug.code_storage import add_subclass_skip_attributes
 
 from pug_opioid.editor.wx_agui import SceneNodes, SceneLayers
-from pug_opioid.editor.util import get_available_layers, save_object
+from pug_opioid.editor.util import get_available_layers, save_object,\
+                                    exporter_cleanup
 
 _DEBUG = False
 
 class PugScene( Opioid2D.Scene, pug.BaseObject):
     """PugScene - Opioid2d Scene with features for use with pug"""
     __node_num = 0
-    _pug_template_class = 'PugScene'
+    started  = False
+    _pug_pugview_class = 'PugScene'
     def __init__(self, gname=''):
         Opioid2D.Scene.__init__(self)
-        pug.BaseObject.__init__(self, gname)        
+        pug.BaseObject.__init__(self, gname)   
+        print "NEW SCENE", self.__class__.__name__     
 
     def handle_keydown(self, ev):
         if ev.key == Opioid2D.K_ESCAPE:
@@ -36,26 +39,30 @@ class PugScene( Opioid2D.Scene, pug.BaseObject):
                     if node.archetype:
                         node.delete()
                 Opioid2D.Director.game_started = True                        
-                self.all_nodes_callback( 'on_game_start')
                 self.all_nodes_callback( 'on_added_to_scene', self)        
+                self.all_nodes_callback( 'on_game_start')
             else:
                 # do nothing if we're not starting the game
                 return
         self.all_nodes_callback( 'on_scene_start', self)             
+        self.started = True
     
     def stop(self):
         """Stop a level that is playing"""
         Opioid2D.Director.game_started = False  
         Opioid2D.Director.start_game = False                     
+        self.started = False
     
     def all_nodes_callback(self, callback, *args, **kwargs):
         """Send a callback to all nodes in the scene"""
+        if _DEBUG: print "PugScene.all_nodes_callback:",callback,self.nodes.data
         for node in self.nodes:
             self.node_callback( node, callback, *args, **kwargs)
                 
     def node_callback(self, node, callback, *args, **kwargs):
         """Send a callback to a node in the scene"""
         if hasattr(node, callback):
+            if _DEBUG: print "PugScene.node_callback",callback,node
             func = getattr(node, callback)
             func( *args, **kwargs)
         
@@ -68,10 +75,13 @@ class PugScene( Opioid2D.Scene, pug.BaseObject):
 
     nodes = property (_get_nodes,doc="dictionary of Scene nodes:node_num")
 
-    def get_ordered_nodes(self):
-        """get_ordered_nodes()->list of nodes sorted by layer then create-time
+    def get_ordered_nodes(self, include_all=False):
+        """get_ordered_nodes(include_all=False)->list of nodes 
         
-Note that due to the non-deterministic nature of Opioid zordering, the order
+Return a list of scene nodes, sorted by layer then create-time.
+include_all: if True, return nodes that are not in a layer.        
+        
+Note that due to the non-deterministic nature of Opioid z-ordering, the order
 returned will be from top to bottom in terms of layers, but pseudo-random in
 terms of nodes within the layers"""
         nodelist = []
@@ -90,15 +100,12 @@ terms of nodes within the layers"""
                     nodesorter = '_'.join([layersort[node.layer_name],
                                        '%04d'%self.nodes[node]])
                 else:
-                    nodesorter = '_'.join(['000',
+                    nodesorter = '_'.join(['zzz',
                                        '%04d'%self.nodes[node]])
-                    if _DEBUG:
-                        import gc
-                        gc.collect()
-                        print "get_ordered nolayer", str(node), node.gname
-                        node._test_referrers()
-#                       self.nodes.pop(node)
-#                    continue
+                    print "scene.get_ordered_nodes nolayer:", \
+                                str(node), node.gname
+                    if not include_all:
+                        continue
                 ordered_nodes[nodesorter] = node
             nodenums = ordered_nodes.keys()
             nodenums.sort()
@@ -120,24 +127,21 @@ Get all nodes whose rects overlap (x,y)
                 picklist.append(node)  
         return picklist
 
-    def pick(self, x, y, selectedRefSet=None):
-        """pick(x, y, selectedRefSet=[])->return a node to select at x,y
+    def pick(self, x, y, selectedObjectDict={}):
+        """pick(x, y, selectedObjectDict={})->return a node to select at x,y
         
 x,y: coordinates
-selectedRefSet: a list of selected objects. If possible, pick will return an 
+selectedObjectDict: a list of selected objects. If possible, pick will return an 
     object at x,y that is NOT in the list.
 """
-        if selectedRefSet is None:
-            selectedRefSet = []
         picklist = self.pick_all(x, y)
         if not len(picklist):
             return None
-        if len(picklist) == 1 or not selectedRefSet:
+        if len(picklist) == 1 or not selectedObjectDict:
             return picklist[0]
         start_node = None
         selected_list = []
-        for ref in selectedRefSet:
-            selected_node = ref()
+        for selected_node in selectedObjectDict:
             selected_list.append(selected_node)
             if not start_node and selected_node in picklist:
                 start_node = selected_node
@@ -163,6 +167,12 @@ Update the PugScene's node tracking dict for node. Possible commands: 'Delete'
 """
         nodes = self.nodes
         if _DEBUG: print "pugscene.update_node", node, command
+        if not nodes.has_key(node):
+            if _DEBUG: print "   not registered:", node
+            return
+        else:
+            if  _DEBUG: print "   registered"
+            node_num = nodes[node]
         if getattr(node,'deleted',False) or command == 'Delete':
             if nodes.has_key(node):
                 try:
@@ -173,17 +183,17 @@ Update the PugScene's node tracking dict for node. Possible commands: 'Delete'
             else:
                 if _DEBUG: print "   unable to delete"
             return            
-        if not nodes.has_key(node):
-            if _DEBUG: print "   added"
-            if getattr(Opioid2D.Director, 'game_started', False):
-                self.node_callback(node, "on_added_to_scene", self)
-            node_num = self.__node_num
-            self.__node_num += 1
-        else:
-            if  _DEBUG: print "   check"
-            node_num = nodes[node]
         # node_num tracks the order of node additions
         nodes[node] = node_num # this call sets off callbacks for nodes gui
+            
+    def register_node(self, node):        
+#        """register(node): a new node is joining scene. Do callbacks"""
+        if _DEBUG: print "PugScene.register_node:",node
+        if getattr(Opioid2D.Director, 'game_started', False):
+            self.node_callback(node, "on_added_to_scene", self)
+        node_num = self.__node_num
+        self.__node_num += 1
+        self.nodes[node] = node_num
             
     def get_scene_layers(self):
         return get_available_layers()
@@ -213,51 +223,77 @@ Update the PugScene's node tracking dict for node. Possible commands: 'Delete'
         if storageDict['as_class']:            
             # enter function
             custom_code_list += [baseIndent, _INDENT, 'def enter(self):\n']
-            custom_code_list += [baseIndent, _INDENT*2, '# Sprites etc.\n']
             if self.nodes:
                 # create ordered list of nodes
                 nodes = self.get_ordered_nodes()
                 nodes.reverse() # store them from bottom-most to top-most
+                # store archetypes at top of file
+                archetypes = False
                 for node in nodes:
-                    nodeStorageDict = exporter.get_custom_storageDict(node)
-                    if node.archetype:
-                        # this node is a class archetype, figure out a save name
-                        if node.gname:
-                            savename = node.gname
-                        else:
-                            # no gname, so find an available filename
-                            tryname = base_tryname = 'MyObjectClass'
-                            savename = ''
-                            suffix = 1
-                            while not savename:
-                                path = os.path.join('objects',
-                                                    ''.join([tryname,'.py']))
-                                try:
-                                    file(path)
-                                except:
-                                    savename = tryname
-                                else:
-                                    suffix+=1
-                                    tryname = ''.join([base_tryname, 
-                                                       str(suffix)])
-                            node.gname = savename
-                        save_object( node, savename)
-                        module = __import__('.'.join(['objects',savename]),
-                                           fromlist=[savename])
-                        reload(module)
-                        node.__class__ = getattr(module,savename)
-                        nodeStorageDict['name'] =''.join([savename,'_instance'])
+                    if not node.archetype:
+                        continue
+                    if not archetypes:
+                        custom_code_list += [baseIndent, _INDENT*2, 
+                                             '# Archetypes\n']
+                        archetypes = True
+                    # this node is a class archetype, figure out a save name
+                    if node.gname:
+                        savename = node.gname
+                    else:
+                        # no gname, so find an available filename
+                        tryname = base_tryname = 'MyObjectClass'
+                        savename = ''
+                        suffix = 1
+                        while not savename:
+                            path = os.path.join('objects',
+                                                ''.join([tryname,'.py']))
+                            try:
+                                file(path)
+                            except:
+                                savename = tryname
+                            else:
+                                suffix+=1
+                                tryname = ''.join([base_tryname, 
+                                                   str(suffix)])
+                        node.gname = savename
+                    archetype_exporter = save_object( node, savename)
+                    if not archetype_exporter or \
+                                            archetype_exporter.errorfilename:
+                        print "PugScene code export failed... unable to save",\
+                                savename, node
+                        return
+#                    module = __import__('.'.join(['objects',savename]),
+#                                       fromlist=[savename])
+#                    reload(module)
+#                    newclass = getattr(module,savename)
+#                    oldclass = node.__class__
+#                    node.__class__ = newclass
+                    nodeStorageDict = exporter.get_custom_storageDict(node)                            
+                    nodeStorageDict['name'] =''.join([savename,'_instance'])
                     nodeStorageDict['as_class'] = False # export as object
                     node_code = exporter.create_object_code(node, 
                                                             nodeStorageDict, 
                                                             indentLevel + 2,
                                                             False)                    
                     custom_code_list+=[node_code,'\n']
-                    # hack - nasty hack
-                    # give Opioid some time to catch up
-#                    starttime = time.time()
-#                    while time.time()-starttime < 0.5:
-#                        time.sleep(0.01)
+                    if not archetype_exporter.file_changed:
+                        continue
+                # store instances
+                instances = False
+                for node in nodes:
+                    if node.archetype:
+                        continue
+                    if not instances:
+                        custom_code_list += [baseIndent, _INDENT*2, 
+                                             '# Sprites\n']
+                        instances = True
+                    nodeStorageDict = exporter.get_custom_storageDict(node)
+                    nodeStorageDict['as_class'] = False # export as object
+                    node_code = exporter.create_object_code(node, 
+                                                            nodeStorageDict, 
+                                                            indentLevel + 2,
+                                                            False)                    
+                    custom_code_list+=[node_code,'\n']
             custom_code_list += [baseIndent, _INDENT*2, '# Pug auto-start\n']
             custom_code_list += [baseIndent, _INDENT * 2, 'self.start()','\n']
         if base_code.endswith('pass\n') and custom_code_list: 
@@ -283,9 +319,9 @@ Update the PugScene's node tracking dict for node. Possible commands: 'Delete'
 
 # force derived classes to use PugScene as base class
 PugScene._codeStorageDict['base_class']=PugScene
-# pug template stuff
+# pug pugview stuff
             
-_sceneTemplate = {
+_scenePugview = {
     'name':'PugScene Editor',
     'skip_menus':['Export'],    
     'attributes':
@@ -305,4 +341,4 @@ _sceneTemplate = {
         ['nodes', SceneNodes, {'growable':True}],
     ]
 }
-pug.add_template('PugScene', _sceneTemplate, True)
+pug.add_pugview('PugScene', _scenePugview, True)

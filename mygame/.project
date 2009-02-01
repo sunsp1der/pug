@@ -3,6 +3,7 @@
 	<name>mygame</name>
 	<comment></comment>
 	<projects>
+		<project>pug</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

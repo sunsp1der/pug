@@ -111,13 +111,13 @@ Special kwargs:
         self.object.nodes.register(self.nodes_changed)
         self.refresh_tree()
         
-    def on_set_selection(self, selectedRefSet):
+    def on_set_selection(self, selectedObjectDict):
         """Callback from pug App"""
         self.changing_sel = True
         self.UnselectAll()
-        if selectedRefSet:
+        if selectedObjectDict:
             count = 0
-            for ref in selectedRefSet:
+            for ref in selectedObjectDict.itervalues():
                 item = self.find_item_by_data( ref)
                 if item:
                     self.SelectItem(item)

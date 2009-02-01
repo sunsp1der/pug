@@ -6,7 +6,7 @@ object to be viewed as an argument on creation of the frame."""
 
 # TODO: provide interface for creating attribute
 # TODO: menu option to go to file where this is defined
-# TODO: send puglist a specific list of attributes
+# TODO: send aguilist a specific list of attributes
 
 import wx
 
@@ -61,6 +61,7 @@ PugFrame(self, obj=None, objectpath="object", title="", show=True, parent=None,
     menuBar = None
     pugWindow = None
     passingMenuEvent = None
+    lockedName = None
     def __init__(self, obj=None, objectpath="unknown", title="", 
                   show=True, parent=None, name=None, **kwargs):        
         wx.Frame.__init__(self, parent=parent, size=WX_PUGFRAME_DEFAULT_SIZE, 
@@ -98,6 +99,9 @@ PugFrame(self, obj=None, objectpath="object", title="", show=True, parent=None,
                 
     def apply(self, event=None):
         self.pugWindow.apply()
+        
+    def refresh(self, event=None):
+        self.pugWindow.refresh()
             
     def set_object(self, obj, objectpath="unknown", title=""):
         """set_object(obj, objectpath, title)
@@ -120,18 +124,20 @@ Set the object that this frame's pugWindow is viewing
         
     def show_all_attributes(self, event=None):
         """Expand the frame's size so that all attributes are visible"""
-        bestSize = self.pugWindow.GetBestSize()
+        newSize = list(self.pugWindow.GetBestSize())
         # give some space for scrollbars
-        newSize = bestSize
-        newSize = (bestSize[0] + WX_SCROLLBAR_FUDGE[0], 
-                   bestSize[1] + WX_SCROLLBAR_FUDGE[1])
+        newSize = [newSize[0] + WX_SCROLLBAR_FUDGE[0], 
+                   newSize[1] + WX_SCROLLBAR_FUDGE[1]]
         # show the whole toolbar
         if self.GetToolBar():
             toolbarWidth = self.GetToolBar().GetSize()[0]
             if newSize[0] < toolbarWidth:
                 newSize = (toolbarWidth, newSize[1])
+#        if self.GetMenuBar():
+#            menusize = self.GetMenuBar().GetSize()
+#            newSize[1] += menusize[1]
         self.SetClientSize(newSize)
-        self.pugWindow.GetSizer().Layout()
+        self.Layout()
             
     def _evt_passmenu(self, event): 
         # this checking stuff is necessary so that we don't have an infinite

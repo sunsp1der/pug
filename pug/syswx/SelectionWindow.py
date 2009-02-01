@@ -8,38 +8,44 @@ import wx
 
 from pug.syswx.pugwindow import PugWindow
 
+_DEBUG = True
+
 class SelectionWindow( PugWindow):
     """SelectionWindow( parent)
     
 A PugFrame that tracks the selected objects using the methods in the pug App. 
 To set the viewed object, use PugApp.set_selection. 
 """
-    selectionRefSet = None
+    selectionList = []
     def __init__(self, parent):
         PugWindow.__init__(self, parent)
         app = wx.GetApp()
         app.register_selection_watcher(self)
-        self.on_set_selection( app.selectedRefSet)        
+        self.on_set_selection( app.selectedObjectDict)        
         
-    def on_set_selection(self, selectionRefSet=None):
-        """on_set_selection(selectionRefSet=None)
+    def on_set_selection(self, selectionDict={}):
+        """on_set_selection(selectionDict={})
         
-selectionRefSet: a set of references for this window to display a pug view of.
+selectionDict: a dict of obj:ref for this window to display a pug view of.
 Callback from PugApp...        
 """
-        if self.selectionRefSet == selectionRefSet:
+        if _DEBUG: print "SelectionWindow.on_set_selection:",\
+                                                            selectionDict.keys()
+        if selectionDict:
+            selectionList = selectionDict.data.keys()
+        else:
+            selectionList = []
+        if self.selectionList == selectionList:
             self.refresh()
             return
-        self.selectionRefSet = selectionRefSet.copy()
+        self.selectionList = selectionList
         oldObject = self.object
-        if not selectionRefSet:
+        if not selectionList:
             self.display_message("Nothing Selected")
             self.SetTitle("Selection", False)
-        elif len(selectionRefSet) == 1:
-            objRef = selectionRefSet.pop()
-            obj = objRef()
+        elif len(selectionDict) == 1:
+            obj = selectionDict.values()[0]()
             wx.CallAfter(self.set_object, obj)
-            selectionRefSet.add(objRef)
         else:
             self.display_message("Multiple Objects Selected")
             self.SetTitle("Selection: Multiple", False)
@@ -48,9 +54,13 @@ Callback from PugApp...
         self.refresh()
         
     def SetTitle(self, title, prefix=True):
-        self.titleBase = title
         parent = self.GetParent()
-        if prefix:
-            title = ''.join(['Selection: ',self.titleBase])
-        if getattr(parent, 'SetTitle'):
-            parent.SetTitle(title)
+        if self.object:            
+            self.titleBase = title
+            if prefix:
+                title = ''.join(['Selection: ',self.titleBase])
+            if getattr(parent, 'SetTitle'):
+                parent.SetTitle(title)
+        else:
+            self.titleBase = ''
+            parent.SetTitle('Selection')

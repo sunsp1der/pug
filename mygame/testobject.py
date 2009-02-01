@@ -7,7 +7,7 @@ class fake( pug.BaseObject):
     def __init__(self):
         pug.BaseObject.__init__(self)
         
-_fakeTemplate = {
+_fakePugview = {
          'name':'Basic',
          'attributes':
         [
@@ -18,4 +18,4 @@ _fakeTemplate = {
              ['interface']
          ]
         }
-pug.add_template(fake,_fakeTemplate,True)
+pug.add_pugview(fake,_fakePugview,True)

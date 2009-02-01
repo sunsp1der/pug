@@ -3,13 +3,14 @@
 import os.path
 from inspect import getmro
 import time
+from copy import copy
 
 import wx
 
 import Opioid2D
 from Opioid2D.public.Node import Node
 
-from pug import code_export, GnameDropdown
+from pug import code_export, GnameDropdown, CodeStorageExporter
 from pug.syswx.util import show_exception_dialog
 from pug.syswx.SelectionWindow import SelectionWindow
 from pug.util import make_name_valid
@@ -98,49 +99,87 @@ parentWindow: the parent window of name dialog. If not provided, the
         if getattr(obj, 'archetype', False):
             # we don't want every instance to be an archetype
             obj.archetype = False
-            archetypeClass = obj.__class__
+            oldClass = obj.__class__
         else:
-            archetypeClass = None
+            oldClass = None
         exporter = code_export( obj, path, True, {'name':objName})
-        if archetypeClass:
+        get_available_objects( True)
+        if oldClass:
             # return archetype status after saving
             obj.archetype = True
             if exporter.file_changed:
-                archetype_changed( archetypeClass)
-        get_available_objects( True)
+                archetype_changed( obj, oldClass, exporter)
         return exporter
     except:
         show_exception_dialog()
     
 _changedArchetypeList = []    
-def archetype_changed( cls):
-    if _changedArchetypeList == []:
-        wx.CallAfter( archetype_change_query)
-    _changedArchetypeList.append(cls)
-def archetype_change_query():
-    global _changedArchetypeList
-    names = []
-    for cls in _changedArchetypeList:
-        has_instance = False
-        nodes = Opioid2D.Director.scene.nodes.keys()
-        for node in nodes:
-            if node.__class__ == cls and not node.archetype:
-                has_instance = True
-                break
-        if has_instance:
-            names.append(cls.__name__)
-    if not names:
-        return
-    names.sort()
-    query = """Some object's archetypes changed on disk. Reload level?\n
-Changed archetypes: """
-    query = ''.join([query, names[0]])
-    for name in names[1:]: 
-        query = ''.join([query, ', ', name])
-    dlg = wx.MessageDialog( None, query, "Reload Level?", style=wx.YES_NO)
-    if dlg.ShowModal() == wx.ID_YES:
-        wx.GetApp().projectObject.revert_scene()
-    _changedArchetypeList = []
+def archetype_changed( archetype, oldclass, archetype_exporter=None):
+    if archetype_exporter is None:
+        archetype_exporter = CodeStorageExporter()
+#    savename = oldclass.__name__
+#    module = __import__('.'.join(['objects',savename]), fromlist=[savename])
+#    reload(module)
+    newclass = get_available_objects()[oldclass.__name__]
+    archetype.__class__ = newclass
+    # convert all nodes referencing this archetype
+    old_dummy = archetype_exporter.get_dummy(oldclass)
+    new_dummy = archetype_exporter.get_dummy(newclass)
+    nodes = Opioid2D.Director.scene.nodes
+    storageDict = archetype_exporter.get_custom_storageDict(new_dummy)
+    storageDict['as_class'] = False 
+    attributeList = archetype_exporter.create_attribute_lists(
+                                            new_dummy, storageDict)[0]                                                        
+    for changer in nodes:
+        if changer == old_dummy:
+            return
+        if _DEBUG: print "archetype_changed changer:", changer
+        if changer.__class__ != oldclass:
+            continue
+        changer.__class__ = newclass
+        # convert the object to new archetype form
+        # set attributes
+        for attr in attributeList:
+            try:
+                oldval = getattr(old_dummy, attr)
+                newval = getattr(new_dummy, attr)
+            except:
+                continue
+            if oldval == newval or getattr(newval, '__module__', False):
+                continue
+            setVal = False
+            try:
+                val = getattr(changer, attr)
+            except:
+                setVal = True
+            if setVal or val == oldval:
+                try:
+                    setattr(changer, attr, newval)
+                except:
+                    continue
+        # set components
+        oldComponents = old_dummy.components.get()
+        if _DEBUG: print "archetype_changed oldComponents:", oldComponents
+        newComponents = new_dummy.components.get()
+        if _DEBUG: print "archetype_changed newComponents:", newComponents
+        if _DEBUG: print "archetype_changed changer components:",\
+                                                    changer.components.get()
+        for comp in oldComponents:
+            removed = changer.components.remove_duplicate_of(comp)
+            if not removed:
+                # if component is in new and old but not changer, don't add it!
+                dupecomp = new_dummy.components.get_duplicate_of(comp)
+                if dupecomp:
+                    if _DEBUG: print "archetype_changed: don't add", dupecomp
+                    newComponents.remove(dupecomp)
+            else:
+                if _DEBUG: print "archetype_changed: removed", comp
+
+        for comp in newComponents:
+            # add duplicate components
+            if not changer.components.get_duplicate_of(comp):
+                if _DEBUG: print "archetype_changed: add", comp
+                changer.components.add(copy(comp))
     
 def get_scene_errors(showDialog=True):
     """get_scene_errors(showDialog=True)->error string
@@ -212,12 +251,14 @@ parentWindow: the parent window of name dialog. If not provided, the
             name = 'MyScene'
         name = make_name_valid(name)
         name.capitalize()
+        if _DEBUG: print "util: save_scene_as 1"
         parentWindow=None
         if parentWindow == None:
             parentWindow = wx.GetActiveWindow()
         dlg = wx.TextEntryDialog( parentWindow, 
                                   "Enter the scene's class/file name", 
                                   "Save Scene", name)
+        if _DEBUG: print "util: save_scene_as 2"
         while not sceneName:
             if dlg.ShowModal() == wx.ID_OK:
                 name = dlg.GetValue()
@@ -234,7 +275,7 @@ parentWindow: the parent window of name dialog. If not provided, the
                            wx.YES_NO | wx.NO_DEFAULT)
                     if confirmDlg.ShowModal() == wx.ID_YES:
                         sceneName = name
-                    confirmDlg.Destroy()
+                    confirmDlg.Destroy()                    
             else:
                 dlg.Destroy()
                 return
@@ -246,27 +287,32 @@ parentWindow: the parent window of name dialog. If not provided, the
         fileName = sceneName
     path = os.path.join('scenes',''.join([fileName,'.py']))
     app = wx.GetApp()
-    selection = app.selectedRefSet.copy()
+    if _DEBUG: print "util: save_scene_as 4"
+    selection = app.selectedObjectDict.keys()
     oldscene = Opioid2D.Director.scene
-    scene.state = None          
+    scene.state = None
+    timer = 0
+    while scene.state != None:
+        time.sleep(0.05)         
+        timer += 1
+        if timer > 50:
+            raise AssertionError("save_scene_as unable to set scene state")
+    if _DEBUG: print "util: save_scene_as 5"
     wx.BeginBusyCursor()
     try:
         if _DEBUG: print "util: save_scene_as enter code_export"
         code_export( scene, path, True, {'name':sceneName})
         if _DEBUG: print "util: save_scene_as exit code_export"
     except:
+        if _DEBUG: print "util: save_scene_as 6"        
         show_exception_dialog()
     else:
+        if _DEBUG: print "util: save_scene_as 7"        
         if sceneName != Opioid2D.Director.scene.__class__.__name__:
             scenedict = get_available_scenes(True)
             loadscene = scenedict.get(sceneName, None)
             if loadscene:
                 Opioid2D.Director.scene.__class__ = loadscene
-                #hack
-                sceneFrame = wx.GetApp().get_object_pugframe( 
-                                                        Opioid2D.Director.scene)
-                if sceneFrame:
-                    sceneFrame.SetTitle( loadscene.__name__)
     finally:
         wx.EndBusyCursor()        
         scene.state = EditorState

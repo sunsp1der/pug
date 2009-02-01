@@ -4,7 +4,7 @@ import functools
 from pug.component.component import *
 all_components = None
 
-_DEBUG = True
+_DEBUG = False
 
 class ComponentObject(object):
 
@@ -27,11 +27,13 @@ class ComponentObject(object):
 def component_method_wrapper(*args, **kwargs):
     if not kwargs.pop('___obj_ref')():
         return
-    for method in kwargs.pop('___component_methods'):
-        if not method.im_self.enabled:
-            continue
-        method(*args, **kwargs)
     ___original_method = kwargs.pop('___original_method')
+    for method in kwargs.pop('___component_methods'):
+        if method:
+            if _DEBUG: print method, args, kwargs
+            if not method.im_self.enabled:
+                continue
+            method(*args, **kwargs)
     if ___original_method:
         return ___original_method(*args, **kwargs)                
 
@@ -100,8 +102,13 @@ If it's a class, an instance will be created and added.
             raise TypeError(''.join([cls," is not a component"]))
         components = self.__component_list.get_components()
         if cls is None:
-            return components
-        return (b for b in components if isinstance(b, cls))
+            return components[:]
+        else:
+            complist = []
+            for b in components:
+                if isinstance(b, cls):
+                    complist.append(b)
+            return complist
 
     def get_one(self, cls):
         for b in self.get(cls):
@@ -110,7 +117,7 @@ If it's a class, an instance will be created and added.
     def remove(self, component):
         component_list = self.__component_list
         if component not in component_list.get_components():
-            return
+            return False
         component_list.remove(component)
         obj = self.__obj()
         original_methods = self.__original_methods
@@ -123,3 +130,17 @@ If it's a class, an instance will be created and added.
                 else:
                     delattr(obj, name)
                 del original_methods[name]
+        return True
+                
+    def remove_duplicate_of(self, component):
+        comp = self.get_duplicate_of(component)
+        if comp:
+            self.remove(comp)
+        return comp
+    
+    def get_duplicate_of(self, component):
+        for mycomponent in self.__component_list.get_components():
+            if mycomponent.is_duplicate_of( component):
+                return mycomponent
+        return None
+        

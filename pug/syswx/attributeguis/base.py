@@ -295,7 +295,7 @@ Try to set the aguis attribute to the value shown in the control
         
     def changed_size(self):
         """Notify the window that this attribute gui has changed size"""
-        self.window.resize_puglist()
+        self.window.resize_aguilist()
         
     def match_label_size(self, doWindowResize=False):
         """Match the label height to the control height"""

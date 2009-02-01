@@ -42,8 +42,8 @@ Uses a browser dialog to facilitate picking a graphics file
 
         controlSizer = wx.BoxSizer(orient=wx.HORIZONTAL)
         control.SetSizer(controlSizer)
-        controlSizer.Add(text,1,wx.EXPAND | wx.EAST, SPACING)
         controlSizer.Add(browseButton,0)
+        controlSizer.Add(text,1,wx.EXPAND | wx.WEST, SPACING)
 #        controlSizer.AddMany([(textSizer,1,wx.EXPAND | wx.EAST, SPACING),
 #                              (browseButton,0)])
 #        control.SetSize(controlSizer.MinSize)
