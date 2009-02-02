@@ -168,8 +168,10 @@ settingsObj: an object similar to the one below... if it is missing any default
         # default menus
         if not self.cached[2]:
             app.add_global_menu("Pug-Opioid",
-                [["Save Working Scene\tCtrl+S", self.save_using_working_scene],
-                 ["Show All Windows\tCtrl+W", app.raise_all_frames],
+                [["Save Working Scene\tCtrl+S", self.save_using_working_scene,
+                  "Save current scene in scenes/__Working__.py"],
+                 ["Raise Windows\tCtrl+W", app.raise_all_frames,
+                  "Raise all PUG Windows to top"],
                  ["Quit\tCtrl+Q", self.quit]])
             self.cached[2]=True
         # open MDI frame
@@ -178,10 +180,13 @@ settingsObj: an object similar to the one below... if it is missing any default
                         [[self, {'objectpath':"Project",'name':"ProjectFrame"}],
                         [self.scene, {'title':"Scene",'name':"SceneFrame",
                                 'objectpath':self.scene.__class__.__name__}],
-                        'selection',
+                        ['selection'],
                         ],
                     title=''.join(["Pug-Opioid Editor - ", self.project_name]),
                     name="Pug-Opioid Editor")
+            frame.GetNotebook().Split(2, wx.LEFT)
+            size = frame.GetSize()
+            frame.GetNotebook().GetPage(1).SetSize([size[0]/2,size[1]/2])
             app.set_project_frame(frame)
         # cache a sprite view for speed on first selection
         if not self.cached[0]:
@@ -442,25 +447,13 @@ list a tuple ("New Scene", PugScene) for use in the sceneclass dropdown"""
     if _DEBUG: print "_scene_list_generator"
     scenedict = get_available_scenes( 
                     useWorking = wx.GetApp().projectObject._use_working_scene)
-    scenedict.pop("PugScene")
     scenelist = scenedict.values()
     scenelist.sort()
     scenelist.insert(0,("New Scene", PugScene))
     return scenelist    
         
-def _object_list_generator():
-    """_object_list_generator()-> list of objects + 'New Sprite'
-    
-Return a list of node classes available in the objects folder. Append to that
-list a tuple ("Sprite", PugSprite) for use in the add object dropdown"""
-    if _DEBUG: print "_object_list_generator"
-    objdict = get_available_objects()
-    objdict.pop("PugSprite")
-    objlist = objdict.values()
-    objlist.sort()
-    objlist.insert(0,("New Sprite", PugSprite))
-    return objlist    
-                    
+from pug_opioid.editor.agui import ObjectsDropdown        
+        
 _interfacePugview = {
     'size':(350,350),
     'name':'Basic',
@@ -479,18 +472,17 @@ _interfacePugview = {
         ['   Save Scene', pug.Routine, {
                                'routine':save_scene_as, 
                                'use_defaults':True,
-                               'tooltip':"Commit current scene to disk"}],
+                               'doc':"Commit current scene to disk"}],
 #        ['view_scene', pug.Routine,  {'label':'   View Scene'}],
         ['revert_scene', None, {'label':'   Revert Scene'}],
         ['use_working_scene', None, {'label':'   Use Working Scene',
-                    'tooltip':'Uncheck to go back to last committed version'}],
- 
+                    'doc':'Uncheck to go back to last committed version'}],
         [' Objects', pug.Label],
-        ['addObjectClass', pug.Dropdown, 
-             {'list_generator':_object_list_generator,
+        ['addObjectClass', ObjectsDropdown, 
+             {'prepend_list':[("New Sprite", PugSprite)],
               'label':'   Object to add',
-              'tooltip':'Select an object type for the add button below'}],
-        ['add_object', None, {'tooltip':\
+              'doc':'Select an object type for the add button below'}],
+        ['add_object', None, {'doc':\
               'Add an object to the scene.\nSelect object type above.',
                               'use_defaults':True,
                               'label':'   Add Object'}],                              

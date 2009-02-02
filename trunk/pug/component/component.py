@@ -35,14 +35,14 @@ _class_list: a list of classes that this component is meant to work with.
         component usage. If _class_list evaluates to False, all classes are
         considered compatible. This is checked with the utility function
         'is_valid_component_class' 
-_attribute_list: List of [[attribute, docstring, {extras}],...]. This is a list 
-        of the official attributes of the Component. These are the attributes 
-        that will be serialized when the component is saved, and are the 
-        attributes that will be shown in pug's default component view. docstring
-        can be left out, but it's way better to provide info about attributes.
-    {extras}: Extra info about the attribute. Possible values:
-        'agui': the pug attribute-gui type to use
-        'aguidata': the aguidata to send to the agui
+_attribute_list: List of [attribute, docstring] or [attribute, agui, {aguidata}] 
+        This is a list of the official attributes of the Component. These are 
+        the attributes that will be saved when the component is saved, and are 
+        the attributes that will be shown in pug's default component view. 
+        docstring can be left out, but it's way better to provide info about 
+        attributes. If agui is provided, the docstring should be in the 'doc'
+        dictionary entry. See the docs for aguilist and the various aguis for
+        more information.
 enabled: When this is false, the component's component_methods will not
     intercept calls to its owner's methods. Calls directly to component_methods 
     will continue to work unless they are explicitly coded not to.

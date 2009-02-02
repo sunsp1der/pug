@@ -7,7 +7,7 @@ from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.code_storage.constants import _INDENT
 from pug.code_storage import add_subclass_skip_attributes
 
-from pug_opioid.editor.wx_agui import SceneNodes, SceneLayers
+from pug_opioid.editor.agui import SceneNodes, SceneLayers
 from pug_opioid.editor.util import get_available_layers, save_object,\
                                     exporter_cleanup
 
@@ -336,7 +336,7 @@ _scenePugview = {
 #        ['   Save Scene As', pug.Routine, {
 #                               'routine':save_scene_as, 
 #                               'use_defaults':True,
-#                               'tooltip':"Save scene to disk with new name"}],        
+#                               'doc':"Save scene to disk with new name"}],        
         [' Scene Graph', pug.Label],
         ['nodes', SceneNodes, {'growable':True}],
     ]

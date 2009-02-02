@@ -71,6 +71,8 @@ For kwargs optional arguments, see the Base attribute GUI
         aguidata['control_only'] = True        
         fontsize = aguidata.get('font_size', self.defaultFontSize)
         if fontsize != self.aguidata.get('font_size', self.defaultFontSize):
+            self.control.Destroy()
+            self.label.Destroy()            
             self.__init__(attribute, window, aguidata)
             return
         if attribute:

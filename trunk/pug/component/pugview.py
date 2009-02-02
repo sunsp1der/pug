@@ -11,16 +11,7 @@ from pug.syswx.component_browser import ComponentBrowseFrame
 def _create_component_attribute_list( obj):
     attributes = []
     for attrinfo in obj._attribute_list:
-        pugview_entry = [attrinfo[0]]
-        if len(attrinfo) > 1:
-            pugview_entry += [None, {'tooltip':attrinfo[1]}]
-        if len(attrinfo) > 2:
-            for item, data in attrinfo[2].iteritems():
-                if item is 'agui': 
-                    pugview_entry[1] = data
-                elif item is 'aguidata':
-                    pugview_entry[2].update(data)
-        attributes.append(pugview_entry)
+        attributes.append(attrinfo)
     attributes.append(['enabled'])
     return attributes
     
@@ -28,7 +19,9 @@ def _create_data_aguilist( obj, window, filterUnderscore):
     pugview = {}
     attributes = []
     pugview['name'] = 'Component Data'
-    attributes = _create_component_attribute_list( obj)
+    attributes = []
+    attributes.append(['Data',pug.Label])
+    attributes += _create_component_attribute_list( obj)
     pugview['attributes'] = attributes
     aguilist = create_pugview_aguilist(obj, window, pugview, filterUnderscore)
     return aguilist

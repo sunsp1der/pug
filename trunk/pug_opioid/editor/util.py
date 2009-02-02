@@ -20,9 +20,6 @@ from pug_opioid.editor import EditorState
 
 _DEBUG = False
 
-# constant to set up component agui
-GNAMED_NODE = {'agui':GnameDropdown, 'aguidata':{'class_list':[Node]}}
-
 _IMAGEPATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Images")
 def get_image_path(filename):
     return os.path.join (_IMAGEPATH, filename)
@@ -380,5 +377,11 @@ Have the app confirm project closure.
         return 
 # set up our special quit
 Opioid2D.Director.realquit = Opioid2D.Director.quit
-Opioid2D.Director.quit = project_quit # hack to make opioid quit=pugquit        
-        
+Opioid2D.Director.quit = project_quit # hack to make opioid quit=pugquit 
+
+#hack for making Opioid2D.Vector objects more visible
+__old_repr = Opioid2D.Vector.__repr__
+def __vect_repr(self):
+    old = __old_repr(self)
+    return ''.join(['(', str(self.x), ', ', str(self.y),') - ',old])     
+Opioid2D.Vector.__repr__ = __vect_repr

@@ -1,15 +1,12 @@
 """GnamedObject attribute gui"""
 
-import wx
-import wx.combo
-
 from pug.gname import get_gnames
 from pug.syswx.attributeguis.dropdown import Dropdown
 
 class GnameDropdown (Dropdown):
     """Gnamed object selection attribute GUI
     
-GnamedObject(attribute, window, aguidata, **kwargs)
+GnameDropdown(attribute, window, aguidata, **kwargs)
 
 attribute: what attribute of window.object is being controlled
 window: the parent pugFrame

@@ -72,6 +72,8 @@ any object.
         
     def setup(self, attribute, window, aguidata):
         if aguidata != self.aguidata:
+            self.control.Destroy()
+            self.label.Destroy()            
             self.__init__( attribute, window, aguidata)
             return
         else:

@@ -119,6 +119,8 @@ For kwargs optional arguments, see the Base attribute GUI
         
     def setup(self, attribute, window, aguidata):
         if self.aguidata != aguidata:
+            self.control.Destroy()
+            self.label.Destroy()            
             self.__init__(attribute, window, aguidata)
             return
         else:

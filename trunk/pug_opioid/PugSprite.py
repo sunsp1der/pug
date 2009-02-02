@@ -198,10 +198,10 @@ _spritePugview = {
         ['Sprite', pug.Label, {'font_size':10}],
         ['__class__', None, {'label':'   class', 'new_view_button':False}],
         ['gname'],
-        ['archetype', None, {'tooltip':
+        ['archetype', 
                 '\n'.join(["Select this to automatically save this sprite",
                            "to the objects folder when the scene is saved.",
-                           "It will not appear in the game."])}],
+                           "It will not appear in the game."])],
         ['save_sprite', None, {'label':'   Save Object',
                                'use_defaults': True}],
         [' Spacial', pug.Label],

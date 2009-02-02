@@ -22,7 +22,7 @@ aguidata: dictionary of special agui information. Can be customized for specific
         'label': the label string
         'read_only': attribute cannot be edited via gui
         'control_only': hide label_widget and give control_widget the full area
-        'tooltip': the tooltip that will pop up on the label
+        'doc': the tooltip that will pop up on the label
         'background_color': for label_widget and control_widget call 
             'SetBackgroundColor' with this value
         'growable': if true, this allows the control to grow vertically
@@ -106,8 +106,8 @@ all controls.
             self.label.textCtrl.SetLabel( labelText)
         #tooltip
         self.tooltip = None
-        if aguidata.has_key('tooltip'):
-            self.tooltip = aguidata['tooltip']
+        if aguidata.has_key('doc'):
+            self.tooltip = aguidata['doc']
         else:
             try: # check if this is a property
                 if isclass(window.object):

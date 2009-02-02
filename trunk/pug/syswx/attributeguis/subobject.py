@@ -117,6 +117,8 @@ simple objects that contain a few values in them (i.e. X and Y)
         sub_attributes = aguidata.get('sub_attributes',[])
         old_attributes = self.aguidata['sub_attributes']
         if sub_attributes != old_attributes:
+            self.control.Destroy()
+            self.label.Destroy()
             self.__init__(self, attribute, window, aguidata)
             return
         else:

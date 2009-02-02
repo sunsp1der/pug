@@ -7,8 +7,10 @@ from Opioid2D import *
 from Opioid2D.public.Node import Node
 
 from pug.component import *
+from pug import Dropdown
 
 from pug_opioid.util import get_available_objects
+from pug_opioid.editor.agui import ObjectsDropdown
 
 class Spawn_Area(Component):
     """This object spawns other objects"""
@@ -18,12 +20,16 @@ class Spawn_Area(Component):
     _class_list = [Node]
     # attributes: ['name', 'doc', {extra info}]    
     _attribute_list = [
-        ["object","The object class to spawn"],
-        ["spawn_interval","Seconds between spawns (0 for no automatic spawning)"],
+        ["object", ObjectsDropdown, {'none_choice':True,
+                                     'doc':"The object class to spawn"}],
+        ["spawn_interval",
+                "Seconds between spawns (0 for no automatic spawning)"],
         ["spawn_variance",
-            "spawn_interval can vary this many seconds"],
+                "spawn_interval can vary this many seconds"],
         ["spawn_delay","Wait this many seconds before beginning to spawn"],
-        ["spawn_location","The area where objects can be spawned"], 
+        ["spawn_location", Dropdown, {'list':['Area', 'Center', 'Edges', 'Top',
+                                              'Bottom','Left','Right'], 
+                            'doc':"The area where objects can be spawned"}],
         ["spawn_offset","Spawn location is offset by this much"],
         ["match_rotation","Rotate spawned object to this object's rotation"],
         ["match_velocity",
