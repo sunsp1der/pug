@@ -4,7 +4,7 @@
 # import autocode #
 ###################
 from all_components import Spawn_Area
-from objects.TestSprite import ShipSprite
+from objects.ShipSprite import ShipSprite
 from objects.jumpug import jumpug
 from pug_opioid.PugScene import PugScene
 from pug_opioid.PugSprite import PugSprite

@@ -4,7 +4,7 @@
 # import autocode #
 ###################
 from all_components import Spawn_Area
-from objects.TestSprite import ShipSprite
+from objects.ShipSprite import ShipSprite
 from objects.jumpug import jumpug
 from pug_opioid.PugScene import PugScene
 from pug_opioid.PugSprite import PugSprite
@@ -16,14 +16,14 @@ from pug_opioid.PugSprite import PugSprite
 # "Spawny2" autocode #
 ######################
 class Spawny2(PugScene):
-    layers = ['Layer 1']
+    layers = ['Layer 1', 'foo']
     def enter(self):
         # Sprites
         spawnero = PugSprite(gname='spawnero')
         spawnero.register = True
         spawnero.components.add( Spawn_Area(
                 object='jumpug',
-                spawn_location='Bottom') )
+                spawn_location='top') )
         spawnero.image = 'art/explosion2.png'
         spawnero.layer = 'Layer 1'
         spawnero.position.x = 434.0
@@ -41,7 +41,6 @@ class Spawny2(PugScene):
 
         corny = ShipSprite(gname='corny')
         corny.register = True
-        corny.layer = 'Layer 1'
         corny.position.x = 10.0
         corny.position.y = 10.0
 

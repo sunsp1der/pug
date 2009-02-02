@@ -13,7 +13,7 @@ class Face_Object(Component):
     _type = 'ai'
     _class_list = [Node]
     # attributes: ['name', 'doc', {extra info}]
-    _attribute_list = [
+    _field_list = [
             ['target', GnameDropdown,{'doc':'Object to face towards', 
                                       'class_list':[Node]}],
             ['rotation_speed',
@@ -38,6 +38,7 @@ class Face_Object(Component):
     def start_facing_target(self):
         self.tick_action = RealTickFunc( self.check_facing)
         self.tick_action.do()
+        self.check_facing() # prevents jerky start
         
     @component_method
     def stop_facing_target(self):

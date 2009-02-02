@@ -4,15 +4,20 @@ Pugview info for components. This file is only used for working with pug guis.
 """
 
 import pug
+from pug.util import test_referrers
 from pug.component import Component, component_method
 from pug.aguilist import create_pugview_aguilist
 from pug.syswx.component_browser import ComponentBrowseFrame
 
+_DEBUG = False
+
 def _create_component_attribute_list( obj):
     attributes = []
-    for attrinfo in obj._attribute_list:
+    for attrinfo in obj._field_list:
         attributes.append(attrinfo)
     attributes.append(['enabled'])
+    if _DEBUG: attributes.append(['test_referrers',pug.Routine,
+                                  {'routine':test_referrers}])
     return attributes
     
 def _create_data_aguilist( obj, window, filterUnderscore):

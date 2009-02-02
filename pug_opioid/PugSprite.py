@@ -63,6 +63,9 @@ Opioid2d Sprite with features for use with pug"""
 
 This calls Director.scene.register_node(self) unless self.register is False""" 
         if self.register:
+            self.do_register()
+            
+    def do_register(self):
             Director.scene.register_node(self)        
 
     # layer_name property
@@ -155,23 +158,6 @@ This calls Director.scene.register_node(self) unless self.register is False"""
         code += custom_code
         if _DEBUG: print "*******************exit sprite save: "+str(self)        
         return ''.join(code)
-    
-    def _test_referrers(self):
-        """_test_referrers
-        
-Just a debug test to make sure that pug doesn't keep the object alive when it's
-supposed to be deleted.
-"""
-        import gc
-        gc.collect()
-        a = gc.get_referrers(self)   
-        for ob in a:
-            print ob
-#            b = gc.get_referrers(ob)
-#            for ob2 in b:
-#                print "   ", ob2 
-            print "_______________________"
-        pass
     
     _codeStorageDict = {
             'skip_attributes': ['_actions', '_image_file', 'image_file', 

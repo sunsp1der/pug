@@ -7,7 +7,7 @@ added to a scene."""
     _set = 'pug_opioid'
     _type = 'physics'
     _class_list = [Node]
-    _attribute_list = [
+    _field_list = [
             ['velocity_x', 'Horizontal velocity'],
             ['velocity_y', 'Vertical velocity'],
             ['acceleration_x', 'Horizontal acceleration'],

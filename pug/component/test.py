@@ -3,7 +3,7 @@ from pug.component import *
 class XComponent(Component):
     _type = 'effect/special'
     _set = 'Testers'
-    _attribute_list = [['defaultsize', 'The default size']]
+    _field_list = [['defaultsize', 'The default size']]
     def __init__(self, **kwargs):
         self.defaultsize = 12
         Component.__init__(self, **kwargs)

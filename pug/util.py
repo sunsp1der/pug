@@ -232,3 +232,22 @@ def _update_pugXDict(obj, pugXDict):
                 setattr(obj,attribute,pugXDict[attribute])
             except:
                 continue     
+
+def test_referrers(obj):
+    """_test_referrers(obj)
+        
+Just a debug test to make sure that pug doesn't keep the object alive when it's
+supposed to be deleted. This will show all referrers to obj and all referrers 
+to those referrers
+"""
+    print "Referrers to:",obj
+    import gc
+    gc.collect()
+    a = gc.get_referrers(obj)   
+    for ob in a:
+        print "   ",ob
+        b = gc.get_referrers(ob)
+        for ob2 in b:
+            print "      ", ob2 
+        print "_______________________"
+    pass

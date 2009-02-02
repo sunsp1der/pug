@@ -1,4 +1,6 @@
-"""Simple text entry attribute gui"""
+"""components.py - component viewer attribute gui"""
+
+import gc
 
 import wx
 import wx.lib.buttons as buttons
@@ -172,6 +174,7 @@ For kwargs optional arguments, see the Base attribute GUI
             return
         self.object.components.remove(component)
         self.editList.component_removed()
+        wx.CallAfter(gc.collect)
 
     def edit_button_click(self, event=None):
         component = self.editList.get_selected()

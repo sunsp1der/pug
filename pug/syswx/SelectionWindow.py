@@ -8,7 +8,7 @@ import wx
 
 from pug.syswx.pugwindow import PugWindow
 
-_DEBUG = True
+_DEBUG = False
 
 class SelectionWindow( PugWindow):
     """SelectionWindow( parent)

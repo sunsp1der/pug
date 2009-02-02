@@ -26,7 +26,7 @@ from pug_opioid.editor import EditorState, selectionManager
 from pug_opioid.editor.util import close_scene_windows, save_scene_as, \
                                     project_quit
                                     
-_DEBUG = True
+_DEBUG = False
 
 class OpioidInterface(pug.ProjectInterface):
     """OpioidInterface( rootfile, scene=PugScene)
@@ -40,6 +40,7 @@ scene: the scene to load initially
     component_browser = None
     _use_working_scene = True
     def __init__(self, rootfile, scene=PugScene):
+        if _DEBUG: print "OpioidInterface.__init__"
         # put this folder on search path so absolute package names will work
         sys.path.insert( 0, os.path.dirname(os.path.dirname(rootfile))) 
         # for process watching purposes
@@ -67,7 +68,7 @@ scene: the scene to load initially
                               title='Pug-Opioid Scene')
         Opioid2D.Director.game_started = False
         Opioid2D.Director.playing_in_editor = True
-        thread.start_new_thread(self.Director.run, (scene,))
+        thread.start_new_thread(self.Director.run, (PugScene,))
         
         app = pug.App(projectObject=self, 
                       projectFolder=projectPath,
@@ -223,6 +224,7 @@ value can be either an actual scene class, or the name of a scene class
                 value = self.sceneDict.get(value.__name__, value)
         oldscene = self.Director.scene
         if oldscene.__class__ != value or forceReload:
+            self.set_selection([])
             oldscene.stop()
             self.Director.scene = value
             # wait for completion
@@ -453,7 +455,7 @@ list a tuple ("New Scene", PugScene) for use in the sceneclass dropdown"""
     return scenelist    
         
 from pug_opioid.editor.agui import ObjectsDropdown        
-        
+
 _interfacePugview = {
     'size':(350,350),
     'name':'Basic',
@@ -501,7 +503,7 @@ _interfacePugview = {
                 {'label':'   Browse Components'}],
 #        ['Director'],
 #        ['Display'],
-#        ['test', pug.Routine, {'routine':test}]
+#       ['test', pug.Routine, {'routine':gc.collect}]
     ]
 }
 pug.add_pugview('OpioidInterface', _interfacePugview, True)
