@@ -1,5 +1,6 @@
 from inspect import *
 from sys import exc_info
+import types
 
 from pug.constants import *
 from pug.util import get_type
@@ -37,9 +38,10 @@ pugview  = \
     # this is optional
 
     'attributes':[
-        ['<attribute>',<agui>,<aguidata>],
-        ['gname'], # use agui from 'defaults'
-        ['position',Vector2,{'decimals':3}],
+        ['<attribute>',<agui> or '<tooltip>',<aguidata>],
+        ['gname'], # 'gname' is attribute. use agui from 'defaults'
+        ['position',Vector2,{'decimals':3}], # Vector2 is agui
+        ['ratio','tooltip blabla'], # 'tooltip blabla' is tooltip. Default agui
         ['notmesswith', None, {'read_only':True}], # use agui from 'defaults'
         ['*']
     ]
@@ -111,16 +113,22 @@ class otherClass( myClass):
             if not(attribute) and len(entry) == 1:
                 continue
             # TODO: make a warning list viewable in the pugframe for this:
-#            if attribute and attribute not in dirList:
-#                continue
-            # do we have a specified agui?
-            if len(entry) > 1 and entry[1]:
-                agui = entry[1]
+            tooltip = None
+            agui = None
+            if len(entry) > 1:
+                # do we have the agui type or a doc string?
+                if type(entry[1]) in types.StringTypes:
+                    tooltip = entry[1]
+                elif entry[1]:
+                    agui = entry[1]
                 # do we have special info for the agui?
                 if len(entry) > 2:
                     aguidata = entry[2].copy()
                 else:
                     aguidata = {}
+                if tooltip:
+                    aguidata['doc'] = tooltip
+            if agui:
                 # create the agui
                 attributegui = get_agui(agui, 
                                         attribute, window, aguidata=aguidata)
@@ -138,7 +146,11 @@ class otherClass( myClass):
                     info = defaultDict[attributeClass]
                     agui = info[0]
                     if len(info) > 2:
-                        aguidata = info[2].copy()
+                        aguidata = info[2].copy()  
+                    else:
+                        aguidata = {}
+                    if tooltip:      
+                        aguidata['doc'] = tooltip
                     try:
                         attributegui = get_agui(agui, attribute, window, 
                                                 aguidata=aguidata)
@@ -149,6 +161,8 @@ class otherClass( myClass):
                         aguidata = entry[2].copy()
                     else:
                         aguidata = {}
+                    if tooltip:      
+                        aguidata['doc'] = tooltip
                     try:
                         attributegui = create_default_agui(attribute, obj, 
                                                            window, 

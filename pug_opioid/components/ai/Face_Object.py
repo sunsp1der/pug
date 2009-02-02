@@ -1,11 +1,10 @@
 from Opioid2D import RealTickFunc, RotateTo, CallFunc
 from Opioid2D.public.Node import Node
 
-from pug import get_gnamed_object
+from pug import get_gnamed_object, GnameDropdown
 from pug.component import *
 
 from pug_opioid.util import angle_to
-from pug_opioid.editor.util import GNAMED_NODE
 
 class Face_Object(Component):
     """Object turns towards another given object"""
@@ -15,7 +14,8 @@ class Face_Object(Component):
     _class_list = [Node]
     # attributes: ['name', 'doc', {extra info}]
     _attribute_list = [
-            ['target', 'Object to face towards', GNAMED_NODE],
+            ['target', GnameDropdown,{'doc':'Object to face towards', 
+                                      'class_list':[Node]}],
             ['rotation_speed',
                     'Speed to turn. Negative = always face object exactly.'],
             ['offset', 'Offset the rotation by this much']

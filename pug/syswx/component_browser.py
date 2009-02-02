@@ -1,3 +1,5 @@
+import types
+
 import wx
 import wx.lib.scrolledpanel as scrolled
 import wx.richtext as rt
@@ -140,14 +142,21 @@ tree on the left and info on the right.
         text=''.join(textlist)
         text = wx.StaticText(self.infowin, -1, text)
         self.infosizer.Add(text,0,wx.WEST,5)
+        dummy = component()
         for item in component._attribute_list:
             textlist = []
             textlist+=['\n',item[0],': (Default=']
-            textlist+=[repr(getattr(component, item[0])),')']
+            textlist+=[repr(getattr(dummy, item[0])),')']
             text=''.join(textlist)
             text = wx.StaticText(self.infowin, -1, text)
             self.infosizer.Add(text,0,wx.WEST,15)
-            text = wx.StaticText(self.infowin, -1, item[1])
+            doc = ''
+            if len(item) > 1:
+                if type(item[1]) in types.StringTypes:
+                    doc = item[1]
+                elif len(item) > 2:
+                    doc = item[2].get('doc', '')
+            text = wx.StaticText(self.infowin, -1, doc)
             self.infosizer.Add(text,0,wx.WEST,35)
         text = wx.StaticText(self.infowin, -1, '\nMethods:')
         self.infosizer.Add(text,0,wx.WEST,5)

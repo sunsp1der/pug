@@ -88,7 +88,7 @@ PugMDI(self, objInfoList, title, show, parent)
             else:
                 obj = info
             if obj == 'selection':
-                child = self.open_selection_child()
+                child = self.open_selection_child(**kwargs)
             else:
                 child = self.open_pug_child(obj, **kwargs)
             
@@ -96,17 +96,18 @@ PugMDI(self, objInfoList, title, show, parent)
         child = PugMDIChild( self, obj, **kwargs)
         return child
 
-    def open_selection_child(self):
-        child = self.open_pug_child()
+    def open_selection_child(self, **kwargs):
+        child = self.open_pug_child(**kwargs)
         child.set_pugwindow(SelectionWindow(child))
         return child
             
     def _evt_on_activate(self, event=None):
-        if self.pugWindow:
+        child = self.GetActiveChild()
+        if child:
             if event.Active:
-                self.refresh()
+                child.refresh()
             else:
-                self.apply()
+                child.apply()
     
     def get_child_list(self):
         childList = []

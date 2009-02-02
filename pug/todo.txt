@@ -1,14 +1,8 @@
 now:
+	object dropdown in  spawn behavior... select shows weirdies
 
 current version:
-	#TODO: object class browser (adapt interface's)
-		option for 'show None'
-	#TODO: integer agui (with spinners?)
-		range
-	#TODO: float agui
-		range
-	#TODO: choice agui
-	
+
 Finalize:
 	Open/New project	
 	html tutorial
@@ -34,6 +28,10 @@ bugs:
 	crash - selecting an object while changing selectionwin to another view 
 
 later: 
+	#TODO: integer agui (with spinners?)
+		range
+	#TODO: float agui
+		range
 	make progress bar move during load
 		loading window... update by percentage in postinit
 	add component label

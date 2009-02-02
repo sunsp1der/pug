@@ -7,6 +7,8 @@ from pug.syswx.list_ctrl_combo_popup import ListCtrlComboPopup
 from pug.syswx.wxconstants import *
 from pug.syswx.attributeguis.base import Base
 
+_DEBUG = True
+
 class Dropdown (Base):
     """Customizable dropdown attribute GUI
     
@@ -21,7 +23,7 @@ aguidata: {
         item.__name__ if possible... otherwise str(object). When the user makes 
         a selection in the dropdown, the attribute will be set to itemdata 
     'allow_typing': if True, user can type their own items. if the value typed
-         is not in the list, itemdata will be set to itemtext. Default: false.
+         is not in the list, itemdata will be set to itemtext. Default: False.
     'list_generator': as an alternative to the static list, this callable will 
         be called when the dropdown is displayed.  It should return a list as 
         described in the 'list' entry above.
@@ -41,6 +43,7 @@ For kwargs optional arguments, see the Base attribute GUI
             style |= wx.CB_READONLY
         control = wx.combo.ComboCtrl(parent=window,
                                      style=style)
+        if _DEBUG: print "DropDown.__init__ attribute:",attribute
         control.SetMinSize((-1,WX_STANDARD_HEIGHT))
         listctrl = ListCtrlComboPopup()
         self.listctrl = listctrl
@@ -53,8 +56,11 @@ For kwargs optional arguments, see the Base attribute GUI
         
     def setup(self, attribute, window, aguidata):
         if self.allow_typing != aguidata.get('allow_typing', False):
+            self.control.Destroy()
+            self.label.Destroy()
             self.__init__( attribute, window, aguidata)
             return
+        if _DEBUG: print "DropDown.setup attribute:",attribute
         self.callback = aguidata.get('callback',  None)
         self.list_generator = aguidata.get('list_generator', None)
         if self.list_generator:
@@ -68,7 +74,8 @@ For kwargs optional arguments, see the Base attribute GUI
         if not list and not callable(self.list_generator):
             return
         selectedData = self.listctrl.GetSelectedData()
-        list = self.list_generator()
+        if self.list_generator:
+            list = self.list_generator()
         self.listctrl.DeleteAllItems()
         namedict = {}
         for item in list:

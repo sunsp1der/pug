@@ -81,8 +81,6 @@ useWorking: if True, and the class in the __Working__.py file is in the class
         else:
             print "No scene in working module.", \
                     "Using committed module instead."
-    from pug_opioid import PugScene                
-    sceneList.append(PugScene)
     for item in sceneList:
         sceneDict[item.__name__]=item
     availableScenes = sceneDict.copy()
@@ -108,8 +106,6 @@ doReload: if True reload all object modules from disk"""
         return availableObjects.copy()
     objectList = get_package_classes('objects', Opioid2D.public.Node.Node,
                                     doReload)
-    from pug_opioid import PugSprite
-    objectList.append(PugSprite)
     objectDict = {}
     for item in objectList:
         objectDict[item.__name__]=item

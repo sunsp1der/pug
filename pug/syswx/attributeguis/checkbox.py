@@ -7,7 +7,7 @@ from pug.syswx.attributeguis.base import Base
 class Checkbox (Base):
     """Checkbox attribute GUI is your basic True/False checkbox
     
-Checkbox(attribute, window, **kwargs)
+Checkbox(attribute, window, aguidata, **kwargs)
 attribute: what attribute of window.object is being controlled
 window: the parent pugFrame
 For kwargs optional arguments, see the Base attribute GUI

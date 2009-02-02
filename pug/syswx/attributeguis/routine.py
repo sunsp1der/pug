@@ -77,12 +77,12 @@ See Base attribute gui for other argument info
             value = getattr(window.object,attribute, None)
         isMethod = bool(ismethod(value) and value.im_self)
         doc = None
-        if aguidata.has_key('tooltip'):
-            doc = aguidata['tooltip']
+        if aguidata.has_key('doc'):
+            doc = aguidata['doc']
         else:
             doc = getdoc(value)
             if doc:
-                aguidata['tooltip'] = doc
+                aguidata['doc'] = doc
 
         # analyze the routine's arguments 
         if callable(value):
