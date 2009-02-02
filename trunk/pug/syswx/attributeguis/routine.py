@@ -174,6 +174,9 @@ See Base attribute gui for other argument info
                 except:
                     # anything could have happened, like deleting the object etc.
                     pass
+                
+    def parseargs(self, *args, **kwargs):
+        return (args, kwargs)
         
     def openExecuteWindow(self, event = None):
         routine = self.get_routine()
@@ -187,22 +190,21 @@ See Base attribute gui for other argument info
 
         if dlg.ShowModal() == wx.ID_OK:
             attribute = self.attribute
-            actualSelf = self
+            realself = self
             self = self.window.object
+            exec(''.join(['(args, kwargs) = realself.parseargs(',
+                               dlg.GetValue(),')']))
+            self = realself
             retValue = None
-            command = ''.join(['retValue = self.',routine.__name__,'(',
-                               dlg.GetValue(),')'])
             try:
                 wx.BeginBusyCursor()
-                exec(command)
+                retValue = routine.__call__(*args, **kwargs)
             except:
                 wx.EndBusyCursor()                
-                self = actualSelf
                 show_exception_dialog( self.control)
                 self.openExecuteWindow()
             else:
                 wx.EndBusyCursor()
-                self = actualSelf
                 self.display_retvalue( retValue)
                 self.refresh_window()
         dlg.Destroy()

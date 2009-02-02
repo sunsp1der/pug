@@ -4,6 +4,7 @@ import math
 import os.path
 import sys
 from time import sleep
+from inspect import isclass
 
 import Opioid2D
 
@@ -60,7 +61,6 @@ useWorking: if True, and the class in the __Working__.py file is in the class
     except:
         print "Exception while loading working module."
         print sys.exc_info()[1]
-        print "Using committed module instead."
     else:
         if doReload and needsReload:
             sys.modules.pop(workingModule)
@@ -111,6 +111,22 @@ doReload: if True reload all object modules from disk"""
         objectDict[item.__name__]=item
     availableObjects = objectDict.copy()
     return objectDict
+
+def get_project_object( obj, reload=False, accept_class=True):
+    """get_project_object(object, reload=False, accept_class=True)
+    
+reload: reload project objects
+accept_class: object can be a class, which will simply be returned
+    
+A utility function mainly for components. Converts a string into a class from
+the objects folder."""
+    if isclass(obj) and accept_class:
+        return obj
+    objDict = get_available_objects(reload)
+    if obj in objDict:
+        return objDict[obj]
+    return None
+    
 
 def set_project_path( path):
     global projectPath

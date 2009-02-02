@@ -14,7 +14,7 @@ doesn't have as many features/accessors as the combo.ComboCtrl"""
     def Create(self, parent):
         self.list=wx.ListBox(parent, style=wx.LB_SINGLE)
 #        self.list = FindPrefixListBox(parent, style = wx.LB_SINGLE)
-        self.list.Bind(wx.EVT_MOTION, self.OnMotion)
+        #self.list.Bind(wx.EVT_MOTION, self.OnMotion)
         self.list.Bind(wx.EVT_LEFT_DOWN, self.OnMouseSelect)
         
     def DeselectAll(self):

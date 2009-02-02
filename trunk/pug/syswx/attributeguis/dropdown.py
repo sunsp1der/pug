@@ -7,7 +7,7 @@ from pug.syswx.list_ctrl_combo_popup import ListCtrlComboPopup
 from pug.syswx.wxconstants import *
 from pug.syswx.attributeguis.base import Base
 
-_DEBUG = True
+_DEBUG = False
 
 class Dropdown (Base):
     """Customizable dropdown attribute GUI
@@ -69,6 +69,7 @@ For kwargs optional arguments, see the Base attribute GUI
             self.listctrl.SetPopupCallback(None)
         Base.setup(self, attribute, window, aguidata)
         self.setup_listctrl(self.aguidata.get('list',[]))
+        self.set_control_value(self.get_attribute_value())
         
     def setup_listctrl(self, list=None):
         if not list and not callable(self.list_generator):
@@ -92,7 +93,7 @@ For kwargs optional arguments, see the Base attribute GUI
         for key in namelist:
             self.listctrl.AddItem( key, namedict[key])
         i = self.listctrl.FindData(selectedData)
-        if i:
+        if i != -1:
             self.listctrl.SelectItem(i)
         self.data = self.listctrl.GetSelectedData()
         self.set_tooltip()
@@ -123,16 +124,21 @@ For kwargs optional arguments, see the Base attribute GUI
         return self.data
     
     def set_control_value(self, value):
+        #  first try to match data
         i = self.listctrl.FindData( value)
         if i == -1:
-            # first, let's try refreshing the list if it's dynamic...
-            if self.list_generator:
+#            # then, try to match text
+#            i = self.listctrl.FindText( value)  
+            if i == -1 and self.list_generator:
+            # then, let's try refreshing the list if it's dynamic...
                 self.setup_listctrl()
                 i = self.listctrl.FindData(value)
-            if i == -1:
+                if i == -1:
+#                    i = self.listctrl.FindText( value)  
+#                    if i == -1:
             # if we still have a value that's not in the list, we want it to 
             # appear in the list anyway...
-                i = self.listctrl.AddItem( str(value), value)
+                    i = self.listctrl.AddItem( str(value), value)
         self.listctrl.SelectItem(i)
         self.control.SetText(self.listctrl.GetStringValue()) 
         self.data = value

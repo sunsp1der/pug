@@ -21,7 +21,7 @@ class PugScene( Opioid2D.Scene, pug.BaseObject):
     def __init__(self, gname=''):
         Opioid2D.Scene.__init__(self)
         pug.BaseObject.__init__(self, gname)   
-        print "NEW SCENE", self.__class__.__name__     
+        if _DEBUG: print "PugScene.__init__", self.__class__.__name__     
 
     def handle_keydown(self, ev):
         if ev.key == Opioid2D.K_ESCAPE:

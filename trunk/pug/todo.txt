@@ -1,5 +1,4 @@
 now:
-	object dropdown in  spawn behavior... select shows weirdies
 
 current version:
 

@@ -143,7 +143,7 @@ tree on the left and info on the right.
         text = wx.StaticText(self.infowin, -1, text)
         self.infosizer.Add(text,0,wx.WEST,5)
         dummy = component()
-        for item in component._attribute_list:
+        for item in component._field_list:
             textlist = []
             textlist+=['\n',item[0],': (Default=']
             textlist+=[repr(getattr(dummy, item[0])),')']

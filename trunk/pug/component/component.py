@@ -35,7 +35,7 @@ _class_list: a list of classes that this component is meant to work with.
         component usage. If _class_list evaluates to False, all classes are
         considered compatible. This is checked with the utility function
         'is_valid_component_class' 
-_attribute_list: List of [attribute, docstring] or [attribute, agui, {aguidata}] 
+_field_list: List of [attribute, docstring] or [attribute, agui, {aguidata}] 
         This is a list of the official attributes of the Component. These are 
         the attributes that will be saved when the component is saved, and are 
         the attributes that will be shown in pug's default component view. 
@@ -66,7 +66,7 @@ enabled: When this is false, the component's component_methods will not
     _set = None
     _type = None
     _class_list = []
-    _attribute_list = []
+    _field_list = []
     _pug_pugview_class = 'Component'
     __owner = None
     enabled = True
@@ -115,7 +115,7 @@ enabled: When this is false, the component's component_methods will not
         duplicate = False
         if self.__class__ == other.__class__:
             duplicate = True
-            for attrinfo in self._attribute_list:
+            for attrinfo in self._field_list:
                 attr = attrinfo[0]
                 if getattr(self, attr) != getattr(other, attr):
                     duplicate = False
@@ -139,7 +139,7 @@ enabled: When this is false, the component's component_methods will not
         """_create_argument_code( indentLevel)
    
 Creates the list of arguments for a component's init function. This sets all the
-items in the component's _attribute_list, as long as they are different from the
+items in the component's _field_list, as long as they are different from the
 default values. They are formatted to be indented twice beyond indentLevel, with
 line breaks between each. To create a single-line argument list, strip out all
 '\n' characters.
@@ -147,7 +147,7 @@ line breaks between each. To create a single-line argument list, strip out all
         dummy = self.__class__()
         argIndent = _INDENT * (indentLevel + 2)
         attributes = []
-        for item in self._attribute_list:
+        for item in self._field_list:
             attributes.append(item[0])
         attributes.append('enabled')
         attribute_code = []

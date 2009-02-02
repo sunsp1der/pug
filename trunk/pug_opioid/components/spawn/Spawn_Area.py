@@ -9,7 +9,7 @@ from Opioid2D.public.Node import Node
 from pug.component import *
 from pug import Dropdown
 
-from pug_opioid.util import get_available_objects
+from pug_opioid.util import get_available_objects, get_project_object
 from pug_opioid.editor.agui import ObjectsDropdown
 
 class Spawn_Area(Component):
@@ -19,16 +19,16 @@ class Spawn_Area(Component):
     _type = 'spawn'
     _class_list = [Node]
     # attributes: ['name', 'doc', {extra info}]    
-    _attribute_list = [
-        ["object", ObjectsDropdown, {'none_choice':True,
+    _field_list = [
+        ["object", ObjectsDropdown, {'component':True,
                                      'doc':"The object class to spawn"}],
         ["spawn_interval",
                 "Seconds between spawns (0 for no automatic spawning)"],
         ["spawn_variance",
                 "spawn_interval can vary this many seconds"],
         ["spawn_delay","Wait this many seconds before beginning to spawn"],
-        ["spawn_location", Dropdown, {'list':['Area', 'Center', 'Edges', 'Top',
-                                              'Bottom','Left','Right'], 
+        ["spawn_location", Dropdown, {'list':['area', 'center', 'edges', 'top',
+                                              'bottom','left','right'], 
                             'doc':"The area where objects can be spawned"}],
         ["spawn_offset","Spawn location is offset by this much"],
         ["match_rotation","Rotate spawned object to this object's rotation"],
@@ -47,13 +47,13 @@ class Spawn_Area(Component):
                        "callback( this_component)"])],
         ]
     # attribute defaults
-    _object = None
+    object = None
     spawn_interval = 2.0
     spawn_variance = 1.0
     spawn_delay = 0.0
     spawn_location = 'Area'
     spawn_offset = Vector(0,0)
-    match_rotation = True
+    match_rotation = False
     match_velocity = False
     max_objects_spawned = -1
     max_spawns_in_scene = -1
@@ -61,56 +61,59 @@ class Spawn_Area(Component):
     owner_callback = None
     obj_callback = None
     # other defaults
+    last_object = None
     spawn_count = 0
     spawn_class = None
     spawned_objects = None
+    action = None # the pending spawn action
 
     @component_method
     def on_added_to_scene(self):
         "on_added_to_scene(): Start spawn timer when object is added to scene"
         self.spawned_objects = weakref.WeakKeyDictionary()
-        self.set_object(self.object)
         self.start_spawning()
         
     def start_spawning(self):
         "start_spawning: Start the spawn timer. To skip delay, call check_spawn"
         if self.spawn_interval > 0:
-            self.owner.do( Delay(self.spawn_delay \
+            self.action = self.owner.do( Delay(self.spawn_delay \
                    + random.uniform(-self.spawn_variance, self.spawn_variance))\
                    + CallFunc( self.check_spawn))
             
     @component_method
     def spawn(self):
         "spawn(): Spawn the chosen object"
-        if not self.spawned_objects:
-            self.spawned_objects = weakref.WeakKeyDictionary()
+        if self.object != self.last_object:
+            self.spawn_class = get_project_object(self.object)            
         if not isclass(self.spawn_class) or not self.enabled:
             return None
-        obj = self.spawn_class()
+        if not self.spawned_objects:
+            self.spawned_objects = weakref.WeakKeyDictionary()
+        obj = self.spawn_class( register=False)
         self.spawned_objects[obj] = self.spawn_count
         x_pos = 0
         y_pos = 0
         location = self.spawn_location
         #spawn_location can be Top, Bottom, Left, Right, Area, Center, Edges
         rect = self.owner.rect
-        if location == "Edges":
-            location = random.choice(['Top','Bottom','Left','Right'])
-        if location == "Area":
+        if location == "edges":
+            location = random.choice(['top','bottom','left','right'])
+        if location == "area":
             x_pos = random.uniform(0, rect.width)
             y_pos = random.uniform(0, rect.height)
-        elif location == "Center":
+        elif location == "center":
             x_pos = rect.centerx
             y_pos = rect.centery
-        elif location == "Top":
+        elif location == "top":
             x_pos = random.uniform(0, rect.width)
             y_pos = 0
-        elif location == "Bottom":
+        elif location == "bottom":
             x_pos = random.uniform(0, rect.width)
             y_pos = rect.height
-        elif location == "Right":
+        elif location == "right":
             x_pos = rect.width
             y_pos = random.uniform(0, rect.height)
-        elif location == "Left":
+        elif location == "left":
             x_pos = 0
             y_pos = random.uniform(0, rect.height)
         x_pos += self.spawn_offset[0] - rect.width*0.5
@@ -123,6 +126,7 @@ class Spawn_Area(Component):
             obj.rotation = self.owner.rotation
         if self.match_velocity:
             obj.velocity = self.owner.velocity
+        obj.do_register() # wait to activate object until start data set
         if self.owner_callback and hasattr(self.owner,'callback'):
             getattr(self.owner,'callback')(obj, self)
         if self.obj_callback and hasattr(obj,'callback'):
@@ -134,23 +138,6 @@ class Spawn_Area(Component):
             self.owner.do(Delete)
             print "spawn autodelete immediate deletion:",self.owner.deleted 
         return obj               
-            
-    def set_object(self, obj):
-        "set_object(object): if object is a string, convert it to a class"
-        self._object = obj
-        if type(obj) in StringTypes:
-            objectDict = get_available_objects()
-            if obj in objectDict:
-                self.spawn_class = objectDict[obj]
-            else:
-                self.spawn_class = None
-        elif isclass(obj):
-            self.spawn_class = obj
-        else:
-            self.spawn_class = None
-    def get_object(self):
-        return self._object        
-    object = property(get_object,set_object,doc="The object to spawn")
             
     def get_next_spawn_time(self):
         "get_next_spawn_time()-> how long to wait before next spawn"
@@ -169,7 +156,10 @@ scheduled unless max_objects_spawned has been reached. """
                 len(self.spawned_objects) > self.max_spawns_in_scene:
             self.spawn()
         if self.spawn_interval > 0:
-            self.owner.do( Delay(self.get_next_spawn_time()) + \
+            self.action = self.owner.do( Delay(self.get_next_spawn_time()) + \
                                CallFunc(self.check_spawn))
                     
+    def stop_spawning(self):
+        self.action.abort()
+        
 register_component( Spawn_Area)

@@ -12,7 +12,7 @@ class Follow_Mouse(Component):
     _type = 'controls'
     _class_list = [Node]
     # attributes: ['name', 'doc', {extra info}]    
-    _attribute_list = [
+    _field_list = [
             ['face_movement','Rotate object to direction of motion']
             ]
     # attribute defaults
