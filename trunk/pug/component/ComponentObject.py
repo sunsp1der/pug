@@ -1,4 +1,5 @@
 from weakref import ref as _ref
+import inspect
 import functools
 
 from pug.component.component import *
@@ -33,7 +34,37 @@ def component_method_wrapper(*args, **kwargs):
             if _DEBUG: print method, args, kwargs
             if not method.im_self.enabled:
                 continue
-            method(*args, **kwargs)
+            if method._ComponentMethod__has_kwargs:
+                if method._ComponentMethod__has_args:
+                    method(*args, **kwargs)
+                else:
+                    method(*(args[:method._ComponentMethod__maxargs]), **kwargs)
+            else:
+                fixed_args = args[:]
+                methodargs = method._ComponentMethod__args
+                methoddefaults = method._ComponentMethod__defaults
+                n = len(fixed_args) + 1
+                while n < method._ComponentMethod__minargs:
+                    if kwargs.has_key(methodargs[n]):
+                        arg = kwargs[methodargs[n]]
+                    elif n + 1 > len(methodargs) - len(methoddefaults):
+                        arg = methoddefaults[n - len(methodargs) + \
+                                                   len(methoddefaults) + 1]
+                    else:
+                        arg= None
+                    fixed_args += (arg,)
+                    n=n+1
+                while n < len(methodargs):
+                    if kwargs.has_key(methodargs[n]):
+                        arg = kwargs[methodargs[n]]
+                    else:
+                        arg = None
+                    fixed_args += (arg,)
+                    n = n+1                    
+                if method._ComponentMethod__has_args:
+                    method(*fixed_args)
+                else:
+                    method(*fixed_args[:method._ComponentMethod__maxargs])
     if ___original_method:
         return ___original_method(*args, **kwargs)                
 
@@ -59,8 +90,8 @@ class ComponentSet(object):
 
 Adds component to the object.  
 
-component: component instance or component class. If it's an instance it will simply be added.
-If it's a class, an instance will be created and added.
+component: component instance or component class. If it's an instance it will 
+simply be added. If it's a class, an instance will be created and added.
 """
 
         if not isinstance(component, Component):

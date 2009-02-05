@@ -20,22 +20,22 @@ def _create_component_attribute_list( obj):
                                   {'routine':test_referrers}])
     return attributes
     
-def _create_data_aguilist( obj, window, filterUnderscore):
+def _create_field_aguilist( obj, window, filterUnderscore):
     pugview = {}
     attributes = []
-    pugview['name'] = 'Component Data'
+    pugview['name'] = 'Component Fields'
     attributes = []
-    attributes.append(['Data',pug.Label])
+    attributes.append(['Fields',pug.Label])
     attributes += _create_component_attribute_list( obj)
     pugview['attributes'] = attributes
     aguilist = create_pugview_aguilist(obj, window, pugview, filterUnderscore)
     return aguilist
 
-def _create_datamethod_aguilist( obj, window, filterUnderscore):
+def _create_fieldmethod_aguilist( obj, window, filterUnderscore):
     pugview = {}
     attributes = []
-    pugview['name'] = 'Component Data and Methods'
-    attributes.append(['Data',pug.Label])
+    pugview['name'] = 'Component Fields and Methods'
+    attributes.append(['Fields',pug.Label])
     attributes += _create_component_attribute_list( obj)
     attributes.append(['Methods',pug.Label])
     for attr in dir(obj.__class__):
@@ -50,14 +50,14 @@ def  _open_component_browser( obj, window, objectPath):
                                  start_component=obj.__class__)
 
 _dataPugview = {
-    'name':'Component Data',
-    'create_pug_list_function': _create_data_aguilist,
+    'name':'Component Fields',
+    'create_pug_list_function': _create_field_aguilist,
     'info_function': _open_component_browser
 }
 
 _dataMethodPugview = {
-    'name':'Component Data and Methods',
-    'create_pug_list_function': _create_datamethod_aguilist,
+    'name':'Component Fields and Methods',
+    'create_pug_list_function': _create_fieldmethod_aguilist,
     'info_function': _open_component_browser
 }
 pug.add_pugview('Component', _dataPugview, True)

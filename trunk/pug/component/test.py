@@ -9,7 +9,8 @@ class XComponent(Component):
         Component.__init__(self, **kwargs)
 
     @component_method
-    def explode(self, size, i=2, *args):
+    def explode(self, size, i=2, *args):#, *args):
+        print args
         if size is None:
             size = self.defaultsize
         print "%s explosion %s" % ( size, i)
@@ -22,8 +23,24 @@ class X2Component(Component):
     _set = 'Testers'
 
     @component_method
-    def explode(self, size, i=3, **kw_args):
-        print "stuff"
+    def explode3(self, i=3, *a, **kw):#, size, i=3, **kw_args):
+        print
+        print a, kw        
+        print x
+        x = 15
+        print "stuff", x
+        print "%s explosion2 %s" % (size, i)
+
+    @component_method
+    def explode(self, size, i, *args):
+        print "%s explosion2 %s" % (size, i)
+        
+    @component_method
+    def explode2(self, r, *a):#, size, i=3, **kw_args):
+        print
+        print x
+        x = 15
+        print "stuff", x
         print "%s explosion2 %s" % (size, i)
         
 register_component(X2Component)
@@ -34,13 +51,17 @@ if __name__ == "__main__":
 
     xcomp = XComponent()
     obj.components.add(xcomp)
-    print "--- obj.explode with XComponent"
-    obj.explode("some size", 3)
+    print "--- obj.explode() with XComponent"
+    obj.explode(i=12)
+    print
+    print "--- obj.explode(size='some size') with XComponent"
+    obj.explode(size="some size")
     
     x2comp2 = X2Component()
     obj.components.add(x2comp2)
     print "--- obj.explode with XComponent AND X2Component"
-    obj.explode("some other size", 20)
+    print "_______SHOULD BE ERROR!!!_______"
+    obj.explode("some size", 3, 'and', 'much', more='more')
     print "----"
 
     obj.components.remove(xcomp)

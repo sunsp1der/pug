@@ -69,12 +69,12 @@ class Spawn_Area(Component):
 
     @component_method
     def on_added_to_scene(self):
-        "on_added_to_scene(): Start spawn timer when object is added to scene"
+        "Start spawn timer when object is added to scene"
         self.spawned_objects = weakref.WeakKeyDictionary()
         self.start_spawning()
         
     def start_spawning(self):
-        "start_spawning: Start the spawn timer. To skip delay, call check_spawn"
+        "Start the spawn timer. To skip delay, call check_spawn"
         if self.spawn_interval > 0:
             self.action = self.owner.do( Delay(self.spawn_delay \
                    + random.uniform(-self.spawn_variance, self.spawn_variance))\
@@ -82,7 +82,7 @@ class Spawn_Area(Component):
             
     @component_method
     def spawn(self):
-        "spawn(): Spawn the chosen object"
+        "Spawn the chosen object"
         if self.object != self.last_object:
             self.spawn_class = get_project_object(self.object)            
         if not isclass(self.spawn_class) or not self.enabled:

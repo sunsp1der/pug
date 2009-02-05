@@ -1,5 +1,6 @@
 import pug
 from pug.syswx.attributeguis import *
+from pug.component import test
 
 #------------------------------------------------------------------------------ 
 class fake( pug.BaseObject):

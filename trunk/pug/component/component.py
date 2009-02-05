@@ -231,7 +231,7 @@ kwargs: will be assigned to component attributes as per component.__init__
                 del methods[key]
 
 class ComponentMethod(object):
-
+        
     def __del__(self):
         self.__cache = None
         self.__func = None
@@ -244,14 +244,11 @@ class ComponentMethod(object):
         bound_method_ref = cache.get(instance_id)
         if bound_method_ref is None or bound_method_ref() is None:
             bound_method = _instancemethod(self.__func, instance, cls)
-
-            #def bound_method(*args, **kw_args):
-            #    return self.__func(instance, *args, **kw_args)
             cache[instance_id] = weakref.ref(bound_method)
         else:
             bound_method = bound_method_ref()
         return bound_method
-
+    
     def __init__(self, func):
         self.__doc__ = func.__doc__
         code = func.func_code
@@ -259,14 +256,17 @@ class ComponentMethod(object):
         locals = code.co_nlocals
         n = code.co_argcount
         names = list(code.co_varnames)
+        has_args = has_kwargs = True
         if not (flags & _CO_VARKEYWORDS):
-            flags |= _CO_VARKEYWORDS
-            locals += 1
-            names.insert(1, '')
+#            flags |= _CO_VARKEYWORDS
+#            locals += 1
+#            names.insert(n, '___fake_kwargs')
+            has_kwargs = False
         if not (flags & _CO_VARARGS):
-            flags |= _CO_VARARGS
-            locals += 1
-            names.insert(1, '')
+#            flags |= _CO_VARARGS
+#            locals += 1
+#            names.insert(n, '___fake_args')
+            has_args = False
         new_code = _code(n, locals, code.co_stacksize, flags, code.co_code,
                          code.co_consts, code.co_names, tuple(names),
                          code.co_filename, code.co_name, code.co_firstlineno,
@@ -274,6 +274,25 @@ class ComponentMethod(object):
         self.__cache = {}
         self.__func = _function(new_code, func.func_globals, func.func_name,
                                 func.func_defaults, func.func_closure)
+#        self.__func.__fake_args = fake_args
+#        self.__func.__fake_kwargs = fake_kwargs
+        argspec = _getargspec(self.__func)
+#        args, varargs, varkw, defaults = argspec
+        if has_args:
+            self.__func.__maxargs = 666
+        else:
+            self.__func.__maxargs = len(argspec[0]) -1
+        if argspec[3] == None:
+            defaults = []
+            defaultlen = 0
+        else:
+            defaults = argspec[3]
+            defaultlen = len(argspec[3]) 
+        self.__func.__minargs = len(argspec[0]) - defaultlen - 1
+        self.__func.__args = argspec[0]
+        self.__func.__defaults = defaults
+        self.__func.__has_args = has_args
+        self.__func.__has_kwargs = has_kwargs
 
 component_method = ComponentMethod
 

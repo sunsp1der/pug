@@ -16,7 +16,6 @@ fun stuff:
 		REVIEW POWERPACK demo components for non collision components
 		fade in fade out
 		grow in grow out
-		forward motion
 		delete off-screen
 		timer delete
 		set name

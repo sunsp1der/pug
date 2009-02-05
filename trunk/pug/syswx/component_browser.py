@@ -21,7 +21,7 @@ start_component: start with view of this component
                            title = 'Select A Component')
         sizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(sizer)
-        self.SetSize((840, 500))   
+        self.SetSize((870, 500))   
         self.SetIcon(get_icon())             
         self.component = None
         
@@ -61,7 +61,7 @@ title: the window title
                            title = title)
         sizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(sizer)
-        self.SetSize((840, 450))        
+        self.SetSize((870, 450))        
         self.SetIcon(get_icon())             
         
         self.browser = ComponentBrowseWindow(self, object)
@@ -93,7 +93,7 @@ tree on the left and info on the right.
         infowin.SetAutoLayout(1)
         self.infosizer = infosizer
         self.infowin = infowin
-        self.SplitVertically(tree, infowin, 207)
+        self.SplitVertically(tree, infowin, 180)
         self.currentItem = None
         self.currentComponent = None
 
@@ -127,37 +127,42 @@ tree on the left and info on the right.
         textlist = []
         textlist.append(component.__name__)
         textlist.append('\n\n')
-        textlist.append(component.__doc__)
-        textlist.append('\n\n')        
-        textlist+=['Set: ',component._set,'\n']
-        textlist+=['Type: ',component._type,'\n']
-        textlist+=['For Class: ',]
-        c = 0
-        for cls in component._class_list:
-            if c:
-                textlist.append('           ')
-            textlist+=[cls.__module__,'.',cls.__name__,'\n']
-        textlist.append('\n')
-        textlist+=['Attributes:']
-        text=''.join(textlist)
-        text = wx.StaticText(self.infowin, -1, text)
-        self.infosizer.Add(text,0,wx.WEST,5)
-        dummy = component()
-        for item in component._field_list:
-            textlist = []
-            textlist+=['\n',item[0],': (Default=']
-            textlist+=[repr(getattr(dummy, item[0])),')']
+        if component.__doc__:
+            textlist.append(component.__doc__)
+            textlist.append('\n\n')        
+        if component._set:
+            textlist+=['Set: ',component._set,'\n']
+        if component._type:
+            textlist+=['Type: ',component._type,'\n']
+        if component._class_list:
+            textlist+=['For Class: ',]
+            c = 0
+            for cls in component._class_list:
+                if c:
+                    textlist.append('           ')
+                textlist+=[cls.__module__,'.',cls.__name__,'\n']
+        if component._field_list:
+            textlist.append('\n')
+            textlist+=['Fields:']
             text=''.join(textlist)
             text = wx.StaticText(self.infowin, -1, text)
-            self.infosizer.Add(text,0,wx.WEST,15)
-            doc = ''
-            if len(item) > 1:
-                if type(item[1]) in types.StringTypes:
-                    doc = item[1]
-                elif len(item) > 2:
-                    doc = item[2].get('doc', '')
-            text = wx.StaticText(self.infowin, -1, doc)
-            self.infosizer.Add(text,0,wx.WEST,35)
+            self.infosizer.Add(text,0,wx.WEST,5)
+            dummy = component()
+            for item in component._field_list:
+                textlist = []
+                textlist+=['\n',item[0],': (Default=']
+                textlist+=[repr(getattr(dummy, item[0])),')']
+                text=''.join(textlist)
+                text = wx.StaticText(self.infowin, -1, text)
+                self.infosizer.Add(text,0,wx.WEST,15)
+                doc = ''
+                if len(item) > 1:
+                    if type(item[1]) in types.StringTypes:
+                        doc = item[1]
+                    elif len(item) > 2:
+                        doc = item[2].get('doc', '')
+                text = wx.StaticText(self.infowin, -1, doc)
+                self.infosizer.Add(text,0,wx.WEST,35)
         text = wx.StaticText(self.infowin, -1, '\nMethods:')
         self.infosizer.Add(text,0,wx.WEST,5)
         for item in dir(component):
