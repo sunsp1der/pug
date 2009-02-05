@@ -8,7 +8,7 @@ import Opioid2D
 _DEBUG = False
 
 class EditorState(Opioid2D.State):
-    layers = ["__selections__",]
+    layers = ["__editor__",]
     selectOnUp = None
     def enter(self):
         self.busy = False
@@ -35,7 +35,7 @@ class EditorState(Opioid2D.State):
         scene = Opioid2D.Director.scene
         x, y = event.pos
         for layer in scene.layers:
-            if layer == "__selections__":
+            if layer == "__editor__":
                 continue
             #node = scene.get_layer(layer).pick(x,y)
             node = scene.pick(x, y, wx.GetApp().selectedObjectDict)

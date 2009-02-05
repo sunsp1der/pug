@@ -93,7 +93,7 @@ update all selection boxes.
                 if box.area.dragging:
                     if box.rect != box.area.rect:
                         layer = Opioid2D.Director.scene.get_layer(
-                                                            "__selections__")
+                                                            "__editor__")
                         position = Mouse.get_position()
                         world_position = layer.convert_pos(position[0], 
                                                            position[1])
@@ -180,14 +180,14 @@ node: any object containing a 'rect' attribute that is a pygame rect
         
 class SelectBoxLineSprite( Opioid2D.gui.GUISprite):
     image = _line_sprite_file
-    layer = "__selections__"
+    layer = "__editor__"
 
 class SelectBoxBaseSprite( Opioid2D.Sprite):
-    layer = "__selections__"
+    layer = "__editor__"
     
 class SelectBoxAreaSprite( Opioid2D.gui.GUISprite):
     image = _empty_sprite_file
-    layer = "__selections__"
+    layer = "__editor__"
     draggable = True
     dragging = False
     

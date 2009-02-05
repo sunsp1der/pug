@@ -27,10 +27,10 @@ def get_image_path(filename):
 def get_available_layers():
     """get_available_layers() -> list of available layers in Director"""
     try:
-        # hide '__selections__' layer
+        # hide '__editor__' layer
         layers = Opioid2D.Director.scene.layers[:]
-        while '__selections__' in layers:
-            layers.remove('__selections__')
+        while '__editor__' in layers:
+            layers.remove('__editor__')
         return layers        
     except:
         return []

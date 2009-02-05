@@ -27,11 +27,13 @@ class Follow_Mouse(Component):
         
     @component_method
     def start_following_mouse(self):
+        "Start following the mouse pointer"
         if not self.action:
             self.action = RealTickFunc( self.follow).do()
         
     @component_method
     def stop_following_mouse(self):
+        "Stop following the mouse pointer"
         if self.action: 
             self.action.end()
 

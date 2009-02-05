@@ -32,16 +32,21 @@ class Face_Object(Component):
     @component_method
     def on_added_to_scene(self):
         """Start facing target when object is added to scene"""
-        self.start_facing_target(self)
+        self.start_facing_target()
         
     @component_method
-    def start_facing_target(self):
+    def start_facing_target(self, target=None):
+        "start_facing_target(target=None): if target is None, use target field"
+        self.stop_facing_target()
+        if target:
+            self.target = target
         self.tick_action = RealTickFunc( self.check_facing)
         self.tick_action.do()
         self.check_facing() # prevents jerky start
         
     @component_method
     def stop_facing_target(self):
+        "Stop facing current target"
         if self.tick_action:
             self.tick_action.abort()
         
@@ -69,7 +74,6 @@ class Face_Object(Component):
     
     def target_reached(self):
         # opioid has a problem aborting the action if it's complete
-        print "target_reached"
         self.action = None
         
 register_component( Face_Object)

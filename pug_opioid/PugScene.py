@@ -199,7 +199,7 @@ Update the PugScene's node tracking dict for node. Possible commands: 'Delete'
         return get_available_layers()
 
     scene_layers = property(get_scene_layers, doc=
-            'Utility property for viewing layers without __selections__ layer')
+            'Utility property for viewing layers without __editor__ layer')
     
     # code storage customization
     def _create_object_code(self, storageDict, indentLevel, exporter):
