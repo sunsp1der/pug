@@ -16,7 +16,7 @@ class EditorState(Opioid2D.State):
         self.interface = wx.GetApp().projectObject
         from pug_opioid.editor import selectionManager
         self.selectionManager = selectionManager
-        self.selectionManager.set_selection( wx.GetApp().selectedObjectDict)
+#        self.selectionManager.set_selection( wx.GetApp().selectedObjectDict)
 
     def exit(self):
         if _DEBUG: print "EditorState.exit"

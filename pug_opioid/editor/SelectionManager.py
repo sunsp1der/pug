@@ -14,7 +14,7 @@ from pug_opioid.editor.util import get_image_path
 _line_sprite_file = get_image_path("dot.png")
 _empty_sprite_file = get_image_path("empty.png")
 
-_DEBUG = False
+_DEBUG = True
 
 class SelectionManager():
     """SelectionManager()

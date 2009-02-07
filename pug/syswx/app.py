@@ -21,7 +21,7 @@ from pug.syswx.SelectionWindow import SelectionWindow
 # TODO: create a link between project closing and app closing
 
 _RECTPREFIX = 'rect_'
-_DEBUG = False
+_DEBUG = True
 
 class pugApp(wx.App):
     """pugApp: wx.App for the pug system
@@ -302,6 +302,8 @@ Set the interface's selectedObjectDict. These objects can be viewed in a PugWind
 by calling the open_selection_frame method. Selection is tracked in a set, so 
 duplicates will be automatically eliminated.
 """
+        if _DEBUG: print "app.set_selection:",selection
+        if _DEBUG: print "    old selection:",self.selectedObjectDict.keys()
         if self.setting_selection:
             return
         self.setting_selection = True

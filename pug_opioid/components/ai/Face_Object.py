@@ -55,30 +55,31 @@ class Face_Object(Component):
         
 position: an Opioid vector        
 Turn the object toward position. If None, use obj.position"""
-        if position is None:
-            if not self.obj:
-                return
-            position = self.obj.position
         if not self.enabled:
             return
-        obj = get_gnamed_object(self.target)
-        if obj:
-            target_angle = angle_to(self.owner.position, 
-                             position) + self.offset
-            if self.rotation_speed < 0:
-                # set owner to proper rotation instantly
-                self.owner.rotation = target_angle
-            else:
-                #create an action that will rotate owner to proper angle
-                if self.owner.rotation != target_angle:
-                    if self.target_angle != target_angle:
-                        if self.action:
-                            self.action.abort()
-                        action = RotateTo(target_angle, 
-                                    speed=self.rotation_speed) + \
-                                          CallFunc(self.target_reached)
-                        self.action = action.do(self.owner)
-                        self.target_angle = target_angle
+        if position is None:
+            if not self.target:
+                return
+            obj = get_gnamed_object(self.target)
+            if not obj:
+                return
+            position = obj.position
+        target_angle = angle_to(self.owner.position, 
+                         position) + self.offset
+        if self.rotation_speed < 0:
+            # set owner to proper rotation instantly
+            self.owner.rotation = target_angle
+        else:
+            #create an action that will rotate owner to proper angle
+            if self.owner.rotation != target_angle:
+                if self.target_angle != target_angle:
+                    if self.action:
+                        self.action.abort()
+                    action = RotateTo(target_angle, 
+                                speed=self.rotation_speed) + \
+                                      CallFunc(self.target_reached)
+                    self.action = action.do(self.owner)
+                    self.target_angle = target_angle
     
     def target_reached(self):
         # opioid has a problem aborting the action if it's complete

@@ -24,7 +24,7 @@ from pug_opioid.util import get_available_scenes, get_available_objects, \
                             save_game_settings
 from pug_opioid.editor import EditorState, selectionManager
 from pug_opioid.editor.util import close_scene_windows, save_scene_as, \
-                                    project_quit
+                                    project_quit, wait_for_state
                                     
 _DEBUG = False
 
@@ -241,7 +241,7 @@ value can be either an actual scene class, or the name of a scene class
                         starttime = time.time()
                 time.sleep(0.05)
             close_scene_windows(oldscene)
-            self.Director.scene.state = EditorState
+            wait_for_state(EditorState)
             sceneFrame = wx.FindWindowByName("SceneFrame")
             if sceneFrame:
                 sceneFrame.set_object(self.Director.scene, title="Scene")                        
@@ -395,12 +395,14 @@ Stop the current scene from playing. Reload original state from disk.
         pug.set_default_pugview("Component", _dataPugview)
         self.revert_scene()
         
-    def execute_scene( self):
+    def execute_scene( self, doSave=True):
         """execute_scene()
         
 Run the scene being editted in a new process.
 """
         try:
+            if doSave:
+                self.save_using_working_scene()
             save_game_settings( self.game_settings)
         except:
             show_exception_dialog()

@@ -18,7 +18,7 @@ from pug.util import make_name_valid
 from pug_opioid.util import get_available_scenes, get_available_objects
 from pug_opioid.editor import EditorState
 
-_DEBUG = False
+_DEBUG = True
 
 _IMAGEPATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Images")
 def get_image_path(filename):
@@ -96,16 +96,18 @@ parentWindow: the parent window of name dialog. If not provided, the
         if getattr(obj, 'archetype', False):
             # we don't want every instance to be an archetype
             obj.archetype = False
-            oldClass = obj.__class__
+            archetype = True
         else:
-            oldClass = None
+            archetype = False
         exporter = code_export( obj, path, True, {'name':objName})
-        get_available_objects( True)
-        if oldClass:
+        objDict = get_available_objects( True)
+        if archetype:
             # return archetype status after saving
             obj.archetype = True
+            oldclass = obj.__class__
+            obj.__class__ = objDict[objName]
             if exporter.file_changed:
-                archetype_changed( obj, oldClass, exporter)
+                archetype_changed( obj, oldclass, exporter)
         return exporter
     except:
         show_exception_dialog()
@@ -114,25 +116,20 @@ _changedArchetypeList = []
 def archetype_changed( archetype, oldclass, archetype_exporter=None):
     if archetype_exporter is None:
         archetype_exporter = CodeStorageExporter()
-#    savename = oldclass.__name__
-#    module = __import__('.'.join(['objects',savename]), fromlist=[savename])
-#    reload(module)
-    newclass = get_available_objects()[oldclass.__name__]
-    archetype.__class__ = newclass
+    newclass = archetype.__class__
     # convert all nodes referencing this archetype
-    old_dummy = archetype_exporter.get_dummy(oldclass)
     new_dummy = archetype_exporter.get_dummy(newclass)
+    old_dummy = archetype_exporter.get_dummy(oldclass)
     nodes = Opioid2D.Director.scene.nodes
     storageDict = archetype_exporter.get_custom_storageDict(new_dummy)
     storageDict['as_class'] = False 
     attributeList = archetype_exporter.create_attribute_lists(
                                             new_dummy, storageDict)[0]                                                        
     for changer in nodes:
-        if changer == old_dummy:
-            return
-        if _DEBUG: print "archetype_changed changer:", changer
-        if changer.__class__ != oldclass:
+        if changer.__class__ != oldclass or changer == old_dummy:
             continue
+        if _DEBUG: print "archetype_changed changer:", changer
+        old_dummy = archetype_exporter.get_dummy(changer.__class__)
         changer.__class__ = newclass
         # convert the object to new archetype form
         # set attributes
@@ -287,13 +284,7 @@ parentWindow: the parent window of name dialog. If not provided, the
     if _DEBUG: print "util: save_scene_as 4"
     selection = app.selectedObjectDict.keys()
     oldscene = Opioid2D.Director.scene
-    scene.state = None
-    timer = 0
-    while scene.state != None:
-        time.sleep(0.05)         
-        timer += 1
-        if timer > 50:
-            raise AssertionError("save_scene_as unable to set scene state")
+    wait_for_state( None)
     if _DEBUG: print "util: save_scene_as 5"
     wx.BeginBusyCursor()
     try:
@@ -305,16 +296,25 @@ parentWindow: the parent window of name dialog. If not provided, the
         show_exception_dialog()
     else:
         if _DEBUG: print "util: save_scene_as 7"        
-        if sceneName != Opioid2D.Director.scene.__class__.__name__:
-            scenedict = get_available_scenes(True)
-            loadscene = scenedict.get(sceneName, None)
-            if loadscene:
-                Opioid2D.Director.scene.__class__ = loadscene
+        sceneDict = get_available_scenes(True)
+        Opioid2D.Director.scene.__class__ = sceneDict[sceneName]
     finally:
         wx.EndBusyCursor()        
-        scene.state = EditorState
+        wait_for_state(EditorState)
         if Opioid2D.Director.scene == oldscene:
-            app.set_selection(selection)
+            if _DEBUG: print "util: save_scene_as reset select:", selection        
+            wx.CallAfter(app.set_selection, selection)
+            
+def wait_for_state(state):
+    "wait_for_state(state): Set scene state then wait until Opioid is ready"
+    scene = Opioid2D.Director.scene
+    scene.state = state
+    timer = 0
+    while not (scene.state == state or scene.state.__class__ == state):
+        time.sleep(0.05)         
+        timer += 1
+        if timer > 50:
+            raise ValueError("Pug unable to set scene state")
     
 def close_scene_windows( scene=None):
     """_close_scene_windows( scene=None)
