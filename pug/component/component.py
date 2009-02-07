@@ -167,7 +167,10 @@ line breaks between each. To create a single-line argument list, strip out all
                 attribute_code += [''.join([attr, '=', repr(val)])]
         joiner = ''.join([',\n',argIndent])
         code = joiner.join(attribute_code)
-        code = ''.join(['\n',argIndent,code])
+        if attribute_code:
+            code = ''.join(['\n',argIndent,code])
+        else:
+            code = ''
         return code
     _codeStorageDict = {
                   'custom_export_func': _create_object_code,

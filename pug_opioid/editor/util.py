@@ -382,6 +382,6 @@ Opioid2D.Director.quit = project_quit # hack to make opioid quit=pugquit
 #hack for making Opioid2D.Vector objects more visible
 __old_repr = Opioid2D.Vector.__repr__
 def __vect_repr(self):
-    old = __old_repr(self)
-    return ''.join(['(', str(self.x), ', ', str(self.y),') - ',old])     
+    #old = __old_repr(self)
+    return ''.join(['(', str(self.x), ', ', str(self.y),') - Opioid Vector'])     
 Opioid2D.Vector.__repr__ = __vect_repr

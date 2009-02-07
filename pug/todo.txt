@@ -1,6 +1,8 @@
 now:
+	get components defined at end of object
 
 current version:
+	Face_Mouse
 
 Finalize:
 	Open/New project	
