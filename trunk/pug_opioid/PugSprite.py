@@ -109,8 +109,6 @@ This calls Director.scene.register_node(self) unless self.register is False"""
         info = (self, storageDict, indentLevel) # for convenience
         code.append(exporter.create_instantiator_code(*info))
         base_code = exporter.create_base_code(*info)
-        if not base_code.endswith('pass\n'): # clean up pass case (for looks)
-            code.append(base_code)
         # custom code
         baseIndent = _INDENT * indentLevel    
         hasAttrs = False    
@@ -156,6 +154,8 @@ This calls Director.scene.register_node(self) unless self.register is False"""
             init_code = exporter.create_init_method(dodef=False, *info)  
             custom_code.append(init_code)          
         code += custom_code
+        if not base_code.endswith('pass\n'): # clean up pass case (for looks)
+            code.append(base_code)
         if _DEBUG: print "*******************exit sprite save: "+str(self)        
         return ''.join(code)
     

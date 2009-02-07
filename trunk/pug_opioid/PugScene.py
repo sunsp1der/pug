@@ -269,7 +269,7 @@ Update the PugScene's node tracking dict for node. Possible commands: 'Delete'
 #                    oldclass = node.__class__
 #                    node.__class__ = newclass
                     nodeStorageDict = exporter.get_custom_storageDict(node)                            
-                    nodeStorageDict['name'] =''.join([savename,'_instance'])
+                    nodeStorageDict['name'] =''.join([savename,'_archetype'])
                     nodeStorageDict['as_class'] = False # export as object
                     node_code = exporter.create_object_code(node, 
                                                             nodeStorageDict, 

@@ -1,8 +1,7 @@
 now:
-	get components defined at end of object
 
 current version:
-	Face_Mouse
+	demo components
 
 Finalize:
 	Open/New project	
@@ -23,11 +22,14 @@ fun stuff:
 		set name
 	
 bugs: 
+	add object after save
 	leftover items in scene graph after deleting both layers
 	sometimes selections still not showing up
 	crash - selecting an object while changing selectionwin to another view 
 
 later: 
+	put main.py startup functionality into a separate module. 
+		take care of __working__ startup appropriately
 	#TODO: integer agui (with spinners?)
 		range
 	#TODO: float agui

@@ -3,10 +3,10 @@
 ###################
 # import autocode #
 ###################
-from all_components import Face_Mouse, Follow_Mouse
+from all_components import Follow_Mouse, Face_Object, Face_Mouse
 from objects.ShipSprite import ShipSprite
+from objects.YellowPug import YellowPug
 from pug_opioid.PugScene import PugScene
-from pug_opioid.PugSprite import PugSprite
 #######################
 # End import autocode #
 #######################
@@ -17,20 +17,21 @@ from pug_opioid.PugSprite import PugSprite
 class FaceFollowMouse_Test(PugScene):
     layers = ['Background', 'Layer 1']
     def enter(self):
-        # Sprites
-        pugsprite_instance = PugSprite()
-        pugsprite_instance.register = True
-        pugsprite_instance.components.add( Face_Mouse(
-                ) )
-        pugsprite_instance.image = 'art/pug.png'
-        pugsprite_instance.layer = 'Background'
-        pugsprite_instance.position.x = 376.0
-        pugsprite_instance.position.y = 288.0
+        # Archetypes
+        YellowPug_archetype = YellowPug(gname='YellowPug')
+        YellowPug_archetype.archetype = True
 
+        # Sprites
         shipsprite_instance = ShipSprite()
-        shipsprite_instance.register = True
-        shipsprite_instance.components.add( Follow_Mouse(
-                ) )
+        shipsprite_instance.components.add( Follow_Mouse() )
+        shipsprite_instance.components.add( Face_Object(
+                target='mouse pointer',
+                offset=-90) )
+
+        mouse_pointer = YellowPug(gname='mouse pointer')
+        mouse_pointer.position.x = 436.0
+        mouse_pointer.position.y = 247.0
+        mouse_pointer.components.add( Face_Mouse() )
 
         # Pug auto-start
         self.start()
