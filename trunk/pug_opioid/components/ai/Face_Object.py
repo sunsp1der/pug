@@ -7,7 +7,7 @@ from pug.component import *
 from pug_opioid.util import angle_to
 
 class Face_Object(Component):
-    """Object turns towards another given object"""
+    """Object turns to face another object"""
     #component_info
     _set = 'pug_opioid'
     _type = 'ai'
@@ -50,13 +50,21 @@ class Face_Object(Component):
         if self.tick_action:
             self.tick_action.abort()
         
-    def check_facing(self):
+    def check_facing(self, position=None):
+        """check_facing(position=None)
+        
+position: an Opioid vector        
+Turn the object toward position. If None, use obj.position"""
+        if position is None:
+            if not self.obj:
+                return
+            position = self.obj.position
         if not self.enabled:
             return
         obj = get_gnamed_object(self.target)
         if obj:
             target_angle = angle_to(self.owner.position, 
-                             obj.position) + self.offset
+                             position) + self.offset
             if self.rotation_speed < 0:
                 # set owner to proper rotation instantly
                 self.owner.rotation = target_angle

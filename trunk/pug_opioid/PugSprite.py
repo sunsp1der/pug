@@ -161,7 +161,8 @@ This calls Director.scene.register_node(self) unless self.register is False"""
     
     _codeStorageDict = {
             'skip_attributes': ['_actions', '_image_file', 'image_file', 
-                                'layer_name','_init_image','_init_layer'], 
+                                'layer_name','_init_image','_init_layer',
+                                'register'], 
             'instance_attributes': ['*'],
             'instance_only_attributes':['gname'],
             'init_method':'on_create',

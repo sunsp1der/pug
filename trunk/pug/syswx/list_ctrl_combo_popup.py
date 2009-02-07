@@ -24,9 +24,8 @@ doesn't have as many features/accessors as the combo.ComboCtrl"""
         return self.list
     
     def GetSelectedData(self):
-        selection = self.list.GetSelection()
-        if selection != wx.NOT_FOUND:
-            return self.list.GetClientData(selection)
+        if self.selected != -1:
+            return self.list.GetClientData(self.selected)   
         else:
             return None
     
