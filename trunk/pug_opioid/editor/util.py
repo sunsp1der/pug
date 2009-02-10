@@ -238,9 +238,7 @@ parentWindow: the parent window of name dialog. If not provided, the
     if _DEBUG: print "util: save_scene_as"
     scene = Opioid2D.Director.scene
     if not sceneName:
-        name = scene.gname
-        if not name:
-            name = scene.__class__.__name__
+        name = scene.__class__.__name__
         if name == 'PugScene' or name == 'Scene':
             name = 'MyScene'
         name = make_name_valid(name)
@@ -255,7 +253,7 @@ parentWindow: the parent window of name dialog. If not provided, the
         if _DEBUG: print "util: save_scene_as 2"
         while not sceneName:
             if dlg.ShowModal() == wx.ID_OK:
-                name = dlg.GetValue()
+                name = str(dlg.GetValue())
                 path = os.path.join('scenes',''.join([name,'.py']))
                 try:
                     test = file(path)
@@ -276,10 +274,11 @@ parentWindow: the parent window of name dialog. If not provided, the
         dlg.Destroy()
     else:
         if sceneName == 'PugScene' or sceneName == 'Scene':
-            save_scene_as( sceneName, fileName)
+            raise ValueError("Can't save over 'PugScene' or 'Scene'")
+#            save_scene_as( sceneName, fileName)
     if not fileName:
-        fileName = sceneName
-    path = os.path.join('scenes',''.join([fileName,'.py']))
+        fileName = ''.join([sceneName, '.py'])
+    path = os.path.join('scenes',fileName)
     app = wx.GetApp()
     if _DEBUG: print "util: save_scene_as 4"
     selection = app.selectedObjectDict.keys()
@@ -304,13 +303,15 @@ parentWindow: the parent window of name dialog. If not provided, the
         if Opioid2D.Director.scene == oldscene:
             if _DEBUG: print "util: save_scene_as reset select:", selection        
             wx.CallAfter(app.set_selection, selection)
-            
+        wx.GetApp().refresh()
+          
 def wait_for_state(state):
     "wait_for_state(state): Set scene state then wait until Opioid is ready"
     scene = Opioid2D.Director.scene
     scene.state = state
     timer = 0
     while not (scene.state == state or scene.state.__class__ == state):
+        if _DEBUG: print "   Waiting for state: ",state
         time.sleep(0.05)         
         timer += 1
         if timer > 50:

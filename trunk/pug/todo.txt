@@ -1,7 +1,6 @@
 now:
 
 current version:
-	demo components
 
 Finalize:
 	Open/New project	

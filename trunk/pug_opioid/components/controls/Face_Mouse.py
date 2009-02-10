@@ -4,7 +4,8 @@ from Opioid2D.public.Node import Node
 from pug_opioid.components import Face_Object
 
 class Face_Mouse( Face_Object):
-    """Object turns to face the mouse"""
+    """Object turns to face the mouse. This is the exactly like the Face_Object 
+component with the mouse-pointer as the target."""
     #component_info
     _set = 'pug_opioid'
     _type = 'controls'

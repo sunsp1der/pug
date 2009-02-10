@@ -5,7 +5,7 @@ import wx
 
 import Opioid2D
 
-_DEBUG = False
+_DEBUG = True
 
 class EditorState(Opioid2D.State):
     layers = ["__editor__",]

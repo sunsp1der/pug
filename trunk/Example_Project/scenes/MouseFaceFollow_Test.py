@@ -1,4 +1,4 @@
-"""FaceFollowMouse_Test.py"""
+"""MouseFaceFollow_Test.py"""
 
 ###################
 # import autocode #
@@ -12,9 +12,9 @@ from pug_opioid.PugScene import PugScene
 #######################
 
 ###################################
-# "FaceFollowMouse_Test" autocode #
+# "MouseFaceFollow_Test" autocode #
 ###################################
-class FaceFollowMouse_Test(PugScene):
+class MouseFaceFollow_Test(PugScene):
     layers = ['Background', 'Layer 1']
     def enter(self):
         # Archetypes
@@ -36,6 +36,6 @@ class FaceFollowMouse_Test(PugScene):
         # Pug auto-start
         self.start()
 #######################################
-# End "FaceFollowMouse_Test" autocode #
+# End "MouseFaceFollow_Test" autocode #
 #######################################
 

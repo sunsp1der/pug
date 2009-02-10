@@ -14,22 +14,28 @@ window: the parent pugWindow
 For kwargs optional arguments, see the Base attribute GUI
 """
     def __init__(self, attribute, window, aguidata={}, **kwargs):
-        #control = wx.Panel(window)
-        #sizer = wx.BoxSizer()
-        textEntry = AguiTextCtrl( window)
-        #control.SetSize((30, WX_STANDARD_HEIGHT))
-        #sizer.Add(textEntry,1,flag=wx.EXPAND)
-        #control.SetSizer(sizer, orient=wx.VERTICAL)
+        control = wx.Panel(window)
+        sizer = wx.BoxSizer(orient=wx.VERTICAL)
+        control.SetSizer(sizer)
+        textEntry = AguiTextCtrl( control)
+#        textEntry.SetMinSize((-1, WX_STANDARD_HEIGHT))
+        sizer.Add(textEntry,1,flag=wx.EXPAND)
         textEntry.Bind(wx.EVT_TEXT_ENTER, self.apply)
         textEntry.Bind(wx.EVT_KILL_FOCUS, self.apply)
+        self.textEntry = textEntry
+#        textEntry = AguiTextCtrl( window)
+#        control = textEntry
 
-        kwargs['control_widget'] = textEntry
+        kwargs['control_widget'] = control
         Base.__init__(self, attribute, window, aguidata, **kwargs)
+        
+    def setup(self, attribute, window, aguidata):
+        Base.setup(self, attribute, window, aguidata)
                         
     def get_control_value(self):
-        return self.control.GetValue()
+        return self.textEntry.GetValue()
     
     def set_control_value(self, value):
-        return self.control.SetValue(value)
+        return self.textEntry.SetValue(value)
            
             
