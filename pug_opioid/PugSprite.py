@@ -5,6 +5,7 @@ from Opioid2D.public.Node import Node
 from Opioid2D.public.Sprite import SpriteMeta
 
 import pug
+from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.syswx.attributeguis import *
 from pug.code_storage import add_subclass_skip_attributes
 from pug.code_storage.constants import _INDENT
@@ -23,6 +24,7 @@ Opioid2d Sprite with features for use with pug"""
     # image stuff... allows entry and storage of filename
     _image_file = None   
     archetype = False
+    destroy_blockers = None
     _pug_pugview_class = 'PugSprite'
     def __init__(self, img=None, gname='', register=True):
         self.register = register
@@ -49,6 +51,48 @@ Opioid2d Sprite with features for use with pug"""
                       pug.BaseObject._del_gname,
                       "An easily accessed global name for this object")
 
+    def destroy(self):
+        """destroy(): set sprite up for deletion, but allow option to block
+        
+The destroy system is useful when dealing with deletion via components. When
+destroy is called, the PugSprite will send an 'on_destroy' callback to itself.
+Components (or an over-ridden on_destroy method) can then call 'block_destroy'
+on the sprite, with the argument being the blocking object. This blocking is
+cancelled when the blocking object is deleted or block_destroy(block=False) is 
+called. When all blocks have been removed, 'delete' will be called.
+
+In general, it is a good idea to use PugSprite.destroy rather than 
+PugSprite.delete whenever the PugSprite is being removed by gameplay effects."""
+        self.on_destroy()
+        
+    def on_destroy(self):
+        """on_destroy(): callback for when object is destroyed in gameplay"""
+        if not self.destroy_blockers:
+            self.delete()
+
+    def block_destroy(self, blocker, block=True, blockData=None):
+        """block_destroy( blocker, block=True, blockData=None)
+        
+blocker: the object creating the block
+block: set to False to unblock
+blockData: optional info associated with blocker
+        
+block_destroy can be called before or during the 'on_destroy' callback. It will
+add blocker to a dictionary of objects blocking the PugSprite's destruction."""
+        if block:
+            if self.destroy_blockers is None:
+                blockers = CallbackWeakKeyDictionary()
+                blockers.register_for_delete( self.destroy_callback)
+                self.destroy_blockers = blockers
+            self.destroy_blockers[blocker] = blockData
+        else:
+            if blocker in self.destroy_blockers:
+                self.destroy_blockers.pop(blocker)
+                
+    def destroy_callback(self, dict, func, arg1, arg2):
+        if not dict:
+            self.delete()        
+
     def delete(self):
         self.on_delete()
         Director.scene.update_node(self, "Delete") # register self with scene                
@@ -66,7 +110,7 @@ This calls Director.scene.register_node(self) unless self.register is False"""
             self.do_register()
             
     def do_register(self):
-            Director.scene.register_node(self)        
+        Director.scene.register_node(self)        
 
     # layer_name property
     def set_layer(self, layer):
@@ -162,7 +206,7 @@ This calls Director.scene.register_node(self) unless self.register is False"""
     _codeStorageDict = {
             'skip_attributes': ['_actions', '_image_file', 'image_file', 
                                 'layer_name','_init_image','_init_layer',
-                                'register'], 
+                                'register', 'destroy_blockers'], 
             'instance_attributes': ['*'],
             'instance_only_attributes':['gname'],
             'init_method':'on_create',

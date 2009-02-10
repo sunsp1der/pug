@@ -51,7 +51,7 @@ class Spawn_Area(Component):
     spawn_interval = 2.0
     spawn_variance = 1.0
     spawn_delay = 0.0
-    spawn_location = 'Area'
+    spawn_location = 'area'
     spawn_offset = Vector(0,0)
     match_rotation = False
     match_velocity = False

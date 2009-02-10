@@ -15,11 +15,13 @@ For kwargs optional arguments, see the Base attribute GUI
     def __init__(self, attribute, window, aguidata, **kwargs):
         control = wx.Panel(window, size=wx.Size(30, WX_STANDARD_HEIGHT))
         sizer = wx.BoxSizer(orient=wx.VERTICAL)
-        checkbox = wx.CheckBox(control, -1, " ")
+        checkbox = wx.CheckBox(control, -1, label=" ")
         checkbox.Bind(wx.EVT_CHECKBOX, self.apply)
+        checkbox.Bind(wx.EVT_SET_FOCUS, self.focus)
+        checkbox.Bind(wx.EVT_KILL_FOCUS, self.unfocus)
         self.checkbox = checkbox
         line = wx.StaticLine(control)
-        sizer.Add(checkbox,1,wx.EXPAND)
+        sizer.Add(checkbox,1)
         sizer.Add(line,flag=wx.EXPAND)
         control.SetSizer(sizer)
 
@@ -32,3 +34,9 @@ For kwargs optional arguments, see the Base attribute GUI
     
     def set_control_value(self, value):
         return self.checkbox.SetValue(bool(value))
+    
+    def focus(self, event=None):
+        pass
+        
+    def unfocus(self, event=None):
+        pass

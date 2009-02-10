@@ -163,7 +163,9 @@ settingsObj: an object similar to the one below... if it is missing any default
         app.set_pug_settings( self.pug_settings)
         # initial scene
         if getattr(self.pug_settings, 'initial_scene'):
-            self.sceneclass = self.pug_settings.initial_scene  
+            scene = self.pug_settings.initial_scene
+            if scene in get_available_scenes():
+                self.sceneclass = self.pug_settings.initial_scene  
         if not self.scene:
             self.sceneclass = self.Director.scene.__class__
         # default menus
@@ -284,7 +286,8 @@ highlight them.
         
 Callback from PugApp...
 """
-        if self.Director.scene.state.__class__ == EditorState:
+        if self.Director.scene.state and \
+                        self.Director.scene.state.__class__ == EditorState:
             selectionManager.on_set_selection(selectedObjectDict)
         
     def open_selection_frame(self):
@@ -353,7 +356,7 @@ Callback from PugApp...
         """Save the current scene as scenes/__Working__.py"""
         if self.scene.__class__.__name__ in ['PugScene', 'Scene']:
             save_scene_as()
-        save_scene_as( self.scene.__class__.__name__, '__Working__')
+        save_scene_as( self.scene.__class__.__name__, '__Working__.py')
         self.use_working_scene = True
         wx.GetApp().refresh()
 

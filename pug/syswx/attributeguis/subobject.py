@@ -70,7 +70,7 @@ simple objects that contain a few values in them (i.e. X and Y)
             controlText.Bind(wx.EVT_KILL_FOCUS, self.apply)
             controlHSizer = wx.BoxSizer(orient=wx.HORIZONTAL)
             controlHSizer.Add(controlText,1)
-            controlSizer.AddSizer(controlHSizer, flag = wx.EXPAND)               
+            controlSizer.AddSizer(controlHSizer, flag=wx.EXPAND)               
             self.subControlList += [(sub,controlText)]
             rightLabel = AguiLabelSizer(label, sub, subnum == subcount, 
                                        flag=wx.ALIGN_RIGHT)
