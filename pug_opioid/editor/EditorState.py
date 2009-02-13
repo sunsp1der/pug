@@ -5,32 +5,28 @@ import wx
 
 import Opioid2D
 
+from pug_opioid.PugState import PugState
+
 _DEBUG = True
 
-class EditorState(Opioid2D.State):
+class EditorState(PugState):
     layers = ["__editor__",]
     selectOnUp = None
+    exitted = False
     def enter(self):
-        self.busy = False
-        self.originalCursor = Opioid2D.Mouse.cursor
         self.interface = wx.GetApp().projectObject
         from pug_opioid.editor import selectionManager
         self.selectionManager = selectionManager
+        PugState.enter(self)
 #        self.selectionManager.set_selection( wx.GetApp().selectedObjectDict)
 
     def exit(self):
         if _DEBUG: print "EditorState.exit"
-        wx.GetApp().set_selection([])
         self.selectionManager.boxDict.clear()
+        wx.CallAfter(wx.GetApp().set_selection,[])
         if _DEBUG: print "EditorState.exit complete"
-        
-    def on_set_busy_state(self, On):
-        if On:
-            Opioid2D.Mouse.cursor = _busyCursor
-        else:
-            Opioid2D.Mouse.cursor = self.originalCursor
-        self.busy = On
-    
+        PugState.exit(self)
+            
     def handle_mousebuttondown(self, event):
         scene = Opioid2D.Director.scene
         x, y = event.pos
@@ -88,22 +84,3 @@ class EditorState(Opioid2D.State):
     def realtick(self):
         self.selectionManager.update()    
 
-strings = [" XXXXXXXXXXXXXX ",
-           " XOOOOOOOOOOOOX ",
-           " XOXXXXXXXXXXOX ",
-           "  XOXOOOOOOXOX  ",
-           "   XOXOOOOXOX   ",
-           "   XOXXXXXXOX   ",
-           "    XOXXXXOX    ",
-           "     XOXXOX     ",
-           "     XOXXOX     ",
-           "    XOXOOXOX    ",
-           "   XOXOOOOXOX   ",
-           "   XOXOXXOXOX   ",
-           "  XOXXXXXXXXOX  ",
-           " XOXXXXXXXXXXOX ",
-           " XOOOOOOOOOOOOX ",
-           " XXXXXXXXXXXXXX "]
-
-_busyCursor = Opioid2D.HWCursor.compile(strings=strings, hotspot = (8,8),
-                                        white='O',black='X',xor='@')

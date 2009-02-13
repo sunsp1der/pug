@@ -15,7 +15,7 @@ from pug_opioid.PugScene import PugScene
 # "MouseFaceFollow_Test" autocode #
 ###################################
 class MouseFaceFollow_Test(PugScene):
-    layers = ['Background', 'Layer 1']
+    layers = ['Background']
     def enter(self):
         # Archetypes
         YellowPug_archetype = YellowPug(gname='YellowPug')

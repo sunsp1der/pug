@@ -1,3 +1,4 @@
+from Opioid2D import Vector
 from Opioid2D.public.Node import Node
 from pug.component import *
 
@@ -15,7 +16,10 @@ added to a scene."""
             ['rotation_speed', 'Clockwise rotational velocity'],
             ['friction', '0-1 multiplier applied every realtick'],
             ['additive', 
-       "Add to current values instead of setting them. Friction is multiplied."]
+    "Add to current values instead of setting them. Friction is multiplied."],
+            ['rotated',
+    """If owner is rotated when motion is set, velocity 
+    and acceleration will be relative to that rotation."""],
     ]
     #defaults
     velocity_x = 0
@@ -24,10 +28,9 @@ added to a scene."""
     acceleration_y = 0
     rotation_speed = 0
     friction = 1.0
-    additive = False
-    
-    action = None
-    
+    additive = True
+    rotated = True
+        
     @component_method
     def on_added_to_scene(self):
         """Set the motion when object is added to scene"""
@@ -37,16 +40,19 @@ added to a scene."""
     def set_motion(self):
         """Apply the motion settings"""
         owner = self.owner
+        velocity_vector = Vector(self.velocity_x, self.velocity_y)
+        acceleration_vector = Vector(self.acceleration_x, self.acceleration_y)
+        if self.rotated:
+            velocity_vector.direction += self.owner.rotation
+            acceleration_vector.direction += self.owner.rotation
         if self.additive:
-            owner.velocity = (owner.velocity[0] + self.velocity_x,
-                              owner.velocity[1] + self.velocity_y)
-            owner.acceleration = (owner.acceleration[0] + self.acceleration_x,
-                              owner.acceleration[1] + self.acceleration_y)
+            owner.velocity += velocity_vector
+            owner.acceleration += acceleration_vector
             owner.rotation_speed += self.rotation_speed
             owner.friction = owner.friction * self.friction
         else:
-            owner.velocity = (self.velocity_x, self.velocity_y)
-            owner.acceleration = (self.acceleration_x, self.acceleration_y)
+            owner.velocity = velocity_vector
+            owner.acceleration = acceleration_vector
             owner.rotation_speed = self.rotation_speed
             owner.friction = self.friction
         

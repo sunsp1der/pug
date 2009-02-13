@@ -30,7 +30,8 @@ Object that manages selection graphics in the Opioid2D frame
         
 Callback from pug.App...
 """
-        if _DEBUG: print 'SelectionManager.on_set_selection', selectedObjectDict
+        if _DEBUG: print 'SelectionManager.on_set_selection',\
+                            selectedObjectDict.data
         self.set_selection( selectedObjectDict)
         
     def set_selection(self, selectedObjectDict):
@@ -39,7 +40,8 @@ Callback from pug.App...
 Set the selection to the given list of objects. Draw a box around each one.
 This action will be deferred until after current update...
 """
-        if _DEBUG: print 'SelectionManager.set_selection', selectedObjectDict
+        if _DEBUG: print 'SelectionManager.set_selection', \
+                            selectedObjectDict.data
         self.new_selection = selectedObjectDict
 
     def do_set_selection(self,  selectedObjectDict):
@@ -47,7 +49,8 @@ This action will be deferred until after current update...
         
 Set the selection to the given list of objects. Draw a box around each one.
 """
-        if _DEBUG: print 'SelectionManager.do_set_selection', selectedObjectDict
+        if _DEBUG: print 'SelectionManager.do_set_selection', \
+                            selectedObjectDict.data
         keySet = set(self.boxDict.keys())
         selectSet = set()
         for ref in selectedObjectDict.itervalues():

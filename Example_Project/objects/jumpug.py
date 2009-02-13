@@ -14,7 +14,7 @@ from pug_opioid.PugSprite import PugSprite
 #####################
 class jumpug(PugSprite):
     image = 'art/pug.png'
-    layer = 'Layer 1'
+    layer = 'Background'
     def on_create(self):
         self.position.x = 106.0
         self.position.y = 442.0

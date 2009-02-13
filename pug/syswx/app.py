@@ -241,6 +241,7 @@ object: the object being viewed. Alternatively, this can be a string identifying
             self.pugFrameDict[frame]+=objList
         else:
             self.pugFrameDict[frame]= objList
+        if _DEBUG: print "   app.pugframe_viewing complete"
             
     def pugframe_stopped_viewing(self, frame, object):
         if frame in self.pugFrameDict:

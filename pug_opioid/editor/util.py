@@ -4,6 +4,7 @@ import os.path
 from inspect import getmro
 import time
 from copy import copy
+import weakref
 
 import wx
 
@@ -302,20 +303,23 @@ parentWindow: the parent window of name dialog. If not provided, the
         wait_for_state(EditorState)
         if Opioid2D.Director.scene == oldscene:
             if _DEBUG: print "util: save_scene_as reset select:", selection        
-            wx.CallAfter(app.set_selection, selection)
+            app.set_selection(selection)
         wx.GetApp().refresh()
           
 def wait_for_state(state):
     "wait_for_state(state): Set scene state then wait until Opioid is ready"
     scene = Opioid2D.Director.scene
+    oldstate = scene.state
     scene.state = state
     timer = 0
-    while not (scene.state == state or scene.state.__class__ == state):
+    while not (scene.state == state or scene.state.__class__ == state) and \
+            getattr(oldstate, 'exitted', True):
         if _DEBUG: print "   Waiting for state: ",state
         time.sleep(0.05)         
         timer += 1
         if timer > 50:
             raise ValueError("Pug unable to set scene state")
+    if _DEBUG: print "   State set"
     
 def close_scene_windows( scene=None):
     """_close_scene_windows( scene=None)

@@ -13,7 +13,7 @@ from pug_opioid.PugSprite import PugSprite
 ########################
 class YellowPug(PugSprite):
     image = 'art/pug.png'
-    layer = 'Layer 1'
+    layer = 'Background'
     def on_create(self):
         self.position.x = 145.0
         self.position.y = 478.0

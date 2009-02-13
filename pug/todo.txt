@@ -1,6 +1,10 @@
 now:
 
 current version:
+	set name when archetype is selected
+		add 'callback' feature to base agui
+	attach component view to control
+	ctrl-w ctrl-q don't work
 
 Finalize:
 	Open/New project	
@@ -14,6 +18,7 @@ Finalize:
 fun stuff:
 	so many frickin components to make :) 
 		REVIEW POWERPACK demo components for non collision components
+		on_destroy spawn
 		fade in fade out
 		grow in grow out
 		delete off-screen
@@ -32,6 +37,7 @@ later:
 	#TODO: integer agui (with spinners?)
 		range
 	#TODO: float agui
+		limit float precision output
 		range
 	make progress bar move during load
 		loading window... update by percentage in postinit

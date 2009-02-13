@@ -382,7 +382,7 @@ doSave: save working copy first
         #self.revert_scene()
         pug.set_default_pugview("Component", _dataMethodPugview)
         app = wx.GetApp()
-        app.set_selection([])
+#        app.set_selection([])
         start_scene()
     
     def stop_scene( self):
@@ -433,6 +433,7 @@ Add an object to the scene
         if objectclass == PugSprite and type(self.scene.state) == EditorState:
             # set a default image for basic sprite
             node.image = "art/pug.png"
+            node.position = Opioid2D.Vector(*Opioid2D.Display.get_view_size())/2
             if len(self.scene.layers) > 1:
                 # skip 'selection' layer
                 node.layer = self.scene.layers[-2]
