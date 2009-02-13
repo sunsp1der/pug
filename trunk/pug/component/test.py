@@ -92,12 +92,36 @@ if __name__ == "__main__":
             for ob2 in b:
                 print "   ", ob2 
             print "_______________________"     
+    print
+    print "Component delete when component is removed test..."
+    comp = XComponent()
+    print "new component:", comp
+    obj.components.add(comp)
+    compref = weakref.ref(comp)
+    print "component: ",compref()
+    obj.components.remove(comp)
+    del(comp)
+    print "might be None: ",compref()
+    gc.collect()
+    print "should be None: ", compref()
+    if compref():
+        func = compref().explode
+        non_comp_func = compref()._set_owner
+        g = gc.get_referrers(compref())   
+        for ob in g:
+            print ob
+            b = gc.get_referrers(ob)
+            for ob2 in b:
+                print "   ", ob2 
+            print "_______________________"     
     
     print "SHOULD FAIL"
     obj.components.remove(x2comp2)
     print "--- obj.explode with no components"
     obj.explode("not work", 20)
     print "----"    
+    
+    
     
 
 

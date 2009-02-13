@@ -13,8 +13,8 @@ class Grow_Shrink(Component):
     _field_list = [
             ['grow_in_secs',
                     "Number of seconds to take growing in. 0 = no grow."],
-            ['grow_in_alpha', "Fade in to this alpha value"],
-            ['grow_out_secs',
+            ['grow_in_scale', "Fade in to this alpha value"],
+            ['shrink_out_secs',
    "Number of seconds to take fading out when owner is destroyed. 0 = no grow."]
             ]
     #defaults

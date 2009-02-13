@@ -37,7 +37,7 @@ Callback from PugApp...
             selectionList = []
         if self.selectionList == selectionList:
             self.refresh()
-            return
+#            return
         self.selectionList = selectionList
         oldObject = self.object
         if not selectionList:
