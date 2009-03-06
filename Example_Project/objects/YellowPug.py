@@ -18,7 +18,6 @@ class YellowPug(PugSprite):
         self.position.x = 145.0
         self.position.y = 478.0
         self.color = (1.0, 1.0, 0.0, 1.0)
-        PugSprite.on_create(self)
 ############################
 # End "YellowPug" autocode #
 ############################

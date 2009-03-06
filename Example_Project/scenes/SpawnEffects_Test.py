@@ -16,7 +16,7 @@ from pug_opioid.PugScene import PugScene
 ################################
 class SpawnEffects_Test(PugScene):
     layers = ['Background']
-    def enter(self):
+    def on_enter(self):
         # Archetypes
         Fadestar_archetype = Fadestar(gname='Fadestar')
         Fadestar_archetype.archetype = True
@@ -39,8 +39,6 @@ class SpawnEffects_Test(PugScene):
                 spawn_variance=0.29999999999999999,
                 match_velocity=True) )
 
-        # Pug auto-start
-        self.start()
 ####################################
 # End "SpawnEffects_Test" autocode #
 ####################################
