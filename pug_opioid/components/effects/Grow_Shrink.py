@@ -12,10 +12,9 @@ class Grow_Shrink(Component):
     # attributes: ['name', 'doc', {extra info}]
     _field_list = [
             ['grow_in_secs',
-                    "Number of seconds to take growing in. 0 = no grow."],
-            ['grow_in_scale', "Fade in to this alpha value"],
+                    "Number of seconds to take growing in. -1 = no grow."],
             ['shrink_out_secs',
-   "Number of seconds to take fading out when owner is destroyed. 0 = no grow."]
+"Number of seconds to take fading out when owner is destroyed. -1 = no grow."]
             ]
     #defaults
     grow_in_secs = 3.0
@@ -31,12 +30,12 @@ class Grow_Shrink(Component):
         """grow_in(secs=None, dstscale=None)
         
 secs: number of seconds to take growing. Default: self.grow_in_secs
-dstscale: destination scale to grow to. Default: self.grow_in_alpha        
+dstscale: destination scale to grow to. Default: self.owner.scale        
 """
         if secs is None:
             secs = self.grow_in_secs
         if  dstscale is None:
-            dstscale = self.grow_in_scale
+            dstscale = tuple(self.owner.scale)
         if secs >= 0:
             self.owner.set_scale((0,0))
             self.owner.do( ScaleTo(dstscale, secs))

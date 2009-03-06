@@ -26,10 +26,17 @@ Opioid2d Sprite with features for use with pug"""
     archetype = False
     destroy_blockers = None
     _pug_pugview_class = 'PugSprite'
+    
+    def __del__(self):
+        pug.BaseObject.__del__(self)
+    
     def __init__(self, img=None, gname='', register=True):
-        self.register = register
         pug.BaseObject.__init__(self, gname=gname)
-        Sprite.__init__(self, img)
+        Sprite._preinit(self, img)
+        self.on_create()
+        if register:
+            self.do_register()
+        
     def get_image_file(self):
         # TODO: find a way to actually look up this filename in the image
         if self._image_file is None:
@@ -67,6 +74,8 @@ PugSprite.delete whenever the PugSprite is being removed by gameplay effects."""
         
     def on_destroy(self):
         """on_destroy(): callback for when object is destroyed in gameplay"""
+        if _DEBUG:
+            print 'PugSprite.on_destroy',self, self.destroy_blockers.data
         if not self.destroy_blockers:
             self.delete()
 
@@ -79,6 +88,8 @@ blockData: optional info associated with blocker
         
 block_destroy can be called before or during the 'on_destroy' callback. It will
 add blocker to a dictionary of objects blocking the PugSprite's destruction."""
+        if _DEBUG: 
+            print 'PugSprite.block_destroy', self, blocker, block, blockData
         if block:
             if self.destroy_blockers is None:
                 blockers = CallbackWeakKeyDictionary()
@@ -90,7 +101,11 @@ add blocker to a dictionary of objects blocking the PugSprite's destruction."""
                 self.destroy_blockers.pop(blocker)
                 
     def destroy_callback(self, dict, func, arg1, arg2):
+        if _DEBUG:
+            print 'PugSprite.destroy_callback', dict, func, arg1, arg2
+            print '    ', dict.data
         if not dict:
+            if _DEBUG: print '    delete'
             self.delete()        
 
     def delete(self):
@@ -101,15 +116,9 @@ add blocker to a dictionary of objects blocking the PugSprite's destruction."""
     def on_delete(self):
         "on_delete(): callback called when Sprite is deleted"
         pass
-    
-    def on_create(self):
-        """on_create(): callback called when Sprite is created.
-
-This calls Director.scene.register_node(self) unless self.register is False""" 
-        if self.register:
-            self.do_register()
-            
+                
     def do_register(self):
+        "do_register(): register with the PugScene"
         Director.scene.register_node(self)        
 
     # layer_name property
@@ -195,7 +204,9 @@ This calls Director.scene.register_node(self) unless self.register is False"""
                                      attr, '.', 'y = ', repr(vector.y),'\n']
         custom_code += custom_attr_code
         if storageDict['as_class']:
-            init_code = exporter.create_init_method(dodef=False, *info)  
+            init_code = exporter.create_init_method(dodef=False, *info)
+            if not init_code:
+                init_code = ''.join([baseIndent,  xIndent, 'pass\n'])  
             custom_code.append(init_code)          
         code += custom_code
         if not base_code.endswith('pass\n'): # clean up pass case (for looks)
@@ -211,6 +222,7 @@ This calls Director.scene.register_node(self) unless self.register is False"""
             'instance_only_attributes':['gname'],
             'init_method':'on_create',
             'init_method_args': [],
+            'base_init': False,
             'force_init_def': True,
             'dummy_creator': '_create_dummy',
             'custom_export_func': _create_object_code,
@@ -256,7 +268,7 @@ _spritePugview = {
         [' Components', pug.Label],
         ['components'],
         [' Functions', pug.Label],
-        ['delete'],
+        ['delete',"Delete this sprite"],
 #        ['_delete_test'],
 #        ['_test_referrers'],
     ]       

@@ -8,7 +8,7 @@ from pug.syswx.attributeguis.dropdown import Dropdown
 from pug_opioid.util import get_available_objects
 
 class ObjectsDropdown (Dropdown):
-    """Pug_Opioid object selection attribute GUI
+    """Opugoid object selection attribute GUI
     
 ObjectsDropdown(attribute, window, aguidata, **kwargs)
 

@@ -6,7 +6,7 @@ from pug.component import *
 class Forward_Motion(Component):
     """Apply velocity or acceleration in the direction the object is facing.
     
-Warning: This component may cause major slow-downs."""
+Warning: This component uses a tick_action, so it may be slow."""
     #component_info
     _set = 'pug_opioid'
     _type = 'physics'
@@ -14,7 +14,8 @@ Warning: This component may cause major slow-downs."""
     # attributes: ['name', 'doc', {extra info}]
     _field_list = [
             ['velocity','Forward velocity'],
-            ['acceleration','Forward acceleration'],
+            ['acceleration',
+'Forward acceleration. Velocity must be set to 0 for this to work.'],
             ['offset','Forward direction is offset by this much'],
             ]
     #defaults
@@ -24,7 +25,6 @@ Warning: This component may cause major slow-downs."""
     #other defaults
     tick_action = None
     last_rotation = None
-    old_velocity_vector = None
     
     @component_method
     def on_added_to_scene(self):
@@ -37,19 +37,18 @@ Warning: This component may cause major slow-downs."""
         
 Set object's forward velocity and acceleration. Arguments default to component
 values (self.velocity and self.acceleration)"""
-        if not self.old_velocity_vector:
-            self.old_velocity_vector = Vector(0,0)
-            self.old_acceleration_vector = Vector(0,0)
-            self.new_velocity_vector = Vector(0,0)
-            self.new_acceleration_vector = Vector(0,0)
         if velocity == None:
             velocity = self.velocity
         else:
             self.velocity = velocity
+        self.velocity_vector = Vector(0, -velocity)
+        self.velocity_vector.direction = self.offset
         if acceleration == None:
             acceleration = self.acceleration
         else:
             self.acceleration = acceleration
+        self.acceleration_vector = Vector(0, -acceleration)
+        self.acceleration_vector.direction = self.offset
         if velocity or acceleration:
             self.tick_action = RealTickFunc( self.forward_motion)
             self.tick_action.do()
@@ -64,21 +63,11 @@ values (self.velocity and self.acceleration)"""
         if self.owner.rotation == self.last_rotation:
             return
         if self.velocity:
-            if self.last_rotation is not None:
-                self.old_velocity_vector.set_radial((self.last_rotation + \
-                                                    self.offset, self.velocity))
-            self.new_velocity_vector.set_radial((self.owner.rotation + \
-                                              self.offset, self.velocity))
-            self.owner.velocity += \
-                            self.new_velocity_vector - self.old_velocity_vector
+            self.velocity_vector.direction = self.owner.rotation + self.offset
+            self.owner.velocity = self.velocity_vector
         if self.acceleration:
-            if self.last_rotation is not None:
-                self.old_acceleration_vector.set_radial((self.last_rotation + \
-                                                self.offset, self.acceleration))
-            self.new_acceleration_vector.set_radial((self.owner.rotation+self.offset,
-                                         self.acceleration))
-            self.owner.acceleration += \
-                    self.new_acceleration_vector - self.old_acceleration_vector
+            self.acceleration_vector.direction = self.owner.rotation+self.offset
+            self.owner.acceleration = self.acceleration_vector
         self.last_rotation = self.owner.rotation
         
         

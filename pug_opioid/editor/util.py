@@ -12,6 +12,7 @@ import Opioid2D
 from Opioid2D.public.Node import Node
 
 from pug import code_export, GnameDropdown, CodeStorageExporter
+from pug.component import Component
 from pug.syswx.util import show_exception_dialog
 from pug.syswx.SelectionWindow import SelectionWindow
 from pug.util import make_name_valid
@@ -19,7 +20,7 @@ from pug.util import make_name_valid
 from pug_opioid.util import get_available_scenes, get_available_objects
 from pug_opioid.editor import EditorState
 
-_DEBUG = True
+_DEBUG = False
 
 _IMAGEPATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Images")
 def get_image_path(filename):
@@ -127,7 +128,12 @@ def archetype_changed( archetype, oldclass, archetype_exporter=None):
     attributeList = archetype_exporter.create_attribute_lists(
                                             new_dummy, storageDict)[0]                                                        
     for changer in nodes:
-        if changer.__class__ != oldclass or changer == old_dummy:
+        if changer == old_dummy or changer == new_dummy or changer == archetype:
+            # just a temporary object used by this process
+            continue
+        if not (changer.__class__.__name__ == newclass.__name__ and \
+                    changer.__class__.__module__ == newclass.__module__):
+            # not of the archetype's class
             continue
         if _DEBUG: print "archetype_changed changer:", changer
         old_dummy = archetype_exporter.get_dummy(changer.__class__)
@@ -140,13 +146,21 @@ def archetype_changed( archetype, oldclass, archetype_exporter=None):
                 newval = getattr(new_dummy, attr)
             except:
                 continue
-            if oldval == newval or getattr(newval, '__module__', False):
+            if oldval == newval:
                 continue
             setVal = False
             try:
                 val = getattr(changer, attr)
             except:
                 setVal = True
+            if getattr(newval, '__module__', False):
+                valtype = type(newval)
+                if valtype == Opioid2D.public.Vector.VectorReference:
+                    setVal = val.x == oldval.x and val.y == oldval.y
+                elif valtype == Opioid2D.public.Image.ImageInstance:
+                    setVal = True
+                else:
+                    continue
             if setVal or val == oldval:
                 try:
                     setattr(changer, attr, newval)
@@ -300,10 +314,11 @@ parentWindow: the parent window of name dialog. If not provided, the
         Opioid2D.Director.scene.__class__ = sceneDict[sceneName]
     finally:
         wx.EndBusyCursor()        
-        wait_for_state(EditorState)
-        if Opioid2D.Director.scene == oldscene:
+        if Opioid2D.Director.scene != oldscene:
+            wx.GetApp().set_selection([])
             if _DEBUG: print "util: save_scene_as reset select:", selection        
-            app.set_selection(selection)
+        wait_for_state(EditorState)
+
         wx.GetApp().refresh()
           
 def wait_for_state(state):
@@ -320,6 +335,11 @@ def wait_for_state(state):
         if timer > 50:
             raise ValueError("Pug unable to set scene state")
     if _DEBUG: print "   State set"
+
+def wait_for_exit_scene():  
+    Opioid2D.Director.scene.exit()
+    while not Opioid2D.Director.scene.exitted:
+        time.sleep(0.05) # give Opioid time to stop
     
 def close_scene_windows( scene=None):
     """_close_scene_windows( scene=None)
@@ -342,14 +362,28 @@ Note: for this to work on nodes, it must be run BEFORE the scene is changed.
         doclose = False
         if frameObj == scene:
             doclose = True
-        else:
-            if isinstance(frameObj, Opioid2D.public.Node.Node):
-                try:
-                    nodescene = frameObj.layer._scene
-                except:
-                    nodescene = 0
-                if nodescene == scene:
-                    doclose = True
+        elif isinstance(frameObj, Opioid2D.public.Node.Node):
+            try:
+                nodescene = frameObj.layer._scene
+            except:
+                nodescene = 0
+            if nodescene == scene:
+                doclose = True
+        elif isinstance(frameObj, Component):
+            if _DEBUG: print "close_scene_windows: Componentframe"
+            if _DEBUG: print "   frameObj:", frameObj
+            if _DEBUG: print "   owner:", frameObj.owner
+            if not frameObj.owner:
+                doclose = True
+            else:
+                if isinstance(frameObj.owner, Opioid2D.public.Node.Node):
+                    try:
+                        nodescene = frameObj.owner.layer_scene
+                    except:
+                        nodescene = scene
+                    if _DEBUG: print "   scene:", nodescene
+                    if nodescene == scene:
+                        doclose = True
         if doclose:
             frame.Close()    
 

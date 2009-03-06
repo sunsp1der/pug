@@ -12,14 +12,12 @@ class Fade(Component):
     # attributes: ['name', 'doc', {extra info}]
     _field_list = [
             ['fade_in_secs',
-                    "Number of seconds to take fading in. 0 = no fade."],
-            ['fade_in_alpha', "Fade in to this alpha value"],
+                    "Number of seconds to take fading in. -1 = no fade."],
             ['fade_out_secs',
-   "Number of seconds to take fading out when owner is destroyed. 0 = no fade."]
+"Number of seconds to take fading out when owner is destroyed. -1 = no fade."]
             ]
     #defaults
     fade_in_secs = 3.0
-    fade_in_alpha = 1.0
     fade_out_secs = 3.0
 
     @component_method
@@ -31,12 +29,12 @@ class Fade(Component):
         """fade_in(secs=None, dstalpha=None)
         
 secs: number of seconds to take fading. Default: self.fade_in_secs
-dstalpha: destination alpha to fade in to. Default: self.fade_in_alpha        
+dstalpha: destination alpha to fade in to. Default: self.owner.alpha       
 """
         if secs is None:
             secs = self.fade_in_secs
         if  dstalpha is None:
-            dstalpha = self.fade_in_alpha
+            dstalpha = self.owner.alpha
         if secs >= 0:
             self.owner.set_alpha(0)
             self.owner.do( AlphaFade(dstalpha, secs))
