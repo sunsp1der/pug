@@ -1,4 +1,4 @@
-"""__Working__.py"""
+"""SpawnOnDelete_Test.py"""
 
 ###################
 # import autocode #
@@ -22,10 +22,9 @@ class SpawnOnDelete_Test(PugScene):
         ExplodeParticle_archetype = ExplodeParticle(gname='ExplodeParticle')
         ExplodeParticle_archetype.archetype = True
 
-        StarBomb_archetype = StarBomb(gname='StarBomb')
-        StarBomb_archetype.archetype = True
-
         # Sprites
+        starbomb_instance = StarBomb()
+
         pugsprite_instance = PugSprite()
         pugsprite_instance.image = 'art/pug.png'
         pugsprite_instance.layer = 'Background'

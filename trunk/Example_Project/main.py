@@ -3,13 +3,12 @@ import os
 
 import Opioid2D
 
-from pug_opioid.util import get_available_scenes
+from pug_opioid.util import get_available_scenes, set_project_path
 
 from _game_settings import game_settings
 
-# prep
-    # put this folder on search path so absolute package names will work
-sys.path.insert( 0, os.path.dirname(os.path.dirname(__file__))) 
+# set this file's folder as main project path
+set_project_path( os.path.dirname(__file__))
 
 # settings
 position = game_settings.rect_opioid_window[0:2]
@@ -23,12 +22,12 @@ if len(sys.argv) > 1:
     scenedict = get_available_scenes( useWorking=True) # use __Working__.py
     initial_scene = scenedict[sys.argv[1]] 
 else:
-    # starting scene
+    # set starting scene to initial_scene from game_settings
     scenedict = get_available_scenes( useWorking=False)
     initial_scene = scenedict[game_settings.initial_scene]
 
 # start Opioid
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % position
-Opioid2D.Display.init(resolution, title=title, fullscreen=fullscreen)
+Opioid2D.Display.init(resolution, title=title, fullscreen=fullscreen, icon='')
 Opioid2D.Director.start_game = True
 Opioid2D.Director.run(initial_scene)
