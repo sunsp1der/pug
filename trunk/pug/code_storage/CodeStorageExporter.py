@@ -462,14 +462,17 @@ args: (self, obj, storageDict, indentLevel=0, dodef=True, docode=True)
 dodef: create the def line
 docode: create the method code
 Create the init_method code. dodef and docode are to facilitate customization.
+If storageDict['force_init_def'] is False, dodef is True, docode is True, and
+there are no attributes to set, this method returns "". 
 """
         attrList, instanceAttrList = self.create_attribute_lists( obj,
                                                                   storageDict)
         attributeCode = self.create_attribute_code(obj, storageDict, 
                                                    indentLevel + 2, 'self.',
                                                    instanceAttrList)
-        if not attributeCode and not storageDict['force_init_def']:
-            return ''
+        if dodef and docode and not attributeCode and \
+                                        not storageDict['force_init_def']:
+            return '' # no init call necessary
         else:
             codeList = []
             baseIndent = _INDENT*indentLevel
@@ -481,7 +484,7 @@ Create the init_method code. dodef and docode are to facilitate customization.
                 initCode += [')']                
                 codeList += [baseIndent, _INDENT, 'def '] + initCode + [':\n']
             if docode:
-                if storageDict['base_init'] != None:
+                if storageDict['base_init']:
                     # call base class init method
                     initCode = [storageDict['init_method'], '(self']
                     if storageDict['base_init_args']:
@@ -497,7 +500,10 @@ Create the init_method code. dodef and docode are to facilitate customization.
                         codeList.append(attributeCode)
                         codeList += baseclass_init
                 else:
-                    codeList.append(attributeCode)            
+                    if dodef and docode and not attributeCode:
+                        codeList+= [baseIndent, _INDENT * 2, 'pass\n']
+                    else:
+                        codeList.append(attributeCode)            
             return ''.join(codeList)
     
     def create_attribute_code(self, obj, storageDict, indentLevel=0, prefix='', 

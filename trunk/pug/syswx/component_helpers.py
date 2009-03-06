@@ -6,6 +6,7 @@ TreeCtrlComboPopup
 """
 
 from time import time
+import weakref
 
 import wx
 import wx.combo
@@ -122,8 +123,9 @@ choose a given component to be selected after refresh.
             if selectComponent is None or selectComponent not in componentList:
                 selectComponent=componentList[0]
             for component in componentList:
+                ref = weakref.ref(component)
                 item = self.listCtrl.AddItem(component.__class__.__name__, 
-                                         component)
+                                         ref)
                 if component == selectComponent:
                     retValue = item
                     self.listCtrl.SelectItem(item)
@@ -150,7 +152,11 @@ Call this when the selected component is removed from the object being viewed.
         self.refresh_components()
             
     def get_selected(self):
-        return self.listCtrl.GetSelectedData()
+        ref = self.listCtrl.GetSelectedData()
+        if ref:
+            return ref()
+        else:
+            return None
     
     def get_text(self):
         return self.listCtrl.GetStringValue()

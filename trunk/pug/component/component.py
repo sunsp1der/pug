@@ -67,14 +67,22 @@ enabled: When this is false, the component's component_methods will not
     _type = None
     _class_list = []
     _field_list = []
+    _component_method_names = None
     _pug_pugview_class = 'Component'
     __owner = None
     enabled = True
     
     def __init__(self, owner=None, **kwargs):
-        self._set_owner(owner)
+        self.owner = owner
         for attr, val in kwargs.iteritems():
             setattr(self, attr, val)
+        cls = self.__class__
+        if cls._component_method_names is None:
+            names = []
+            for attr in dir(cls):
+                if isinstance(getattr(cls,attr), ComponentMethod):
+                    names.append(attr)
+            cls._component_method_names = names
             
     def _set_owner(self, owner):
         if self.__owner:
@@ -92,24 +100,24 @@ enabled: When this is false, the component's component_methods will not
             return None
         else:
             return self.__owner()
-            
+    
     def _owner_deleted(self, owner):
+        if _DEBUG: print "component._owner_deleted", self, owner
         self.enabled = False
+        self.owner = None
         
     owner = property(get_owner, _set_owner, 
                      doc="The object that this component is attached to")
                             
-    def _component_method_names(doc):
-
-        """Returns a generator of component method names."""
-
-        def get_component_method_names(self):
-            cls = self.__class__
-            return (k for k in dir(cls) \
-                    if isinstance(getattr(cls, k), ComponentMethod))
-        return property(get_component_method_names, doc=doc)
-    _component_method_names = \
-        _component_method_names(_component_method_names.__doc__)
+#    def _component_method_names(doc):
+#        """Returns a generator of component method names."""
+#        def get_component_method_names(self):
+#            cls = self.__class__
+#            return (k for k in dir(cls) \
+#                    if isinstance(getattr(cls, k), ComponentMethod))
+#        return property(get_component_method_names, doc=doc)
+#    _component_method_names = \
+#        _component_method_names(_component_method_names.__doc__)
 		
     def is_duplicate_of(self, other):
         duplicate = False
@@ -177,6 +185,16 @@ line breaks between each. To create a single-line argument list, strip out all
                   'as_class': True,
                   'skip_attributes': ['_component_method_names']
                   }
+    def _debug_referrents(self):
+        import gc
+        gc.collect()
+        print "referrers to", self
+        g = gc.get_referrers(self)
+        for ob in g:
+            print "   ",ob
+            b = gc.get_referrers(ob)
+            for ob2 in b:
+                print "      ",ob2
         
 class ComponentList(object):
 
@@ -203,14 +221,14 @@ kwargs: will be assigned to component attributes as per component.__init__
                                              repr(component), 
                                              "is not a component"]))
         methods = self.__methods
-        if _DEBUG: print "ComponentList.add",component,kwargs
+#        if _DEBUG: print "ComponentList.add",component,kwargs
         for key in component._component_method_names:
             value = getattr(component, key)
             component_methods = methods.get(key)
             if component_methods is None:
                 methods[key] = component_methods = []
-            if _DEBUG: print "   methods[",key,']',component_methods
-            if _DEBUG: print "       .append:",value
+#            if _DEBUG: print "   methods[",key,']',component_methods
+#            if _DEBUG: print "       .append:",value
             component_methods.append(value)
         self.__components.append(component)
 
@@ -224,7 +242,6 @@ kwargs: will be assigned to component attributes as per component.__init__
         return self.__methods.keys()
 
     def remove(self, component):
-        self.__components.remove(component)
         methods = self.__methods
         for key in component._component_method_names:
             value = getattr(component, key)
@@ -232,7 +249,9 @@ kwargs: will be assigned to component attributes as per component.__init__
             methods_list.remove(value)
             if not len(methods_list):
                 del methods[key]
-
+        self.__components.remove(component)
+        component.owner = None
+ 
 class ComponentMethod(object):
         
     def __del__(self):
@@ -250,6 +269,7 @@ class ComponentMethod(object):
             cache[instance_id] = weakref.ref(bound_method)
         else:
             bound_method = bound_method_ref()
+#        if _DEBUG: print "ComponentMethod.__get__:",instance, cls, bound_method
         return bound_method
     
     def __init__(self, func):
