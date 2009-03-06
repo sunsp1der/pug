@@ -21,11 +21,12 @@ from pug.syswx.pugmdi import PugMDI
 from pug_opioid import PugScene, PugSprite
 from pug_opioid.util import get_available_scenes, get_available_objects, \
                             set_project_path, start_scene, \
-                            save_game_settings
-from pug_opioid.editor import EditorState, selectionManager
+                            save_game_settings, get_project_path
+from pug_opioid.editor import EditorState, graphicsManager
 from pug_opioid.editor.util import close_scene_windows, save_scene_as, \
-                                    project_quit, wait_for_state
-                                    
+                                    project_quit, wait_for_state, \
+                                    wait_for_exit_scene, get_image_path
+
 _DEBUG = False
 
 class OpioidInterface(pug.ProjectInterface):
@@ -41,8 +42,6 @@ scene: the scene to load initially
     _use_working_scene = True
     def __init__(self, rootfile, scene=PugScene):
         if _DEBUG: print "OpioidInterface.__init__"
-        # put this folder on search path so absolute package names will work
-        sys.path.insert( 0, os.path.dirname(os.path.dirname(rootfile))) 
         # for process watching purposes
         import dl
         libc = dl.open('/lib/libc.so.6')
@@ -65,7 +64,8 @@ scene: the scene to load initially
         os.environ['SDL_VIDEO_WINDOW_POS'] = \
                 "%d,%d" % self.pug_settings.rect_opioid_window[0:2]
         Opioid2D.Display.init(self.pug_settings.rect_opioid_window[2:4], 
-                              title='Pug-Opioid Scene')
+                              title='Pug-Opioid Scene', 
+                              icon=get_image_path('pug.png'))
         Opioid2D.Director.game_started = False
         Opioid2D.Director.playing_in_editor = True
         thread.start_new_thread(self.Director.run, (PugScene,))
@@ -82,8 +82,9 @@ settingsObj: an object similar to the one below... if it is missing any default
     attributes, they will be replaced here.
 """    
         # DEFAULT GAME SETTINGS
+        defaultTitle = os.path.split(get_project_path())[1]
         class game_settings():
-            title = 'NewGame'
+            title = defaultTitle
             initial_scene = '__Working__'
             rect_opioid_window = (20, 20, 800, 600)
             fullscreen = False
@@ -171,10 +172,20 @@ settingsObj: an object similar to the one below... if it is missing any default
         # default menus
         if not self.cached[2]:
             app.add_global_menu("Pug-Opioid",
-                [["Save Working Scene\tCtrl+S", self.save_using_working_scene,
-                  "Save current scene in scenes/__Working__.py"],
+                [["New Project", self.new_project, 
+                        "Create a new Pug-Opioid project"],
+                 ["Open Project", self.open_project,
+                        "Open a Pug-Opioid project"],
+                 ["*DIVIDER*"],
+                 ["New Scene\tCtrl+N", [self.set_scene, ("PugScene",), {}],
+                        "Create a new PugScene"],
+                 ["Save Working Scene\tCtrl+S", self.save_using_working_scene,
+                        "Save current scene in scenes/__Working__.py"],
+                 ["New Object\tShift+Ctrl+N", self.add_object,
+                        "Add the currently selected add object to the scene"],
+                 ["*DIVIDER*"],
                  ["Raise Windows\tCtrl+W", app.raise_all_frames,
-                  "Raise all PUG Windows to top"],
+                        "Raise all PUG Windows to top"],
                  ["Quit\tCtrl+Q", self.quit]])
             self.cached[2]=True
         # open MDI frame
@@ -226,8 +237,10 @@ value can be either an actual scene class, or the name of a scene class
                 value = self.sceneDict.get(value.__name__, value)
         oldscene = self.Director.scene
         if oldscene.__class__ != value or forceReload:
+            if _DEBUG: print "Interface.set_scene", value
             self.set_selection([])
-            oldscene.stop()
+            close_scene_windows(oldscene)
+            self.stop_scene(False)
             self.Director.scene = value
             # wait for completion
             starttime = time.time()
@@ -242,11 +255,11 @@ value can be either an actual scene class, or the name of a scene class
                     else:
                         starttime = time.time()
                 time.sleep(0.05)
-            close_scene_windows(oldscene)
             wait_for_state(EditorState)
             sceneFrame = wx.FindWindowByName("SceneFrame")
             if sceneFrame:
-                sceneFrame.set_object(self.Director.scene, title="Scene")                        
+                sceneFrame.set_object(self.Director.scene, title="Scene")
+            wx.GetApp().refresh()
             
     def _get_sceneclass(self):
         try:
@@ -288,7 +301,7 @@ Callback from PugApp...
 """
         if self.Director.scene.state and \
                         self.Director.scene.state.__class__ == EditorState:
-            selectionManager.on_set_selection(selectedObjectDict)
+            graphicsManager.on_set_selection(selectedObjectDict)
         
     def open_selection_frame(self):
         """Open a pug window for selected object"""
@@ -327,12 +340,20 @@ Callback from PugApp...
         return True
     
     def browse_components(self):
-        """Open up a component browser window"""
+        """Open up a window showing all available components"""
         if self.component_browser:
             self.component_browser.Raise()
         else:
             self.component_browser = ComponentBrowseFrame()
             self.component_browser.Show()
+
+    def new_project(self):
+        """Create a new Pug_Opioid project"""
+        pass
+    
+    def open_project(self):
+        """Open a Pug_Opioid project"""
+        pass
 
     def _get_use_working_scene(self): 
         return self._use_working_scene
@@ -385,18 +406,20 @@ doSave: save working copy first
 #        app.set_selection([])
         start_scene()
     
-    def stop_scene( self):
-        """stop_scene()
+    def stop_scene( self, doRevert=True):
+        """stop_scene(doRevert=True)
         
-Stop the current scene from playing. Reload original state from disk.
+Stop the current scene from playing. if doRevert, Reload original state from 
+disk.
 """
         if _DEBUG: print "stop_scene"
         if not Opioid2D.Director.game_started:
             return
         self.scene.stop()
-        time.sleep(0.1) # give Opioid a little time to stop
+        wait_for_exit_scene()
         pug.set_default_pugview("Component", _dataPugview)
-        self.revert_scene()
+        if doRevert:
+            self.revert_scene()
         
     def execute_scene( self, doSave=True):
         """execute_scene()
@@ -433,12 +456,9 @@ Add an object to the scene
         if objectclass == PugSprite and type(self.scene.state) == EditorState:
             # set a default image for basic sprite
             node.image = "art/pug.png"
-            node.position = Opioid2D.Vector(*Opioid2D.Display.get_view_size())/2
-            if len(self.scene.layers) > 1:
-                # skip 'selection' layer
-                node.layer = self.scene.layers[-2]
-            else:
-                node.layer = "Background"
+            node.position = \
+                    Opioid2D.Vector(*Opioid2D.Display.get_view_size()) * 0.5
+            node.layer = "Background"
         wx.GetApp().set_selection([node])
         
     def reload_object_list(self):

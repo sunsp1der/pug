@@ -7,23 +7,26 @@ import Opioid2D
 
 from pug_opioid.PugState import PugState
 
-_DEBUG = True
+_DEBUG = False
 
 class EditorState(PugState):
     layers = ["__editor__",]
     selectOnUp = None
-    exitted = False
     def enter(self):
+        if _DEBUG: print "EditorState.enter"
         self.interface = wx.GetApp().projectObject
-        from pug_opioid.editor import selectionManager
-        self.selectionManager = selectionManager
+        from pug_opioid.editor import graphicsManager
+        self.graphicsManager = graphicsManager
         PugState.enter(self)
-#        self.selectionManager.set_selection( wx.GetApp().selectedObjectDict)
+        self.graphicsManager.boxDict.clear()
+        wx.CallAfter(self.graphicsManager.set_selection,
+                      wx.GetApp().selectedObjectDict)
+        if _DEBUG: print "EditorState.enter complete"
 
     def exit(self):
         if _DEBUG: print "EditorState.exit"
-        self.selectionManager.boxDict.clear()
-        wx.CallAfter(wx.GetApp().set_selection,[])
+        self.graphicsManager.boxDict.clear()
+#        wx.CallAfter(wx.GetApp().set_selection,[])
         if _DEBUG: print "EditorState.exit complete"
         PugState.exit(self)
             
@@ -82,5 +85,5 @@ class EditorState(PugState):
         wx.CallAfter(wx.GetApp()._evt_project_frame_close)
         
     def realtick(self):
-        self.selectionManager.update()    
+        self.graphicsManager.update()    
 

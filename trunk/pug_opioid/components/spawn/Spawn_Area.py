@@ -13,12 +13,12 @@ from pug_opioid.util import get_available_objects, get_project_object
 from pug_opioid.editor.agui import ObjectsDropdown
 
 class Spawn_Area(Component):
-    """This object spawns other objects"""
+    """Owner spawns other objects"""
     # component_info
     _set = 'pug_opioid'
     _type = 'spawn'
     _class_list = [Node]
-    # attributes: ['name', 'doc', {extra info}]    
+    # attributes:   
     _field_list = [
         ["object", ObjectsDropdown, {'component':True,
                                      'doc':"The object class to spawn"}],
@@ -26,19 +26,21 @@ class Spawn_Area(Component):
                 "Seconds between spawns (0 for no automatic spawning)"],
         ["spawn_variance",
                 "spawn_interval can vary this many seconds"],
-        ["spawn_delay","Wait this many seconds before beginning to spawn"],
         ["spawn_location", Dropdown, {'list':['area', 'center', 'edges', 'top',
                                               'bottom','left','right'], 
                             'doc':"The area where objects can be spawned"}],
         ["spawn_offset", 
-         "Spawn location is offset by this muvh (scaled by owner size)"],
-        ["objects_per_spawn","The number of objects to spawn at one time"],
-        ["add_rotation", "Add owner's rotation to spawned object's rotation"],
-        ["add_velocity", "Add owner's velocity to spawned object's velocity"],
+         "Spawn location is offset by this much (scaled by owner size)"],
+        ["spawn_delay","Wait this many seconds before beginning to spawn"],
+        ["min_objects_per_spawn","Minimum number of objects created per spawn"],
+        ["max_objects_per_spawn","Maximum number of objects created per spawn"],
         ["max_objects_spawned",
 "Total number of objects owner can create over its lifetime (-1 = unlimited)"],
         ["max_spawns_in_scene",
             "Maximum number of spawns in scene at one time (-1 = unlimited)"],
+        ["match_scale", "Multiply spawned object's scale by owner's scale"],
+        ["add_rotation", "Add owner's rotation to spawned object's rotation"],
+        ["add_velocity", "Add owner's velocity to spawned object's velocity"],
         ["delete_when_done",
    "Delete this object after the specified number of objects has been spawned"],
         ["owner_callback", 
@@ -55,7 +57,9 @@ class Spawn_Area(Component):
     spawn_delay = 0.0
     spawn_location = 'area'
     spawn_offset = (0,0)
-    objects_to_spawn = 1
+    min_objects_per_spawn = 1
+    max_objects_per_spawn = 1
+    match_scale = True
     add_rotation = True
     add_velocity = False
     max_objects_spawned = -1
@@ -73,7 +77,7 @@ class Spawn_Area(Component):
     @component_method
     def on_added_to_scene(self):
         "Start spawn timer when object is added to scene"
-        self.spawned_objects = weakref.WeakKeyDictionary()
+        self.spawned_objects = weakref.WeakValueDictionary()
         self.start_spawning()
         
     def start_spawning(self):
@@ -91,11 +95,13 @@ class Spawn_Area(Component):
         if not isclass(self.spawn_class) or not self.enabled:
             return None
         if not self.spawned_objects:
-            self.spawned_objects = weakref.WeakKeyDictionary()
+            self.spawned_objects = weakref.WeakValueDictionary()
         spawned_objects = []
-        for i in range(self.objects_to_spawn):
+        count = random.randint(self.min_objects_per_spawn,
+                               self.max_objects_per_spawn)
+        for i in range(count):
             obj = self.spawn_class( register=False)
-            self.spawned_objects[obj] = self.spawn_count
+            self.spawned_objects[self.spawn_count] = obj
             x_pos = 0
             y_pos = 0
             location = self.spawn_location
@@ -128,6 +134,8 @@ class Spawn_Area(Component):
             obj.position = Vector(x_pos, y_pos)
             obj.position.direction += self.owner.rotation
             obj.position += self.owner.position
+            if self.match_scale:
+                obj.scale = obj.scale * self.owner.scale
             if self.add_rotation:
                 obj.rotation += self.owner.rotation
                 obj.velocity.direction += self.owner.rotation
@@ -144,10 +152,10 @@ class Spawn_Area(Component):
             if self.max_objects_spawned > -1 and \
                     self.spawn_count >= self.max_objects_spawned:
                 if self.delete_when_done:
-                    self.owner.do(Delete)
+                    self.owner.do(Delete())
                 break
-            if not(self.max_spawns_in_scene <= 0 or \
-                    len(self.spawned_objects) <= self.max_spawns_in_scene):
+            if self.max_spawns_in_scene > 0 and \
+                    len(self.spawned_objects) >= self.max_spawns_in_scene:
                 break            
         return spawned_objects               
             
@@ -167,8 +175,8 @@ scheduled unless max_objects_spawned has been reached. """
         if self.spawn_interval > 0 and schedule_next:
             self.action = self.owner.do( Delay(self.get_next_spawn_time()) + \
                                          CallFunc(self.check_spawn))
-        if self.max_spawns_in_scene <= 0 or \
-                len(self.spawned_objects) <= self.max_spawns_in_scene:
+        if self.max_spawns_in_scene < 0 or \
+                len(self.spawned_objects) < self.max_spawns_in_scene:
             return self.spawn()
         return None
                     

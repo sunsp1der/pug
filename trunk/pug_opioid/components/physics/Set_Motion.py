@@ -3,7 +3,7 @@ from Opioid2D.public.Node import Node
 from pug.component import *
 
 class Set_Motion(Component):
-    """Set object's velocity, acceleration, rotation and friction when it's
+    """Set owner's velocity, acceleration, rotation and friction when it's
 added to a scene."""
     _set = 'pug_opioid'
     _type = 'physics'
@@ -15,11 +15,12 @@ added to a scene."""
             ['acceleration_y', 'Vertical acceleration'],
             ['rotation_speed', 'Clockwise rotational velocity'],
             ['friction', '0-1 multiplier applied every realtick'],
-            ['additive', 
-    "Add to current values instead of setting them. Friction is multiplied."],
             ['rotated',
-    """If owner is rotated when motion is set, velocity 
-    and acceleration will be relative to that rotation."""],
+"""If owner is already rotated when motion is set, velocity 
+and acceleration will be relative to that rotation."""],
+            ['additive', 
+"""Add to owner's current values instead of setting them. 
+Friction is multiplied."""],
     ]
     #defaults
     velocity_x = 0
@@ -28,8 +29,8 @@ added to a scene."""
     acceleration_y = 0
     rotation_speed = 0
     friction = 1.0
-    additive = True
     rotated = True
+    additive = True
         
     @component_method
     def on_added_to_scene(self):

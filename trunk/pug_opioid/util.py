@@ -130,6 +130,7 @@ the objects folder."""
 
 def set_project_path( path):
     global projectPath
+    path = os.path.realpath(path)
     if projectPath:
         sys.path.remove(projectPath)
     projectPath = path
@@ -139,4 +140,4 @@ def set_project_path( path):
         
 def get_project_path():
     return projectPath
-    
+        

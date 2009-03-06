@@ -11,7 +11,7 @@ class Follow_Mouse(Component):
     _set = 'pug_opioid'
     _type = 'controls'
     _class_list = [Node]
-    # attributes: ['name', 'doc', {extra info}]    
+    # attributes:   
     _field_list = [
             ['face_movement','Rotate object to direction of motion']
             ]

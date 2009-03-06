@@ -14,12 +14,12 @@ from pug_opioid.editor.util import get_image_path
 _line_sprite_file = get_image_path("dot.png")
 _empty_sprite_file = get_image_path("empty.png")
 
-_DEBUG = True
+_DEBUG = False
 
-class SelectionManager():
-    """SelectionManager()
+class GraphicsManager():
+    """GraphicsManager()
 
-Object that manages selection graphics in the Opioid2D frame
+Object that manages editor graphics in the Opioid2D frame
 """
     new_selection = None
     def __init__(self):
@@ -30,7 +30,7 @@ Object that manages selection graphics in the Opioid2D frame
         
 Callback from pug.App...
 """
-        if _DEBUG: print 'SelectionManager.on_set_selection',\
+        if _DEBUG: print 'GraphicsManager.on_set_selection',\
                             selectedObjectDict.data
         self.set_selection( selectedObjectDict)
         
@@ -40,7 +40,7 @@ Callback from pug.App...
 Set the selection to the given list of objects. Draw a box around each one.
 This action will be deferred until after current update...
 """
-        if _DEBUG: print 'SelectionManager.set_selection', \
+        if _DEBUG: print 'GraphicsManager.set_selection', \
                             selectedObjectDict.data
         self.new_selection = selectedObjectDict
 
@@ -49,7 +49,7 @@ This action will be deferred until after current update...
         
 Set the selection to the given list of objects. Draw a box around each one.
 """
-        if _DEBUG: print 'SelectionManager.do_set_selection', \
+        if _DEBUG: print 'GraphicsManager.do_set_selection', \
                             selectedObjectDict.data
         keySet = set(self.boxDict.keys())
         selectSet = set()
@@ -69,6 +69,7 @@ Set the selection to the given list of objects. Draw a box around each one.
     
     def update(self):
         if self.new_selection is not None:
+            if _DEBUG: print "GraphicsManager.update():",self.new_selection.data
             # don't do anything if we're in the middle of a drag
             for box in self.boxDict.itervalues():
                 if box.area.dragging:
@@ -76,6 +77,7 @@ Set the selection to the given list of objects. Draw a box around each one.
             new_selection = self.new_selection
             self.new_selection = None
             self.do_set_selection(new_selection)
+            if _DEBUG: print "   GraphicsManager.update() DONE"
         self.update_boxes()
         
     def update_boxes(self):
@@ -110,11 +112,11 @@ update all selection boxes.
         except:
             if _DEBUG: 
                 import sys
-                print "SelectionManager.update_boxes: exception"
+                print "GraphicsManager.update_boxes: exception"
                 print sys.exc_info()[1]
             pass
             
-selectionManager = SelectionManager()
+graphicsManager = GraphicsManager()
         
 class SelectBox():
     """SelectBox()
@@ -158,11 +160,11 @@ node: any object containing a 'rect' attribute that is a pygame rect
             return
         elif self.rect.size != rect.size:
             line = self.lines['left']
-            line.position = (rect.width * -0.5, 0)
+            line.position = (rect.width * -0.5, -0.5)
             line.scale = (1,rect.height)
             
             line = self.lines['right']
-            line.position = (rect.width * 0.5, 0)
+            line.position = (rect.width * 0.5, -0.5)
             line.scale = (1,rect.height)
             
             line = self.lines['top']
@@ -200,6 +202,6 @@ class SelectBoxAreaSprite( Opioid2D.gui.GUISprite):
 
     def on_drag_end(self):
         Opioid2D.Director.scene.state.selectOnUp = None
-        selectionManager.update_boxes()
+        graphicsManager.update_boxes()
         wx.CallAfter(wx.GetApp().selection_refresh)
         self.dragging = False

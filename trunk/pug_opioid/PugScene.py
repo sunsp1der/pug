@@ -16,7 +16,8 @@ _DEBUG = False
 class PugScene( Opioid2D.Scene, pug.BaseObject):
     """PugScene - Opioid2d Scene with features for use with pug"""
     __node_num = 0
-    started  = False
+    started = False
+    exitted = False
     _pug_pugview_class = 'PugScene'
     def __init__(self, gname=''):
         Opioid2D.Scene.__init__(self)
@@ -30,6 +31,13 @@ class PugScene( Opioid2D.Scene, pug.BaseObject):
                 wx.CallAfter(wx.GetApp().projectObject.stop_scene)
             else:
                 Opioid2D.Director.quit()
+                
+    def enter(self):
+        self.on_enter()
+        self.start()
+        
+    def on_enter(self):
+        pass
 
     def start(self):
         """call after enter() and before state changes"""
@@ -52,6 +60,17 @@ class PugScene( Opioid2D.Scene, pug.BaseObject):
         Opioid2D.Director.game_started = False  
         Opioid2D.Director.start_game = False                     
         self.started = False
+        self.exit()
+        
+    def exit(self):
+        if _DEBUG: print "PugScene.exit"
+        if not self.exitted:
+            self.all_nodes_callback('on_exit_scene', self)
+            nodes = self.nodes.keys()
+            for node in nodes:
+                if _DEBUG: print "   Delete Node:",node
+                node.delete()
+            self.exitted = True
     
     def all_nodes_callback(self, callback, *args, **kwargs):
         """Send a callback to all nodes in the scene"""
@@ -222,7 +241,6 @@ Update the PugScene's node tracking dict for node. Possible commands: 'Delete'
 #                                 '\n']
         if storageDict['as_class']:            
             # enter function
-            custom_code_list += [baseIndent, _INDENT, 'def enter(self):\n']
             if self.nodes:
                 # create ordered list of nodes
                 nodes = self.get_ordered_nodes()
@@ -293,9 +311,15 @@ Update the PugScene's node tracking dict for node. Possible commands: 'Delete'
                                                             nodeStorageDict, 
                                                             indentLevel + 2,
                                                             False)                    
-                    custom_code_list+=[node_code,'\n']
-            custom_code_list += [baseIndent, _INDENT*2, '# Pug auto-start\n']
-            custom_code_list += [baseIndent, _INDENT * 2, 'self.start()','\n']
+                    custom_code_list += [node_code,'\n']
+            init_code = [baseIndent, _INDENT, 'def on_enter(self):\n']
+            if not custom_code_list:
+                custom_code_list = init_code
+                custom_code_list += [baseIndent, _INDENT*2, 'pass\n']
+            else:
+                custom_code_list = init_code + custom_code_list
+#            custom_code_list += [baseIndent, _INDENT*2, '# Pug auto-start\n']
+#            custom_code_list += [baseIndent, _INDENT * 2, 'self.start()','\n']
         if base_code.endswith('pass\n') and custom_code_list: 
             # clean up pass case (for looks)
             base_code = base_code.splitlines()[0:-1]
