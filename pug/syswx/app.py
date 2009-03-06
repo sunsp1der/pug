@@ -21,7 +21,7 @@ from pug.syswx.SelectionWindow import SelectionWindow
 # TODO: create a link between project closing and app closing
 
 _RECTPREFIX = 'rect_'
-_DEBUG = True
+_DEBUG = False
 
 class pugApp(wx.App):
     """pugApp: wx.App for the pug system
@@ -379,8 +379,11 @@ Add a global menu to be placed on all pugframes.
 
 name: menu name. Do not use __ids__ or __order__ as names
 entryList: a list of entries in this form: 
-   [command name, function to be run, tooltip (optional)]
-   For hotkeys set command name to: NAME\tHOTKEY with HOTKEY like Shift+Ctrl+A
+   [command name, function info, tooltip (optional)]
+   OR
+   ["*DIVIDER*"] for menu divider
+   command name: name or name\tHOTKEY with HOTKEY like Shift+Ctrl+A
+   function info: function to run or [function, args, kwargs]
 """
         order = self.globalMenuDict['__order__']
         if name in order:
@@ -404,6 +407,9 @@ menubar: the wx.MenuBar to add the global menus to
             menubar.Append(menu=menu, title=menuName)
             menuEntries = self.globalMenuDict.get(menuName, [])
             for entry in menuEntries:
+                if entry == ["*DIVIDER*"]:
+                    menu.AppendSeparator()
+                    continue
                 id = wx.NewId()
                 name = entry[0]
                 func = entry[1]
@@ -416,8 +422,15 @@ menubar: the wx.MenuBar to add the global menus to
                 self.Bind(wx.EVT_MENU, self._evt_on_global_menu, id=id)
                 
     def _evt_on_global_menu(self, event):
-        func = self.globalMenuDict['__ids__'][event.Id]
-        func()
+        info = self.globalMenuDict['__ids__'][event.Id]
+        if type(info) is list:
+            if len(info) == 1: 
+                info[1] = ()
+            if len(info) == 2:
+                info[2] = {}
+            info[0](*info[1], **info[2])
+        else:
+            info()
         
     def set_busy_state(self, On=True):
         """set_busy_state(On=True)

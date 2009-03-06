@@ -1,13 +1,18 @@
 now:
 
 current version:
-	set name when archetype is selected
-		add 'callback' feature to base agui
-	attach component view to control
-	ctrl-w ctrl-q don't work
+	set gname
+	demo of heads watching a ufo
+	undo
+	save query when changing levels or quitting
+	new_project
+		dialog
+			folder
+			name
+			all settings
+	open_project
 
 Finalize:
-	Open/New project	
 	html tutorial
 		create project
 		create scene
@@ -18,12 +23,6 @@ Finalize:
 fun stuff:
 	so many frickin components to make :) 
 		REVIEW POWERPACK demo components for non collision components
-		on_destroy spawn
-		fade in fade out
-		grow in grow out
-		delete off-screen
-		timer delete
-		set name
 	
 bugs: 
 	add object after save
@@ -32,11 +31,30 @@ bugs:
 	crash - selecting an object while changing selectionwin to another view 
 
 later: 
+	hide the self.start in pugscene derivatives
+	only registered objects selectable by mouseclick
+	make sure field is selected when tabbing through controls... even after change
+	figure out some way to make derived classes work better
+		probably option to select base class
+	clone sprites
+		component copy
+		scene_archetype - in list with object types
+			OR is it a savesprite callback and a component that lets you save
+				it in a scene folder
+	automatically recur into component folders
+	add option for (set to None) on generic agui
+	context button on window frame?
+	default RAW to show __ when there is a different default
+	add 'callback' feature to base agui
+		set name when archetype is selected
+	make checkbox highlight visible
 	put main.py startup functionality into a separate module. 
 		take care of __working__ startup appropriately
 	#TODO: integer agui (with spinners?)
+		derive from generic
 		range
 	#TODO: float agui
+		derive from generic
 		limit float precision output
 		range
 	make progress bar move during load

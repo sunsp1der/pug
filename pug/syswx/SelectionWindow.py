@@ -23,7 +23,7 @@ To set the viewed object, use PugApp.set_selection.
         app.register_selection_watcher(self)
         self.on_set_selection( app.selectedObjectDict)        
         
-    def on_set_selection(self, selectionDict={}):
+    def on_set_selection(self, selectionDict):
         """on_set_selection(selectionDict={})
         
 selectionDict: a dict of obj:ref for this window to display a pug view of.
@@ -41,6 +41,7 @@ Callback from PugApp...
         self.selectionList = selectionList
         oldObject = self.object
         if not selectionList:
+            self.set_object(None)
             self.display_message("Nothing Selected")
             self.SetTitle("Selection", False)
         elif len(selectionDict) == 1:
@@ -49,11 +50,15 @@ Callback from PugApp...
         else:
             self.display_message("Multiple Objects Selected")
             self.SetTitle("Selection: Multiple", False)
+        if _DEBUG: print "   SelectionWindow.on_set_selection DONE"
             
     def on_selection_refresh(self):
+        if _DEBUG: print "SelectionWindow.on_selection_refresh"
         self.refresh()
+        if _DEBUG: print "   SelectionWindow.on_selection_refresh DONE"
         
     def SetTitle(self, title, prefix=True):
+        if _DEBUG: print "SelectionWindow.SetTitle", title, prefix
         parent = self.GetParent()
         if self.object:            
             self.titleBase = title
@@ -64,3 +69,4 @@ Callback from PugApp...
         else:
             self.titleBase = ''
             parent.SetTitle('Selection')
+        if _DEBUG: print "   SelectionWindow.SetTitle DONE"

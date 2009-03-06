@@ -14,6 +14,10 @@ ComponentObject: can use the pug component system
     def __init__(self, gname=''):
         pug.GnamedObject.__init__(self, gname=gname)
         pug.ComponentObject.__init__(self)
+        
+    def __del__(self):
+        pug.GnamedObject.__del__(self)
+        pug.ComponentObject.__del__(self)
 
     _codeStorageDict = {}
     add_subclass_skip_attributes(_codeStorageDict, pug.GnamedObject)

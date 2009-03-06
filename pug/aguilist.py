@@ -310,6 +310,7 @@ Get an agui from the cache or create one"""
         else:
             return agui
     agui = cls( attribute, window, aguidata)
+    if _DEBUG: print "agui created:", attribute, agui
     return agui
 
 # cache aguis here

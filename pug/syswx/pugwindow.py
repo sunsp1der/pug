@@ -121,7 +121,7 @@ holds multiple PugWindows in tabbed (or other) form.
             if not obj:
                 self.objectRef = None
                 self.object = obj
-                self.display_message("No object")
+#                self.display_message("No object")
                 self.setup_menus()
             else:
                 try:
@@ -174,9 +174,10 @@ tell app that our parent is viewing obj"""
         wx.CallAfter(self._object_deleted, obj)
         
     def _object_deleted(self, obj=None):
-        title = ''.join([ self.titleBase," (deleted)"])
-        self.set_object(None, title=title)
-        self.display_message(title)
+        if not self.msgTextCtrl:
+            title = ''.join([ self.titleBase," (deleted)"])
+            self.set_object(None, title=title)
+            self.display_message(title)
 
     def display_message(self, message):
         """display_message( message)
@@ -184,16 +185,19 @@ tell app that our parent is viewing obj"""
 Set the PugWindow to display a simple text message rather than view an object.
 To return to object view, call display_aguilist().
 """
-        sizer = self.pugSizer
-        sizer.ShowItems( False)
-        sizer.Clear(False)
-        self.reset_sizer()
-        text = wx.StaticText( self, label = message)
-        self.msgTextCtrl = text
-        sizer.Add(text,(0,0), flag = wx.ALIGN_CENTER)
-        sizer.AddGrowableRow(0)
-        sizer.AddGrowableCol(0)       
-        sizer.Layout()
+        if self.msgTextCtrl:
+            self.msgTextCtrl.SetLabel(message)
+        else:
+            sizer = self.pugSizer
+            sizer.ShowItems( False)
+            sizer.Clear(False)
+            self.reset_sizer()
+            text = wx.StaticText( self, label = message)
+            self.msgTextCtrl = text
+            sizer.Add(self.msgTextCtrl, (0,0), flag = wx.ALIGN_CENTER)
+            sizer.AddGrowableRow(0)
+            sizer.AddGrowableCol(0)       
+            sizer.Layout()
         
     def reset_sizer(self):
         sizer = self.pugSizer
@@ -257,6 +261,7 @@ To return to object view, call display_aguilist().
         if _DEBUG: print "PugWindow.display_aguilist enter"
         if self.msgTextCtrl:
             self.msgTextCtrl.Destroy()
+            self.msgTextCtrl = None
         if self.object:
             if self.aguilist:         
                 sizer = self.pugSizer

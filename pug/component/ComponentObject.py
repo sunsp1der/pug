@@ -1,6 +1,8 @@
-from weakref import ref as _ref
+from weakref import proxy, ref as _ref
+from new import instancemethod as _instancemethod
 import inspect
 import functools
+import sys
 
 from pug.component.component import *
 all_components = None
@@ -10,6 +12,7 @@ _DEBUG = False
 class ComponentObject(object):
 
     def __del__(self):
+        if _DEBUG: print "ComponentObject.__del__"
         self.__components = None
 
     def __init__(self):
@@ -26,19 +29,23 @@ class ComponentObject(object):
                         }    
                 
 def component_method_wrapper(*args, **kwargs):
-    if not kwargs.pop('___obj_ref')():
+    retvalue = None
+    obj = kwargs.pop('___obj_ref')()
+    if not obj:
         return
     ___original_method = kwargs.pop('___original_method')
-    for method in kwargs.pop('___component_methods'):
+    method_list = kwargs.pop('___component_methods')
+    for method in method_list:
         if method:
             if _DEBUG: print method, args, kwargs
             if not method.im_self.enabled:
                 continue
             if method._ComponentMethod__has_kwargs:
                 if method._ComponentMethod__has_args:
-                    method(*args, **kwargs)
+                    retvalue = method(*args, **kwargs)
                 else:
-                    method(*(args[:method._ComponentMethod__maxargs]), **kwargs)
+                    retvalue = method(
+                        *(args[:method._ComponentMethod__maxargs]), **kwargs)
             else:
                 fixed_args = args[:]
                 methodargs = method._ComponentMethod__args
@@ -47,26 +54,44 @@ def component_method_wrapper(*args, **kwargs):
                 while n < method._ComponentMethod__minargs:
                     if kwargs.has_key(methodargs[n]):
                         arg = kwargs[methodargs[n]]
-                    elif n + 1 > len(methodargs) - len(methoddefaults):
-                        arg = methoddefaults[n - len(methodargs) + \
-                                                   len(methoddefaults) + 1]
                     else:
-                        arg= None
+                        continue
+#                    elif n + 1 > len(methodargs) - len(methoddefaults):
+#                        arg = methoddefaults[n - len(methodargs) + \
+#                                                   len(methoddefaults) + 1]
+#                    else:
+#                        arg= None
                     fixed_args += (arg,)
                     n=n+1
                 while n < len(methodargs):
                     if kwargs.has_key(methodargs[n]):
                         arg = kwargs[methodargs[n]]
                     else:
-                        arg = None
+                        break
+#                        arg = None
                     fixed_args += (arg,)
                     n = n+1                    
                 if method._ComponentMethod__has_args:
-                    method(*fixed_args)
+                    retvalue = method(*fixed_args)
                 else:
-                    method(*fixed_args[:method._ComponentMethod__maxargs])
+                    retvalue = method(
+                                *fixed_args[:method._ComponentMethod__maxargs])
     if ___original_method:
-        return ___original_method(*args, **kwargs)                
+        retvalue = ___original_method( obj, *args, **kwargs)
+    return retvalue
+
+#TODO: run_component_method
+#def run_component_method( method, args, kwargs):
+#    try:
+#        retvalue = method(*args, **kwargs)
+#    except:
+#        print \
+#"""I'd like to take the component processor part off the stack here, so that 
+#an exception would not show run_component_method or component_method_wrapper in
+#the traceback. But I can't figure out how... 
+#"""
+#    else:
+#        return retvalue
 
 class ComponentSet(object):
 
@@ -111,38 +136,58 @@ simply be added. If it's a class, an instance will be created and added.
         original_methods = self.__original_methods
         sentinel = self.__sentinel
         for name in component._component_method_names:
-            component_methods = list(component_list.get_methods(name))
+            component_methods = component_list.get_methods(name)
             original_method = original_methods.get(name, sentinel)
             if original_method is sentinel:
                 original_method = getattr(obj, name, None)
+                if type(original_method) is _instancemethod:
+                    # if we store an instancemethod, owner won't delete properly
+                    original_method = getattr(original_method.im_class, name)
                 original_methods[name] = original_method
+            if original_method:
+                method_proxy = weakref.proxy(original_method) 
+            else:
+                method_proxy = None
             wrapper = functools.partial(component_method_wrapper,                             
                             ___obj_ref=self.__obj, 
                             ___component_methods=component_methods,
-                            ___original_method=original_method)
+                            ___original_method=method_proxy)
             if original_method:
                 functools.update_wrapper(wrapper, original_method)
             setattr(obj, name, wrapper)
         return component
     
-    def get(self, cls=None):
-        if type(cls) == str:
-            if all_components:
-                cls = getattr(all_components, cls, cls)
-        if cls is not None and not issubclass(cls, Component):
-            raise TypeError(''.join([cls," is not a component"]))
+    def get(self, comp=None):
+        """get(comp=None)->list of components of class comp or with name comp
+        
+If comp is None, return all components. If comp is a string, search by class 
+name. Otherwise search by class."""
+        compname = compclass = None
+        if type(comp) == str:
+            compname = comp
+        else:
+            compclass = comp
+        if compclass:
+            if not issubclass(compclass, Component):
+                raise TypeError(''.join([compclass," is not a component"]))
         components = self.__component_list.get_components()
-        if cls is None:
+        if comp is None:
             return components[:]
         else:
             complist = []
-            for b in components:
-                if isinstance(b, cls):
-                    complist.append(b)
+            if compclass:
+                for c in components:
+                    if isinstance(c, compclass):
+                        complist.append(c)
+            else:
+                for c in components:
+                    if c.__class__.__name__ == compname:
+                        complist.append(c)
             return complist
 
-    def get_one(self, cls):
-        for b in self.get(cls):
+    def get_one(self, comp):
+        "get_one(comp)->First element in list returned by get(comp)"
+        for b in self.get(comp):
             return b
 
     def remove(self, component):
