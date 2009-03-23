@@ -342,7 +342,6 @@ Callback from PugApp...
                                 obj.position[1] + vector[1])  
  
     def _on_pug_quit(self):
-        self.stop_scene(False)
         if getattr(self.game_settings,'save_settings_on_quit',True):
             if '__Working__' in self.Director.scene.__module__:
                 self.game_settings.initial_scene = '__Working__'
@@ -363,7 +362,7 @@ Callback from PugApp...
                        'Project Frame Closed', 
             wx.YES_NO | wx.CANCEL | wx.YES_DEFAULT | wx.ICON_QUESTION)
         answer = dlg.ShowModal() 
-        if answer == wx.ID_YES:
+        if answer == wx.ID_YES and not self.Director.game_started:
             self.save_using_working_scene()
         elif answer == wx.ID_CANCEL:
             return False

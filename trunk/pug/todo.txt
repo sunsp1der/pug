@@ -3,6 +3,7 @@ now:
 current version:
 	set gname
 	demo of heads watching a ufo
+	editable code_storage	
 	undo
 	save query when changing levels or quitting
 	new_project
@@ -96,7 +97,6 @@ later:
 		option to cancel
 		intercept at base level?
 	make objects imports absolute
-	editable code_storage
 	warn about duplicate gnames
 	multiple selection
 	easy import for scenes and objects would be nice, too
