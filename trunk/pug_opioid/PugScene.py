@@ -22,7 +22,10 @@ class PugScene( Opioid2D.Scene, pug.BaseObject):
     def __init__(self, gname=''):
         Opioid2D.Scene.__init__(self)
         pug.BaseObject.__init__(self, gname)   
-        if _DEBUG: print "PugScene.__init__", self.__class__.__name__     
+        if _DEBUG: print "PugScene.__init__", self.__class__.__name__   
+        
+        from Opioid2D.public.Sprite import SpritePool
+        SpritePool.preallocate(100)  
 
     def handle_keydown(self, ev):
         if ev.key == Opioid2D.K_ESCAPE:
@@ -80,15 +83,10 @@ class PugScene( Opioid2D.Scene, pug.BaseObject):
                 
     def node_callback(self, node, callback, *args, **kwargs):
         """Send a callback to a node in the scene"""
-        try:
-            if hasattr(node, callback):
-                if _DEBUG: print "PugScene.node_callback",callback,node
-                func = getattr(node, callback)
-                func( *args, **kwargs)
-        except:
-            # node problemo
-            if _DEBUG: print "node_callback err:", node, callback, args, kwargs
-            pass
+        if hasattr(node, callback):
+            if _DEBUG: print "PugScene.node_callback",callback,node
+            func = getattr(node, callback)
+            func( *args, **kwargs)
         
     # node info storage
     def _get_nodes(self):
@@ -120,23 +118,17 @@ terms of nodes within the layers"""
             ordered_nodes = {}
             myNodes = self.nodes.keys()
             for node in myNodes:
-                try:
-                    if hasattr(node.layer,'name'):
-                        nodesorter = '_'.join([layersort[node.layer_name],
-                                           '%04d'%self.nodes[node]])
-                    else:
-                        nodesorter = '_'.join(['zzz',
-                                           '%04d'%self.nodes[node]])
-                        print "scene.get_ordered_nodes nolayer:", \
-                                    str(node), node.gname
-                        if not include_all:
-                            continue
-                    ordered_nodes[nodesorter] = node
-                except:
-                    # node problemo
-                    if _DEBUG: 
-                        print "get_ordered_nodes error:", node
-                    pass
+                if hasattr(node.layer,'name'):
+                    nodesorter = '_'.join([layersort[node.layer_name],
+                                       '%04d'%self.nodes[node]])
+                else:
+                    nodesorter = '_'.join(['zzz',
+                                       '%04d'%self.nodes[node]])
+                    print "scene.get_ordered_nodes nolayer:", \
+                                str(node), node.gname
+                    if not include_all:
+                        continue
+                ordered_nodes[nodesorter] = node
             nodenums = ordered_nodes.keys()
             nodenums.sort()
             nodenums.reverse()
@@ -221,9 +213,8 @@ Update the PugScene's node tracking dict for node. Possible commands: 'Delete'
         if _DEBUG: print "PugScene.register_node:",node
         if getattr(Opioid2D.Director, 'game_started', False):
             self.node_callback(node, "on_added_to_scene", self)
-        node_num = self.__node_num
+        self.nodes[node] = self.__node_num
         self.__node_num += 1
-        self.nodes[node] = node_num
             
     def get_scene_layers(self):
         return get_available_layers()

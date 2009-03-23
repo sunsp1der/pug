@@ -47,12 +47,12 @@ None: automatically generated name,"""]
     zonetype = Opioid2D.mutators.LifeZone
     
     @component_method
-    def on_added_to_scene(self):
+    def on_added_to_scene(self, scene):
         """Start timer when object is added to scene"""
         self.set_zone()
         
     @component_method
-    def on_exit_scene(self):
+    def on_exit_scene(self, scene):
         if self.zone_groups:
             Life_Zone.zone_groups = {}
         

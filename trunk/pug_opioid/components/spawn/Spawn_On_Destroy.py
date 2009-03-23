@@ -2,7 +2,6 @@
 from pug import Dropdown
 from pug.component import component_method, register_component
 
-from Opioid2D import *
 from Opioid2D.public.Node import Node
 
 from pug_opioid.editor.agui import ObjectsDropdown
@@ -23,8 +22,8 @@ class Spawn_On_Destroy( Spawn_Area):
                             'doc':"The area where objects can be spawned"}],
         ["spawn_offset", 
          "Spawn location is offset by this much (scaled by owner size)"],
-        ["min_objects_per_spawn","Minimum number of objects created per spawn"],
-        ["max_objects_per_spawn","Maximum number of objects created per spawn"],
+        ["min_objects_per_spawn","Minimum number of objects created"],
+        ["max_objects_per_spawn","Maximum number of objects created"],
         ["match_scale", "Multiply spawned object's scale by owner's scale"],
         ["add_rotation", "Add owner's rotation to spawned object's rotation"],
         ["add_velocity", "Add owner's velocity to spawned object's velocity"],
@@ -34,7 +33,7 @@ class Spawn_On_Destroy( Spawn_Area):
         ]
 
     @component_method
-    def on_added_to_scene(self):
+    def on_added_to_scene(self, scene):
         "Over-ride Spawn_Area's on_added_to_scene... don't do anything."
         pass
 
@@ -42,7 +41,7 @@ class Spawn_On_Destroy( Spawn_Area):
     def on_destroy(self):
         "Do spawn when object is destroyed"
         self.spawn()        
-        
+ 
 register_component( Spawn_On_Destroy)
         
        

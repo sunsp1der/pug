@@ -33,7 +33,7 @@ Friction is multiplied."""],
     additive = True
         
     @component_method
-    def on_added_to_scene(self):
+    def on_added_to_scene(self, scene):
         """Set the motion when object is added to scene"""
         self.set_motion()
         
@@ -44,8 +44,8 @@ Friction is multiplied."""],
         velocity_vector = Vector(self.velocity_x, self.velocity_y)
         acceleration_vector = Vector(self.acceleration_x, self.acceleration_y)
         if self.rotated:
-            velocity_vector.direction += self.owner.rotation
-            acceleration_vector.direction += self.owner.rotation
+            velocity_vector.direction += owner.rotation
+            acceleration_vector.direction += owner.rotation
         if self.additive:
             owner.velocity += velocity_vector
             owner.acceleration += acceleration_vector

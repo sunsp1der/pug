@@ -18,24 +18,24 @@ class Follow_Mouse(Component):
     # attribute defaults
     face_movement = False
     # other defaults
-    action = None
+    tick_action = None
 
     @component_method
-    def on_added_to_scene(self):
+    def on_added_to_scene(self, scene):
         """Start following when object is added to scene"""
         self.start_following_mouse()
         
     @component_method
     def start_following_mouse(self):
         "Start following the mouse pointer"
-        if not self.action:
-            self.action = RealTickFunc( self.follow).do()
+        if not self.tick_action:
+            self.tick_action = RealTickFunc( self.follow).do()
         
     @component_method
     def stop_following_mouse(self):
         "Stop following the mouse pointer"
-        if self.action: 
-            self.action.end()
+        if self.tick_action: 
+            self.tick_action.abort()
 
     def follow(self):
         if not self.enabled:

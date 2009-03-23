@@ -22,7 +22,7 @@ class Grow_Shrink(Component):
     shrink_out_secs = 3.0
 
     @component_method
-    def on_added_to_scene(self):
+    def on_added_to_scene(self, scene):
         """Do grow in if grow_in_secs > 0"""
         self.grow_in()
             
