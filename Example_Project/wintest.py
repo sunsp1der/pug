@@ -2,7 +2,6 @@ import sys
 import os
 
 import Opioid2D
-
 from pug_opioid.util import get_available_scenes, set_project_path
 
 from _game_settings import game_settings
@@ -30,4 +29,10 @@ else:
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % position
 Opioid2D.Display.init(resolution, title=title, fullscreen=fullscreen, icon='')
 Opioid2D.Director.start_game = True
+
+import pug
+import threading
+import time
+pug.frame(Opioid2D.Director)
 Opioid2D.Director.run(initial_scene)
+

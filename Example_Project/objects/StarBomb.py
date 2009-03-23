@@ -27,7 +27,7 @@ class StarBomb(PugSprite):
         self.components.add( Self_Destruct() )
         self.components.add( Fade(
                 fade_in_secs=-1,
-                fade_out_secs=0.3) )
+                fade_out_secs=0.29999999999999999) )
         self.components.add( Random_Motion(
                 angle_min=-45,
                 angle_max=45,
