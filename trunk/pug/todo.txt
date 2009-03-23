@@ -3,6 +3,7 @@ now:
 current version:
 	set gname
 	demo of heads watching a ufo
+	finalize demos
 	editable code_storage	
 	undo
 	save query when changing levels or quitting

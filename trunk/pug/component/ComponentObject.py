@@ -31,67 +31,19 @@ class ComponentObject(object):
 def component_method_wrapper(*args, **kwargs):
     retvalue = None
     obj = kwargs.pop('___obj_ref')()
-    if not obj:
-        return
-    ___original_method = kwargs.pop('___original_method')
+#    if not obj:
+#        return
+    original_method = kwargs.pop('___original_method')
     method_list = kwargs.pop('___component_methods')
     for method in method_list:
         if method:
             if _DEBUG: print method, args, kwargs
             if not method.im_self.enabled:
                 continue
-            if method._ComponentMethod__has_kwargs:
-                if method._ComponentMethod__has_args:
-                    retvalue = method(*args, **kwargs)
-                else:
-                    retvalue = method(
-                        *(args[:method._ComponentMethod__maxargs]), **kwargs)
-            else:
-                fixed_args = args[:]
-                methodargs = method._ComponentMethod__args
-                methoddefaults = method._ComponentMethod__defaults
-                n = len(fixed_args) + 1
-                while n < method._ComponentMethod__minargs:
-                    if kwargs.has_key(methodargs[n]):
-                        arg = kwargs[methodargs[n]]
-                    else:
-                        continue
-#                    elif n + 1 > len(methodargs) - len(methoddefaults):
-#                        arg = methoddefaults[n - len(methodargs) + \
-#                                                   len(methoddefaults) + 1]
-#                    else:
-#                        arg= None
-                    fixed_args += (arg,)
-                    n=n+1
-                while n < len(methodargs):
-                    if kwargs.has_key(methodargs[n]):
-                        arg = kwargs[methodargs[n]]
-                    else:
-                        break
-#                        arg = None
-                    fixed_args += (arg,)
-                    n = n+1                    
-                if method._ComponentMethod__has_args:
-                    retvalue = method(*fixed_args)
-                else:
-                    retvalue = method(
-                                *fixed_args[:method._ComponentMethod__maxargs])
-    if ___original_method:
-        retvalue = ___original_method( obj, *args, **kwargs)
+            retvalue =  method(*args,**kwargs)
+    if original_method:
+        retvalue = original_method( obj, *args, **kwargs)
     return retvalue
-
-#TODO: run_component_method
-#def run_component_method( method, args, kwargs):
-#    try:
-#        retvalue = method(*args, **kwargs)
-#    except:
-#        print \
-#"""I'd like to take the component processor part off the stack here, so that 
-#an exception would not show run_component_method or component_method_wrapper in
-#the traceback. But I can't figure out how... 
-#"""
-#    else:
-#        return retvalue
 
 class ComponentSet(object):
 
