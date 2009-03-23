@@ -47,7 +47,7 @@ size: the button size
             tooltip = ''.join(["View '",objectName,"' in this window"])
             fn = self.on_view_button                
         wx.lib.buttons.ThemedGenBitmapButton.__init__(self, parent=parent, 
-                                               size=size)
+                                               bitmap=None, size=size)
         self.SetBitmapLabel(bmp)
         self.SetToolTipString(tooltip)
         self.Bind(wx.EVT_BUTTON, fn, self)   

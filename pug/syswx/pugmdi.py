@@ -42,7 +42,9 @@ PugMDI(self, objInfoList, title, show, parent)
     def __init__(self, objInfoList=None, title="", show=True, parent=None, 
                  **kwargs):        
         wx.aui.AuiMDIParentFrame.__init__(self, parent, -1,
-                            size=WX_PUGFRAME_DEFAULT_SIZE, title=title,**kwargs) 
+                            size=WX_PUGFRAME_DEFAULT_SIZE, 
+                            style=wx.DEFAULT_FRAME_STYLE,
+                            title=title,**kwargs) 
         
         sizer = wx.BoxSizer()
         self.SetMinSize(wx.Size(250, 130))

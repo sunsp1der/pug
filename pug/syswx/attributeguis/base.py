@@ -96,8 +96,14 @@ all controls.
             self.window = window
         if self.control.GetParent() != self.window:
             self.control.Reparent(self.window)
+            if self.control.IsFrozen():
+                self.control.Thaw()
+            self.control.Show()
         if self.label.GetParent() != self.window:
             self.label.Reparent(self.window)
+            if self.label.IsFrozen():
+                self.label.Thaw()
+            self.label.Show()
         aguidata.setdefault('read_only',False)
         #label
         if hasattr(self.label, 'textCtrl'):

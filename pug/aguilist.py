@@ -1,5 +1,6 @@
 from inspect import *
 from sys import exc_info
+import traceback
 import types
 
 from pug.constants import *
@@ -93,6 +94,7 @@ class otherClass( myClass):
         # go through list of attributes in pugview
         if _DEBUG: print obj
         for entry in attributeList:
+            attributegui = None
             attribute = entry[0]
             if _DEBUG: print "create_pugview_aguilist: attr -", attribute
             if attribute == '*':
@@ -102,12 +104,9 @@ class otherClass( myClass):
                     if filterUnderscore:
                         if do_filter_underscore(attribute, filterUnderscore):
                             continue
-                    try:
-                        attributegui = create_default_agui(attribute, obj, 
-                                                           window)
-                    except:
-                        continue
-                    aguilist.append(attributegui)
+                    attributegui = create_default_agui(attribute, obj, window)
+                    if attributegui:
+                        aguilist.append(attributegui)
                 continue
             # make sure we have an attribute, or a non-attr agui entry
             if not(attribute) and len(entry) == 1:
@@ -151,11 +150,8 @@ class otherClass( myClass):
                         aguidata = {}
                     if tooltip:      
                         aguidata['doc'] = tooltip
-                    try:
-                        attributegui = get_agui(agui, attribute, window, 
+                    attributegui = get_agui(agui, attribute, window, 
                                                 aguidata=aguidata)
-                    except:
-                        continue
                 else:
                     if len(entry) > 2:
                         aguidata = entry[2].copy()
@@ -163,13 +159,10 @@ class otherClass( myClass):
                         aguidata = {}
                     if tooltip:      
                         aguidata['doc'] = tooltip
-                    try:
-                        attributegui = create_default_agui(attribute, obj, 
-                                                           window, 
+                    attributegui = create_default_agui(attribute, obj, window, 
                                                            aguidata=aguidata)
-                    except:
-                        continue       
-            aguilist.append(attributegui)
+            if attributegui:
+                aguilist.append(attributegui)
             if entry[0] in dirList:
                 dirList.remove(entry[0])
     if _DEBUG: print "create_pugview_aguilist: end"
@@ -204,13 +197,10 @@ take all the objects attributes and make entries based on defaults defined in:
         else:
             family = None
         # create agui
-        try:
-            agui = create_default_agui(attribute, obj, window, family)
-        except:
-            error = exc_info()
-            if _DEBUG: print error
-            continue
-        aguilist.append(agui)
+        agui = None
+        agui = create_default_agui(attribute, obj, window, family)
+        if agui:
+            aguilist.append(agui)
     return aguilist
 
 def do_filter_underscore(attribute, filterUnderscore):
@@ -299,18 +289,38 @@ For pugview layout, see create_pugview_gui.
 def get_agui( cls, attribute, window, aguidata):
     """get_agui(cls, attribute, window, aguidata)->agui instance
 
+cls: agui class
+attribute: the attribute to create agui for
+window: the pugWindow to display in
+aguidata: special info for agui
+
 Get an agui from the cache or create one"""
+    agui = None
     if aguiCache.get(cls, None):
         agui = aguiCache[cls].pop()
         try:
             agui.setup( attribute, window, aguidata)
             if _DEBUG: print "   cached agui used:", attribute, agui
         except:
-            pass
+            if _DEBUG: 
+                print "#"*80
+                print "agui.setup_error", attribute
+                print "   agui_type", cls
+                print "   ", aguidata
+                traceback.print_exc()
+                print "#"*80
         else:
             return agui
-    agui = cls( attribute, window, aguidata)
-    if _DEBUG: print "agui created:", attribute, agui
+    try:
+        agui = cls( attribute, window, aguidata)
+        if _DEBUG: print "agui created:", attribute, agui
+    except:
+        print "#"*80
+        print "agui_creation_error:", attribute, 
+        print "   agui_type:", cls
+        print "   ", aguidata
+        traceback.print_exc()
+        print "#"*80
     return agui
 
 # cache aguis here

@@ -45,9 +45,9 @@ projectFolder: where file menus start at.  Defaults to current working dir.
     settings = object()
     projectFrame = None
     def __init__(self, projectObject=None, projectObjectName='',
-                 projectName='PUG', projectFolder = "" ):
+                 projectName='PUG', projectFolder = "", redirect=False ):
         #wx.PySimpleApp.__init__(self)
-        wx.App.__init__(self)
+        wx.App.__init__(self, redirect=redirect)
         #self.SetExitOnFrameDelete(False)
         
         # global menus
@@ -64,7 +64,7 @@ projectFolder: where file menus start at.  Defaults to current working dir.
         if projectObject:
             self.start_project(projectObject, projectObjectName,
                           projectName, projectFolder)
-            
+    
     def start_project(self, projectObject=None, projectObjectName='',
                  projectName='PUG', projectFolder = "" ):
         if projectObjectName == '' and getattr(projectObject,'gname',None):
