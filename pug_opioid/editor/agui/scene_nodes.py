@@ -89,13 +89,13 @@ Special kwargs:
             # can't figure out how to make the list single selection
             # hacked below
         TreeListCtrl.__init__(self, style=style, *args, **kwargs)
-        self.set_object(scene)
         # columns
         self.Indent = 5 # doesn't seem to work
         self.AddColumn("gname")
         self.AddColumn("class")
         self.AddColumn("layer")
         self.SetColumnWidth(0,150)
+        self.set_object(scene)
         self.refresh_tree()
         self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_sel_changed)
 #        self.GetMainWindow().Bind(wx.EVT_LEFT_DCLICK, self.dclick)
@@ -197,7 +197,8 @@ Special kwargs:
             self.SetItemText(item, layer, 2)
         self.SetMainColumn(2)
         self.refreshing = False
-        self.Thaw()
+        if self.IsFrozen():
+            self.Thaw()
         
     def get_full_width(self):
         w = 0
