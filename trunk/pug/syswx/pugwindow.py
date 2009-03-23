@@ -137,7 +137,6 @@ holds multiple PugWindows in tabbed (or other) form.
                 self.setup_menus()
                 if oldView == self._currentView:
                     self.update_aguilist_object()
-                    self.Thaw()
                 else:
                     self.create_aguilist()
                 if not oldobject and hasattr(self.GetParent(),
@@ -145,7 +144,8 @@ holds multiple PugWindows in tabbed (or other) form.
                     self.GetParent().show_all_attributes()
             self.started_viewing( obj)
         self.SetTitle(title)
-        self.Thaw()                   
+        if self.IsFrozen():
+            self.Thaw()                   
         wx.EndBusyCursor()        
     
     def stopped_viewing(self):
@@ -203,10 +203,16 @@ To return to object view, call display_aguilist().
         sizer = self.pugSizer
         rows = range(sizer.GetRows())
         for row in rows:
-            sizer.RemoveGrowableRow(row)
+            try:
+                sizer.RemoveGrowableRow(row)
+            except:
+                pass
         cols = range(sizer.GetCols())
         for col in cols:
-            sizer.RemoveGrowableCol(col)
+            try:
+                sizer.RemoveGrowableCol(col)
+            except:
+                pass
         sizer.SetRows(0)
         sizer.SetCols(0)
         self.SetupScrolling()
@@ -244,7 +250,8 @@ To return to object view, call display_aguilist().
             else:
                 self.persist = None
         self.display_aguilist()
-        self.Thaw()
+        if self.IsFrozen():
+            self.Thaw()
         wx.EndBusyCursor()
         
     def update_aguilist_object(self):
@@ -315,9 +322,11 @@ To return to object view, call display_aguilist().
                 parent = self.GetParent()
                 size = parent.GetSize()
                 parent.SetSize((1,1))
-                parent.SetSize(size)                
+                parent.SetSize(size)  
+                parent.Layout()              
         if _DEBUG: print "PugWindow.display_aguilist exit"
-        self.Thaw()
+        if self.IsFrozen():
+            self.Thaw()
         wx.EndBusyCursor()
 
     def resize_aguilist(self):
@@ -336,6 +345,7 @@ Generally, this is called when an attribute gui has changed size.
     def setup_menus(self):
         if not hasattr(self, 'menuBar'):
             self.menuBar = wx.MenuBar()
+        self.menuBar.Freeze()
         self.menuBar.SetMenus([])
         wx.GetApp().append_global_menus(self.menuBar)
         if self.object:
@@ -352,6 +362,9 @@ Generally, this is called when an attribute gui has changed size.
                 skipper = self.menuBar.FindMenu(menu)
                 if skipper:
                     self.menuBar.Remove(skipper)
+        self.menuBar.Thaw()
+#        else:
+#            pass #self._init_viewMenu_Items(self.viewMenu)
             
     def _init_viewMenu_Items(self, menu):
         #clear out menu items
@@ -401,7 +414,7 @@ Generally, this is called when an attribute gui has changed size.
             menu.AppendSeparator()
             self._add_RefreshApply_Items(menu)
             self.refresh_settings()
-        menu.DestroyId(1)
+#        menu.DestroyId(1)
 
     def _evt_viewmenu(self, event):
         if self._currentView != self._viewDict[event.Id]:

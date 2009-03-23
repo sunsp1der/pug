@@ -178,4 +178,5 @@ tree on the left and info on the right.
         self.infosizer.Layout()
         self.infosizer.MinSize = self.infosizer.Size
         self.infowin.SetupScrolling()
-        self.infowin.Thaw()
+        if self.infowin.IsFrozen():
+            self.infowin.Thaw()

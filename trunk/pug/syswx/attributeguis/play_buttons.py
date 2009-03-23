@@ -55,7 +55,6 @@ For kwargs arguments, see the Base attribute GUI
                                 wx.ArtProvider.GetBitmap(wx.ART_EXECUTABLE_FILE,
                                         wx.ART_TOOLBAR, WX_BUTTON_BMP_SIZE)),
                 }
-                
         self.functionDict = {}
         
         for item in buttonOrder:
@@ -68,14 +67,16 @@ For kwargs arguments, see the Base attribute GUI
                 func = getattr( window.object, aguidata[item], None)
                 if not isroutine(func):
                     continue
-            button = buttons.ThemedGenBitmapButton(control, size=WX_BUTTON_SIZE)
+            button = buttons.ThemedGenBitmapButton(control, -1, None,
+                                                   size=WX_BUTTON_SIZE)
+#            print info[1].Ok(), info[1]
             button.SetBitmapLabel(info[1])
             self.functionDict[button] = func    
             button.SetToolTipString(info[0])
             control.Bind(wx.EVT_BUTTON, self.button_press, button)
             controlSizer.Add( button)
         line = AguiLabelSizer(control, ' ')
-        controlSizer.Add(line, 1)
+        controlSizer.Add(line, 1, wx.EXPAND)
 
         kwargs['control_widget'] = control
         Base.__init__(self, attribute, window, aguidata, **kwargs) 

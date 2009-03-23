@@ -95,7 +95,9 @@ For kwargs optional arguments, see the Base attribute GUI
         i = self.listctrl.FindData(selectedData)
         if i != -1:
             self.listctrl.SelectItem(i)
-        self.data = self.listctrl.GetSelectedData()
+            self.data = self.listctrl.GetSelectedData()
+        else:
+            self.data = None
         self.set_tooltip()
         
         

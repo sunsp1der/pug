@@ -110,9 +110,11 @@ Set the object that this frame's pugWindow is viewing
 """
         self.Freeze()
         self.pugWindow.set_object(obj, objectpath, title)
+        self.Layout()
         if not self.lockedName:
-            self.Name = self.pugWindow.titleBase               
-        self.Thaw()
+            self.Name = self.pugWindow.titleBase  
+        if self.IsFrozen():                 
+            self.Thaw()
         
     def get_object(self):
         return self.pugWindow.objectRef()
