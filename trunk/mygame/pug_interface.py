@@ -1,4 +1,4 @@
-import threading
+import thread
 
 import pygame
 import pug
@@ -20,8 +20,7 @@ class MyInterface(pug.ProjectInterface):
         self.dummy.mygame = self.game
         self.dummy.interface = self
         self.game.pause()
-        mainthread = threading.Thread(target=self.game.mainloop)
-        mainthread.start()
+        thread.start_new_thread(self.game.mainloop,())
     def play (self):
         """Unpause the project"""
         self.game.pause(False)
@@ -36,9 +35,11 @@ class MyInterface(pug.ProjectInterface):
         self.game.quit(True)    
     
 def init_pug():
-    
+    print "1"    
     interface = MyInterface()
-    pug.App( projectObject=interface, projectObjectName='MyGame')  
+    print  "2"
+    pug.App( projectObject=interface, projectObjectName='MyGame')
+    print "3"
     
 if __name__ == '__main__':
     init_pug()
