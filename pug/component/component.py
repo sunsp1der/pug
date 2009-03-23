@@ -73,18 +73,24 @@ enabled: When this is false, the component's component_methods will not
     enabled = True
     
     def __init__(self, owner=None, **kwargs):
-        self.owner = owner
+        if self.owner:
+            self.owner = owner
         for attr, val in kwargs.iteritems():
             setattr(self, attr, val)
         cls = self.__class__
         if cls._component_method_names is None:
-            names = []
-            for attr in dir(cls):
-                if isinstance(getattr(cls,attr), ComponentMethod):
-                    names.append(attr)
-            cls._component_method_names = names
+            cls._setup_method_names()
+            
+    def _setup_method_names(cls):
+        names = []
+        for attr in dir(cls):
+            if isinstance(getattr(cls,attr), ComponentMethod):
+                names.append(attr)
+        cls._component_method_names = names
+    _setup_method_names = classmethod(_setup_method_names)        
             
     def _set_owner(self, owner):
+#        print self.__class__, owner
         if self.__owner:
             try:
                 self.__owner().component.remove(self)
@@ -104,7 +110,7 @@ enabled: When this is false, the component's component_methods will not
     def _owner_deleted(self, owner):
         if _DEBUG: print "component._owner_deleted", self, owner
         self.enabled = False
-        self.owner = None
+#        self.owner = None
         
     owner = property(get_owner, _set_owner, 
                      doc="The object that this component is attached to")
@@ -212,14 +218,6 @@ class ComponentList(object):
 component: must either be a component instance or a component class.
 kwargs: will be assigned to component attributes as per component.__init__
 """
-        if isinstance(component, Component):
-            component.__init__( **kwargs)
-        elif issubclass( component, Component):
-            component = component( **kwargs)
-        else:
-            raise TypeError(message=''.join(['ComponentList.add: ',
-                                             repr(component), 
-                                             "is not a component"]))
         methods = self.__methods
 #        if _DEBUG: print "ComponentList.add",component,kwargs
         for key in component._component_method_names:
@@ -251,12 +249,15 @@ kwargs: will be assigned to component attributes as per component.__init__
                 del methods[key]
         self.__components.remove(component)
         component.owner = None
- 
+  
 class ComponentMethod(object):
         
     def __del__(self):
         self.__cache = None
         self.__func = None
+        
+    def __call__(self, *args, **kwargs):
+        return self.__func(*args, **kwargs)
 
     def __get__(self, instance, cls):
         if instance is None:

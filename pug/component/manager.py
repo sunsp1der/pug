@@ -35,6 +35,7 @@ available through the pug system.
         raise TypeError("".join(["Not a Component:",str(component)]))
     if component in _globalComponentManager.componentList:
         return
+    component._setup_method_names()
     _globalComponentManager.componentList.append(component)
     _globalComponentManager.lastUpdate = time()
     setattr(all_components, component.__name__, component)
