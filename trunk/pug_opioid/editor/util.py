@@ -397,27 +397,6 @@ def exporter_cleanup( exporter):
     # wait for Opioid to catch up
     time.sleep(0.25)
 
-#hack for quitting pug when opioid quits
-QUITTING = False
-def project_quit(*args, **kwargs):
-    """project_quit(*args, **kwargs)
-    
-Have the app confirm project closure.
-"""
-    if not wx.GetApp():
-        Opioid2D.Director.realquit()
-        return
-    global QUITTING
-    if not QUITTING:
-        QUITTING = True
-        app = wx.GetApp()
-        if hasattr(app, '_evt_project_frame_close'):
-            wx.CallAfter(app._evt_project_frame_close)
-        return 
-# set up our special quit
-Opioid2D.Director.realquit = Opioid2D.Director.quit
-Opioid2D.Director.quit = project_quit # hack to make opioid quit=pugquit 
-
 #hack for making Opioid2D.Vector objects more visible
 __old_repr = Opioid2D.Vector.__repr__
 def __vect_repr(self):

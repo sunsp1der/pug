@@ -24,10 +24,28 @@ from pug_opioid.util import get_available_scenes, get_available_objects, \
                             save_game_settings, get_project_path
 from pug_opioid.editor import EditorState, graphicsManager
 from pug_opioid.editor.util import close_scene_windows, save_scene_as, \
-                                    project_quit, wait_for_state, \
+                                    wait_for_state, \
                                     wait_for_exit_scene, get_image_path
+import pug_opioid.editor.PugDirector
 
 _DEBUG = False
+
+def start_opioid( rect, title, icon, scene):
+    #start up opioid with a little pause for threading    
+    time.sleep(0.1)
+    
+    if os.name == "nt":
+        loc = (rect[0]+3, rect[1]+28)
+    else:
+        loc = rect[0:2]
+    os.environ['SDL_VIDEO_WINDOW_POS'] = \
+            "%d,%d" % loc
+    Opioid2D.Display.init(rect[2:4], 
+                          title=title, 
+                          icon=icon)
+    Opioid2D.Director.game_started = False
+    Opioid2D.Director.playing_in_editor = True    
+    Opioid2D.Director.run( scene)
 
 class OpioidInterface(pug.ProjectInterface):
     """OpioidInterface( rootfile, scene=PugScene)
@@ -42,10 +60,14 @@ scene: the scene to load initially
     _use_working_scene = True
     def __init__(self, rootfile, scene=PugScene):
         if _DEBUG: print "OpioidInterface.__init__"
-        # for process watching purposes
-        import dl
-        libc = dl.open('/lib/libc.so.6')
-        libc.call('prctl', 15, 'python_Pug_Opioid', 0, 0, 0)
+        try:
+            # for process watching purposes
+            import dl
+            libc = dl.open('/lib/libc.so.6')
+            libc.call('prctl', 15, 'python_Pug_Opioid', 0, 0, 0)
+        except:
+            # we're probably not in linux
+            pass
         
         projectPath = os.path.dirname(os.path.realpath(rootfile))
         set_project_path( projectPath)
@@ -60,15 +82,21 @@ scene: the scene to load initially
         self.Director = Opioid2D.Director   
         self.Director.editorMode = True
                 
-        pug.ProjectInterface.__init__(self)
-        os.environ['SDL_VIDEO_WINDOW_POS'] = \
-                "%d,%d" % self.pug_settings.rect_opioid_window[0:2]
-        Opioid2D.Display.init(self.pug_settings.rect_opioid_window[2:4], 
-                              title='Pug-Opioid Scene', 
-                              icon=get_image_path('pug.png'))
-        Opioid2D.Director.game_started = False
-        Opioid2D.Director.playing_in_editor = True
-        thread.start_new_thread(self.Director.run, (PugScene,))
+#        pug.ProjectInterface.__init__(self)
+#        os.environ['SDL_VIDEO_WINDOW_POS'] = \
+#                "%d,%d" % self.pug_settings.rect_opioid_window[0:2]
+#        Opioid2D.Display.init(self.pug_settings.rect_opioid_window[2:4], 
+#                              title='Pug-Opioid Scene', 
+#                              icon=get_image_path('pug.png'))
+#        Opioid2D.Director.game_started = False
+#        Opioid2D.Director.playing_in_editor = True
+#        thread.start_new_thread(self.Director.run, (PugScene,))
+        thread.start_new_thread(start_opioid, 
+                                          (self.pug_settings.rect_opioid_window,
+                                           'Pug-Opioid Scene',
+                                           get_image_path('pug.png'),
+                                           PugScene))
+        time.sleep(1)
         
         app = pug.App(projectObject=self, 
                       projectFolder=projectPath,
@@ -212,7 +240,7 @@ settingsObj: an object similar to the one below... if it is missing any default
             self.cached[0] = True            
             
     def quit(self):
-        project_quit()
+        self.Director.quit()
         
     def view_scene(self):
         """Show scene data in a window"""
@@ -314,6 +342,7 @@ Callback from PugApp...
                                 obj.position[1] + vector[1])  
  
     def _on_pug_quit(self):
+        self.stop_scene(False)
         if getattr(self.game_settings,'save_settings_on_quit',True):
             if '__Working__' in self.Director.scene.__module__:
                 self.game_settings.initial_scene = '__Working__'
@@ -325,7 +354,8 @@ Callback from PugApp...
                 show_exception_dialog()
         if getattr(self.pug_settings,'save_settings_on_quit',True):
             self.save_pug_settings()
-        Opioid2D.Director.realquit()   
+        Opioid2D.Director.realquit()
+        time.sleep(1)   
         
     def _pre_quit_func(self, event=None):     
         dlg = wx.MessageDialog( wx.GetApp().projectFrame,

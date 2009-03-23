@@ -80,10 +80,15 @@ class PugScene( Opioid2D.Scene, pug.BaseObject):
                 
     def node_callback(self, node, callback, *args, **kwargs):
         """Send a callback to a node in the scene"""
-        if hasattr(node, callback):
-            if _DEBUG: print "PugScene.node_callback",callback,node
-            func = getattr(node, callback)
-            func( *args, **kwargs)
+        try:
+            if hasattr(node, callback):
+                if _DEBUG: print "PugScene.node_callback",callback,node
+                func = getattr(node, callback)
+                func( *args, **kwargs)
+        except:
+            # node problemo
+            if _DEBUG: print "node_callback err:", node, callback, args, kwargs
+            pass
         
     # node info storage
     def _get_nodes(self):
@@ -115,17 +120,23 @@ terms of nodes within the layers"""
             ordered_nodes = {}
             myNodes = self.nodes.keys()
             for node in myNodes:
-                if hasattr(node.layer,'name'):
-                    nodesorter = '_'.join([layersort[node.layer_name],
-                                       '%04d'%self.nodes[node]])
-                else:
-                    nodesorter = '_'.join(['zzz',
-                                       '%04d'%self.nodes[node]])
-                    print "scene.get_ordered_nodes nolayer:", \
-                                str(node), node.gname
-                    if not include_all:
-                        continue
-                ordered_nodes[nodesorter] = node
+                try:
+                    if hasattr(node.layer,'name'):
+                        nodesorter = '_'.join([layersort[node.layer_name],
+                                           '%04d'%self.nodes[node]])
+                    else:
+                        nodesorter = '_'.join(['zzz',
+                                           '%04d'%self.nodes[node]])
+                        print "scene.get_ordered_nodes nolayer:", \
+                                    str(node), node.gname
+                        if not include_all:
+                            continue
+                    ordered_nodes[nodesorter] = node
+                except:
+                    # node problemo
+                    if _DEBUG: 
+                        print "get_ordered_nodes error:", node
+                    pass
             nodenums = ordered_nodes.keys()
             nodenums.sort()
             nodenums.reverse()
