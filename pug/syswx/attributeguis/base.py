@@ -144,14 +144,7 @@ all controls.
         # context help
         self.setup_context_help(self.label, window)
         self.setup_context_help(self.control, window)        
-        
-    def get_control_value(self):
-        """get the value of the attribute - defined by derivative classes
-
-By default, this returns the attribute value        
-"""
-        return getattr(self.window.object, self.attribute, None)
-    
+            
     def set_control_value(self, value):
         """set the value of the attribute - defined by derivative classes"""
         return
@@ -243,6 +236,13 @@ When auto apply is off, skip apply events that were created by the event system
             # bad apply... just revert
             self.refresh()  
         return applied
+
+    def get_control_value(self):
+        """get the value of the attribute - defined by derivative classes
+
+By default, this returns the attribute value        
+"""
+        return getattr(self.window.object, self.attribute, None)
 
     def set_attribute_value(self):
         """set_attribute_value()->False if there was a problem. True otherwise.
