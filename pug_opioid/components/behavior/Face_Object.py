@@ -30,7 +30,7 @@ class Face_Object(Component):
     tick_action = None
     
     @component_method
-    def on_added_to_scene(self):
+    def on_added_to_scene(self, scene):
         """Start facing target when object is added to scene"""
         self.start_facing_target()
         
@@ -40,8 +40,7 @@ class Face_Object(Component):
         self.stop_facing_target()
         if target:
             self.target = target
-        self.tick_action = RealTickFunc( self.check_facing)
-        self.tick_action.do()
+        self.tick_action = RealTickFunc( self.check_facing).do()
         self.check_facing() # prevents jerky start
         
     @component_method
@@ -49,6 +48,12 @@ class Face_Object(Component):
         "Stop facing current target"
         if self.tick_action:
             self.tick_action.abort()
+            
+    @component_method
+    def on_delete(self):
+        "Abort the tick action on delete"
+        if self.tick_action:
+            self.tick_action.abort()            
         
     def check_facing(self, position=None):
         """check_facing(position=None)

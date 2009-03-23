@@ -109,14 +109,9 @@ add blocker to a dictionary of objects blocking the PugSprite's destruction."""
             self.delete()        
 
     def delete(self):
-        self.on_delete()
         Director.scene.update_node(self, "Delete") # register self with scene                
         Sprite.delete(self)
         
-    def on_delete(self):
-        "on_delete(): callback called when Sprite is deleted"
-        pass
-                
     def do_register(self):
         "do_register(): register with the PugScene"
         Director.scene.register_node(self)        

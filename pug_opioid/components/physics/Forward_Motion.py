@@ -27,7 +27,7 @@ Warning: This component uses a tick_action, so it may be slow."""
     last_rotation = None
     
     @component_method
-    def on_added_to_scene(self):
+    def on_added_to_scene(self, scene):
         """Start facing target when object is added to scene"""
         self.set_forward_motion()
         
@@ -49,13 +49,17 @@ values (self.velocity and self.acceleration)"""
             self.acceleration = acceleration
         self.acceleration_vector = Vector(0, -acceleration)
         self.acceleration_vector.direction = self.offset
+        if self.tick_action:
+            self.tick_action.abort()
         if velocity or acceleration:
-            self.tick_action = RealTickFunc( self.forward_motion)
-            self.tick_action.do()
+            self.tick_action = RealTickFunc( self.forward_motion).do()
             self.forward_motion()
-        else:
-            if self.tick_action:
-                self.tick_action.abort()
+        
+    @component_method
+    def on_delete(self):
+        "Abort the tick action on delete"
+        if self.tick_action:
+            self.tick_action.abort()            
         
     def forward_motion(self):
         if not self.enabled:

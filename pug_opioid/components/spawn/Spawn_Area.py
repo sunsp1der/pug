@@ -75,7 +75,7 @@ class Spawn_Area(Component):
     action = None # the pending spawn action
 
     @component_method
-    def on_added_to_scene(self):
+    def on_added_to_scene(self, scene):
         "Start spawn timer when object is added to scene"
         self.spawned_objects = weakref.WeakValueDictionary()
         self.start_spawning()
@@ -96,9 +96,15 @@ class Spawn_Area(Component):
             return None
         if not self.spawned_objects:
             self.spawned_objects = weakref.WeakValueDictionary()
+        owner = self.owner
         spawned_objects = []
         count = random.randint(self.min_objects_per_spawn,
                                self.max_objects_per_spawn)
+        rect = owner.rect
+        rotation = owner.rotation
+        position = owner.position
+        velocity = owner.velocity
+        scale = owner.scale
         for i in range(count):
             obj = self.spawn_class( register=False)
             self.spawned_objects[self.spawn_count] = obj
@@ -106,7 +112,6 @@ class Spawn_Area(Component):
             y_pos = 0
             location = self.spawn_location
             #spawn_location can be Top, Bottom, Left, Right, Area, Center, Edges
-            rect = self.owner.rect
             halfwidth = rect.width * 0.5
             halfheight = rect.height * 0.5
             if location == "edges":
@@ -132,19 +137,19 @@ class Spawn_Area(Component):
             x_pos += self.spawn_offset[0] * halfwidth - halfwidth
             y_pos += self.spawn_offset[1] * halfheight - halfheight
             obj.position = Vector(x_pos, y_pos)
-            obj.position.direction += self.owner.rotation
-            obj.position += self.owner.position
+            obj.position.direction += rotation
+            obj.position += position
             if self.match_scale:
-                obj.scale = obj.scale * self.owner.scale
+                obj.scale = obj.scale * scale
             if self.add_rotation:
-                obj.rotation += self.owner.rotation
-                obj.velocity.direction += self.owner.rotation
-                obj.acceleration.direction += self.owner.rotation
+                obj.rotation += rotation
+                obj.velocity.direction += rotation
+                obj.acceleration.direction += rotation
             if self.add_velocity:
-                obj.velocity += self.owner.velocity
+                obj.velocity += velocity
             obj.do_register() # wait to activate object until start data set
-            if self.owner_callback and hasattr(self.owner,'callback'):
-                getattr(self.owner,'callback')(obj, self)
+            if self.owner_callback and hasattr(owner,'callback'):
+                getattr(owner,'callback')(obj, self)
             if self.obj_callback and hasattr(obj,'callback'):
                 getattr(obj,'callback')(self)
             self.spawn_count += 1
@@ -152,7 +157,7 @@ class Spawn_Area(Component):
             if self.max_objects_spawned > -1 and \
                     self.spawn_count >= self.max_objects_spawned:
                 if self.delete_when_done:
-                    self.owner.do(Delete())
+                    owner.do(Delete())
                 break
             if self.max_spawns_in_scene > 0 and \
                     len(self.spawned_objects) >= self.max_spawns_in_scene:

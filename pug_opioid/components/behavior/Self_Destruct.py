@@ -22,7 +22,7 @@ Otherwise, use this component's 'start_timer' method."""],
     timerAction = None # this can be aborted if necessary
     
     @component_method
-    def on_added_to_scene(self):
+    def on_added_to_scene(self, scene):
         """Start timer when object is added to scene"""
         if self.start_automatically:
             self.start_timer()
