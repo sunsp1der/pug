@@ -11,5 +11,6 @@ from pug_opioid.components.physics.Set_Motion import Set_Motion
 from pug_opioid.components.physics.Face_Motion import Face_Motion
 from pug_opioid.components.physics.Forward_Motion import Forward_Motion
 from pug_opioid.components.physics.Random_Motion import Random_Motion
+from pug_opioid.components.settings.Set_Gname import Set_Gname
 from pug_opioid.components.spawn.Spawn_Area import Spawn_Area
 from pug_opioid.components.spawn.Spawn_On_Destroy import Spawn_On_Destroy

@@ -24,9 +24,6 @@ class PugScene( Opioid2D.Scene, pug.BaseObject):
         pug.BaseObject.__init__(self, gname)   
         if _DEBUG: print "PugScene.__init__", self.__class__.__name__   
         
-        from Opioid2D.public.Sprite import SpritePool
-        SpritePool.preallocate(100)  
-
     def handle_keydown(self, ev):
         if ev.key == Opioid2D.K_ESCAPE:
             if getattr(Opioid2D.Director, 'playing_in_editor', False):
@@ -79,15 +76,11 @@ class PugScene( Opioid2D.Scene, pug.BaseObject):
         """Send a callback to all nodes in the scene"""
         if _DEBUG: print "PugScene.all_nodes_callback:",callback,self.nodes.data
         for node in self.nodes:
-            self.node_callback( node, callback, *args, **kwargs)
-                
-    def node_callback(self, node, callback, *args, **kwargs):
-        """Send a callback to a node in the scene"""
-        if hasattr(node, callback):
-            if _DEBUG: print "PugScene.node_callback",callback,node
-            func = getattr(node, callback)
-            func( *args, **kwargs)
-        
+            func = getattr(node, callback, None)
+            if func:
+                if _DEBUG: print "PugScene.node_callback",callback,node
+                func( *args, **kwargs)
+                       
     # node info storage
     def _get_nodes(self):
         """_get_nodes()->CallbackWeakKeyDictionary of nodes"""
@@ -211,8 +204,9 @@ Update the PugScene's node tracking dict for node. Possible commands: 'Delete'
     def register_node(self, node):        
 #        """register(node): a new node is joining scene. Do callbacks"""
         if _DEBUG: print "PugScene.register_node:",node
-        if getattr(Opioid2D.Director, 'game_started', False):
-            self.node_callback(node, "on_added_to_scene", self)
+        if getattr(Opioid2D.Director, 'game_started', False) and \
+                    hasattr(node, "on_added_to_scene"):
+            node.on_added_to_scene(self)
         self.nodes[node] = self.__node_num
         self.__node_num += 1
             
