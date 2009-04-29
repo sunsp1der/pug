@@ -1,20 +1,14 @@
 """SpawnOnDelete_Test.py"""
 
-###################
-# import autocode #
-###################
+### import autocode ###
 from all_components import Spawn_Area
 from objects.ExplodeParticle import ExplodeParticle
 from objects.StarBomb import StarBomb
 from pug_opioid.PugScene import PugScene
 from pug_opioid.PugSprite import PugSprite
-#######################
-# End import autocode #
-#######################
+### End import autocode ###
 
-#################################
-# "SpawnOnDelete_Test" autocode #
-#################################
+### "SpawnOnDelete_Test" autocode ###
 class SpawnOnDelete_Test(PugScene):
     layers = ['Background']
     def on_enter(self):
@@ -36,7 +30,5 @@ class SpawnOnDelete_Test(PugScene):
                 spawn_location='center',
                 spawn_offset=(0, -1)) )
 
-#####################################
-# End "SpawnOnDelete_Test" autocode #
-#####################################
+### End "SpawnOnDelete_Test" autocode ###
 

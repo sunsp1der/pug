@@ -1,24 +1,15 @@
 """ShipSprite.py"""
 
-###################
-# import autocode #
-###################
+### import autocode ###
 from pug_opioid.PugSprite import PugSprite
-#######################
-# End import autocode #
-#######################
+### End import autocode ###
 
-#########################
-# "ShipSprite" autocode #
-#########################
+### "ShipSprite" autocode ###
 class ShipSprite(PugSprite):
     image = 'art/sprite.png'
     layer = 'Background'
     def on_create(self):
         self.position.x = 681.0
         self.position.y = 183.0
-        PugSprite.on_create(self)
-#############################
-# End "ShipSprite" autocode #
-#############################
+### End "ShipSprite" autocode ###
 

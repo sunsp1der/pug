@@ -409,6 +409,10 @@ Callback from PugApp...
         save_scene_as( self.scene.__class__.__name__, '__Working__.py')
         self.use_working_scene = True
         wx.GetApp().refresh()
+        
+    def commit_scene(self):
+        if save_scene_as():
+            self.save_using_working_scene()
 
     def rewind_scene(self):
         """rewind_scene(): reset the scene and play it again"""
@@ -509,7 +513,7 @@ list a tuple ("New Scene", PugScene) for use in the sceneclass dropdown"""
     scenelist.insert(0,("New Scene", PugScene))
     return scenelist    
         
-from pug_opioid.editor.agui import ObjectsDropdown        
+from pug_opioid.editor.agui import ObjectsDropdown      
 
 _interfacePugview = {
     'size':(350,350),
@@ -526,9 +530,8 @@ _interfacePugview = {
         ['sceneclass', pug.Dropdown, 
              {'label':'   Select Scene',
               'list_generator':_scene_list_generator}],
-        ['   Save Scene', pug.Routine, {
-                               'routine':save_scene_as, 
-                               'use_defaults':True,
+        ['commit_scene', None, {
+                               'label':"   Save Scene", 
                                'doc':"Commit current scene to disk"}],
 #        ['view_scene', pug.Routine,  {'label':'   View Scene'}],
         ['revert_scene', None, {'label':'   Revert Scene'}],

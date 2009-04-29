@@ -241,7 +241,8 @@ def save_scene():
     save_scene_as(name)
     
 def save_scene_as( sceneName=None, fileName=None):#, parentWindow=None):
-    """Save the current scene as a class in the scenes folder
+    """save_scene_as( sceneName=None, fileName=None)->Filename or False if fail 
+    Save the current scene as a class in the scenes folder
         
 sceneName: string with name to save as. If None, a dialog will be opened.
 parentWindow: the parent window of name dialog. If not provided, the 
@@ -249,7 +250,7 @@ parentWindow: the parent window of name dialog. If not provided, the
 """
     wx.GetApp().apply()
     if get_scene_errors():
-        return
+        return False
     if _DEBUG: print "util: save_scene_as"
     scene = Opioid2D.Director.scene
     if not sceneName:
@@ -285,7 +286,7 @@ parentWindow: the parent window of name dialog. If not provided, the
                     confirmDlg.Destroy()                    
             else:
                 dlg.Destroy()
-                return
+                return False
         dlg.Destroy()
     else:
         if sceneName == 'PugScene' or sceneName == 'Scene':
@@ -320,6 +321,7 @@ parentWindow: the parent window of name dialog. If not provided, the
         wait_for_state(EditorState)
 
         wx.GetApp().refresh()
+    return fileName
           
 def wait_for_state(state):
     "wait_for_state(state): Set scene state then wait until Opioid is ready"

@@ -194,9 +194,12 @@ called, but PugFrame.setup_window is."""
         self.SetMenuBar(self.pugWindow.menuBar)
     
     def Raise(self):
-        self.GetMDIParentFrame().Show()
-        self.GetMDIParentFrame().Iconize(False)
-        self.GetMDIParentFrame().Raise()
-        self.Iconize(False)
+        parent = self.GetMDIParentFrame()
+        parent.Show()
+        if parent.IsIconized():
+            parent.Iconize(False)
+        parent.Raise()
+        if self.IsIconized():
+            self.Iconize(False)
         self.Activate()
 

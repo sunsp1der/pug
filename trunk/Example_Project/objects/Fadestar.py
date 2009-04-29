@@ -1,17 +1,11 @@
 """Fadestar.py"""
 
-###################
-# import autocode #
-###################
+### import autocode ###
 from all_components import Fade, Self_Destruct
 from pug_opioid.PugSprite import PugSprite
-#######################
-# End import autocode #
-#######################
+### End import autocode ###
 
-#######################
-# "Fadestar" autocode #
-#######################
+### "Fadestar" autocode ###
 class Fadestar(PugSprite):
     image = 'art/explosion2.png'
     layer = 'Stars'
@@ -20,7 +14,5 @@ class Fadestar(PugSprite):
         self.position.y = 126.0
         self.components.add( Fade() )
         self.components.add( Self_Destruct() )
-###########################
-# End "Fadestar" autocode #
-###########################
+### End "Fadestar" autocode ###
 

@@ -1,27 +1,18 @@
 """Growstar.py"""
 
-###################
-# import autocode #
-###################
+### import autocode ###
 from all_components import Grow_Shrink, Self_Destruct
 from pug_opioid.PugSprite import PugSprite
-#######################
-# End import autocode #
-#######################
+### End import autocode ###
 
-#######################
-# "Fadestar" autocode #
-#######################
+### "Growstar" autocode ###
 class Growstar(PugSprite):
     image = 'art/explosion2.png'
     layer = 'Stars'
     def on_create(self):
-        self.position.x = 701.0
-        self.position.y = 126.0
+        self.position.x = 317.0
+        self.position.y = 85.0
         self.components.add( Grow_Shrink() )
         self.components.add( Self_Destruct() )
-        PugSprite.on_create(self)
-###########################
-# End "Fadestar" autocode #
-###########################
+### End "Growstar" autocode ###
 

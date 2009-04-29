@@ -1,19 +1,13 @@
 """MouseFaceFollow_Test.py"""
 
-###################
-# import autocode #
-###################
+### import autocode ###
 from all_components import Follow_Mouse, Face_Object, Face_Mouse
 from objects.ShipSprite import ShipSprite
 from objects.YellowPug import YellowPug
 from pug_opioid.PugScene import PugScene
-#######################
-# End import autocode #
-#######################
+### End import autocode ###
 
-###################################
-# "MouseFaceFollow_Test" autocode #
-###################################
+### "MouseFaceFollow_Test" autocode ###
 class MouseFaceFollow_Test(PugScene):
     layers = ['Background']
     def on_enter(self):
@@ -33,7 +27,5 @@ class MouseFaceFollow_Test(PugScene):
         mouse_pointer.position.y = 247.0
         mouse_pointer.components.add( Face_Mouse() )
 
-#######################################
-# End "MouseFaceFollow_Test" autocode #
-#######################################
+### End "MouseFaceFollow_Test" autocode ###
 

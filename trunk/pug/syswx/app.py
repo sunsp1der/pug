@@ -499,7 +499,8 @@ settingsObj: any frame settings members will be replaced
                 win = frame
         for frame in windows:
             if frame != win and frame.IsShown():
-                frame.Iconize(False)
+                if frame.IsIconized():
+                    frame.Iconize(False)
                 frame.Raise()
         if win:
             win.Raise()

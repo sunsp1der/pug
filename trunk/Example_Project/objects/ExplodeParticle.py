@@ -1,19 +1,13 @@
 """ExplodeParticle.py"""
 
-###################
-# import autocode #
-###################
+### import autocode ###
 from all_components import Random_Motion, Set_Motion, Self_Destruct, \
         Grow_Shrink, \
         Face_Motion
 from pug_opioid.PugSprite import PugSprite
-#######################
-# End import autocode #
-#######################
+### End import autocode ###
 
-##############################
-# "ExplodeParticle" autocode #
-##############################
+### "ExplodeParticle" autocode ###
 class ExplodeParticle(PugSprite):
     image = 'art/pug.png'
     layer = 'Background'
@@ -37,7 +31,5 @@ class ExplodeParticle(PugSprite):
                 grow_in_secs=0.5,
                 shrink_out_secs=1.0) )
         self.components.add( Face_Motion() )
-##################################
-# End "ExplodeParticle" autocode #
-##################################
+### End "ExplodeParticle" autocode ###
 

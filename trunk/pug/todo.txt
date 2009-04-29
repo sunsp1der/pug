@@ -1,10 +1,10 @@
 now:
 
 current version:
+	editable code_storage			
 	set gname
 	demo of heads watching a ufo
 	finalize demos
-	editable code_storage	
 	undo
 	save query when changing levels or quitting
 	new_project
@@ -27,13 +27,17 @@ fun stuff:
 		REVIEW POWERPACK demo components for non collision components
 	
 bugs: 
+	scene tree doesn't show selected object 
+		when obj is first added?
+		when scene is not shown during selection?
+	changing scenes causes bad label in dropdown
+		after save
+	original_method problem with 'unbound method'!?
 	add object after save
 	leftover items in scene graph after deleting both layers
-	sometimes selections still not showing up
 	crash - selecting an object while changing selectionwin to another view 
 
 later: 
-	hide the self.start in pugscene derivatives
 	only registered objects selectable by mouseclick
 	make sure field is selected when tabbing through controls... even after change
 	figure out some way to make derived classes work better
