@@ -103,6 +103,8 @@ Possible entries in storageDict:
         self.exportDictList = [] # list of objects to be exported when export
                                   # is called. [(obj,storageDict)]
         self.objCode = {} # chunks of object code {'storage_name':code}
+        self.oldCodeDict = {} # user code from file matching save name, if any.
+                                # indexed by 'XXXXX autocode' or 'top_of_file'
         self.storageNames = [] # names of objects in the exported code
         self.deleteCallbacks = [] # fns to be called on delete
         self.dummyDict = {} # dummy objects for attribute comparisons
@@ -118,8 +120,9 @@ fn will be called with exporter as an argument in exporter's __del__ method
         for fn in self.deleteCallbacks:
             fn( self)
 
-    def export(self, filename, obj=None, asClass=None, storageDict=None):
-        """export(filename, obj=None)
+    def export(self, filename, obj=None, asClass=None, storageDict=None,
+               test=True):
+        """export(filename, obj=None, asClass=None, storageDict=None,test=True)
     
 Export auto-generated code that will create 'obj'
 
@@ -130,6 +133,9 @@ storageDict: will be created if necessary (see class definition)
 asClass: If True, force obj to export as a class, if False, force export as 
     an object, if None, use default as set in obj._codeStorageDict or, if not 
     there, default to False.
+test: If True, the created code will be executed to test if it works properly.
+    Note that unexpected effects may occur if the code changes any global
+    objects or settings.
 """
         self.filename = filename
         # set object
@@ -140,15 +146,16 @@ asClass: If True, force obj to export as a class, if False, force export as
             oldfile = open(filename, 'r')
         except:
             oldcode = None
-            pass
         else:
             oldcode = oldfile.read()
             oldfile.close()
+            self.oldCodeDict = self.extract_oldcode(oldcode)
         # create code
         code = ''
         try:
-            code = self.create_code()
-            exec code           
+            code = self.create_code( oldcode)
+            if test:
+                exec code           
         except:
             if code:
                 self.errorfilename = ''.join([filename,'.err'])
@@ -170,6 +177,35 @@ asClass: If True, force obj to export as a class, if False, force export as
             exportfile.write(code)
             exportfile.close()
         return self.file_changed
+        
+    def extract_oldcode(self, code=''):
+        """extract_usercode( code='')->dict of non-autocode in code
+        
+The dict will be indexed by '____ autocode' (as per file) or 'top_of_file' if 
+the code appears before import autocode"""
+        self.oldCodeDict = {}
+        startLabel = 'top_of_file'
+        codeblock = ''
+        lines = code.splitlines()
+        for line in lines:
+            label = self.get_comment_label(line)
+            if label:
+                if startLabel:
+                    if label == ''.join(['End ',startLabel]) or \
+                            startLabel == 'top_of_file':
+                        self.oldCodeDict[startLabel]=codeblock
+                    else:
+                        raise ValueError(''.join([
+                                'autocode start without ending previous: "',
+                                label,'"']))
+                elif label[0:4] == 'End ':
+                    raise ValueError(''.join([
+                                'End without start: "',label,'"']))
+                else:
+                    startLabel = label
+            else:
+                codeblock = '\n'.join([codeblock, line])
+                startLabel = None
         
     def add_object(self, obj, asClass=None, storageDict=None):
         """add_object(self, obj, storageDict=None)->initialized storageDict
@@ -305,8 +341,9 @@ from itemName due to name conflicts.
                     self.specialImports[module] = [(itemName, importName)]
             return importName
         
-    def create_code(self):
-        """create all the code for exporting"""
+    def create_code(self, oldCode=None):
+        """create_code(): create all the code for exporting
+"""
         # create code for individual objects
         for storageDict in self.exportDictList:
             obj = storageDict['obj']
@@ -744,11 +781,13 @@ iAttrList: When storing 'as_class', these attributes will be set in the init
                         divider = ' '
                     else:
                         divider = ', '
-                    count += 1
                     # create a new line if necessary
                     if len(statement)  + len(divider) + len(item) > 78:
-                        divider = ''.join([divider, '\\\n        '])
-                    statement = ''.join([statement, divider, item])
+                        importblock = ''.join([importblock, statement, ',\n'])
+                        statement = [_INDENT*2, item]
+                    else:
+                        statement = ''.join([statement, divider, item])
+                    count += 1
                 statement = ''.join([statement, '\n'])
                 importblock = ''.join([importblock, statement])
             if self.specialImports.has_key(mod):
@@ -761,11 +800,17 @@ iAttrList: When storing 'as_class', these attributes will be set in the init
         return ''.join([startblock, importblock, endblock,'\n'])
     
     def create_comment_block(self, comment):
-        """comment_block(comment) -> string with comment boxed in #s"""
-        l = len(comment)
-        startblock = '#' * (l + 4)
-        comment = ''.join(['# ', comment, ' #'])
-        return '\n'.join([startblock, comment, startblock, '']) 
+        "create_comment_block(comment) -> string with comment in CSE markers"
+        comment = ''.join(['### ', comment, ' ###\n'])
+        return comment
+    
+    def get_comment_label(self, str=''):
+        """get_comment(str)->if str is in CSE markers, label. Otherwise, None"""
+        str = str.strip()
+        if str[:3] == '### ' and str[-3:] == ' autocode ###':
+            return str[3:-3]
+        else:
+            return None
     
     def create_component_code(self, obj, storageDict, indentLevel=0):
         storageDict = self.prepare_storageDict(obj, storageDict)

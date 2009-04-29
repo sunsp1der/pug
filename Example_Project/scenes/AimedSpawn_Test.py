@@ -1,19 +1,13 @@
 """AimedSpawn_Test.py"""
 
-###################
-# import autocode #
-###################
+### import autocode ###
 from all_components import Spawn_Area, Forward_Motion
 from objects.PurpleFacer import PurpleFacer
 from objects.UpFO import UpFO
 from pug_opioid.PugScene import PugScene
-#######################
-# End import autocode #
-#######################
+### End import autocode ###
 
-##############################
-# "AimedSpawn_Test" autocode #
-##############################
+### "AimedSpawn_Test" autocode ###
 class AimedSpawn_Test(PugScene):
     layers = ['Background']
     def on_enter(self):
@@ -23,6 +17,9 @@ class AimedSpawn_Test(PugScene):
 
         # Sprites
         purplefacer_instance = PurpleFacer()
+        purplefacer_instance.image = 'art/cannon.png'
+        purplefacer_instance.position.x = 493.0
+        purplefacer_instance.position.y = 462.0
         purplefacer_instance.components.add( Spawn_Area(
                 object='UpFO',
                 spawn_interval=0.29999999999999999,
@@ -31,9 +28,5 @@ class AimedSpawn_Test(PugScene):
                 spawn_offset=(1, 0)) )
         purplefacer_instance.components.add( Forward_Motion(
                 velocity=50) )
-
-##################################
-# End "AimedSpawn_Test" autocode #
-##################################
-
+### End "AimedSpawn_Test" autocode ###
 

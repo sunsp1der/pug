@@ -1,6 +1,6 @@
 import gc
 
-from Opioid2D import Sprite, Director, Delete
+from Opioid2D import Sprite, Director, Delete, CallFunc, Delay
 from Opioid2D.public.Node import Node
 from Opioid2D.public.Sprite import SpriteMeta
 
@@ -46,7 +46,14 @@ Opioid2d Sprite with features for use with pug"""
         if isinstance(image, basestring):
             self._image_file = image
         Sprite.set_image(self,image)
-    image_file = property(get_image_file, set_image)
+        
+    def set_image_file(self, image):
+        # the following line had problems on windows:
+        #     Sprite.set_image(self,image)
+        # HACK: putting a Delay before the set_image fixes the problem...
+        (Delay(0) + CallFunc(Sprite.set_image, self, image)).do()
+        # HACK: but it slows down animations ALOT. wtf with this?!
+    image_file = property(get_image_file, set_image_file)
     
     # scene management
     def _set_gname(self, value):
@@ -200,9 +207,9 @@ add blocker to a dictionary of objects blocking the PugSprite's destruction."""
         custom_code += custom_attr_code
         if storageDict['as_class']:
             init_code = exporter.create_init_method(dodef=False, *info)
-            if not init_code:
-                init_code = ''.join([baseIndent,  xIndent, 'pass\n'])  
             custom_code.append(init_code)          
+            if not custom_code:
+                init_code = ''.join([baseIndent,  xIndent, 'pass\n'])  
         code += custom_code
         if not base_code.endswith('pass\n'): # clean up pass case (for looks)
             code.append(base_code)
@@ -225,6 +232,8 @@ add blocker to a dictionary of objects blocking the PugSprite's destruction."""
                         }
     add_subclass_skip_attributes(_codeStorageDict, pug.BaseObject)    
 
+    def test(self):
+        self.set_image("art/button.png")
 # force derived classes to use PugSprite as a base
 #PugSprite._codeStorageDict['base_class'] = PugSprite
 
@@ -268,4 +277,8 @@ _spritePugview = {
 #        ['_test_referrers'],
     ]       
  }
+
+if hasattr(PugSprite,'test'):
+    _spritePugview['attributes'].append(['test'])
+
 pug.add_pugview('PugSprite', _spritePugview, True)

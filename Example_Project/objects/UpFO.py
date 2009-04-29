@@ -1,17 +1,11 @@
 """UpFO.py"""
 
-###################
-# import autocode #
-###################
+### import autocode ###
 from all_components import Set_Motion, Grow_Shrink, Life_Zone
 from pug_opioid.PugSprite import PugSprite
-#######################
-# End import autocode #
-#######################
+### End import autocode ###
 
-###################
-# "UpFO" autocode #
-###################
+### "UpFO" autocode ###
 class UpFO(PugSprite):
     image = 'art/ufo.png'
     layer = 'Background'
@@ -23,7 +17,5 @@ class UpFO(PugSprite):
         self.components.add( Grow_Shrink(
                 grow_in_secs=0.5) )
         self.components.add( Life_Zone() )
-#######################
-# End "UpFO" autocode #
-#######################
+### End "UpFO" autocode ###
 

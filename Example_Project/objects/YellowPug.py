@@ -1,16 +1,10 @@
 """YellowPug.py"""
 
-###################
-# import autocode #
-###################
+### import autocode ###
 from pug_opioid.PugSprite import PugSprite
-#######################
-# End import autocode #
-#######################
+### End import autocode ###
 
-########################
-# "YellowPug" autocode #
-########################
+### "YellowPug" autocode ###
 class YellowPug(PugSprite):
     image = 'art/pug.png'
     layer = 'Background'
@@ -18,7 +12,5 @@ class YellowPug(PugSprite):
         self.position.x = 145.0
         self.position.y = 478.0
         self.color = (1.0, 1.0, 0.0, 1.0)
-############################
-# End "YellowPug" autocode #
-############################
+### End "YellowPug" autocode ###
 

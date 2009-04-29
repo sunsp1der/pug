@@ -121,7 +121,8 @@ Set the object that this frame's pugWindow is viewing
     
     def on_show_object(self, object=None):
         self.Show()
-        self.Iconize(False)
+        if self.IsIconized():
+            self.Iconize(False)
         self.Raise()
         
     def show_all_attributes(self, event=None):

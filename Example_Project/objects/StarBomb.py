@@ -1,19 +1,13 @@
 """StarBomb.py"""
 
-###################
-# import autocode #
-###################
+### import autocode ###
 from all_components import Spawn_On_Destroy, Self_Destruct, Fade, \
         Random_Motion, \
         Grow_Shrink
 from pug_opioid.PugSprite import PugSprite
-#######################
-# End import autocode #
-#######################
+### End import autocode ###
 
-#######################
-# "StarBomb" autocode #
-#######################
+### "StarBomb" autocode ###
 class StarBomb(PugSprite):
     image = 'art/ball.png'
     layer = 'Background'
@@ -36,7 +30,5 @@ class StarBomb(PugSprite):
         self.components.add( Grow_Shrink(
                 grow_in_secs=0.5,
                 shrink_out_secs=-1) )
-###########################
-# End "StarBomb" autocode #
-###########################
+### End "StarBomb" autocode ###
 

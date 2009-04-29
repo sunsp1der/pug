@@ -301,13 +301,15 @@ Update the PugScene's node tracking dict for node. Possible commands: 'Delete'
                         custom_code_list += [baseIndent, _INDENT*2, 
                                              '# Sprites\n']
                         instances = True
+                    else:
+                        custom_code_list +=['\n',]
                     nodeStorageDict = exporter.get_custom_storageDict(node)
                     nodeStorageDict['as_class'] = False # export as object
                     node_code = exporter.create_object_code(node, 
                                                             nodeStorageDict, 
                                                             indentLevel + 2,
                                                             False)                    
-                    custom_code_list += [node_code,'\n']
+                    custom_code_list += [node_code]
             init_code = [baseIndent, _INDENT, 'def on_enter(self):\n']
             if not custom_code_list:
                 custom_code_list = init_code

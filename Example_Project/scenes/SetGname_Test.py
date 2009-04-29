@@ -1,18 +1,12 @@
 """SetGname_Test.py"""
 
-###################
-# import autocode #
-###################
+### import autocode ###
 from all_components import Spawn_Area
 from pug_opioid.PugScene import PugScene
 from pug_opioid.PugSprite import PugSprite
-#######################
-# End import autocode #
-#######################
+### End import autocode ###
 
-############################
-# "SetGname_Test" autocode #
-############################
+### "SetGname_Test" autocode ###
 class SetGname_Test(PugScene):
     layers = ['Background']
     def on_enter(self):
@@ -25,7 +19,5 @@ class SetGname_Test(PugScene):
         pugsprite_instance.components.add( Spawn_Area(
                 object='RandFO') )
 
-################################
-# End "SetGname_Test" autocode #
-################################
+### End "SetGname_Test" autocode ###
 
