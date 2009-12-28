@@ -1,13 +1,11 @@
-"""UpFO.py"""
-
 ### import autocode ###
-from all_components import Set_Motion, Grow_Shrink, Life_Zone
-from pug_opioid.PugSprite import PugSprite
+from pug.all_components import Set_Motion, Grow_Shrink, Life_Zone
+from pig.PigSprite import PigSprite
 ### End import autocode ###
 
-### "UpFO" autocode ###
-class UpFO(PugSprite):
-    image = 'art/ufo.png'
+### UpFO autocode ###
+class UpFO(PigSprite):
+    image = 'art/red nose reindeer.png'
     layer = 'Background'
     def on_create(self):
         self.position.x = 380.0
@@ -17,5 +15,4 @@ class UpFO(PugSprite):
         self.components.add( Grow_Shrink(
                 grow_in_secs=0.5) )
         self.components.add( Life_Zone() )
-### End "UpFO" autocode ###
-
+### End UpFO autocode ###

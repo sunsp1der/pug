@@ -1,12 +1,12 @@
 """PurpleFacer.py"""
 
 ### import autocode ###
-from all_components import Face_Mouse, Spawn_Area, Forward_Motion
-from pug_opioid.PugSprite import PugSprite
+from pug.all_components import Face_Mouse, Spawn_Area, Forward_Motion
+from pig.PigSprite import PigSprite
 ### End import autocode ###
 
 ### "PurpleFacer" autocode ###
-class PurpleFacer(PugSprite):
+class PurpleFacer(PigSprite):
     image = 'art/pug.png'
     layer = 'Background'
     def on_create(self):
@@ -21,6 +21,6 @@ class PurpleFacer(PugSprite):
                 spawn_location='center',
                 spawn_offset=(1, 0)) )
         self.components.add( Forward_Motion(
-                velocity=50) )
+                velocity=0))
 ### End "PurpleFacer" autocode ###
 

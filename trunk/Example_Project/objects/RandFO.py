@@ -3,8 +3,8 @@
 ###################
 # import autocode #
 ###################
-from all_components import Random_Motion, Grow_Shrink, Life_Zone
-from pug_opioid.PugSprite import PugSprite
+from pug.all_components import Random_Motion, Grow_Shrink, Life_Zone
+from pig.PigSprite import PigSprite
 #######################
 # End import autocode #
 #######################
@@ -12,7 +12,7 @@ from pug_opioid.PugSprite import PugSprite
 #####################
 # "RandFO" autocode #
 #####################
-class RandFO(PugSprite):
+class RandFO(PigSprite):
     image = 'art/ufo.png'
     layer = 'Background'
     def on_create(self):

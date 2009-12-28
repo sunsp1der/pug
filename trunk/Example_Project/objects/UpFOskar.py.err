@@ -1,0 +1,11 @@
+"""UpFOskar.py"""
+
+### import autocode ###
+from objects.UpFO import UpFO
+### End import autocode ###
+
+### "UpFOskar" autocode ###
+class UpFOskar(UpFO):
+    def on_create(self):
+### End "UpFOskar" autocode ###
+

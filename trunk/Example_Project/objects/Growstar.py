@@ -1,12 +1,12 @@
 """Growstar.py"""
 
 ### import autocode ###
-from all_components import Grow_Shrink, Self_Destruct
-from pug_opioid.PugSprite import PugSprite
+from pug.all_components import Grow_Shrink, Self_Destruct
+from pig.PigSprite import PigSprite
 ### End import autocode ###
 
 ### "Growstar" autocode ###
-class Growstar(PugSprite):
+class Growstar(PigSprite):
     image = 'art/explosion2.png'
     layer = 'Stars'
     def on_create(self):

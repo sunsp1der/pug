@@ -1,14 +1,14 @@
 """MouseFaceFollow_Test.py"""
 
 ### import autocode ###
-from all_components import Follow_Mouse, Face_Object, Face_Mouse
+from pug.all_components import Follow_Mouse, Face_Object, Face_Mouse
 from objects.ShipSprite import ShipSprite
 from objects.YellowPug import YellowPug
-from pug_opioid.PugScene import PugScene
+from pig.PigScene import PigScene
 ### End import autocode ###
 
 ### "MouseFaceFollow_Test" autocode ###
-class MouseFaceFollow_Test(PugScene):
+class MouseFaceFollow_Test(PigScene):
     layers = ['Background']
     def on_enter(self):
         # Archetypes

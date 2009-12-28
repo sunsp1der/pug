@@ -3,7 +3,7 @@ import os
 
 import Opioid2D
 
-from pug_opioid.util import get_available_scenes, set_project_path
+from pig.util import get_available_scenes, set_project_path
 
 from _game_settings import game_settings
 

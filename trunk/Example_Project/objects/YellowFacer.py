@@ -3,8 +3,8 @@
 ###################
 # import autocode #
 ###################
-from all_components import Face_Mouse
-from pug_opioid.PugSprite import PugSprite
+from pug.all_components import Face_Mouse
+from pig.PigSprite import PigSprite
 #######################
 # End import autocode #
 #######################
@@ -12,7 +12,7 @@ from pug_opioid.PugSprite import PugSprite
 ##########################
 # "YellowFacer" autocode #
 ##########################
-class YellowFacer(PugSprite):
+class YellowFacer(PigSprite):
     image = 'art/pug.png'
     layer = 'Layer 1'
     def on_create(self):
@@ -20,7 +20,7 @@ class YellowFacer(PugSprite):
         self.position.y = 322.0
         self.color = (1.0, 1.0, 0.0, 1.0)
         self.components.add( Face_Mouse() )
-        PugSprite.on_create(self)
+        PigSprite.on_create(self)
 ##############################
 # End "YellowFacer" autocode #
 ##############################
