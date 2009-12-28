@@ -6,12 +6,12 @@ import os.path
 import imp
 import sys
 
-from pug.code_storage.constants import _INDENT, _STORE_UNICODE
+from pug.code_storage.constants import _INDENT, _STORE_UNICODE, _PRETTIFY_FLOATS
 from pug.component import ComponentObject, Component
 from pug.component.ComponentObject import ComponentSet
 from pug.gname import GnamedObject
 from pug.util import make_name_valid, get_type_name
-import all_components
+import pug.all_components as all_components
 
 _DEBUG = False
 
@@ -103,7 +103,7 @@ Possible entries in storageDict:
         self.exportDictList = [] # list of objects to be exported when export
                                   # is called. [(obj,storageDict)]
         self.objCode = {} # chunks of object code {'storage_name':code}
-        self.oldCodeDict = {} # user code from file matching save name, if any.
+        self.userCodeDict = {} # user code from file matching save name, if any.
                                 # indexed by 'XXXXX autocode' or 'top_of_file'
         self.storageNames = [] # names of objects in the exported code
         self.deleteCallbacks = [] # fns to be called on delete
@@ -149,7 +149,7 @@ test: If True, the created code will be executed to test if it works properly.
         else:
             oldcode = oldfile.read()
             oldfile.close()
-            self.oldCodeDict = self.extract_oldcode(oldcode)
+            self.userCodeDict = self.extract_usercode(oldcode)
         # create code
         code = ''
         try:
@@ -162,14 +162,15 @@ test: If True, the created code will be executed to test if it works properly.
                 errorfile = open( self.errorfilename, 'w')
                 errorfile.write(code)
                 errorfile.close()
-                # if there were any problems creating the code, make sure we don't
-                # write to the file
+                # if there were any problems creating the code, make sure we 
+                # don't write to the file
                 info = ''.join([str(sys.exc_info()[1]), 
                                 '\nSaved to: ', self.errorfilename])
                 raise sys.exc_info()[0]( info)
             else:
                 raise
         # test load
+        code = self.inject_usercode(code)
         self.code = code
         if code != oldcode:
             exportfile = open(filename, 'w')
@@ -178,34 +179,107 @@ test: If True, the created code will be executed to test if it works properly.
             exportfile.close()
         return self.file_changed
         
-    def extract_oldcode(self, code=''):
-        """extract_usercode( code='')->dict of non-autocode in code
+    def extract_usercode(self, code=''):
+        """extract_usercode( code='')->dict of non-autocode in file
         
-The dict will be indexed by '____ autocode' (as per file) or 'top_of_file' if 
-the code appears before import autocode"""
-        self.oldCodeDict = {}
-        startLabel = 'top_of_file'
-        codeblock = ''
+The dict will be indexed by '____ autocode', or 'top_of_file' if 
+the code appears before first autocode block
+"""
+        user_code_dict = {}
+        user_block = 'top_of_file' # index for user_code_dict
+        auto_block = '' # autocode block we are scanning
+        user_code = '' # user code to save in userCodeDict
         lines = code.splitlines()
         for line in lines:
             label = self.get_comment_label(line)
             if label:
-                if startLabel:
-                    if label == ''.join(['End ',startLabel]) or \
-                            startLabel == 'top_of_file':
-                        self.oldCodeDict[startLabel]=codeblock
+                # we hit an autocode label
+                if user_block:                    
+                    if user_code:
+                        # this code copied below
+                        while user_code[-1:] == '\n':
+                            user_code = user_code[:-1]
+                        user_code_dict[user_block] = user_code
+                        user_code = ''
+                    auto_block = label
+                    user_block = None                    
+                elif auto_block:
+                    # we've already started an autocode block
+                    if label == ''.join(['End ',auto_block]):
+                        # this label ends the block
+                        user_block = auto_block
+                        auto_block = None
                     else:
+                        # we shouldn't hit another label until the first ends
                         raise ValueError(''.join([
                                 'autocode start without ending previous: "',
                                 label,'"']))
                 elif label[0:4] == 'End ':
+                    # we've hit an end without a beginning
                     raise ValueError(''.join([
                                 'End without start: "',label,'"']))
-                else:
-                    startLabel = label
             else:
-                codeblock = '\n'.join([codeblock, line])
-                startLabel = None
+                # the line is code, not an autocode label
+                if auto_block:
+                    # skip all autocode
+                    continue
+                else:
+                    # store the user_code
+                    if user_code or line != '':
+                        if user_code:
+                            user_code = '\n'.join([user_code, line])
+                        else:
+                            user_code = line
+        if user_code:
+            # copy of code from above
+            while user_code[-2:-1] == '\n' and user_code[-1:] == '\n':
+                user_code = user_code[:-1]
+            user_code_dict[user_block] = user_code
+        return user_code_dict
+
+    def inject_usercode(self, code='', user_code_dict=None):
+        """extract_usercode( code='', user_code_dict=None)->code with user_code
+
+code: autocode generated by CodeStorageExporter
+user_code_dict: usercode dict indexed by '____ autocode', or 'top_of_file' if 
+the code appears before first autocode block. If None, defaults to 
+self.userCodeDict
+"""
+        if user_code_dict is None:
+            user_code_dict = self.userCodeDict
+        injected_code = [] # list of strings to be joined by '\n'
+        auto_lines = code.splitlines() # list of lines of autocode
+        # start injected_code with 'top_of_file' usercode
+        user_code = user_code_dict.get('top_of_file')
+        if user_code:
+            injected_code += [user_code,'']
+        # parse file and inject usercode
+        auto_block = None # the autocode block being read in
+        for line in auto_lines:
+            label = self.get_comment_label(line)
+            if label:
+                # we hit an autocode label
+                if auto_block:
+                    # we've been reading in an auto_block
+                    if label == ''.join(['End ',auto_block]):
+                        # this label ends the block
+                        injected_code.append(line)
+                        user_code = user_code_dict.get(auto_block)
+                        if user_code:
+                            injected_code += ['',user_code]
+                        auto_block = None
+                    else:
+                        # we shouldn't hit another label until the first ends
+                        raise ValueError(''.join([
+                                'autocode start without ending previous: "',
+                                label,'"']))
+                else:
+                    injected_code.append(line)
+                    auto_block = label
+            else:
+                injected_code.append(line)
+        code = '\n'.join(injected_code)                
+        return code
         
     def add_object(self, obj, asClass=None, storageDict=None):
         """add_object(self, obj, storageDict=None)->initialized storageDict
@@ -351,7 +425,7 @@ from itemName due to name conflicts.
             self.objCode.setdefault(name, objCode)
         # create file label
         fname = os.path.basename(self.filename)
-        code = [''.join(['"""',fname,'"""\n\n'])]            
+        code = [""]            
         # create code for imports and other initialization
         code += [self.create_import_code()]
         for storageDict in self.exportDictList:
@@ -381,7 +455,7 @@ storageDict: storageDict to use. If not provided, self.exportDictList will be
             storageDict = None
         storageDict = self.prepare_storageDict( obj, storageDict)
         storage_name = storageDict['storage_name']
-        label = ''.join(['"', storage_name, '" autocode'])
+        label = ''.join([ storage_name, ' autocode'])
         startblock = self.create_comment_block(label)
         endblock = self.create_comment_block(''.join(['End ', label]))
         codeblock = self.create_object_code( obj, storageDict)
@@ -610,7 +684,11 @@ there are no attributes to set, this method returns "".
             if repr(val) == '-0.0': 
                 # I don't totally understand why this is possible
                 val = 0.0 
-            line = [baseIndent, prefix, attr, ' = ', repr(val), '\n']
+            if _PRETTIFY_FLOATS and type(val) == float:
+                output = str(val)
+            else:
+                output = repr(val)
+            line = [baseIndent, prefix, attr, ' = ', output, '\n']
             codeList += line
         return ''.join(codeList)
 
@@ -775,19 +853,15 @@ iAttrList: When storing 'as_class', these attributes will be set in the init
             if self.modulesToImport.has_key(mod):
                 statement = base_statement
                 itemlist = self.modulesToImport[mod]
-                count = 0
+                divider = ' '
                 for item in itemlist:
-                    if count == 0:
-                        divider = ' '
-                    else:
-                        divider = ', '
                     # create a new line if necessary
                     if len(statement)  + len(divider) + len(item) > 78:
-                        importblock = ''.join([importblock, statement, ',\n'])
-                        statement = [_INDENT*2, item]
+                        importblock = ''.join([importblock, statement, ',\\\n'])
+                        statement = ''.join([_INDENT, item])
                     else:
                         statement = ''.join([statement, divider, item])
-                    count += 1
+                    divider = ', '
                 statement = ''.join([statement, '\n'])
                 importblock = ''.join([importblock, statement])
             if self.specialImports.has_key(mod):
@@ -804,11 +878,11 @@ iAttrList: When storing 'as_class', these attributes will be set in the init
         comment = ''.join(['### ', comment, ' ###\n'])
         return comment
     
-    def get_comment_label(self, str=''):
-        """get_comment(str)->if str is in CSE markers, label. Otherwise, None"""
-        str = str.strip()
-        if str[:3] == '### ' and str[-3:] == ' autocode ###':
-            return str[3:-3]
+    def get_comment_label(self, line=''):
+        """get_comment(line)->if line is in CSE markers, label. else None"""
+        line = line.strip()
+        if line[:4] == '### ' and line[-13:] == ' autocode ###':
+            return line[4:-4]
         else:
             return None
     
@@ -842,7 +916,7 @@ iAttrList: When storing 'as_class', these attributes will be set in the init
             compImportModule = compStorageDict['import_module']
             # just drop in the all_components magic
             if all_components and compObjClass.__name__ in dir(all_components):
-                import_name = self.setup_import('all_components', 
+                import_name = self.setup_import('pug.all_components', 
                                                 compObjClass.__name__)     
             else:                               
                 import_name = self.setup_import(compImportModule, 
@@ -861,7 +935,7 @@ iAttrList: When storing 'as_class', these attributes will be set in the init
             compObjClass = compStorageDict['base_class']
             compImportModule = compStorageDict['import_module']
             if all_components and compObjClass.__name__ in dir(all_components):
-                import_name = self.setup_import('all_components', 
+                import_name = self.setup_import('pug.all_components', 
                                                 compObjClass.__name__)     
             else:                               
                 import_name = self.setup_import(compImportModule, 

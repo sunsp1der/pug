@@ -8,9 +8,6 @@ from time import time
 import pug
 from pug.component.component import Component
 
-all_components = imp.new_module('all_components')
-sys.modules['all_components'] = all_components
-
 class _GlobalComponentManager():
     """The component manager is used to register all components available for
 adding through the pug system"""
@@ -38,7 +35,10 @@ available through the pug system.
     component._setup_method_names()
     _globalComponentManager.componentList.append(component)
     _globalComponentManager.lastUpdate = time()
-    setattr(all_components, component.__name__, component)
+    old_component = getattr(pug.all_components, component.__name__, None)
+    if old_component:
+        print "Duplicate component name: ",component.__name__," overwritten"
+    setattr(pug.all_components, component.__name__, component)
         
 def get_component_manager():
     return _GlobalComponentManager

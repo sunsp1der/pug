@@ -1,10 +1,35 @@
 now:
+	open pug python game creator editor engine builder 
+	open game inventor OGI
+	python game inventor PGI
+	piggy
+	python graphics and game inventor
+	python inventor of games and graphics
+	python inventor gizmo
 
-current version:
-	editable code_storage			
+current version:		
+	key controls
+		from pug_opioid.keyboard import *
+			in pug_opioid.__init__: from pug_opioid.keyboard import *
+				pug_opioid.keyboard has key constants and funcs 
+		on_key_down
+		on_key_up
+		while_key_down
+		while_key_up (A_KEY, fn, *args, **kwargs)
+		
+	basic collisions or physics
+		from pug_opioid.collision import register_collision_callback
+		
+		register_collision_callback(sprite, fn)
+		sprite.collides_with_groups('player','playershot')
+		sprite.join_collision_group('player')
+	
+next_version:
+	new components should override old. project loaded last.
+	option to open component file. default save is project component file
+	make mouse follow stop properly with 'stop_within'
 	set gname
-	demo of heads watching a ufo
-	finalize demos
+		demo of heads watching a ufo
 	undo
 	save query when changing levels or quitting
 	new_project
@@ -13,6 +38,7 @@ current version:
 			name
 			all settings
 	open_project
+	finalize demos
 
 Finalize:
 	html tutorial

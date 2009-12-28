@@ -92,12 +92,12 @@ size: the button size
             if obj:
                 self.PugFrame(obj=obj, objectpath=self._getNewPath())
         except:
+            wx.EndBusyCursor()
             retDlg = wx.MessageDialog(self, 'Unable To Open PugFrame',
                                       'PugFrame Error', 
                                        wx.ICON_ERROR | wx.OK)
             retDlg.ShowModal()      
             retDlg.Destroy()          
-            wx.EndBusyCursor()
 
     def get_obj(self):
         if self.targetObjectFn:
