@@ -5,7 +5,7 @@ from new import code as _code, function as _function, \
 import weakref
 from types import MethodType as _MethodType
 
-from pug.code_storage.constants import _INDENT, _STORE_UNICODE
+from pug.code_storage.constants import _INDENT, _STORE_UNICODE, _PRETTIFY_FLOATS
 
 _DEBUG = False
 
@@ -174,11 +174,20 @@ line breaks between each. To create a single-line argument list, strip out all
                     store = False
             except:
                 store = False
-            if store:                
+            if store:       
+                #TODO: make function to do this stuff which is duplicated from
+                #     CodeStorageExporter.create_attribute_code         
                 if not _STORE_UNICODE and val is unicode(val):
                     # we convert unicode values to strings for pretty's sake
                     val = str(val)
-                attribute_code += [''.join([attr, '=', repr(val)])]
+                if repr(val) == '-0.0': 
+                    # I don't totally understand why this is possible
+                    val = 0.0                     
+                if _PRETTIFY_FLOATS and type(val) == float:
+                    output = str(val)
+                else:
+                    output = repr(val)                    
+                attribute_code += [''.join([attr, '=', output])]
         joiner = ''.join([',\n',argIndent])
         code = joiner.join(attribute_code)
         if attribute_code:

@@ -198,7 +198,10 @@ take all the objects attributes and make entries based on defaults defined in:
             family = None
         # create agui
         agui = None
-        agui = create_default_agui(attribute, obj, window, family)
+        try:
+            agui = create_default_agui(attribute, obj, window, family)
+        except:
+            continue
         if agui:
             aguilist.append(agui)
     return aguilist

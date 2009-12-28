@@ -5,7 +5,6 @@ import functools
 import sys
 
 from pug.component.component import *
-all_components = None
 
 _DEBUG = False
 
@@ -58,9 +57,6 @@ class ComponentSet(object):
         self.__component_list = ComponentList()
         self.__obj = _ref(obj)
         self.__original_methods = {}
-        global all_components
-        if not all_components:
-            all_components = __import__("all_components")
 
     def add(self, component):
         """add(component)->component instance
