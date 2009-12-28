@@ -1,13 +1,13 @@
 """StarBomb.py"""
 
 ### import autocode ###
-from pug.all_components import Spawn_On_Destroy, Self_Destruct, Fade,\
+from all_components import Spawn_On_Destroy, Self_Destruct, Fade,
     Random_Motion, Grow_Shrink
-from pig.PigSprite import PigSprite
+from pug_opioid.PugSprite import PugSprite
 ### End import autocode ###
 
 ### "StarBomb" autocode ###
-class StarBomb(PigSprite):
+class StarBomb(PugSprite):
     image = 'art/ball.png'
     layer = 'Background'
     def on_create(self):

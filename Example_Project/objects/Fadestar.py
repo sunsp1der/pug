@@ -1,12 +1,12 @@
 """Fadestar.py"""
 
 ### import autocode ###
-from all_components import Fade, Self_Destruct
-from pug_opioid.PugSprite import PugSprite
+from pug.all_components import Fade, Self_Destruct
+from pig.PigSprite import PigSprite
 ### End import autocode ###
 
 ### "Fadestar" autocode ###
-class Fadestar(PugSprite):
+class Fadestar(PigSprite):
     image = 'art/explosion2.png'
     layer = 'Stars'
     def on_create(self):

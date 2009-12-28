@@ -1,11 +1,11 @@
 """ShipSprite.py"""
 
 ### import autocode ###
-from pug_opioid.PugSprite import PugSprite
+from pig.PigSprite import PigSprite
 ### End import autocode ###
 
 ### "ShipSprite" autocode ###
-class ShipSprite(PugSprite):
+class ShipSprite(PigSprite):
     image = 'art/sprite.png'
     layer = 'Background'
     def on_create(self):

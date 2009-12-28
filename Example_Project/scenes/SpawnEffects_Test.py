@@ -1,15 +1,15 @@
 """SpawnEffects_Test.py"""
 
 ### import autocode ###
-from all_components import Grow_Shrink, Self_Destruct, Spawn_Area
+from pug.all_components import Grow_Shrink, Self_Destruct, Spawn_Area
 from objects.Fadestar import Fadestar
 from objects.Growstar import GrowStar
 from objects.YellowPug import YellowPug
-from pug_opioid.PugScene import PugScene
+from pig.PigScene import PigScene
 ### End import autocode ###
 
 ### "SpawnEffects_Test" autocode ###
-class SpawnEffects_Test(PugScene):
+class SpawnEffects_Test(PigScene):
     layers = ['Background', 'Stars']
     def on_enter(self):
         # Archetypes

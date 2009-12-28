@@ -7,10 +7,10 @@ import Opioid2D
 
 import pug
 
-from pug_opioid.editor.OpioidInterface import OpioidInterface
+from pig.editor.OpioidInterface import OpioidInterface
 
 def init_pug():
-    """start mainScene with a pug interface"""         
+    """start mainScene with a pug interface"""
     interface = OpioidInterface(sys.argv[0])
       
 if __name__ == "__main__":
