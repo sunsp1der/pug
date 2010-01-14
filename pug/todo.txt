@@ -1,21 +1,11 @@
 now:
-	open pug python game creator editor engine builder 
-	open game inventor OGI
-	python game inventor PGI
-	piggy
-	python graphics and game inventor
-	python inventor of games and graphics
-	python inventor gizmo
 
 current version:		
 	key controls
-		from pug_opioid.keyboard import *
-			in pug_opioid.__init__: from pug_opioid.keyboard import *
-				pug_opioid.keyboard has key constants and funcs 
 		on_key_down
 		on_key_up
 		while_key_down
-		while_key_up (A_KEY, fn, *args, **kwargs)
+		while_key_up (KEYMOD, KEY_A, fn, *args, **kwargs)
 		
 	basic collisions or physics
 		from pug_opioid.collision import register_collision_callback
