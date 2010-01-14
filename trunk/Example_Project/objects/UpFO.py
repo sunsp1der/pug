@@ -1,6 +1,6 @@
 ### import autocode ###
-from pug.all_components import Set_Motion, Grow_Shrink, Life_Zone
 from pig.PigSprite import PigSprite
+from pug.all_components import Set_Motion, Grow_Shrink, Life_Zone
 ### End import autocode ###
 
 ### UpFO autocode ###
