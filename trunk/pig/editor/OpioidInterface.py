@@ -96,7 +96,7 @@ scene: the scene to load initially
         thread.start_new_thread(start_opioid, 
                                           (self.pug_settings.rect_opioid_window,
                                            'Pig Scene',
-                                           get_image_path('pug.png'),
+                                           get_image_path('pig.png'),
                                            PigScene))
         time.sleep(1)
         
