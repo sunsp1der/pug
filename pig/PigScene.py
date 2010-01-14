@@ -1,4 +1,5 @@
 import os.path
+from types import StringTypes
 
 import Opioid2D
 
@@ -8,8 +9,8 @@ from pug.code_storage.constants import _INDENT
 from pug.code_storage import add_subclass_skip_attributes
 
 from pig.editor.agui import SceneNodes, SceneLayers
-from pig.editor.util import get_available_layers, save_object,\
-                                    exporter_cleanup
+from pig.editor.util import get_available_layers, save_object
+from pig.keyboard import keys, keymods
 
 _DEBUG = False
 
@@ -20,17 +21,93 @@ class PigScene( Opioid2D.Scene, pug.BaseObject):
     exitted = False
     _pug_pugview_class = 'PigScene'
     def __init__(self, gname=''):
+        self._key_down_dict = {}
+        self._key_up_dict = {}
+        self.register_key_down(0, keys["ESCAPE"], self.escape)
         Opioid2D.Scene.__init__(self)
         pug.BaseObject.__init__(self, gname)   
         if _DEBUG: print "PigScene.__init__", self.__class__.__name__   
-        
+                    
     def handle_keydown(self, ev):
-        if ev.key == Opioid2D.K_ESCAPE:
-            if getattr(Opioid2D.Director, 'playing_in_editor', False):
-                import wx
-                wx.CallAfter(wx.GetApp().projectObject.stop_scene)
-            else:
-                Opioid2D.Director.quit()
+        """handle_keydown( ev): ev is a pygame keydown event"""
+        mod = 0
+        if ev.mod:
+            for modval in keymods.itervalues():
+                if ev.mod & modval:
+                    mod += modval 
+        fn_list = self._key_down_dict.get((mod, ev.key))
+        for fn_info in fn_list:
+            fn_info[0](*fn_info[1],**fn_info[2])
+    
+    def register_key_down(self, *args, **kwargs):
+        """register_key_down(keymod, key, fn, *args, **kwargs)
+    
+Register a function to execute when a given key is pressed.
+keymod: "", "SHIFT", "CTRL", "ALT", "SHIFT-CTRL", "SHIFT-ALT", "ALT-CTRL", 
+        or "SHIFT-CTRL-ALT" or a KEYMOD_ constant from pig.keyboard
+key: a KEY_ constant from pig.keyboard
+fn: the function to call when the keypress occurs
+*args, **kwargs: arguments to fn    
+"""
+        self._register_key( self._key_down_dict, *args, **kwargs)
+        
+    def register_key_up(self, *args, **kwargs):
+        """register_key_up: like register_key_down, but when key is released"""
+        self._register_key( self._key_up_dict, *args, **kwargs)
+
+    def unregister_key_down(self, keymod, key, fn=None, *args, **kwargs):
+        """unregister_key_down(keymod, key, fn=None, *args, **kwargs)
+    
+Unregister a function to execute when a given key is pressed. Returns True if fn
+is found. If no function is specified, unregister that key altogether and return
+True.
+keymod: "", "SHIFT", "CTRL", "ALT", "SHIFT-CTRL", "SHIFT-ALT", "ALT-CTRL", 
+        or "SHIFT-CTRL-ALT" or a KEYMOD_ constant from pig.keyboard
+key: a KEY_ constant from pig.keyboard
+fn: the function to call when the keypress occurs
+*args, **kwargs: arguments to fn    
+"""
+        self._unregister_key( self._key_down_dict, *args, **kwargs)
+
+    def unregister_key_up(self, *args, **kwargs):
+        "unregister_key_up: like register_key_down, but when key is released"
+        self._unregister_key( self._key_up_dict, *args, **kwargs)
+        
+    def _register_key( self, keydict, keymod, key, fn, *args, **kwargs):
+        """register_key( keydict, keymod, key, fn, *args, **kwargs)
+        
+Registers keys into the specified dict... avoid duplicating code for key_up,
+key_down. In the future, maybe key_hold.
+"""
+        if keydict.get((keymod, key)) is None:
+            keydict[(keymod, key)] = [[fn, args, kwargs]]
+        else:
+            keydict[(keymod, key)].append([fn, args, kwargs])
+
+    def _unregister_key( self, keydict, keymod, key, fn=None, *args, **kwargs):
+        """unregister_key( keydict, keymod, key, fn, *args, **kwargs)
+        
+Unregisters keys into the specified dict... avoid duplicating code for key_up,
+key_down. In the future, maybe key_hold.
+"""
+        fn_list = keydict.get((keymod, key)) 
+        if fn_list is None:
+            return False
+        if fn is None:
+            keydict[(keymod, key)] = []
+            return True
+        elif (fn, args, kwargs) in fn_list:
+            fn_list.remove((fn, args, kwargs))
+            return True
+        else:
+            return False
+    
+    def escape(self):
+        if getattr(Opioid2D.Director, 'playing_in_editor', False):
+            import wx
+            wx.CallAfter(wx.GetApp().projectObject.stop_scene)
+        else:
+            Opioid2D.Director.quit()
                 
     def enter(self):
         self.on_enter()
@@ -214,7 +291,7 @@ Update the PigScene's node tracking dict for node. Possible commands: 'Delete'
         return get_available_layers()
 
     scene_layers = property(get_scene_layers, doc=
-            'Utility property for viewing layers without __editor__ layer')
+            'Utility property for viewing layers without __editor__ layer')        
     
     # code storage customization
     def _create_object_code(self, storageDict, indentLevel, exporter):
@@ -335,7 +412,8 @@ Update the PigScene's node tracking dict for node. Possible commands: 'Delete'
             'custom_export_func': _create_object_code,
             'as_class':True,
             'skip_attributes': ['_nodes','_groups','scene_layers','layers',
-                                '_PigScene__node_num']
+                                '_PigScene__node_num', '_key_down_dict', 
+                                '_key_up_dict']
              }   
     add_subclass_skip_attributes(_codeStorageDict, pug.BaseObject)
 
