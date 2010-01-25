@@ -3,7 +3,12 @@
 
 # this is the list of all available keys
 # changing the order of this list will change the order in pug dropdowns
-key_list = (
+key_list = [
+    ("UP",273),
+    ("DOWN",274),
+    ("LEFT",276),
+    ("RIGHT",275),
+    ("SPACE",32),
     ("a",97),
     ("b",98),
     ("c",99),
@@ -55,7 +60,6 @@ key_list = (
     ("COMPOSE",314),
     ("DELETE",127),
     ("DOLLAR",36),
-    ("DOWN",274),
     ("END",279),
     ("EQUALS",61),
     ("ESCAPE",27),
@@ -101,7 +105,6 @@ key_list = (
     ("KP_PLUS",270),
     ("LALT",308),
     ("LCTRL",306),
-    ("LEFT",276),
     ("LEFTBRACKET",91),
     ("LEFTPAREN",40),
     ("LESS",60),
@@ -125,7 +128,6 @@ key_list = (
     ("RALT",307),
     ("RCTRL",305),
     ("RETURN",13),
-    ("RIGHT",275),
     ("RIGHTBRACKET",93),
     ("RIGHTPAREN",41),
     ("RMETA",309),
@@ -134,13 +136,11 @@ key_list = (
     ("SCROLLOCK",302),
     ("SEMICOLON",59),
     ("SLASH",47),
-    ("SPACE",32),
     ("SYSREQ",317),
     ("TAB",9),
     ("UNDERSCORE",95),
     ("UNDO",322),
     ("UNKNOWN",0),
-    ("UP",273),
 #    ("WORLD_0",160),
 #    ("WORLD_1",161),
 #    ("WORLD_10",170),
@@ -237,7 +237,7 @@ key_list = (
 #    ("WORLD_93",253),
 #    ("WORLD_94",254),
 #    ("WORLD_95",255),
-)
+]
 # create constant values and dict
 keys = {}
 for _name, _val in key_list:

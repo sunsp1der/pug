@@ -179,6 +179,7 @@ called, but PugFrame.setup_window is."""
         self.Bind(wx.EVT_MENU, self._evt_passmenu)        
 #        wx.GetApp().set_default_pos( self)
         self.setup_window(obj, objectpath, title, name)
+
         
     def on_show_object(self, obj=None):
         self.Raise()

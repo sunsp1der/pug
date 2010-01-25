@@ -6,7 +6,6 @@ import shutil
 import time
 import thread
 import subprocess
-import sys
 
 import wx
 

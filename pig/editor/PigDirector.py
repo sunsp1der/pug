@@ -3,12 +3,7 @@
 Hack in a few features necessary for the Opioid2D director to work with pug"""
 
 import wx
-import time
 import Opioid2D
-from Opioid2D.internal.objectmgr import ObjectManager
-from Opioid2D.public.Image import ImageMeta
-from Opioid2D.public.ResourceManager import ResourceManager
-import sys, traceback
 
 #hack for quitting pug when opioid quits
 QUITTING = False

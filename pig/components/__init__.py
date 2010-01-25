@@ -5,6 +5,7 @@ from pig.components.behavior.Life_Zone import Life_Zone
 from pig.components.behavior.Self_Destruct import Self_Destruct
 from pig.components.controls.Follow_Mouse import Follow_Mouse
 from pig.components.controls.Face_Mouse import Face_Mouse
+from pig.components.controls.Keys_Velocity import Keys_Velocity
 from pig.components.effects.Fade import Fade
 from pig.components.effects.Grow_Shrink import Grow_Shrink
 from pig.components.physics.Set_Motion import Set_Motion

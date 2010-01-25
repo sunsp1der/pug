@@ -8,7 +8,7 @@ from pug.syswx.attributeguis.dropdown import Dropdown
 from pig.util import get_available_objects
 
 class ObjectsDropdown (Dropdown):
-    """Opugoid object selection attribute GUI
+    """PIG object selection attribute GUI
     
 ObjectsDropdown(attribute, window, aguidata, **kwargs)
 
@@ -21,8 +21,8 @@ aguidata: {
     'prepend_list': a list of ("name",obj) options to add to start of list.
     'none_choice': if value is -1, adds 'append_list':[('#None#',None)],
         otherwise if value evaluates to True, 'prepend_list':[('#None#',None)]
-    'component': if True, sets 'none_choice':True and returns strings rather
-        or None than actual classes. Used for component fields
+    'component': if True, sets 'none_choice':True and returns strings or None
+        rather than actual classes. Used for component fields
     '...': for more see Dropdown    
 
 For kwargs optional arguments, see the Base attribute GUI
