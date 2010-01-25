@@ -1,6 +1,8 @@
 import os.path
 from types import StringTypes
 
+from pygame.locals import KEYDOWN, KEYUP
+
 import Opioid2D
 
 import pug
@@ -23,24 +25,40 @@ class PigScene( Opioid2D.Scene, pug.BaseObject):
     def __init__(self, gname=''):
         self._key_down_dict = {}
         self._key_up_dict = {}
-        self.register_key_down(0, keys["ESCAPE"], self.escape)
+        self.register_key_down(keys["ESCAPE"], 0, self.escape)
         Opioid2D.Scene.__init__(self)
         pug.BaseObject.__init__(self, gname)   
         if _DEBUG: print "PigScene.__init__", self.__class__.__name__   
                     
-    def handle_keydown(self, ev):
+    def handle_keydown( self, ev):
         """handle_keydown( ev): ev is a pygame keydown event"""
+        self.process_keylist( ev)
+
+    def handle_keyup( self, ev):
+        """handle_keydown( ev): ev is a pygame keydown event"""
+        self.process_keylist( ev)
+        
+    def process_keylist( self, ev):
+        """process_keylist( ev): call registered key event callbacks
+
+ev: a pygame key event
+key_dict: the key_dict to use 
+"""
+        if ev.type == KEYDOWN:
+            dict = self._key_down_dict
+        elif ev.type == KEYUP:
+            dict = self._key_up_dict
         mod = 0
         if ev.mod:
             for modval in keymods.itervalues():
                 if ev.mod & modval:
                     mod += modval 
-        fn_list = self._key_down_dict.get((mod, ev.key))
+        fn_list = dict.get((ev.key, mod), [])
         for fn_info in fn_list:
             fn_info[0](*fn_info[1],**fn_info[2])
     
     def register_key_down(self, *args, **kwargs):
-        """register_key_down(keymod, key, fn, *args, **kwargs)
+        """register_key_down(key, keymod, fn, *args, **kwargs)
     
 Register a function to execute when a given key is pressed.
 keymod: "", "SHIFT", "CTRL", "ALT", "SHIFT-CTRL", "SHIFT-ALT", "ALT-CTRL", 
@@ -52,11 +70,13 @@ fn: the function to call when the keypress occurs
         self._register_key( self._key_down_dict, *args, **kwargs)
         
     def register_key_up(self, *args, **kwargs):
-        """register_key_up: like register_key_down, but when key is released"""
+        """register_key_up(key, keymod, fn, *args, **kwargs)
+
+Like register_key_down, but when key is released"""
         self._register_key( self._key_up_dict, *args, **kwargs)
 
-    def unregister_key_down(self, keymod, key, fn=None, *args, **kwargs):
-        """unregister_key_down(keymod, key, fn=None, *args, **kwargs)
+    def unregister_key_down(self, key, keymod, fn=None, *args, **kwargs):
+        """unregister_key_down(key, keymod, fn=None, *args, **kwargs)
     
 Unregister a function to execute when a given key is pressed. Returns True if fn
 is found. If no function is specified, unregister that key altogether and return
@@ -70,31 +90,36 @@ fn: the function to call when the keypress occurs
         self._unregister_key( self._key_down_dict, *args, **kwargs)
 
     def unregister_key_up(self, *args, **kwargs):
-        "unregister_key_up: like register_key_down, but when key is released"
+        """unregister_key_up(key, keymod, fn=None, *args, **kwargs)
+        
+Like register_key_down, but when key is released"""
         self._unregister_key( self._key_up_dict, *args, **kwargs)
         
-    def _register_key( self, keydict, keymod, key, fn, *args, **kwargs):
-        """register_key( keydict, keymod, key, fn, *args, **kwargs)
+    def _register_key( self, keydict, key, keymod, fn, *args, **kwargs):
+        """register_key( keydict, key, keymod, fn, *args, **kwargs)
         
 Registers keys into the specified dict... avoid duplicating code for key_up,
 key_down. In the future, maybe key_hold.
 """
-        if keydict.get((keymod, key)) is None:
-            keydict[(keymod, key)] = [[fn, args, kwargs]]
+        if key is None:
+            # this facilitates components that don't use every key
+            return
+        if keydict.get((key, keymod)) is None:
+            keydict[(key, keymod)] = [[fn, args, kwargs]]
         else:
-            keydict[(keymod, key)].append([fn, args, kwargs])
+            keydict[(key, keymod)].append([fn, args, kwargs])
 
-    def _unregister_key( self, keydict, keymod, key, fn=None, *args, **kwargs):
-        """unregister_key( keydict, keymod, key, fn, *args, **kwargs)
+    def _unregister_key( self, keydict, key, keymod, fn=None, *args, **kwargs):
+        """unregister_key( keydict, key, keymod, fn, *args, **kwargs)
         
 Unregisters keys into the specified dict... avoid duplicating code for key_up,
 key_down. In the future, maybe key_hold.
 """
-        fn_list = keydict.get((keymod, key)) 
+        fn_list = keydict.get((key, keymod)) 
         if fn_list is None:
             return False
         if fn is None:
-            keydict[(keymod, key)] = []
+            keydict[(key, keymod)] = []
             return True
         elif (fn, args, kwargs) in fn_list:
             fn_list.remove((fn, args, kwargs))

@@ -65,7 +65,6 @@ simple objects that contain a few values in them (i.e. X and Y)
         for sub in sub_attributes:
             subnum += 1
             controlText = AguiTextCtrl( control)
-            controlText.SetMinSize((-1, WX_STANDARD_HEIGHT))
             controlText.Bind(wx.EVT_TEXT_ENTER, self.apply)
             controlText.Bind(wx.EVT_KILL_FOCUS, self.apply)
             controlHSizer = wx.BoxSizer(orient=wx.HORIZONTAL)
