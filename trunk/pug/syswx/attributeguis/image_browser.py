@@ -66,7 +66,7 @@ Uses a browser dialog to facilitate picking a graphics file
             file = dlg.GetFile()
             self.set_control_value(file)
             self.apply()
-        dlg.Destroy()
+            dlg.Destroy()
 
     def get_control_value(self):
         return self.control.value
@@ -77,5 +77,6 @@ Uses a browser dialog to facilitate picking a graphics file
             folder = os.path.dirname(self.control.value)
             val = ''.join(folder,file)
         self.control.text.SetToolTipString(val)            
-        self.control.value = val
         self.control.text.SetValue(file)
+        self.control.value = val
+        

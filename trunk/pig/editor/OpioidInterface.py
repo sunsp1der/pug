@@ -30,23 +30,6 @@ import pig.editor.PigDirector
 
 _DEBUG = False
 
-def start_opioid( rect, title, icon, scene):
-    #start up opioid with a little pause for threading    
-    time.sleep(0.1)
-    
-    if os.name == "nt":
-        loc = (rect[0]+3, rect[1]+28)
-    else:
-        loc = rect[0:2]
-    os.environ['SDL_VIDEO_WINDOW_POS'] = \
-            "%d,%d" % loc
-    Opioid2D.Display.init(rect[2:4], 
-                          title=title, 
-                          icon=icon)
-    Opioid2D.Director.game_started = False
-    Opioid2D.Director.playing_in_editor = True    
-    Opioid2D.Director.run( scene)
-
 class OpioidInterface(pug.ProjectInterface):
     """OpioidInterface( rootfile, scene=PigScene)
     
@@ -59,6 +42,7 @@ scene: the scene to load initially
     component_browser = None
     _use_working_scene = True
     _new_scene = True
+    _initialized = False
     def __init__(self, rootfile, scene=PigScene):
         if _DEBUG: print "OpioidInterface.__init__"
         try:
@@ -92,6 +76,7 @@ scene: the scene to load initially
 #        Opioid2D.Director.game_started = False
 #        Opioid2D.Director.playing_in_editor = True
 #        thread.start_new_thread(self.Director.run, (PigScene,))
+
         thread.start_new_thread(start_opioid, 
                                           (self.pug_settings.rect_opioid_window,
                                            'Pig Scene',
@@ -196,11 +181,10 @@ settingsObj: an object similar to the one below... if it is missing any default
             scene = self.pug_settings.initial_scene
             available_scenes = get_available_scenes()
             if scene in available_scenes:
-                self.sceneclass = self.pug_settings.initial_scene
+                self.sceneclass = scene
                 if available_scenes[scene].__module__ == 'scenes.__Working__':
                     self._new_scene = False
-        if not self.scene:
-            self.sceneclass = self.Director.scene.__class__
+        self.set_scene(self.Director.scene.__class__, True)
         # default menus
         if not self.cached[2]:
             app.add_global_menu("Pig",
@@ -226,7 +210,7 @@ settingsObj: an object similar to the one below... if it is missing any default
                         [[self, {'objectpath':"Project",'name':"ProjectFrame"}],
                         [self.scene, {'title':"Scene",'name':"SceneFrame",
                                 'objectpath':self.scene.__class__.__name__}],
-                        ['selection'],
+                        ['selection', {'name':"Selection"}],
                         ],
                     title=''.join(["Pig Editor - ", self.project_name]),
                     name="Pig Editor")
@@ -241,7 +225,8 @@ settingsObj: an object similar to the one below... if it is missing any default
             dummy.delete()
             while dummy in self.Director.scene.nodes:
                 time.sleep(0.1)
-            self.cached[0] = True            
+            self.cached[0] = True       
+        self._initialized = True     
             
     def quit(self):
         self.Director.quit()
@@ -560,6 +545,23 @@ Add an object to the scene
         addName = self.addObjectClass.__name__
         objectDict = get_available_objects( True)
         self.addObjectClass = objectDict.get(addName, PigSprite)
+       
+def start_opioid( rect, title, icon, scene):
+    #start up opioid with a little pause for threading    
+    time.sleep(0.1)
+    
+    if os.name == "nt":
+        loc = (rect[0]+3, rect[1]+28)
+    else:
+        loc = rect[0:2]
+    os.environ['SDL_VIDEO_WINDOW_POS'] = \
+            "%d,%d" % loc
+    Opioid2D.Display.init(rect[2:4], 
+                          title=title, 
+                          icon=icon)
+    Opioid2D.Director.game_started = False
+    Opioid2D.Director.playing_in_editor = True    
+    Opioid2D.Director.run( scene)       
          
 def _scene_list_generator():
     """_scene_list_generator( includeNewScene=True)-> list of scenes + 'New'

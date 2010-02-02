@@ -1,12 +1,7 @@
 now:
 
-current version:		
-	key controls
-		on_key_down
-		on_key_up
-		while_key_down
-		while_key_up (KEYMOD, KEY_A, fn, *args, **kwargs)
-		
+current version:	
+	test platform using wx.PlatformInfo
 	basic collisions or physics
 		from pug_opioid.collision import register_collision_callback
 		

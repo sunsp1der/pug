@@ -8,7 +8,7 @@ from pig.PigSprite import PigSprite
 
 ### "ExplodeParticle" autocode ###
 class ExplodeParticle(PigSprite):
-    image = 'art/pug.png'
+    image = 'art/pig.png'
     layer = 'Background'
     def on_create(self):
         self.position.x = 489.0

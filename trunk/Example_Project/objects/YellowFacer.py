@@ -13,7 +13,7 @@ from pig.PigSprite import PigSprite
 # "YellowFacer" autocode #
 ##########################
 class YellowFacer(PigSprite):
-    image = 'art/pug.png'
+    image = 'art/pig.png'
     layer = 'Layer 1'
     def on_create(self):
         self.position.x = 416.0

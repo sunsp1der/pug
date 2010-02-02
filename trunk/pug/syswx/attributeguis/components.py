@@ -140,8 +140,6 @@ For kwargs optional arguments, see the Base attribute GUI
                 wx.CallAfter( child.Close)
         aguidata.setdefault('background_color', self.defaultBackgroundColor)
         aguidata.setdefault('label','   components')
-        selectComponent = self.editList.get_selected()
-        selectAddComponent = self.addTree.tree.GetStringValue()
         try:
             resetObject = self.object != window.object
         except:
@@ -150,6 +148,14 @@ For kwargs optional arguments, see the Base attribute GUI
             self.object = window.object
             self.addTree.object = self.object
             self.editList.object = self.object
+        try:
+            selectComponent = self.editList.get_selected()
+        except:
+            selectComponent = None
+        try:
+            selectAddComponent = self.addTree.tree.GetStringValue()
+        except:
+            selectAddComponent = ""
         self.editList.refresh_components( selectComponent)
         self.addTree.create_tree( self.object)
         self.addTree.tree.SetStringValue( selectAddComponent)

@@ -7,7 +7,7 @@ from pig.PigSprite import PigSprite
 
 ### "PurpleFacer" autocode ###
 class PurpleFacer(PigSprite):
-    image = 'art/pug.png'
+    image = 'art/pig.png'
     layer = 'Background'
     def on_create(self):
         self.position.x = 541.0

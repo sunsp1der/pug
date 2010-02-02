@@ -6,7 +6,7 @@ from pig.PigSprite import PigSprite
 
 ### YellowPug autocode ###
 class YellowPug(PigSprite):
-    image = 'art/pug.png'
+    image = 'art/pig.png'
     layer = 'Background'
     def on_create(self):
         self.position.x = 145.0

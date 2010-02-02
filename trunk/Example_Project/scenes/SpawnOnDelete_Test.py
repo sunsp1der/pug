@@ -21,7 +21,7 @@ class SpawnOnDelete_Test(PigScene):
 
         # Sprites
         PigSprite_instance = PigSprite()
-        PigSprite_instance.image = 'art/pug.png'
+        PigSprite_instance.image = 'art/pig.png'
         PigSprite_instance.layer = 'Background'
         PigSprite_instance.position.x = 401.0
         PigSprite_instance.position.y = 551.0

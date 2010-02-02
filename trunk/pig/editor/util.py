@@ -358,7 +358,7 @@ Note: for this to work on nodes, it must be run BEFORE the scene is changed.
         scene = Opioid2D.Director.scene
     app = wx.GetApp()
     for frame in app.pugFrameDict:
-        if isinstance(frame.pugWindow, SelectionWindow):
+        if not bool(frame) or isinstance(frame.pugWindow, SelectionWindow):
             continue
         if frame.Name == 'SceneFrame':
             continue

@@ -1,5 +1,6 @@
 import os.path
 from types import StringTypes
+import time
 
 from pygame.locals import KEYDOWN, KEYUP
 
@@ -22,6 +23,7 @@ class PigScene( Opioid2D.Scene, pug.BaseObject):
     started = False
     exitted = False
     _pug_pugview_class = 'PigScene'
+    layers = ['Background']
     def __init__(self, gname=''):
         self._key_down_dict = {}
         self._key_up_dict = {}
@@ -140,6 +142,11 @@ key_down. In the future, maybe key_hold.
         
     def on_enter(self):
         pass
+#        PigSprite_instance = PigSprite()
+#        PigSprite_instance.layer_name = "Background"
+#        PigSprite_instance.image = get_image_path("pig.png")
+#        PigSprite_instance.position = \
+#                Opioid2D.Vector(*Opioid2D.Display.get_view_size()) * 0.5
 
     def start(self):
         """call after enter() and before state changes"""

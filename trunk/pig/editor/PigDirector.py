@@ -12,7 +12,8 @@ def pig_quit(*args, **kwargs):
     
 Have the app confirm project closure.
 """
-    if not wx.GetApp():
+    if not wx.GetApp() or \
+                not getattr(wx.GetApp().projectObject,'_initialized', False): 
         Opioid2D.Director.realquit()
         return
     global QUITTING
