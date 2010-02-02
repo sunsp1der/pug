@@ -176,6 +176,10 @@ called every second until the object is initialized"""
         return self.projectFrame
             
     def post_init_failed(self, error):
+        try:
+            self.projectObject.quit()
+        except:
+            pass
         msg = ''.join(['pug.App.post_init error:\n',error[3]])
         print msg
         print

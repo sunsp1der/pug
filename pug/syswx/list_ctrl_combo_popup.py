@@ -7,15 +7,12 @@ class ListCtrlComboPopup(wx.combo.ComboPopup):
     """Popup control containing a list. Created because the built-in combo-box
 doesn't have as many features/accessors as the combo.ComboCtrl"""
 
-    selected = -1      
-    selectCallback = None  
-    popupCallback = None
-        
     def Create(self, parent):
         self.list=wx.ListBox(parent, style=wx.LB_SINGLE)
-#        self.list = FindPrefixListBox(parent, style = wx.LB_SINGLE)
-        #self.list.Bind(wx.EVT_MOTION, self.OnMotion)
         self.list.Bind(wx.EVT_LEFT_DOWN, self.OnMouseSelect)
+        self.selected = -1
+        self.selectCallback = None
+        self.popupCallback = None
         
     def DeselectAll(self):
         return self.list.DeselectAll()

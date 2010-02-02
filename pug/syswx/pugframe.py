@@ -89,6 +89,7 @@ PugFrame(self, obj=None, objectpath="object", title="", show=True, parent=None,
         pugWindow = PugWindow(self)
         self.set_pugwindow( pugWindow)
         self.set_object( obj, objectpath, title)
+        return pugWindow
             
     def _evt_on_activate(self, event=None):
         if self.pugWindow:

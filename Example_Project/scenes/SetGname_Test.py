@@ -12,7 +12,7 @@ class SetGname_Test(PigScene):
     def on_enter(self):
         # Sprites
         PigSprite_instance = PigSprite()
-        PigSprite_instance.image = 'art/pug.png'
+        PigSprite_instance.image = 'art/pig.png'
         PigSprite_instance.layer = 'Background'
         PigSprite_instance.position.x = 388.0
         PigSprite_instance.position.y = 394.0

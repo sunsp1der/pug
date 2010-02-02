@@ -17,8 +17,8 @@ For kwargs optional arguments, see the Base attribute GUI
         sizer = wx.BoxSizer(orient=wx.VERTICAL)
         checkbox = wx.CheckBox(control, -1, label=" ")
         checkbox.Bind(wx.EVT_CHECKBOX, self.apply)
-        checkbox.Bind(wx.EVT_SET_FOCUS, self.focus)
-        checkbox.Bind(wx.EVT_KILL_FOCUS, self.unfocus)
+#        checkbox.Bind(wx.EVT_SET_FOCUS, self.focus)
+#        checkbox.Bind(wx.EVT_KILL_FOCUS, self.unfocus)
         self.checkbox = checkbox
         line = wx.StaticLine(control)
         sizer.Add(checkbox,1)
@@ -35,8 +35,8 @@ For kwargs optional arguments, see the Base attribute GUI
     def set_control_value(self, value):
         return self.checkbox.SetValue(bool(value))
     
-    def focus(self, event=None):
-        pass
-        
-    def unfocus(self, event=None):
-        pass
+#    def focus(self, event=None):
+#        pass
+#        
+#    def unfocus(self, event=None):
+#        pass

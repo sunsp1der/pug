@@ -50,9 +50,16 @@ For kwargs optional arguments, see the Base attribute GUI
         control.SetPopupControl(listctrl)
         listctrl.SetSelectCallback(self.item_selected)
         control.Bind(wx.EVT_TEXT_ENTER, self.item_selected)
-        
         kwargs['control_widget'] = control
         Base.__init__(self, attribute, window, aguidata, **kwargs)
+        control.Bind(wx.EVT_KEY_DOWN, self.OnKey)
+
+    def OnKey(self, ev):
+        if ev.GetKeyCode() == wx.WXK_TAB:
+            if ev.ShiftDown():
+                self.control.Navigate(False)
+            else:
+                self.control.Navigate()        
         
     def setup(self, attribute, window, aguidata):
         if self.allow_typing != aguidata.get('allow_typing', False):

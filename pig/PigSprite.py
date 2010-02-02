@@ -45,15 +45,14 @@ Opioid2d Sprite with features for use with pug"""
     def set_image(self, image):
         if isinstance(image, basestring):
             self._image_file = image
-        Sprite.set_image(self,image)
-        
-    def set_image_file(self, image):
         # the following line had problems on windows:
         #     Sprite.set_image(self,image)
         # HACK: putting a Delay before the set_image fixes the problem...
         (Delay(0) + CallFunc(Sprite.set_image, self, image)).do()
         # HACK: but it slows down animations ALOT. wtf with this?!
-    image_file = property(get_image_file, set_image_file)
+        #Sprite.set_image(self,image)
+        
+    image_file = property(get_image_file, set_image)
     
     # scene management
     def _set_gname(self, value):

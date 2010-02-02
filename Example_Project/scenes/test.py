@@ -12,7 +12,7 @@ class test(PigScene):
     def on_enter(self):
         # Sprites
         PigSprite_instance = PigSprite()
-        PigSprite_instance.image = 'art/pug.png'
+        PigSprite_instance.image = 'art/pig.png'
         PigSprite_instance.layer = 'Background'
         PigSprite_instance.position.x = 400.0
         PigSprite_instance.position.y = 300.0
