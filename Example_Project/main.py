@@ -1,33 +1,19 @@
 import sys
-import os
+from pig.util import run_pig_scene
 
-import Opioid2D
-
-from pig.util import get_available_scenes, set_project_path
-
-from _game_settings import game_settings
-
-# set this file's folder as main project path
-set_project_path( os.path.dirname(sys.argv[0]))
-
-# settings
-position = game_settings.rect_opioid_window[0:2]
-resolution = game_settings.rect_opioid_window[2:4]
-title = game_settings.title
-fullscreen = game_settings.fullscreen
-
-    # command line arguments (sets starting scene...)
+# command line arguments
 if len(sys.argv) > 1: 
     # first command line argument is used as the starting scene.
-    scenedict = get_available_scenes( useWorking=True) # use __Working__.py
-    initial_scene = scenedict[sys.argv[1]] 
+    scene = sys.argv[1] 
 else:
-    # set starting scene to initial_scene from game_settings
-    scenedict = get_available_scenes( useWorking=False)
-    initial_scene = scenedict[game_settings.initial_scene]
+    scene = None # use initial_scene from game_settings
 
-# start Opioid
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % position
-Opioid2D.Display.init(resolution, title=title, fullscreen=fullscreen, icon='')
-Opioid2D.Director.start_game = True
-Opioid2D.Director.run(initial_scene)
+run_pig_scene( __file__, scene)
+
+# if you want to force settings manually, do something like this: 
+#position = (0,0)
+#resolution = (800, 600)
+#title = "My Awesome Game"
+#fullscreen = True
+#scene = "Level 1"
+#run_pig_scene( __file__, scene, position, resolution, title, fullscreen)

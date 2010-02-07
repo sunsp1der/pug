@@ -1,7 +1,4 @@
-import gc
-
-from Opioid2D import Sprite, Director, Delete, CallFunc, Delay
-from Opioid2D.public.Node import Node
+from Opioid2D import Sprite, Director, CallFunc, Delay
 from Opioid2D.public.Sprite import SpriteMeta
 
 import pug
@@ -12,7 +9,6 @@ from pug.code_storage.constants import _INDENT
 from pig.editor.util import get_available_layers, save_object, \
                                 exporter_cleanup
 
-import sys
 
 _DEBUG = False
 
@@ -48,7 +44,10 @@ Opioid2d Sprite with features for use with pug"""
         # the following line had problems on windows:
         #     Sprite.set_image(self,image)
         # HACK: putting a Delay before the set_image fixes the problem...
-        (Delay(0) + CallFunc(Sprite.set_image, self, image)).do()
+        if getattr(Director, 'game_started', False):
+            Sprite.set_image(self, image)
+        else:
+            (Delay(0) + CallFunc(Sprite.set_image, self, image)).do()
         # HACK: but it slows down animations ALOT. wtf with this?!
         #Sprite.set_image(self,image)
         
@@ -165,7 +164,6 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
         base_code = exporter.create_base_code(*info)
         # custom code
         baseIndent = _INDENT * indentLevel    
-        hasAttrs = False    
         dummy = exporter.dummyDict.get(storageDict['base_class'], None)
         custom_code = []
         if storageDict['as_class']:
@@ -231,8 +229,8 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
                         }
     add_subclass_skip_attributes(_codeStorageDict, pug.BaseObject)    
 
-    def test(self):
-        self.set_image("art/button.png")
+#    def test(self):
+#        self.set_image("art/button.png")
 # force derived classes to use PigSprite as a base
 #PigSprite._codeStorageDict['base_class'] = PigSprite
 
@@ -260,20 +258,20 @@ _spritePugview = {
         ['image_file', pug.ImageBrowser],
         ['color'],
         ['lighting'],
-#        ['', Label, {'label':' Groups'}],
-#        ['group', Dropdown, 
-#                      'list_generator':get_available_groups,
-#                      }],
-#        ['', pug.Label, {'label':' Physics'}],
-#        ['rotation_speed'],
-#        ['velocity'],
-#        ['acceleration'],
+    #        ['', Label, {'label':' Groups'}],
+    #        ['group', Dropdown, 
+    #                      'list_generator':get_available_groups,
+    #                      }],
+    #        ['', pug.Label, {'label':' Physics'}],
+    #        ['rotation_speed'],
+    #        ['velocity'],
+    #        ['acceleration'],
         [' Components', pug.Label],
         ['components'],
         [' Functions', pug.Label],
         ['delete',"Delete this sprite"],
-#        ['_delete_test'],
-#        ['_test_referrers'],
+    #        ['_delete_test'],
+    #        ['_test_referrers'],
     ]       
  }
 

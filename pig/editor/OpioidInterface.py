@@ -216,7 +216,7 @@ settingsObj: an object similar to the one below... if it is missing any default
                     name="Pig Editor")
             frame.GetNotebook().Split(2, wx.LEFT)
             size = frame.GetSize()
-            frame.GetNotebook().GetPage(1).SetSize([size[0]/2,size[1]/2])
+            frame.GetNotebook().GetPage(1).SetSize([size[0]/2,size[1]])
             app.set_project_frame(frame)
         # cache a sprite view for speed on first selection
         if not self.cached[0]:
@@ -580,7 +580,7 @@ from pig.editor.agui import ObjectsDropdown
 
 _interfacePugview = {
     'size':(350,350),
-    'name':'Basic',
+    'name':'Pig Editor',
     'skip_menus':['Export'],    
     'attributes':[ 
         ['Project', pug.Label, {'font_size':10}],

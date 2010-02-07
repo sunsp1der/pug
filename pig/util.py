@@ -1,7 +1,7 @@
 """Various ingame functions to make life easier when using pig"""
 
 import math
-import os.path
+import os, os.path
 import sys
 from time import sleep
 from inspect import isclass
@@ -32,10 +32,61 @@ def start_scene():
         sleep(0.1)
     Opioid2D.Director.scene.start()    
     
-def save_game_settings( game_settings):
-    pug.code_export( game_settings, "_game_settings.py", True, 
-                 {'name':'game_settings'})            
+def save_game_settings( gameSettings):
+    pug.code_export( gameSettings, "_game_settings.py", True, 
+                 {'name':'game_settings'})        
+
+def run_pig_scene( projectPath, scenename=None, position=None, resolution=None, 
+                   title=None, fullscreen=None, icon=None, units=None, 
+                   useWorking=False):
+    """run_pig_scene( ...) Run a pig scene in a game window
     
+args: ( scenename, projectPath, position=None, resolution=None, 
+                   title=None, fullscreen=None, icon=None, units=None, 
+                   use_working=False)
+All arguments with None defaults will default to info found in the 
+_game_settings file unless otherwise noted.                  
+    projectPath: the root path of this project. If projectPath is a file path, 
+                just the folder will be used. If that folder is the 'scenes'
+                folder, the parent of that folder will be used.
+    scenename: the name of the scene to run (look in 'scenename'.py file)
+    position: (x, y) the topleft corner of the game window. 
+    resolution: (x,y) the width and height of the game window
+    title: the title to appear on the game window
+    fullscreen: True displays game in fullscreen mode
+    icon: icon graphic to use for game window
+    units: viewport size in game units. Defaults to resolution
+    useWorking: if True, use the __working__.py file when running the scene of 
+                the same name
+"""
+    if os.path.isfile(projectPath):
+        projectPath = os.path.dirname(projectPath)
+        if os.path.basename == 'scenes':
+            projectPath = os.path.dirname(projectPath)
+    set_project_path (projectPath)
+    from _game_settings import game_settings
+    # settings
+    if position is None:
+        position = game_settings.rect_opioid_window[0:2]        
+    if resolution is None:
+        resolution = game_settings.rect_opioid_window[2:4]
+    if title is None:
+        title = game_settings.title
+    if fullscreen is None:
+        fullscreen = game_settings.fullscreen
+    if scenename is None:
+        scenename = game_settings.initial_scene
+        
+    # get scene    
+    scenedict = get_available_scenes( useWorking=useWorking)# use __Working__.py
+    initial_scene = scenedict[scenename] 
+    
+    icon = ''
+    os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % position
+    Opioid2D.Display.init(resolution, units, title, fullscreen, icon)
+    Opioid2D.Director.start_game = True
+    Opioid2D.Director.run(initial_scene)
+
 availableScenes = None
 def get_available_scenes( doReload=False, useWorking=True):
     """get_available_scenes( doReload=False, useWorking=False) -> dict

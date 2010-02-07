@@ -1,29 +1,39 @@
-"""MouseFaceFollow_Test.py"""
+#1
 
 ### import autocode ###
-from objects.ShipSprite import ShipSprite
-from objects.YellowPug import YellowPug
+from objects.PurpleFacer import PurpleFacer
+from objects.UpFO import UpFO
 from pig.PigScene import PigScene
-from pug.all_components import Follow_Mouse, Face_Object, Face_Mouse
+from pug.all_components import Spawn_Area
 ### End import autocode ###
 
-### MouseFaceFollow_Test autocode ###
-class MouseFaceFollow_Test(PigScene):
+#2
+
+### AimedSpawn_Test autocode ###
+class AimedSpawn_Test(PigScene):
     layers = ['Background']
     def on_enter(self):
         # Archetypes
-        YellowPug_archetype = YellowPug(gname='YellowPug')
-        YellowPug_archetype.archetype = True
+        UpFO_archetype = UpFO(gname='UpFO')
+        UpFO_archetype.archetype = True
 
         # Sprites
-        shipsprite_instance = ShipSprite()
-        shipsprite_instance.components.add( Follow_Mouse() )
-        shipsprite_instance.components.add( Face_Object(
-                target='mouse pointer',
-                offset=-90) )
+        purplefacer_instance = PurpleFacer()
+        purplefacer_instance.image = 'art/cannon.png'
+        purplefacer_instance.position.x = 0.0
+        purplefacer_instance.position.y = 459.0
+        purplefacer_instance.components.add( Spawn_Area(
+                object='UpFO',
+                spawn_interval=0.3,
+                spawn_variance=0.0,
+                spawn_location='right',
+                spawn_offset=(0, 1)) )
+        purplefacer_instance.components.add( Spawn_Area(
+                object='UpFO',
+                spawn_interval=0.3,
+                spawn_variance=0.0,
+                spawn_location='left',
+                spawn_offset=(0, 1)) )
+### End AimedSpawn_Test autocode ###
 
-        mouse_pointer = YellowPug(gname='mouse pointer')
-        mouse_pointer.position.x = 436.0
-        mouse_pointer.position.y = 247.0
-        mouse_pointer.components.add( Face_Mouse() )
-### End MouseFaceFollow_Test autocode ###
+

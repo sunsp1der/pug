@@ -534,7 +534,8 @@ Automatically calls on_<setting>(val, event) callback.
         for id, data in self._settingWidgets.iteritems():
             if settingname == data[1]:
                 widget = data[0]
-                if widget and isinstance(widget, wx.Menu):
+                if widget and isinstance(widget, wx.Menu) and \
+                                                widget.FindItemById(id):
                     widget.Check(id,val)
                 elif widget and isinstance(widget, wx.ToolBar):
                     widget.ToggleTool(id, val)
