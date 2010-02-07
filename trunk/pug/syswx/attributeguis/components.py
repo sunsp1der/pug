@@ -55,6 +55,7 @@ For kwargs optional arguments, see the Base attribute GUI
         # list of components on object
         editList = ComponentList(parent=control, size=WX_BUTTON_SIZE)
         editList.SetToolTipString("Components attached to object")
+        editList.SetPopupMinWidth(100)
         editSizer.Add(editList, 1)
         self.editList = editList
         # edit
@@ -113,8 +114,8 @@ For kwargs optional arguments, see the Base attribute GUI
         control.SetMinSize((-1, -1))  
         sizer.SetMinSize((-1,-1))        
         sizer.Fit(control)
-        addTree.SetMinSize((-1,self.addTree.Size[1]))
-        editList.SetMinSize((-1,self.editList.Size[1]))
+        addTree.SetMinSize((1,self.addTree.Size[1]))
+        editList.SetMinSize((1,self.editList.Size[1]))
         
         aguidata.setdefault('doc', "")
         kwargs['aguidata'] = aguidata

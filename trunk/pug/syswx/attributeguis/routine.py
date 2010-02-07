@@ -1,4 +1,5 @@
 from inspect import getargspec, getdoc, ismethod
+from types import StringTypes
 
 import wx
 import wx.lib.buttons as buttons
@@ -96,11 +97,23 @@ See Base attribute gui for other argument info
                 arguments = "?args unknown?"
             else:
                 arglist = []
-                if isMethod:
+                if isMethod and len(argspec[0]):
                     argspec[0].pop(0)
                 if argspec[0]:
                     self.takesargs = True
-                    mainargs = argspec[0][:]
+                    mainargs = []
+                    for arg in argspec[0]:
+                        if type(arg) in StringTypes:
+                            mainargs.append(arg)
+                        else:
+                            try:
+                                l = ''.join(["(",arg[0]])
+                                for item in arg[1:]:
+                                    l = ''.join([l,", ",item])
+                                l = ''.join([l,")"])
+                                mainargs.append(l)
+                            except:
+                                mainargs.append(repr(arg))
                     if argspec[3]:
                         argcount = len(argspec[0])
                         if argcount < len(argspec[3]):
@@ -108,7 +121,7 @@ See Base attribute gui for other argument info
                         for idx in range(argcount):
                             kwidx = idx - (argcount - len(argspec[3])) 
                             if kwidx >= 0:
-                                mainargs[idx] = ''.join([argspec[0][idx],
+                                mainargs[idx] = ''.join([mainargs[idx],
                                                 '=',repr(argspec[3][kwidx])])
                     arglist += mainargs
                 if argspec[1]:
@@ -192,21 +205,26 @@ See Base attribute gui for other argument info
             attribute = self.attribute
             realself = self
             self = self.window.object
-            exec(''.join(['(args, kwargs) = realself.parseargs(',
-                               dlg.GetValue(),')']))
-            self = realself
-            retValue = None
+            wx.BeginBusyCursor()
             try:
-                wx.BeginBusyCursor()
-                retValue = routine.__call__(*args, **kwargs)
+                exec(''.join(['(args, kwargs) = realself.parseargs(',
+                                   dlg.GetValue(),')']))
             except:
                 wx.EndBusyCursor()                
-                show_exception_dialog( self.control)
-                self.openExecuteWindow()
+                show_exception_dialog( realself.control)
             else:
-                wx.EndBusyCursor()
-                self.display_retvalue( retValue)
-                self.refresh_window()
+                self = realself
+                retValue = None
+                try:
+                    retValue = routine.__call__(*args, **kwargs)
+                except:
+                    wx.EndBusyCursor()                
+                    show_exception_dialog( self.control)
+                    self.openExecuteWindow()
+                else:
+                    wx.EndBusyCursor()
+                    self.display_retvalue( retValue)
+                    self.refresh_window()
         dlg.Destroy()
 
     def display_retvalue(self, retValue):

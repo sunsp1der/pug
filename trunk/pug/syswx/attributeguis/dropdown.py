@@ -44,7 +44,7 @@ For kwargs optional arguments, see the Base attribute GUI
         control = wx.combo.ComboCtrl(parent=window,
                                      style=style)
         if _DEBUG: print "DropDown.__init__ attribute:",attribute
-        control.SetMinSize((-1,WX_STANDARD_HEIGHT))
+        control.SetMinSize((1,WX_STANDARD_HEIGHT))
         listctrl = ListCtrlComboPopup()
         self.listctrl = listctrl
         control.SetPopupControl(listctrl)

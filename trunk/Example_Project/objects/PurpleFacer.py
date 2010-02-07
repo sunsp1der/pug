@@ -16,11 +16,10 @@ class PurpleFacer(PigSprite):
         self.components.add( Face_Mouse() )
         self.components.add( Spawn_Area(
                 object='UpFO',
-                spawn_interval=0.29999999999999999,
+                spawn_interval=0.3,
                 spawn_variance=0.0,
                 spawn_location='center',
-                spawn_offset=(1, 0)) )
+                spawn_offset=(0, 0)) )
         self.components.add( Forward_Motion(
                 velocity=0))
 ### End "PurpleFacer" autocode ###
-
