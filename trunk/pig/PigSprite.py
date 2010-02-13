@@ -17,7 +17,6 @@ class PigSprite(Sprite, pug.BaseObject):
     
 Opioid2d Sprite with features for use with pug"""
     __metaclass__ = SpriteMeta
-    # image stuff... allows entry and storage of filename
     _image_file = None   
     archetype = False
     destroy_blockers = None
@@ -33,25 +32,34 @@ Opioid2d Sprite with features for use with pug"""
         if register:
             self.do_register()
         
-    def get_image_file(self):
-        # TODO: find a way to actually look up this filename in the image
-        if self._image_file is None:
-            self._image_file = self._init_image
-        return self._image_file
     def set_image(self, image):
         if isinstance(image, basestring):
             self._image_file = image
+        Sprite.set_image(self, image)
+
+    def set_image_file(self, file):
+        self._image_file = file
+        (Delay(0) + CallFunc(Sprite.set_image, self, file)).do() 
+    
+    def get_image_file(self):
+        # TODO: find a way to actually look up this filename in the image
+        if self._image_file is None:
+            try:
+                image = self.get_image()._key[0]
+                self._image_file = image._key[0]
+            except:
+                self._image_file = self._init_image
+        return self._image_file
         # the following line had problems on windows:
         #     Sprite.set_image(self,image)
         # HACK: putting a Delay before the set_image fixes the problem...
-        if getattr(Director, 'game_started', False):
-            Sprite.set_image(self, image)
-        else:
-            (Delay(0) + CallFunc(Sprite.set_image, self, image)).do()
+#        if getattr(Director, 'game_started', False):
+#        else:
+#            (Delay(0) + CallFunc(Sprite.set_image, self, image)).do()
         # HACK: but it slows down animations ALOT. wtf with this?!
         #Sprite.set_image(self,image)
         
-    image_file = property(get_image_file, set_image)
+    image_file = property(get_image_file, set_image_file)
     
     # scene management
     def _set_gname(self, value):
@@ -62,6 +70,26 @@ Opioid2d Sprite with features for use with pug"""
     gname = property( pug.BaseObject._get_gname, _set_gname, 
                       pug.BaseObject._del_gname,
                       "An easily accessed global name for this object")
+
+    def on_collision(self, toSprite=None, fromSprite=None, toGroup=None, 
+                     fromGroup=None, *a, **kw):
+        """on_collision( toSprite, fromSprite, fromGroup, spriteGroup)
+        
+All arguments default to None.
+toSprite: sprite that collided. Usually same as 'self' but included to match 
+    Pig's callback system.
+fromSprite: sprite we collided with
+toGroup: group of this sprite that triggered this callback. This is useful
+    when a sprite belongs to multiple groups
+fromGroup: group of the sprite we collided with
+Additional arguments are allowed, but will be ignored.
+
+This method is meant to work with the PigScene.register_collision_callback 
+system. It does nothing in the base class, but is meant for overriding or for
+stacking with pug.components.
+"""
+        pass
+        print "on_collision", self, toSprite, fromSprite, toGroup, fromGroup
 
     def destroy(self):
         """destroy(): set sprite up for deletion, but allow option to block
@@ -180,11 +208,11 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
         else:
             name = storage_name
             if not dummy or dummy.image_file != self.image_file:
-                custom_code += [baseIndent, name, '.', 'image = ', 
-                                     repr(self.image_file),'\n']
+                custom_code += [baseIndent, name, '.image = ', 
+                                    repr(self.image_file),'\n']
             if not dummy or dummy.layer_name != self.layer_name:
-                custom_code += [baseIndent, name, '.', 'layer = ', 
-                                     repr(self.layer_name),'\n']
+                custom_code += [baseIndent, name, '.layer = ', 
+                                    repr(self.layer_name),'\n']
             xIndent = ''
         # instance attributes
         custom_attr_code = []

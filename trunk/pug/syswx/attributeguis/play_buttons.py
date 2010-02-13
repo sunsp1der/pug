@@ -96,5 +96,8 @@ For kwargs arguments, see the Base attribute GUI
             self.functionDict[event.GetEventObject()]()
         except:
             show_exception_dialog(self.control)
-            wx.StopBusyCursor()
+            try:
+                wx.EndBusyCursor()
+            except:
+                pass
         self.refresh_window()

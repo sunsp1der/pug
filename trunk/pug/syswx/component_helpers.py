@@ -172,8 +172,8 @@ class ComponentTreeCtrl(wx.TreeCtrl):
                                 |wx.TR_LINES_AT_ROOT
                                 |wx.SIMPLE_BORDER)
         self.SetSpacing(10)
-        self.SetIndent(8)
-        
+        self.SetIndent(8)            
+
     def AddItem(self, text, data=None, parent=None):
         if not parent:
             root = self.GetRootItem()
@@ -265,7 +265,8 @@ object: the object that is being viewed. Used to define what components are
                 self.AddItem(component.__name__, parent=parent, 
                              data=component) 
             self.SortChildren(parent)    
-            lastType = currentType           
+            lastType = currentType       
+             
 
 #----------------------------------------------------------------------
 # This class is a popup containing a TreeCtrl.  This time we'll use a

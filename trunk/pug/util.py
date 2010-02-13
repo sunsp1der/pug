@@ -86,9 +86,10 @@ superClass
             continue
         obj = getattr(module, item)
         if hasattr(obj,'__module__') and \
-                obj.__module__ == modulename and \
-                issubclass( obj, superClass):
-            classList.append(obj)  
+                    obj.__module__ == modulename and \
+                    inspect.isclass(obj) and \
+                    issubclass( obj, superClass):
+            classList.append(obj)
     return classList  
             
 def get_type(obj):

@@ -2,5 +2,6 @@
 
 from PigSprite import PigSprite
 from PigScene import PigScene
-import components
+from PigDirector import PigDirector as Director
+import components 
 import keyboard

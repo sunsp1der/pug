@@ -1,20 +1,5 @@
 now:
 
-current version:	
-	basic collisions or physics
-		components:
-			join_group
-			collide_with_group
-			delete_on_collide
-			spawn_on_delete
-	
-		from pug_opioid.collision import register_collision_callback
-		
-		register_collision_callback(sprite, fn)
-		fn(to_sprite, from_sprite)
-		sprite.collides_with_groups('player','playershot')
-		sprite.join_collision_group('player')
-	
 next_version:
 	new components should override old. project loaded last.
 	option to open component,sprite,scene file. default save is project component file

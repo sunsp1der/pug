@@ -10,10 +10,3 @@ else:
 
 run_pig_scene( __file__, scene)
 
-# if you want to force settings manually, do something like this: 
-#position = (0,0)
-#resolution = (800, 600)
-#title = "My Awesome Game"
-#fullscreen = True
-#scene = "Level 1"
-#run_pig_scene( __file__, scene, position, resolution, title, fullscreen)

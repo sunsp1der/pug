@@ -27,11 +27,47 @@ class PigScene( Opioid2D.Scene, pug.BaseObject):
     def __init__(self, gname=''):
         self._key_down_dict = {}
         self._key_up_dict = {}
+        self._collision_callback_dict = {}
         self.register_key_down(keys["ESCAPE"], 0, self.escape)
         Opioid2D.Scene.__init__(self)
         pug.BaseObject.__init__(self, gname)   
         if _DEBUG: print "PigScene.__init__", self.__class__.__name__   
                     
+    def register_collision_callback( self, sprite, fn, 
+                                     withGroup=None, 
+                                     spriteGroup=None):
+        """register_collision_callback(sprite, fn, withGroup, spriteGroup)
+        
+sprite: when this sprite collides with spriteGroup, fn will be called 
+fn: the function to be called with args: (sprite, sprite-it-hit)
+withGroup: when 'sprite' collides with this group, fn will be called. Defaults 
+    to 'all_colliders' if not specified.
+spriteGroup: collisions will be detected by checking withGroup sprites vs
+    spriteGroup sprites. defaults to "all_colliders" if not specified. 'sprite' 
+    will automatically be added to this group.
+    
+Designing withGroup and spriteGroup efficiently will improve program performance.
+Avoid setting up situations where unnecessary collisions tests are made.  
+"""     
+        if withGroup is None:
+            withGroup = "all_colliders"
+        if spriteGroup is None:
+            spriteGroup = "all_colliders"
+        sprite.join_group(spriteGroup)
+        idx = (sprite, withGroup, spriteGroup)
+        if self._collision_callback_dict.get(idx):
+            self._collision_callback_dict[idx].append(fn)
+        else:
+            self._collision_callback_dict[idx] = [fn]
+        def collision_method( toSprite, fromSprite):
+            idx = (toSprite, withGroup, spriteGroup)
+            callback_list = self._collision_callback_dict.get(idx)
+            if callback_list:
+                for callback in callback_list:
+                    callback( toSprite, fromSprite, spriteGroup, withGroup)
+        self._collision_handlers[spriteGroup, withGroup] = collision_method
+        self._cObj.EnableCollisions(spriteGroup, withGroup)
+            
     def handle_keydown( self, ev):
         """handle_keydown( ev): ev is a pygame keydown event"""
         self.process_keylist( ev)
@@ -142,11 +178,6 @@ key_down. In the future, maybe key_hold.
         
     def on_enter(self):
         pass
-#        PigSprite_instance = PigSprite()
-#        PigSprite_instance.layer_name = "Background"
-#        PigSprite_instance.image = get_image_path("pig.png")
-#        PigSprite_instance.position = \
-#                Opioid2D.Vector(*Opioid2D.Display.get_view_size()) * 0.5
 
     def start(self):
         """call after enter() and before state changes"""
@@ -308,7 +339,7 @@ Update the PigScene's node tracking dict for node. Possible commands: 'Delete'
                 if _DEBUG: print "   unable to delete"
             return            
         # node_num tracks the order of node additions
-        nodes[node] = node_num # this call sets off callbacks for nodes gui
+        nodes[node] = node_num # this call sets off callbacks for nodes gui        
             
     def register_node(self, node):        
 #        """register(node): a new node is joining scene. Do callbacks"""
