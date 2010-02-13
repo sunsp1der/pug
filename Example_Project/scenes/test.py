@@ -1,23 +1,29 @@
 """test.py"""
 
 ### import autocode ###
-from pug.all_components import Spawn_Area
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
+from pug.all_components import Set_Motion, Collision_Callback, Join_Group
 ### End import autocode ###
 
-### "test" autocode ###
+### test autocode ###
 class test(PigScene):
     layers = ['Background']
     def on_enter(self):
         # Sprites
-        PigSprite_instance = PigSprite()
-        PigSprite_instance.image = 'art/pig.png'
-        PigSprite_instance.layer = 'Background'
-        PigSprite_instance.position.x = 400.0
-        PigSprite_instance.position.y = 300.0
-        PigSprite_instance.components.add( Spawn_Area(
-                object='UpFO',
-                spawn_location='left') )
-### End "test" autocode ###
+        pigsprite_instance = PigSprite()
+        pigsprite_instance.image = 'art/pig.png'
+        pigsprite_instance.layer = 'Background'
+        pigsprite_instance.position.x = 391.0
+        pigsprite_instance.position.y = 109.0
+        pigsprite_instance.components.add( Set_Motion(
+                velocity_y=150) )
+        pigsprite_instance.components.add( Collision_Callback() )
 
+        pigsprite_instance_2 = PigSprite()
+        pigsprite_instance_2.image = 'art/pig.png'
+        pigsprite_instance_2.layer = 'Background'
+        pigsprite_instance_2.position.x = 400.0
+        pigsprite_instance_2.position.y = 300.0
+        pigsprite_instance_2.components.add( Join_Group() )
+### End test autocode ###

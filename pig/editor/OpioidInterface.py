@@ -18,7 +18,7 @@ from pug.syswx.util import show_exception_dialog, cache_default_view
 from pug.syswx.component_browser import ComponentBrowseFrame
 from pug.syswx.pugmdi import PugMDI
 
-from pig import PigScene, PigSprite
+from pig import PigScene, PigSprite, Director
 from pig.util import get_available_scenes, get_available_objects, \
                             set_project_path, start_scene, \
                             save_game_settings, get_project_path
@@ -26,8 +26,7 @@ from pig.editor import EditorState, graphicsManager
 from pig.editor.util import close_scene_windows, save_scene_as, \
                                     wait_for_state, \
                                     wait_for_exit_scene, get_image_path
-import pig.editor.PigDirector
-
+ 
 _DEBUG = False
 
 class OpioidInterface(pug.ProjectInterface):
@@ -56,7 +55,7 @@ scene: the scene to load initially
         
         projectPath = os.path.dirname(os.path.realpath(rootfile))
         set_project_path( projectPath)
-        path, self.project_name = os.path.split(projectPath)
+        self.project_name = os.path.split(projectPath)[1]
 
         self.reload_scene_list()        
         self.import_settings()
@@ -64,7 +63,7 @@ scene: the scene to load initially
             self.project_name = self.game_settings.title 
 
         self.Display = Opioid2D.Display
-        self.Director = Opioid2D.Director   
+        self.Director = Director   
         self.Director.editorMode = True
                 
 #        pug.ProjectInterface.__init__(self)
@@ -84,10 +83,10 @@ scene: the scene to load initially
                                            PigScene))
         time.sleep(1)
         
-        app = pug.App(projectObject=self, 
+        pug.App(projectObject=self, 
                       projectFolder=projectPath,
                       projectObjectName=self.project_name)
-        Opioid2D.Director.realquit()
+        self.Director.realquit()
 
     def create_default_game_settings(self, settingsObj=None):
         """create_default_game_settings(settingsObj=None)->setting data class
@@ -352,7 +351,7 @@ Callback from PugApp...
                 show_exception_dialog()
         if getattr(self.pug_settings,'save_settings_on_quit',True):
             self.save_pug_settings()
-        Opioid2D.Director.realquit()
+        self.Director.realquit()
         time.sleep(1)   
         
     def _pre_quit_func(self, event=None):     
@@ -443,7 +442,7 @@ event: a wx.Event
 
     def rewind_scene(self):
         """rewind_scene(): reset the scene and play it again"""
-        if not Opioid2D.Director.game_started:
+        if not self.Director.game_started:
             return
         self.stop_scene()
         self.play_scene( False)
@@ -455,7 +454,7 @@ start the current scene playing.
 doSave: save working copy first
 """
         if _DEBUG: print "play_scene"
-        if Opioid2D.Director.game_started:
+        if self.Director.game_started:
             # don't do anything if game started
             return False
         if doSave:
@@ -470,7 +469,7 @@ doSave: save working copy first
                     return False               
         #self.reload_scene()
         pug.set_default_pugview("Component", _dataMethodPugview)
-        app = wx.GetApp()
+#        app = wx.GetApp()
 #        app.set_selection([])
         start_scene()
         return True
@@ -482,7 +481,7 @@ Stop the current scene from playing. if doRevert, Reload original state from
 disk.
 """
         if _DEBUG: print "stop_scene"
-        if not Opioid2D.Director.game_started:
+        if not self.Director.game_started:
             return
         self.scene.stop()
         wait_for_exit_scene()
@@ -534,7 +533,7 @@ Add an object to the scene
         node = objectclass()
         if objectclass == PigSprite and type(self.scene.state) == EditorState:
             # set a default image for basic sprite
-            node.image = "art/pig.png"
+            node.set_image("art/pig.png")
             node.position = \
                     Opioid2D.Vector(*Opioid2D.Display.get_view_size()) * 0.5
             node.layer = "Background"

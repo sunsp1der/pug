@@ -3,13 +3,32 @@ import wx.combo
 
 """This class is a popup containing a ListCtrl."""
 
-class ListCtrlComboPopup(wx.combo.ComboPopup):
+class ListCtrlComboPopup(wx.ListBox, wx.combo.ComboPopup):
     """Popup control containing a list. Created because the built-in combo-box
 doesn't have as many features/accessors as the combo.ComboCtrl"""
 
+    def __init__(self):
+        self.PostCreate(wx.PreListBox())
+        wx.combo.ComboPopup.__init__(self)
+        
+    def AddItem(self, text, data=None):
+        item = self.Append(text)
+        self.SetClientData(item, data)
+        return item
+
+    def OnMotion(self, event):
+        # have the selection follow the mouse, like in a real combobox
+        selected = self.list.HitTest(event.GetPosition())
+        if selected != -1 and selected != self.selected:
+            self.selected = selected
+            self.list.Select(selected)
+        event.Skip()
+
     def Create(self, parent):
-        self.list=wx.ListBox(parent, style=wx.LB_SINGLE)
-        self.list.Bind(wx.EVT_LEFT_DOWN, self.OnMouseSelect)
+        wx.ListBox.Create(self, parent, style=wx.LB_SINGLE)
+        self.list = self
+        self.Bind(wx.EVT_LEFT_DOWN, self.OnMouseSelect)
+        self.Bind(wx.EVT_MOTION, self.OnMotion)
         self.selected = -1
         self.selectCallback = None
         self.popupCallback = None
@@ -43,10 +62,6 @@ callback(self)
             raise ValueError(''.join([str(callback)," not callable"]))
         self.popupCallback = callback  
     
-    def AddItem(self, text, data=None):
-        item = self.list.Append(text)
-        self.list.SetClientData(item, data)
-        return item
         
     def DeleteAllItems(self):
         self.list.Clear()
@@ -85,14 +100,6 @@ The callback will be called just after a selection is made.
             return self.list.GetString(self.selected)   
         else:
             return ""
-
-    def OnMotion(self, event):
-        # have the selection follow the mouse, like in a real combobox
-        selected = self.list.HitTest(event.GetPosition())
-        if selected != -1 and selected != self.selected:
-            self.selected = selected
-            self.list.Select(selected)
-        event.Skip()
         
     def SelectItem(self, index):
         self.selected = index

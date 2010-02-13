@@ -1,39 +1,29 @@
-#1
+"""test.py"""
 
 ### import autocode ###
-from objects.PurpleFacer import PurpleFacer
-from objects.UpFO import UpFO
 from pig.PigScene import PigScene
-from pug.all_components import Spawn_Area
+from pig.PigSprite import PigSprite
+from pug.all_components import Set_Motion, Collision_Callback, Join_Group
 ### End import autocode ###
 
-#2
-
-### AimedSpawn_Test autocode ###
-class AimedSpawn_Test(PigScene):
+### test autocode ###
+class test(PigScene):
     layers = ['Background']
     def on_enter(self):
-        # Archetypes
-        UpFO_archetype = UpFO(gname='UpFO')
-        UpFO_archetype.archetype = True
-
         # Sprites
-        purplefacer_instance = PurpleFacer()
-        purplefacer_instance.image = 'art/cannon.png'
-        purplefacer_instance.position.x = 0.0
-        purplefacer_instance.position.y = 459.0
-        purplefacer_instance.components.add( Spawn_Area(
-                object='UpFO',
-                spawn_interval=0.3,
-                spawn_variance=0.0,
-                spawn_location='right',
-                spawn_offset=(0, 1)) )
-        purplefacer_instance.components.add( Spawn_Area(
-                object='UpFO',
-                spawn_interval=0.3,
-                spawn_variance=0.0,
-                spawn_location='left',
-                spawn_offset=(0, 1)) )
-### End AimedSpawn_Test autocode ###
+        pigsprite_instance = PigSprite()
+        pigsprite_instance.image = 'art/pig.png'
+        pigsprite_instance.layer = 'Background'
+        pigsprite_instance.position.x = 391.0
+        pigsprite_instance.position.y = 109.0
+        pigsprite_instance.components.add( Set_Motion(
+                velocity_y=150) )
+        pigsprite_instance.components.add( Collision_Callback() )
 
-
+        pigsprite_instance_2 = PigSprite()
+        pigsprite_instance_2.image = 'art/pig.png'
+        pigsprite_instance_2.layer = 'Background'
+        pigsprite_instance_2.position.x = 400.0
+        pigsprite_instance_2.position.y = 300.0
+        pigsprite_instance_2.components.add( Join_Group() )
+### End test autocode ###
