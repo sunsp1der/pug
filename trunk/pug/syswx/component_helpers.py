@@ -132,6 +132,7 @@ choose a given component to be selected after refresh.
                     self.SetText(component.__class__.__name__)
         else:
             self.SetText('')
+            self.listCtrl.SetSelection(-1)
         return retValue
         
     def component_added(self, component):

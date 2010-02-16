@@ -47,20 +47,20 @@ For kwargs optional arguments, see the Base attribute GUI
         control.SetMinSize((1,WX_STANDARD_HEIGHT))
         listctrl = ListCtrlComboPopup()
         self.listctrl = listctrl
-        control.SetPopupControl(listctrl)
-        listctrl.SetSelectCallback(self.item_selected)
+        control.SetPopupControl(self.listctrl)
+        self.listctrl.SetSelectCallback(self.item_selected)
         control.Bind(wx.EVT_TEXT_ENTER, self.item_selected)
+        control.Bind(wx.EVT_KILL_FOCUS, self.item_selected)
+        control.Bind(wx.EVT_KEY_DOWN, self.OnKey)
         kwargs['control_widget'] = control
         Base.__init__(self, attribute, window, aguidata, **kwargs)
-        control.Bind(wx.EVT_KEY_DOWN, self.OnKey)
 
-    def OnKey(self, ev):
-        if ev.GetKeyCode() == wx.WXK_TAB:
-            if ev.ShiftDown():
-                self.control.Navigate(False)
-            else:
-                self.control.Navigate()        
-        
+    def apply(self, event=None):
+        self.applying = True
+        self.item_selected()
+        self.applying = False
+        Base.apply( self, event)
+ 
     def setup(self, attribute, window, aguidata):
         if self.allow_typing != aguidata.get('allow_typing', False):
             self.control.Destroy()
@@ -77,7 +77,16 @@ For kwargs optional arguments, see the Base attribute GUI
         Base.setup(self, attribute, window, aguidata)
         self.setup_listctrl(self.aguidata.get('list',[]))
         self.set_control_value(self.get_attribute_value())
-        
+
+    def OnKey(self, ev):
+        if ev.GetKeyCode() == wx.WXK_TAB:
+            if ev.ShiftDown():
+                self.control.Navigate(False)
+            else:
+                self.control.Navigate() 
+        else:
+            ev.Skip()   
+         
     def setup_listctrl(self, list=None):
         if not list and not callable(self.list_generator):
             return
@@ -116,7 +125,8 @@ For kwargs optional arguments, see the Base attribute GUI
         else:
             self.data = self.listctrl.GetSelectedData()
             self.text = self.listctrl.GetStringValue()
-        self.apply()
+        if not self.applying: 
+            self.apply()
         if self.callback:
             self.callback(self.text, self.data)
         self.set_tooltip()

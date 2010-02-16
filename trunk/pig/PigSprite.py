@@ -89,7 +89,7 @@ system. It does nothing in the base class, but is meant for overriding or for
 stacking with pug.components.
 """
         pass
-        print "on_collision", self, toSprite, fromSprite, toGroup, fromGroup
+#        print "on_collision", self, toSprite, fromSprite, toGroup, fromGroup
 
     def destroy(self):
         """destroy(): set sprite up for deletion, but allow option to block

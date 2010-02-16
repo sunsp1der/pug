@@ -184,7 +184,10 @@ For kwargs optional arguments, see the Base attribute GUI
         wx.CallAfter(gc.collect)
 
     def edit_button_click(self, event=None):
-        component = self.editList.get_selected()
+        try:
+            component = self.editList.get_selected()
+        except:
+            return
         if not component:
             return
         path = self.window.objectPath
