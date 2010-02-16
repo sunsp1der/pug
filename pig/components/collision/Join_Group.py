@@ -1,7 +1,10 @@
+from weakref import ref
+
 from Opioid2D.public.Sprite import Sprite
-from Opioid2D import Director
 
 from pug.component import *
+
+from pig.editor.agui.group_dropdown import *
 
 class Join_Group( Component):
     """Object joins a sprite group for collisions or other uses."""
@@ -11,20 +14,28 @@ class Join_Group( Component):
     _class_list = [Sprite]
     # attributes: ['name', 'doc', {extra info}]
     _field_list = [
-            ['group', "Group to join"]
+            ['group', GroupDropdown, {'doc':"Group to join"}]
             ]
     # defaults
     _group = "all_colliders"
-    
+
     @component_method
     def on_added_to_scene(self, scene):
         self.owner.join_group( self.group)
         
-    # track all available groups for editor dropdowns
+### track all available groups for editor dropdowns
+    def __init__(self, *args, **kwargs):
+        self.ref = ref(self)
+        Component.__init__(self,  *args, **kwargs)
+
+    def __del__(self):
+        register_group( (self.ref, "group"), None)
+
     def get_group(self):
         return self._group
     def set_group(self, group):
+        register_group( (self.ref, "group"), group)
         self._group = group
     group = property (get_group, set_group)
-    
+        
 register_component( Join_Group)

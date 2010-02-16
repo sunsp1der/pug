@@ -74,8 +74,8 @@ callback(self)
         self.OnSelect( event, selected)
 
     def OnSelect(self, event, selected):
-        if selected != -1:
-            self.selected = selected
+        #if selected != -1:
+        self.selected = selected
         
         self.Dismiss()
         event.Skip()
