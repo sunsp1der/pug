@@ -1,4 +1,6 @@
-from Opioid2D import Sprite, Director, CallFunc, Delay
+from inspect import getmro
+
+from Opioid2D import Sprite, CallFunc, Delay
 from Opioid2D.public.Sprite import SpriteMeta
 
 import pug
@@ -6,6 +8,10 @@ from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.syswx.attributeguis import *
 from pug.code_storage import add_subclass_skip_attributes
 from pug.code_storage.constants import _INDENT
+from pug.util import make_name_valid
+
+from pig.util import prettify_path
+from pig.PigDirector import PigDirector
 from pig.editor.util import get_available_layers, save_object, \
                                 exporter_cleanup
 
@@ -18,7 +24,7 @@ class PigSprite(Sprite, pug.BaseObject):
 Opioid2d Sprite with features for use with pug"""
     __metaclass__ = SpriteMeta
     _image_file = None   
-    archetype = False
+    _archetype = False
     destroy_blockers = None
     _pug_pugview_class = 'PigSprite'
     
@@ -31,6 +37,28 @@ Opioid2d Sprite with features for use with pug"""
         self.on_create()
         if register:
             self.do_register()
+        
+    def set_archetype(self, TF):
+        if TF == "True":
+            self._archetype = True
+        elif TF == True:
+            if not self.gname:
+                name = self.__class__.__name__
+                superclasses = getmro(self.__class__)[1:]
+                for cls in superclasses:
+                    if name == cls.__name__ or name == 'Sprite' \
+                                            or name == 'PigSprite':
+                        name = ''.join(['My',name])    
+                        break            
+                name = make_name_valid(name)
+                self.gname = name
+            self._archetype = True
+        elif TF == False:
+            self._archetype = False
+    def get_archetype(self):
+        return self._archetype
+    archetype = property( get_archetype, set_archetype, 
+                          doc="Used by editor. Does not appear in game.")
         
     def set_image(self, image):
         if isinstance(image, basestring):
@@ -53,7 +81,7 @@ Opioid2d Sprite with features for use with pug"""
         # the following line had problems on windows:
         #     Sprite.set_image(self,image)
         # HACK: putting a Delay before the set_image fixes the problem...
-#        if getattr(Director, 'game_started', False):
+#        if getattr(PigDirector, 'game_started', False):
 #        else:
 #            (Delay(0) + CallFunc(Sprite.set_image, self, image)).do()
         # HACK: but it slows down animations ALOT. wtf with this?!
@@ -64,9 +92,9 @@ Opioid2d Sprite with features for use with pug"""
     # scene management
     def _set_gname(self, value):
         pug.BaseObject._set_gname(self, value)
-        if hasattr(Director, '_scene'):
+        if hasattr(PigDirector, '_scene'):
             if _DEBUG: print "PigSprite._set_gname calling scene.update_node"
-            Director.scene.update_node(self)
+            PigDirector.scene.update_node(self)
     gname = property( pug.BaseObject._get_gname, _set_gname, 
                       pug.BaseObject._del_gname,
                       "An easily accessed global name for this object")
@@ -142,20 +170,20 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
             self.delete()        
 
     def delete(self):
-        Director.scene.update_node(self, "Delete") # register self with scene                
+        PigDirector.scene.update_node(self, "Delete") # register self with scene                
         Sprite.delete(self)
         
     def do_register(self):
         "do_register(): register with the PigScene"
-        Director.scene.register_node(self)        
+        PigDirector.scene.register_node(self)        
 
     # layer_name property
     def set_layer(self, layer):
-        if layer not in Director.scene.layers:
-            Director.scene.add_layer(layer)
+        if layer not in PigDirector.scene.layers:
+            PigDirector.scene.add_layer(layer)
         Sprite.set_layer(self, layer)
         if _DEBUG: print "PigSprite.set_layer calling scene.update_node"
-        Director.scene.update_node(self) # register self with scene    
+        PigDirector.scene.update_node(self) # register self with scene    
     def get_layer_name(self):
         try:
             return self.layer.name
@@ -197,7 +225,7 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
         if storageDict['as_class']:
             if not dummy or dummy.image_file != self.image_file:
                 custom_code += [baseIndent, _INDENT, 'image = ', 
-                                repr(self.image_file),'\n']
+                                prettify_path(repr(self.image_file)),'\n']
             if not dummy or dummy.layer_name != self.layer_name:
                 custom_code += [baseIndent, _INDENT, 'layer = ', 
                                 repr(self.layer_name),'\n']
@@ -209,7 +237,7 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
             name = storage_name
             if not dummy or dummy.image_file != self.image_file:
                 custom_code += [baseIndent, name, '.image = ', 
-                                    repr(self.image_file),'\n']
+                                    prettify_path(repr(self.image_file)),'\n']
             if not dummy or dummy.layer_name != self.layer_name:
                 custom_code += [baseIndent, name, '.layer = ', 
                                     repr(self.layer_name),'\n']
@@ -244,7 +272,7 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
     _codeStorageDict = {
             'skip_attributes': ['_actions', '_image_file', 'image_file', 
                                 'layer_name','_init_image','_init_layer',
-                                'register', 'destroy_blockers'], 
+                                'register', 'destroy_blockers', '_archetype'], 
             'instance_attributes': ['*'],
             'instance_only_attributes':['gname'],
             'init_method':'on_create',

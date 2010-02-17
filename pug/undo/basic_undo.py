@@ -550,9 +550,9 @@ Limitations:
             setattr(klass, external_attributename,
                monitor_class(external_attributename, self.observer))
     
-    def disable_category (self, l, monitor_class):
-        for klass, external_attributename in l:
-            setattr(klass, external_attributename, passthrough(internal_attributename))
+#    def disable_category (self, l, monitor_class):
+#        for klass, external_attributename in l:
+#            setattr(klass, external_attributename, passthrough(internal_attributename))
           
     def disable (self):
         """
@@ -589,7 +589,7 @@ Limitations:
                         delattr(klass, attribute)
                         self.removed_functions.append(klass, attribute, entity)
 
-class basic_undomechanism(observer):
+class basic_undomechanism2(observer):
     """
     This class provides the basic operations for undoable operations.
     

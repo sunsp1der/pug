@@ -29,6 +29,5 @@ Have the app confirm project closure.
 PigDirector.realquit = Opioid2D.Director.quit
 PigDirector.quit = pig_quit # hack to make opioid quit=pugquit 
 
-from pig.PigScene import PigScene
-PigDirector.scene = PigScene
+
 

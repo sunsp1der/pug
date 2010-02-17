@@ -4,14 +4,15 @@ import os.path
 from inspect import getmro
 import time
 from copy import copy
-import weakref
 
 import wx
 
 import Opioid2D
 from Opioid2D.public.Node import Node
+from Opioid2D.public.Vector import VectorReference
+from Opioid2D.public.Image import ImageInstance
 
-from pug import code_export, GnameDropdown, CodeStorageExporter
+from pug import code_export, CodeStorageExporter
 from pug.component import Component
 from pug.syswx.util import show_exception_dialog
 from pug.syswx.SelectionWindow import SelectionWindow
@@ -19,6 +20,7 @@ from pug.util import make_name_valid
 
 from pig.util import get_available_scenes, get_available_objects
 from pig.editor import EditorState
+from pig.PigDirector import PigDirector
 
 _DEBUG = False
 
@@ -30,7 +32,7 @@ def get_available_layers():
     """get_available_layers() -> list of available layers in Director"""
     try:
         # hide '__editor__' layer
-        layers = Opioid2D.Director.scene.layers[:]
+        layers = PigDirector.scene.layers[:]
         while '__editor__' in layers:
             layers.remove('__editor__')
         return layers        
@@ -40,7 +42,7 @@ def get_available_layers():
 def get_available_groups():
     """get_available_groups() -> list of available groups in Director"""
     try:
-        return Opioid2D.Director.scene._groups.keys()
+        return PigDirector.scene._groups.keys()
     except:
         return []
     
@@ -51,42 +53,56 @@ name: the name to save the object as. If not provided, a dialog will be opened
 parentWindow: the parent window of name dialog. If not provided, the 
     wx.ActiveWindow will be used
 """
-    if not isinstance(obj, Opioid2D.public.Node.Node):
+    if not isinstance(obj, Node):
         raise TypeError('save_object() arg 1 must be a Node')
     if not name:
         name = obj.gname
         if not name:
             name = obj.__class__.__name__
-        # we generally don't want to save with the same name as 
-        # a base class of the same object
-        superclasses = getmro(obj.__class__)[1:]
-        for cls in superclasses:
-            if name == cls.__name__:
-                name = ''.join(['My',name])
-        name = make_name_valid(name)
         if parentWindow == None:
             parentWindow = wx.GetActiveWindow()
         dlg = wx.TextEntryDialog( parentWindow, 
                                   "Enter the object's class/file name", 
                                   "Save Object", name)
         objName = ''
+        # we generally don't want to save with the same name as 
+        # a base class of the same object
+        superclasses = getmro(obj.__class__)[1:]
+        for cls in superclasses:
+            if name == cls.__name__ or name=='Sprite' or name=='PigSprite':
+                name = ''.join(['My',name])
+                break
+        name = make_name_valid(name)
         while not objName:
             if dlg.ShowModal() == wx.ID_OK:
                 name = dlg.GetValue()
+                if name == 'PigSprite' or name == 'Sprite':
+                    errorDlg = wx.MessageDialog( dlg, 
+                           "You can't use the names 'PigSprite' or 'Sprite'",
+                           "Reserved Name",
+                           wx.OK)
+                    errorDlg.ShowModal()
+                    errorDlg.Destroy() 
+                    dlg.SetValue('MySprite')
+                    dlg.SetFocus()      
+                    continue                
+# DECIDED TO REMOVE THE OVERWRITE CONFIRM DIALOG                
+#                try:
+#                    file(path)
+#                except:
+#                    objName = name
+#                else:
+#                    confirmDlg = wx.MessageDialog( dlg, 
+#                            "\n".join([path,
+#                           "File already exists. Overwrite?"]),
+#                           "Confirm Replace",
+#                           wx.YES_NO | wx.NO_DEFAULT)
+#                    if confirmDlg.ShowModal() == wx.ID_YES:
+#                        objName = name
+#                    confirmDlg.Destroy()
+# INSTEAD JUST USE NAME
+                objName = name
                 path = os.path.join('objects',''.join([name,'.py']))
-                try:
-                    file(path)
-                except:
-                    objName = name
-                else:
-                    confirmDlg = wx.MessageDialog( dlg, 
-                            "\n".join([path,
-                           "File already exists. Overwrite?"]),
-                           "Confirm Replace",
-                           wx.YES_NO | wx.NO_DEFAULT)
-                    if confirmDlg.ShowModal() == wx.ID_YES:
-                        objName = name
-                    confirmDlg.Destroy()
             else:
                 dlg.Destroy()
                 return
@@ -103,11 +119,12 @@ parentWindow: the parent window of name dialog. If not provided, the
             archetype = False
         exporter = code_export( obj, path, True, {'name':objName})
         objDict = get_available_objects( True)
+        oldclass = obj.__class__
+        if oldclass != objDict[objName]:
+            obj.__class__ = objDict[objName]            
         if archetype:
             # return archetype status after saving
             obj.archetype = True
-            oldclass = obj.__class__
-            obj.__class__ = objDict[objName]
             if exporter.file_changed:
                 archetype_changed( obj, oldclass, exporter)
         return exporter
@@ -122,7 +139,7 @@ def archetype_changed( archetype, oldclass, archetype_exporter=None):
     # convert all nodes referencing this archetype
     new_dummy = archetype_exporter.get_dummy(newclass)
     old_dummy = archetype_exporter.get_dummy(oldclass)
-    nodes = Opioid2D.Director.scene.nodes
+    nodes = PigDirector.scene.nodes
     storageDict = archetype_exporter.get_custom_storageDict(new_dummy)
     storageDict['as_class'] = False 
     attributeList = archetype_exporter.create_attribute_lists(
@@ -155,9 +172,9 @@ def archetype_changed( archetype, oldclass, archetype_exporter=None):
                 setVal = True
             if getattr(newval, '__module__', False):
                 valtype = type(newval)
-                if valtype == Opioid2D.public.Vector.VectorReference:
+                if valtype == VectorReference:
                     setVal = val.x == oldval.x and val.y == oldval.y
-                elif valtype == Opioid2D.public.Image.ImageInstance:
+                elif valtype == ImageInstance:
                     setVal = True
                 else:
                     continue
@@ -198,7 +215,7 @@ of errors or None if none found. If showDialog is True, brings up a dialog to
 allow the user to ignore the errors. This function checks for unnamed 
 archetypes, and multiple archetypes with the same name...
 """
-    scene = Opioid2D.Director.scene
+    scene = PigDirector.scene
     errors = []
     if not scene:
         error = "No scene loaded!"
@@ -237,7 +254,7 @@ archetypes, and multiple archetypes with the same name...
     
 def save_scene():
     """Save scene to disk"""
-    name = Opioid2D.Director.scene.__class__.__name__
+    name = PigDirector.scene.__class__.__name__
     return save_scene_as(name)
         
 def save_scene_as( sceneName=None, fileName=None):#, parentWindow=None):
@@ -252,7 +269,7 @@ parentWindow: the parent window of name dialog. If not provided, the
     if get_scene_errors():
         return False
     if _DEBUG: print "util: save_scene_as"
-    scene = Opioid2D.Director.scene
+    scene = PigDirector.scene
     if not sceneName:
         name = scene.__class__.__name__
         if name == 'PigScene' or name == 'Scene':
@@ -270,20 +287,33 @@ parentWindow: the parent window of name dialog. If not provided, the
         while not sceneName:
             if dlg.ShowModal() == wx.ID_OK:
                 name = str(dlg.GetValue())
+                if name == 'PigScene' or name == 'Scene':
+                    errorDlg = wx.MessageDialog( dlg, 
+                           "You can't use the names 'PigScene' or 'Scene'",
+                           "Reserved Name",
+                           wx.OK)
+                    errorDlg.ShowModal()
+                    errorDlg.Destroy() 
+                    dlg.SetValue('MyScene')
+                    dlg.SetFocus()      
+                    continue
+# DECIDED TO REMOVE THE OVERWRITE CONFIRM DIALOG
+#                try:
+#                    test = file(path)
+#                except:
+#                    sceneName = name
+#                else:
+#                    test.close()
+#                    confirmDlg = wx.MessageDialog( dlg, 
+#                           "Scene file already exists. Overwrite?",
+#                           "Confirm Replace",
+#                           wx.YES_NO | wx.NO_DEFAULT)
+#                    if confirmDlg.ShowModal() == wx.ID_YES:
+#                        sceneName = name
+#                    confirmDlg.Destroy()       
+# INSTEAD JUST USE NAME
+                sceneName = name             
                 path = os.path.join('scenes',''.join([name,'.py']))
-                try:
-                    test = file(path)
-                except:
-                    sceneName = name
-                else:
-                    test.close()
-                    confirmDlg = wx.MessageDialog( dlg, 
-                           "Scene file already exists. Overwrite?",
-                           "Confirm Replace",
-                           wx.YES_NO | wx.NO_DEFAULT)
-                    if confirmDlg.ShowModal() == wx.ID_YES:
-                        sceneName = name
-                    confirmDlg.Destroy()                    
             else:
                 dlg.Destroy()
                 return False
@@ -298,7 +328,7 @@ parentWindow: the parent window of name dialog. If not provided, the
     app = wx.GetApp()
     if _DEBUG: print "util: save_scene_as 4"
     selection = app.selectedObjectDict.keys()
-    oldscene = Opioid2D.Director.scene
+    oldscene = PigDirector.scene
     wait_for_state( None)
     if _DEBUG: print "util: save_scene_as 5"
     wx.BeginBusyCursor()
@@ -313,11 +343,11 @@ parentWindow: the parent window of name dialog. If not provided, the
     else:
         if _DEBUG: print "util: save_scene_as 7"        
         sceneDict = get_available_scenes(True)
-        Opioid2D.Director.scene.__class__ = sceneDict[sceneName]
+        PigDirector.scene.__class__ = sceneDict[sceneName]
         saved = True
     finally:
         wx.EndBusyCursor()        
-        if Opioid2D.Director.scene != oldscene:
+        if PigDirector.scene != oldscene:
             wx.GetApp().set_selection([])
             if _DEBUG: print "util: save_scene_as reset select:", selection        
         wait_for_state(EditorState)
@@ -330,7 +360,7 @@ parentWindow: the parent window of name dialog. If not provided, the
           
 def wait_for_state(state):
     "wait_for_state(state): Set scene state then wait until Opioid is ready"
-    scene = Opioid2D.Director.scene
+    scene = PigDirector.scene
     oldstate = scene.state
     scene.state = state
     timer = 0
@@ -344,8 +374,8 @@ def wait_for_state(state):
     if _DEBUG: print "   State set"
 
 def wait_for_exit_scene():  
-    Opioid2D.Director.scene.exit()
-    while not Opioid2D.Director.scene.exitted:
+    PigDirector.scene.exit()
+    while not PigDirector.scene.exitted:
         time.sleep(0.05) # give Opioid time to stop
     
 def close_scene_windows( scene=None):
@@ -355,7 +385,7 @@ Close all scene and node windows belonging to current scene
 Note: for this to work on nodes, it must be run BEFORE the scene is changed.    
 """
     if scene == None:
-        scene = Opioid2D.Director.scene
+        scene = PigDirector.scene
     app = wx.GetApp()
     for frame in app.pugFrameDict:
         if not bool(frame) or isinstance(frame.pugWindow, SelectionWindow):
@@ -369,7 +399,7 @@ Note: for this to work on nodes, it must be run BEFORE the scene is changed.
         doclose = False
         if frameObj == scene:
             doclose = True
-        elif isinstance(frameObj, Opioid2D.public.Node.Node):
+        elif isinstance(frameObj, Node):
             try:
                 nodescene = frameObj.layer._scene
             except:
@@ -383,7 +413,7 @@ Note: for this to work on nodes, it must be run BEFORE the scene is changed.
             if not frameObj.owner:
                 doclose = True
             else:
-                if isinstance(frameObj.owner, Opioid2D.public.Node.Node):
+                if isinstance(frameObj.owner, Node):
                     try:
                         nodescene = frameObj.owner.layer_scene
                     except:

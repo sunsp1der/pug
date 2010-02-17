@@ -7,12 +7,31 @@ from time import sleep
 from inspect import isclass
 
 import Opioid2D
+from Opioid2D.public.Node import Node
 
 import pug
 from pug.util import get_package_classes, find_classes_in_module
 
+from pig.PigDirector import PigDirector
+
 projectPath = os.getcwd()
 _revertScene = None
+
+def prettify_path( path):
+    "prettify_path( path)-> path with '/' as divider"
+    ret = path.replace('\\','/')
+    ret = ret.replace('//','/')
+    return ret
+
+def skip_deprecated_warnings():
+    """skip_deprecated_warnings()
+
+Don't display any warning messages with the word 'deprecated' in them. Opioid
+has a bunch of these...
+"""
+    import warnings
+    
+    warnings.filterwarnings("ignore", message=".*deprecated.*")
 
 def angle_to( from_position, to_position):
     """angle_to(from_position, to_position) -> angle
@@ -28,9 +47,9 @@ def start_scene():
     Opioid2D.Director.start_game = True
     Opioid2D.Director.scene.state = None
     # give the Director a second to pull it together
-    while Opioid2D.Director.scene.state:
+    while PigDirector.scene.state:
         sleep(0.1)
-    Opioid2D.Director.scene.start()    
+    PigDirector.scene.start()    
     
 def save_game_settings( gameSettings):
     pug.code_export( gameSettings, "_game_settings.py", True, 
@@ -155,8 +174,7 @@ doReload: if True reload all object modules from disk"""
     global availableObjects
     if availableObjects is not None and not doReload:
         return availableObjects.copy()
-    objectList = get_package_classes('objects', Opioid2D.public.Node.Node,
-                                    doReload)
+    objectList = get_package_classes('objects', Node, doReload)
     objectDict = {}
     for item in objectList:
         objectDict[item.__name__]=item

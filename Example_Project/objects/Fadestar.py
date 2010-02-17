@@ -1,7 +1,8 @@
 """Fadestar.py"""
 
 ### import autocode ###
-from pug.all_components import Fade, Self_Destruct
+from pug.all_components import Fade
+from pug.all_components import Self_Destruct
 from pig.PigSprite import PigSprite
 ### End import autocode ###
 
