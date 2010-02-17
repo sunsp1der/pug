@@ -21,7 +21,9 @@ from pug.syswx.pugmdi import PugMDI
 from pig import PigScene, PigSprite, Director
 from pig.util import get_available_scenes, get_available_objects, \
                             set_project_path, start_scene, \
-                            save_game_settings, get_project_path
+                            save_game_settings, get_project_path,\
+                            skip_deprecated_warnings
+                            
 from pig.editor import EditorState, graphicsManager
 from pig.editor.util import close_scene_windows, save_scene_as, \
                                     wait_for_state, \
@@ -546,7 +548,8 @@ Add an object to the scene
         self.addObjectClass = objectDict.get(addName, PigSprite)
        
 def start_opioid( rect, title, icon, scene):
-    #start up opioid with a little pause for threading    
+    #start up opioid with a little pause for threading
+    skip_deprecated_warnings()    
     time.sleep(0.1)
     
     if os.name == "nt":

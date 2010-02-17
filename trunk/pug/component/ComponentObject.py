@@ -17,7 +17,7 @@ class ComponentObject(object):
     def __init__(self):
         self.__components = ComponentSet(self)
 
-    def components(doc):
+    def components(doc): 
         """Returns the component set associated with this object."""
         def get_components(self):
             return self.__components

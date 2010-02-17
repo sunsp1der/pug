@@ -2,7 +2,7 @@ import re
 import weakref
 
 import wx
-import wx.lib
+import wx.lib.buttons
 
 from pug.syswx.wxconstants import *
 

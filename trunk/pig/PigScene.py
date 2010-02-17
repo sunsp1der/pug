@@ -1,6 +1,7 @@
 import os.path
 from types import StringTypes
 import time
+from weakref import WeakKeyDictionary
 
 from pygame.locals import KEYDOWN, KEYUP
 
@@ -27,16 +28,18 @@ class PigScene( Opioid2D.Scene, pug.BaseObject):
     def __init__(self, gname=''):
         self._key_down_dict = {}
         self._key_up_dict = {}
-        self._collision_callback_dict = {}
+        self._collision_callback_dict = WeakKeyDictionary()
+            # 2D dict by sprite, then (collide-with-Group, this-sprite-Group)
         self.register_key_down(keys["ESCAPE"], 0, self.escape)
         Opioid2D.Scene.__init__(self)
         pug.BaseObject.__init__(self, gname)   
         if _DEBUG: print "PigScene.__init__", self.__class__.__name__   
                     
     def register_collision_callback( self, sprite, fn, 
-                                     withGroup=None, 
-                                     spriteGroup=None):
-        """register_collision_callback(sprite, fn, withGroup, spriteGroup)
+                                     withGroup="all_colliders", 
+                                     spriteGroup="all_colliders",
+                                     ignore_duplicate=False):
+        """register_collision_callback(sprite, fn, withGroup, spriteGroup)->Add
         
 sprite: when this sprite collides with spriteGroup, fn will be called 
 fn: the function to be called with args: (sprite, sprite-it-hit)
@@ -45,28 +48,60 @@ withGroup: when 'sprite' collides with this group, fn will be called. Defaults
 spriteGroup: collisions will be detected by checking withGroup sprites vs
     spriteGroup sprites. defaults to "all_colliders" if not specified. 'sprite' 
     will automatically be added to this group.
+ignore_duplicate: if fn is already in the list of callbacks for this 
+    sprite/group combination, do not add a second call
     
-Designing withGroup and spriteGroup efficiently will improve program performance.
-Avoid setting up situations where unnecessary collisions tests are made.  
+return value: True if the method was added, False if not (usually because it was
+a duplicate and ignore_duplicate was set to True)
+
+Designing withGroup and spriteGroup efficiently will improve program 
+performance. Avoid setting up situations where unnecessary collisions tests are
+made.  
 """     
-        if withGroup is None:
-            withGroup = "all_colliders"
-        if spriteGroup is None:
-            spriteGroup = "all_colliders"
         sprite.join_group(spriteGroup)
-        idx = (sprite, withGroup, spriteGroup)
-        if self._collision_callback_dict.get(idx):
-            self._collision_callback_dict[idx].append(fn)
+        idx1 = sprite
+        idx2 = (withGroup, spriteGroup)
+        sprite_dict = self._collision_callback_dict.get(idx1)
+        if not sprite_dict:
+            self._collision_callback_dict[idx1] = {idx2:[fn]}
         else:
-            self._collision_callback_dict[idx] = [fn]
+            callback_list = sprite_dict.get(idx2)
+            if not callback_list:
+                sprite_dict[idx2] = [fn]
+            else:
+                if ignore_duplicate and (fn in callback_list):
+                    return False
+                callback_list.append(fn)
         def collision_method( toSprite, fromSprite):
-            idx = (toSprite, withGroup, spriteGroup)
-            callback_list = self._collision_callback_dict.get(idx)
-            if callback_list:
-                for callback in callback_list:
-                    callback( toSprite, fromSprite, spriteGroup, withGroup)
+            try:
+                callback_list = self._collision_callback_dict[toSprite]\
+                                                        [idx2]
+            except:
+                pass
+            for callback in callback_list:
+                callback( toSprite, fromSprite, spriteGroup, withGroup)                    
         self._collision_handlers[spriteGroup, withGroup] = collision_method
         self._cObj.EnableCollisions(spriteGroup, withGroup)
+        return True
+    
+    def unregister_collision_callback(self, sprite, withGroup=None, 
+                                                        spriteGroup=None):
+        """unregister_collision_callback( sprite, withGroup, spriteGroup)
+        
+sprite: the sprite to unregister
+withgroup: If specified, only collisions with this group will be unregistered.
+spritegroup: If specified, only collisions as a member of this group will be
+    unregistered
+"""
+        sprite_dict = self._collision_callback_dict.get(sprite, {})
+        if withGroup or spriteGroup:
+            keys = sprite_dict.keys()
+            for key in keys():
+                if (withGroup is None or key[0]==withGroup) and \
+                        (spriteGroup is None or key[1]==spriteGroup):
+                    sprite_dict.pop(key)
+        else:
+            self._collision_callback_dict[sprite]={}
             
     def handle_keydown( self, ev):
         """handle_keydown( ev): ev is a pygame keydown event"""
@@ -360,8 +395,7 @@ Update the PigScene's node tracking dict for node. Possible commands: 'Delete'
     def _create_object_code(self, storageDict, indentLevel, exporter):
         if _DEBUG: print "*******************enter scene save"
         storage_name = storageDict['storage_name']
-        if storage_name == 'PigScene' or \
-                storage_name == 'Scene':
+        if storage_name == 'PigScene' or storage_name == 'Scene':
             raise ValueError(''.join(["Can't over-write ",
                                       storage_name," base class."]))
         # start with basic export
