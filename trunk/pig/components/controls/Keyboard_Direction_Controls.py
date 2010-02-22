@@ -26,8 +26,8 @@ class Keyboard_Direction_Controls( Component):
                 {'doc':"Press this key to set object's rightward velocity"}],
             ]
     #defaults
-    x_velocity = 50
-    y_velocity = 50
+    x_velocity = 100
+    y_velocity = 100
     up_key = keys["UP"]
     down_key = keys["DOWN"]
     left_key = keys["LEFT"]

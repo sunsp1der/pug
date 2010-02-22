@@ -2,6 +2,7 @@ import os.path
 from types import StringTypes
 import time
 from weakref import WeakKeyDictionary
+import warnings
 
 from pygame.locals import KEYDOWN, KEYUP
 
@@ -126,73 +127,105 @@ key_dict: the key_dict to use
             for modval in keymods.itervalues():
                 if ev.mod & modval:
                     mod += modval 
-        fn_list = dict.get((ev.key, mod), [])
+        fn_list = dict.get(( mod, ev.key), [])
         for fn_info in fn_list:
             fn_info[0](*fn_info[1],**fn_info[2])
     
     def register_key_down(self, *args, **kwargs):
-        """register_key_down(key, keymod, fn, *args, **kwargs)
+        """register_key_down(key, fn, *args, **kwargs)
     
 Register a function to execute when a given key is pressed.
-keymod: "", "SHIFT", "CTRL", "ALT", "SHIFT-CTRL", "SHIFT-ALT", "ALT-CTRL", 
-        or "SHIFT-CTRL-ALT" or a KEYMOD_ constant from pig.keyboard
-key: a KEY_ constant from pig.keyboard
+key: can be either a KEY_ constant from pig.keyboard or a tuple in the form 
+    (KEYMOD_ constant, KEY_ constant)
 fn: the function to call when the keypress occurs
 *args, **kwargs: arguments to fn    
 """
-        self._register_key( self._key_down_dict, *args, **kwargs)
+        return self._register_key( self._key_down_dict, *args, **kwargs)
         
     def register_key_up(self, *args, **kwargs):
-        """register_key_up(key, keymod, fn, *args, **kwargs)
+        """register_key_up(key, fn, *args, **kwargs)
 
 Like register_key_down, but when key is released"""
-        self._register_key( self._key_up_dict, *args, **kwargs)
+        return self._register_key( self._key_up_dict, *args, **kwargs)
 
-    def unregister_key_down(self, key, keymod, fn=None, *args, **kwargs):
-        """unregister_key_down(key, keymod, fn=None, *args, **kwargs)
+    def unregister_key_down(self, key, fn=None, *args, **kwargs):
+        """unregister_key_down(key, fn=None, *args, **kwargs)
     
 Unregister a function to execute when a given key is pressed. Returns True if fn
 is found. If no function is specified, unregister that key altogether and return
 True.
-keymod: "", "SHIFT", "CTRL", "ALT", "SHIFT-CTRL", "SHIFT-ALT", "ALT-CTRL", 
-        or "SHIFT-CTRL-ALT" or a KEYMOD_ constant from pig.keyboard
-key: a KEY_ constant from pig.keyboard
+key: can be either a KEY_ constant from pig.keyboard or a tuple in the form 
+    (KEYMOD_ constant, KEY_ constant)
 fn: the function to call when the keypress occurs
 *args, **kwargs: arguments to fn    
 """
         self._unregister_key( self._key_down_dict, *args, **kwargs)
 
     def unregister_key_up(self, *args, **kwargs):
-        """unregister_key_up(key, keymod, fn=None, *args, **kwargs)
+        """unregister_key_up(key, fn=None, *args, **kwargs)
         
 Like register_key_down, but when key is released"""
         self._unregister_key( self._key_up_dict, *args, **kwargs)
         
-    def _register_key( self, keydict, key, keymod, fn, *args, **kwargs):
-        """register_key( keydict, key, keymod, fn, *args, **kwargs)
-        
+    def _register_key( self, keydict, key, fn, *args, **kwargs):
+        """register_key( keydict, key, fn, *args, **kwargs)->unregister tuple
+
+key: can be either a KEY_ constant from pig.keyboard or a tuple in the form 
+    (KEYMOD_ constant, KEY_ constant)
+fn: the fn to be registered
+*args, **kwargs: sent to fn
+
+returns a tuple that can be sent to unregister_key to unregister the callback
+
 Registers keys into the specified dict... avoid duplicating code for key_up,
 key_down. In the future, maybe key_hold.
 """
         if key is None:
             # this facilitates components that don't use every key
             return
-        if keydict.get((key, keymod)) is None:
-            keydict[(key, keymod)] = [[fn, args, kwargs]]
         else:
-            keydict[(key, keymod)].append([fn, args, kwargs])
+            try:
+                keymod = key[0]
+                key = key[1]
+            except:
+                # key must just be a keymode
+                keymod = 0
+        if keydict.get((keymod, key)) is None:
+            keydict[(keymod, key)] = [(fn, args, kwargs)]
+        else:
+            keydict[(keymod, key)].append((fn, args, kwargs))
+        return (keydict, (keymod, key), fn, args, kwargs)
 
-    def _unregister_key( self, keydict, key, keymod, fn=None, *args, **kwargs):
-        """unregister_key( keydict, key, keymod, fn, *args, **kwargs)
+    def unregister_key(self, info):
+        """unregister_key( info)->True if key unregistered
+        
+info: a tuple of info returned by one of the register_key methods. 
+      Contains (keydict, keymod, key, fn, args, kwargs)
+"""
+        return self._unregister_key( info[0], info[1], info[2], 
+                                     *info[3], **info[4])
+
+    def _unregister_key( self, keydict, key, fn=None, *args, **kwargs):
+        """unregister_key( keydict, key, fn, *args, **kwargs)
         
 Unregisters keys into the specified dict... avoid duplicating code for key_up,
 key_down. In the future, maybe key_hold.
 """
-        fn_list = keydict.get((key, keymod)) 
+        if key is None:
+            # this facilitates components that don't use every key
+            return
+        else:
+            try:
+                keymod = key[0]
+                key = key[1]
+            except:
+                # key must just be a keymode
+                pass
+        fn_list = keydict.get((keymod, key)) 
         if fn_list is None:
             return False
         if fn is None:
-            keydict[(key, keymod)] = []
+            keydict[(keymod, key)] = []
             return True
         elif (fn, args, kwargs) in fn_list:
             fn_list.remove((fn, args, kwargs))
@@ -415,6 +448,7 @@ Update the PigScene's node tracking dict for node. Possible commands: 'Delete'
                 # create ordered list of nodes
                 nodes = self.get_ordered_nodes()
                 nodes.reverse() # store them from bottom-most to top-most
+                
                 # store archetypes at top of file
                 archetypes = False
                 for node in nodes:
@@ -447,15 +481,16 @@ Update the PigScene's node tracking dict for node. Possible commands: 'Delete'
                     archetype_exporter = save_object( node, savename)
                     if not archetype_exporter or \
                                             archetype_exporter.errorfilename:
-                        print "PigScene code export failed... unable to save",\
-                                savename, node
+                        error = ''.join(["PigScene code export failed...",
+                                "unable to save archetype:",
+                                savename, node])
+                        warnings.warn(error)
                         return
-#                    module = __import__('.'.join(['objects',savename]),
-#                                       fromlist=[savename])
-#                    reload(module)
-#                    newclass = getattr(module,savename)
-#                    oldclass = node.__class__
-#                    node.__class__ = newclass
+                    module = __import__('.'.join(['objects',savename]),
+                                       fromlist=[savename])
+                    reload(module)
+                    newclass = getattr(module,savename)
+                    node.__class__ = newclass
                     nodeStorageDict = exporter.get_custom_storageDict(node)                            
                     nodeStorageDict['name'] =''.join([savename,'_archetype'])
                     nodeStorageDict['as_class'] = False # export as object
@@ -464,8 +499,7 @@ Update the PigScene's node tracking dict for node. Possible commands: 'Delete'
                                                             indentLevel + 2,
                                                             False)                    
                     custom_code_list+=[node_code,'\n']
-                    if not archetype_exporter.file_changed:
-                        continue
+               
                 # store instances
                 instances = False
                 for node in nodes:
@@ -525,6 +559,7 @@ _scenePugview = {
     [
         ['Scene', pug.Label, {'font_size':10}],
         ['__class__', None, {'label':'   class', 'new_view_button':False}],        
+        ['components'],
         ['scene_layers', SceneLayers],
 #        ['scene_groups', SceneGroups],
 #        ['scene_layers', None, {'label':'   layers','read_only':True}],

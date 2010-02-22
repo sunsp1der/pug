@@ -2,7 +2,7 @@
 from objects.ShipSprite import ShipSprite
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
-from pug.all_components import Keys_Velocity
+from pug.all_components import Keyboard_Direction_Controls
 ### End import autocode ###
 
 ### MyScene autocode ###
@@ -20,5 +20,5 @@ class MyScene(PigScene):
         shipsprite_instance = ShipSprite()
         shipsprite_instance.position.x = 342.0
         shipsprite_instance.position.y = 146.0
-        shipsprite_instance.components.add( Keys_Velocity() )
+        shipsprite_instance.components.add( Keyboard_Direction_Controls() )
 ### End MyScene autocode ###

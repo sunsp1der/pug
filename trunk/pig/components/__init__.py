@@ -8,7 +8,7 @@ from pig.components.collision.Join_Group import Join_Group
 from pig.components.collision.Collision_Destroy import Collision_Destroy
 from pig.components.controls.Follow_Mouse import Follow_Mouse
 from pig.components.controls.Face_Mouse import Face_Mouse
-from pig.components.controls.Keys_Velocity import Keys_Velocity
+from pig.components.controls.Keyboard_Direction_Controls import Keyboard_Direction_Controls
 from pig.components.effects.Fade import Fade
 from pig.components.effects.Grow_Shrink import Grow_Shrink
 from pig.components.physics.Set_Motion import Set_Motion
