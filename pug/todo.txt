@@ -1,10 +1,9 @@
-now:
-	startarget adds second collide component when derived from target
-	hide keymod in register_key_down
-	write more legible functions for keys_velocity
+now:	
 	Keyboard_Thrust_Controls
 		or bool for acceleration in Keyboard_Drive_Controls (aka keys_tank_controls)
 	reload_level key (for scene!?)		
+	make multiple instances of same graphic appear offset
+		util.placevisible
 
 next_version:
 	new components should override old. project loaded last.

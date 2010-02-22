@@ -30,7 +30,7 @@ For other kwargs arguments, see the Base attribute GUI
     def setup(self, attribute, window, aguidata={}):
         aguidata.setdefault('control_only',True)
         self.control.set_object( window.object)
-        self.control.SetMinSize( (self.control.get_full_width(), -1))
+        self.control.SetMinSize( (self.control.get_full_width() + 5, -1))
         Base.setup( self, attribute, window, aguidata)
         
     def tree_view(self, event=None):
@@ -94,7 +94,7 @@ Special kwargs:
         self.AddColumn("gname")
         self.AddColumn("class")
         self.AddColumn("layer")
-        self.SetColumnWidth(0,150)
+        self.SetColumnWidth(0,80)
         self.set_object(scene)
         self.refresh_tree()
         self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_sel_changed)

@@ -7,9 +7,9 @@ class PigState( Opioid2D.State):
         self.originalCursor = Opioid2D.Mouse.cursor
         
     def exit(self):
-        exitted = True
+        self.exitted = True
 
-    def on_set_busy_state(self, On):
+    def on_set_busy_state(self, On=True):
         if On:
             Opioid2D.Mouse.cursor = _busyCursor
         else:

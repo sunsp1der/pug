@@ -57,9 +57,9 @@ Possible entries in storageDict:
         argument should be passed as a list of strings. Default is: 
         ['*args', '**kwargs'] and 'self' is always included.
     'base_init': If this evaluates to True, call the base_class init method. If
-        the value is "before", the base_class init will be called before 
+        the value is "after", the base_class init will be called after 
         attribute assignments in init_method. Any other value will call the 
-        base_class init method after attribute assignments. Default is True
+        base_class init method before attribute assignments. Default is True
     'base_init_args': The arguments to be passed to the base class init method.
         Default is the value of 'init_method_args' above.
     'force_init_def': always put in the def line for the init method, even if 
@@ -604,12 +604,12 @@ there are no attributes to set, this method returns "".
                     baseclass_init=[baseIndent, _INDENT*2, 
                                storageDict['base_class'].__name__,'.'] + \
                                initCode + ['\n']
-                    if storageDict['base_init'] == 'before':
-                        codeList += baseclass_init
+                    if storageDict['base_init'] == 'after':
                         codeList.append(attributeCode)
+                        codeList += baseclass_init
                     else:
-                        codeList.append(attributeCode)
                         codeList += baseclass_init
+                        codeList.append(attributeCode)
                 else:
                     if dodef and docode and not attributeCode:
                         codeList+= [baseIndent, _INDENT * 2, 'pass\n']

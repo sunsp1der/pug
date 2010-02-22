@@ -23,6 +23,7 @@ from pig.editor import EditorState
 from pig.PigDirector import PigDirector
 
 _DEBUG = False
+PigSprite = None # import later
 
 _IMAGEPATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Images")
 def get_image_path(filename):
@@ -117,7 +118,12 @@ parentWindow: the parent window of name dialog. If not provided, the
             archetype = True
         else:
             archetype = False
-        exporter = code_export( obj, path, True, {'name':objName})
+        global PigSprite
+        if PigSprite is None:
+            from pig.PigSprite import PigSprite as pigsprite
+            PigSprite = pigsprite
+        exporter = code_export( obj, path, True, {'name':objName,
+                                                  'base_class':PigSprite})
         objDict = get_available_objects( True)
         oldclass = obj.__class__
         if oldclass != objDict[objName]:

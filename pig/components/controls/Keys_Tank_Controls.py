@@ -35,21 +35,21 @@ class Keys_Tank_Controls( Component):
     @component_method
     def on_added_to_scene(self, scene):
         """Set keys when object is added to scene"""
-        scene.register_key_down( self.backward_key, 0, self.move_key, 
+        scene.register_key_down( self.backward_key, self.move_key, 
                                  0, -self.velocity)
-        scene.register_key_down( self.forward_key, 0, self.move_key, 
+        scene.register_key_down( self.forward_key, self.move_key, 
                                  0, self.velocity)
-        scene.register_key_down( self.left_key, 0, self.move_key, 
+        scene.register_key_down( self.left_key, self.move_key, 
                                  -self.rotation_speed, 0)
-        scene.register_key_down( self.right_key, 0, self.move_key, 
+        scene.register_key_down( self.right_key, self.move_key, 
                                  self.rotation_speed, 0)
-        scene.register_key_up( self.backward_key, 0, self.move_key, 
+        scene.register_key_up( self.backward_key, self.move_key, 
                                  0, self.velocity)
-        scene.register_key_up( self.forward_key, 0, self.move_key, 
+        scene.register_key_up( self.forward_key, self.move_key, 
                                  0, -self.velocity)
-        scene.register_key_up( self.left_key, 0, self.move_key, 
+        scene.register_key_up( self.left_key, self.move_key, 
                                  self.rotation_speed, 0)
-        scene.register_key_up( self.right_key, 0, self.move_key, 
+        scene.register_key_up( self.right_key, self.move_key, 
                                  -self.rotation_speed, 0)
         
     def move_key(self, x_delta, y_delta):

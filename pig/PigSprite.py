@@ -211,6 +211,10 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
         if storage_name == 'PigSprite' or storage_name == 'Sprite':
             raise ValueError(''.join(["Can't over-write ",
                                       storage_name," base class."]))
+        # grandchildren need to call their parent.on_create
+        if storageDict['base_class'].__name__ != 'PigSprite':
+            storageDict = storageDict.copy()
+            storageDict['base_init'] = True
         # clean up
         self.rotation = self.rotation % 360
         # export code
@@ -285,10 +289,14 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
                         }
     add_subclass_skip_attributes(_codeStorageDict, pug.BaseObject)    
 
+# force derived classes to use PigSprite as a base. Advanced users can get
+# around this however they need to
+# PigSprite._codeStorageDict['base_class'] = PigSprite
+
+#@ test function 
 #    def test(self):
 #        self.set_image("art/button.png")
-# force derived classes to use PigSprite as a base
-#PigSprite._codeStorageDict['base_class'] = PigSprite
+
 
 _spritePugview = {
     'name':'PigSprite Editor',
