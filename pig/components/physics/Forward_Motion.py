@@ -13,16 +13,16 @@ Warning: This component uses a tick_action, so it may be slow."""
     _class_list = [Node]
     # attributes: ['name', 'doc', {extra info}]
     _field_list = [
-            ['velocity','Forward velocity'],
-            ['acceleration',
-'Forward acceleration. Velocity must be set to 0 for this to work.'],
-            ['offset','Forward direction is offset by this much'],
+            ['speed','Forward velocity or acceleration'],
+            ['accelerate',"If True, 'speed' indicates acceleration.\n"+\
+                            "If False, 'speed' indicates velocity"],
             ]
     #defaults
-    velocity = 0
-    acceleration = 100
-    offset = 0
-    #other defaults
+    speed = 200
+    accelerate = True
+
+    offset = 0 # decided to hide this from the component gui, but it still works
+    actual_offset = 0
     tick_action = None
     last_rotation = None
     
@@ -32,46 +32,50 @@ Warning: This component uses a tick_action, so it may be slow."""
         self.set_forward_motion()
         
     @component_method
-    def set_forward_motion(self, velocity=None, acceleration=None):
-        """set_forward_motion(self, velocity=None, acceleration=None)
+    def set_forward_motion(self, speed=None):
+        """set_forward_motion(self, speed=None)
         
-Set object's forward velocity and acceleration. Arguments default to component
-values (self.velocity and self.acceleration)"""
-        if velocity == None:
-            velocity = self.velocity
+speed: set object's forward velocity or acceleration to this value. Defaults to
+        self.speed
+"""
+        if speed == None:
+            speed = self.speed
         else:
-            self.velocity = velocity
-        self.velocity_vector = Vector(0, -velocity)
-        self.velocity_vector.direction = self.offset
-        if acceleration == None:
-            acceleration = self.acceleration
+            self.speed = speed
+        if self.speed < 0:
+            self.actual_offset = self.offset + 180
         else:
-            self.acceleration = acceleration
-        self.acceleration_vector = Vector(0, -acceleration)
-        self.acceleration_vector.direction = self.offset
-        if self.tick_action:
-            self.tick_action.abort()
-        if velocity or acceleration:
-            self.tick_action = RealTickFunc( self.forward_motion).do()
-            self.forward_motion()
+            self.actual_offset = self.offset
+        self.speed_vector = Vector(0, -speed)
+
+        if speed:
+            self.tick_action = RealTickFunc( self.update_forward_motion).do()
+        else:
+            if self.tick_action:
+                self.tick_action.abort()            
+                self.tick_action = None
+            self.last_rotation = None
+            self.set_motion()            
         
     @component_method
-    def on_delete(self):
-        "Abort the tick action on delete"
+    def on_destroy(self):
+        "Abort the tick action on destroy"
         if self.tick_action:
-            self.tick_action.abort()            
-        
-    def forward_motion(self):
+            self.tick_action.abort()                  
+
+    def set_motion(self):
+        self.speed_vector.direction = self.owner.rotation + self.actual_offset
+        if self.accelerate:
+            self.owner.acceleration = self.speed_vector
+        else:
+            self.owner.velocity = self.speed_vector
+            
+    def update_forward_motion(self):
         if not self.enabled:
             return
         if self.owner.rotation == self.last_rotation:
-            return
-        if self.velocity:
-            self.velocity_vector.direction = self.owner.rotation + self.offset
-            self.owner.velocity = self.velocity_vector
-        if self.acceleration:
-            self.acceleration_vector.direction = self.owner.rotation+self.offset
-            self.owner.acceleration = self.acceleration_vector
+            return        
+        self.set_motion()        
         self.last_rotation = self.owner.rotation
         
         

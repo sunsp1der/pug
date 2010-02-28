@@ -126,7 +126,7 @@ all controls.
             except:
                 pass
         if self.tooltip:
-            self.label.SetToolTipString(self.tooltip) 
+            self.set_label_tooltip(self.tooltip) 
         else:
             self.doc_to_tooltip()
             
@@ -170,11 +170,18 @@ all controls.
             except:
                 pass
         try:
-            self.label.SetToolTipString(doc)
+            self.set_label_tooltip(doc)            
         except:
             if hasattr(self.label, 'text'):
                 if self.label.GetToolTip():
-                    self.label.SetToolTipString(' ')
+                    self.set_label_tooltip(' ')            
+        
+    def set_label_tooltip(self, tip, control=None):
+        if control == None:
+            control = self.label
+        control.SetToolTipString( tip)
+        for child in control.GetChildren():
+            self.set_label_tooltip( tip, child)
         
     def get_attribute_value(self):
         return getattr(self.window.object, self.attribute, None)
