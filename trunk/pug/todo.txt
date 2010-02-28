@@ -1,27 +1,24 @@
 now:	
-	Keyboard_Thrust_Controls
-		or bool for acceleration in Keyboard_Drive_Controls (aka keys_tank_controls)
 	reload_level key (for scene!?)		
 	make multiple instances of same graphic appear offset
 		util.placevisible
-
-next_version:
-	new components should override old. project loaded last.
-	option to open component,sprite,scene file. default save is project component file
-	make mouse follow stop properly with 'stop_within'
-	set gname
-		demo of heads watching a ufo
-	undo
 	save query when changing levels or quitting
+	option to open component,sprite,scene file. default save is project component file
+	new components should override old. project loaded last.
 	new_project
+		open_project
 		dialog
 			folder
 			name
 			all settings
-	open_project
 	finalize demos
+	brief tutorial
+
+next_version:
 
 Finalize:
+	TODO list
+		Undo!
 	html tutorial
 		create project
 		create scene
@@ -45,6 +42,10 @@ bugs:
 	crash - selecting an object while changing selectionwin to another view 
 
 later: 
+	make mouse follow stop properly with 'stop_within'
+	set gname
+		demo of heads watching a ufo
+	undo
 	only registered objects selectable by mouseclick
 	make sure field is selected when tabbing through controls... even after change
 	figure out some way to make derived classes work better

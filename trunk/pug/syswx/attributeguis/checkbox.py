@@ -21,7 +21,7 @@ For kwargs optional arguments, see the Base attribute GUI
 #        checkbox.Bind(wx.EVT_KILL_FOCUS, self.unfocus)
         self.checkbox = checkbox
         line = wx.StaticLine(control)
-        sizer.Add(checkbox,1)
+        sizer.Add(checkbox,1,flag=wx.LEFT, border=5)
         sizer.Add(line,flag=wx.EXPAND)
         control.SetSizer(sizer)
 

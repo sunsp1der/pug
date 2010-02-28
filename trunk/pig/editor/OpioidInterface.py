@@ -589,7 +589,8 @@ _interfacePugview = {
         ['Controls', pug.PlayButtons, {'execute':'execute_scene', 
                                        'stop':'stop_scene',
                                        'rewind':'rewind_scene',
-                                       'play':'play_scene'}],        
+                                       'play':'play_scene',
+                                       'doc':'Controls for current scene'}],        
 
         [' Current Scene', pug.Label],
         ['sceneclass', pug.Dropdown, 

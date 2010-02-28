@@ -16,6 +16,7 @@ class Keyboard_Direction_Controls( Component):
     _field_list = [
             ['x_velocity', 'Horizontal velocity set by up and down keys'],
             ['y_velocity', 'Vertical velocity set by left and right keys'],
+            ['rotate', 'Rotate object to face direction of movement'],
             ['up_key', KeyDropdown, 
                 {'doc':"Press this key to set object's upward velocity"}],
             ['down_key', KeyDropdown, 
@@ -28,6 +29,7 @@ class Keyboard_Direction_Controls( Component):
     #defaults
     x_velocity = 100
     y_velocity = 100
+    rotate = True 
     up_key = keys["UP"]
     down_key = keys["DOWN"]
     left_key = keys["LEFT"]
@@ -58,6 +60,8 @@ class Keyboard_Direction_Controls( Component):
     def change_velocity(self, x_change, y_change):
         """Change owner's velocity"""
         self.owner.velocity += (x_change, y_change)
+        if self.rotate and self.owner.velocity.length: 
+            self.owner.rotation = self.owner.velocity.direction        
     
     @component_method
     def on_destroy(self):
