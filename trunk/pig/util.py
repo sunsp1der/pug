@@ -56,7 +56,7 @@ def save_game_settings( gameSettings):
                  {'name':'game_settings'})        
 
 def run_pig_scene( projectPath, scenename=None, position=None, resolution=None, 
-                   title=None, fullscreen=None, icon=None, units=None, 
+                   title=None, fullscreen=None, icon='', units=None, 
                    useWorking=False):
     """run_pig_scene( ...) Run a pig scene in a game window
     
@@ -78,12 +78,16 @@ _game_settings file unless otherwise noted.
     useWorking: if True, use the __working__.py file when running the scene of 
                 the same name
 """
+    projectPath = fix_project_path(projectPath)
     if os.path.isfile(projectPath):
         projectPath = os.path.dirname(projectPath)
         if os.path.basename == 'scenes':
             projectPath = os.path.dirname(projectPath)
     set_project_path (projectPath)
-    from _game_settings import game_settings
+    try:
+        from _game_settings import game_settings
+    except:
+        raise ValueError("No scenes have been created yet. Run edit_project.py")
     # settings
     if position is None:
         position = game_settings.rect_opioid_window[0:2]        
@@ -98,13 +102,32 @@ _game_settings file unless otherwise noted.
         
     # get scene    
     scenedict = get_available_scenes( useWorking=useWorking)# use __Working__.py
-    initial_scene = scenedict[scenename] 
+    try:
+        initial_scene = scenedict[scenename]
+    except:
+        raise ValueError("Scene not found: "+scenename) 
     
-    icon = ''
-    os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % position
+    set_opioid_window_position( position)
     Opioid2D.Display.init(resolution, units, title, fullscreen, icon)
     Opioid2D.Director.start_game = True
     Opioid2D.Director.run(initial_scene)
+    
+def set_opioid_window_position( position):    
+    if os.name == "nt":
+        loc = (position[0]+5, position[1]+28)
+    else:
+        loc = position[0:2]
+    os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % loc
+    
+def fix_project_path( path):
+    """fix_project_path( path)->path after removing Idle editor info"""
+    # the honest truth is that idle doesn't work for shizz with PIG.
+    # but maybe someday it will... 
+    
+    if "idlelib" in path and "idle.py" in path:
+        return sys.argv[0]
+    else:
+        return path
 
 availableScenes = None
 def get_available_scenes( doReload=False, useWorking=True):
@@ -200,7 +223,7 @@ the objects folder."""
 def set_project_path( path):
     global projectPath
     path = os.path.realpath(path)
-    if projectPath:
+    if projectPath and projectPath in sys.path:
         sys.path.remove(projectPath)
     projectPath = path
     if projectPath not in sys.path:

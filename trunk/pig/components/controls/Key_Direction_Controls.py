@@ -6,9 +6,9 @@ from pig.keyboard import *
 from pig.editor.agui import KeyDropdown
 from pig.PigDirector import PigDirector
 
-class Keyboard_Direction_Controls( Component):
+class Key_Direction_Controls( Component):
     """Control object velocity with keys for up, down, left, right."""
-    #component_info
+    # component_info
     _set = 'pig'
     _type = 'controls'
     _class_list = [Node]
@@ -70,5 +70,5 @@ class Keyboard_Direction_Controls( Component):
         for info in self.k_info:
             scene.unregister_key(info)
             
-register_component( Keyboard_Direction_Controls)
+register_component( Key_Direction_Controls)
 

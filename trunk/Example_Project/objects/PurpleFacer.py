@@ -1,7 +1,7 @@
 """PurpleFacer.py"""
 
 ### import autocode ###
-from pug.all_components import Face_Mouse, Spawn_Area, Forward_Motion
+from pug.all_components import Mouse_Face, Spawn_Area, Forward_Motion
 from pig.PigSprite import PigSprite
 ### End import autocode ###
 
@@ -13,7 +13,7 @@ class PurpleFacer(PigSprite):
         self.position.x = 541.0
         self.position.y = 389.0
         self.color = (0.69999998807907104, 0.0, 1.0, 1.0)
-        self.components.add( Face_Mouse() )
+        self.components.add( Mouse_Face() )
         self.components.add( Spawn_Area(
                 object='UpFO',
                 spawn_interval=0.3,

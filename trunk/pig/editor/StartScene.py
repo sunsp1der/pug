@@ -1,15 +1,14 @@
-### import autocode ###
 from pig.PigScene import PigScene
-from pig.PigSprite import PigSprite
-### End import autocode ###
+from pig import PigSprite
 
-### MyScene autocode ###
-class MyScene(PigScene):
+class StartScene(PigScene):
+    layers = ['Background']
     def on_enter(self):
-        # Sprites
+#        # Sprites
+        from pig import PigSprite
         pigsprite_instance = PigSprite()
         pigsprite_instance.image = 'art/pig.png'
         pigsprite_instance.layer = 'Background'
         pigsprite_instance.position.x = 400.0
-        pigsprite_instance.position.y = 300.0
-### End MyScene autocode ###
+        pigsprite_instance.position.y = 300.0  
+        pigsprite_instance.delete()       

@@ -3,7 +3,7 @@ from Opioid2D.public.Node import Node
 
 from pig.components import Face_Object
 
-class Face_Mouse( Face_Object):
+class Mouse_Face( Face_Object):
     """Object turns to face the mouse. This is the exactly like the Face_Object 
 component with the mouse-pointer as the target."""
     #component_info
@@ -27,4 +27,4 @@ Turn the object toward position. If None, use mouse position."""
         Face_Object.check_facing(self, position)
                 
 from pug.component import register_component
-register_component( Face_Mouse)
+register_component( Mouse_Face)

@@ -86,8 +86,8 @@ class Spawn_Area(Component):
             self.action = self.owner.do( Delay(self.spawn_delay \
                    + random.uniform(-self.spawn_variance, self.spawn_variance))\
                    + CallFunc( self.check_spawn))
-            
-    @component_method
+    
+    @component_method 
     def spawn(self):
         "spawn()->[objects_spawned] Perform the spawn as set up"
         if self.object != self.last_object:
