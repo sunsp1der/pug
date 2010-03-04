@@ -81,6 +81,9 @@ class EditorState(PigState):
         if ev.key == Opioid2D.K_w and ctrlDown:
             wx.CallAfter(wx.GetApp().raise_all_frames)
             
+    def handle_keyup(self, ev):
+        pass
+            
     def handle_quit(self, ev):
         wx.CallAfter(wx.GetApp()._evt_project_frame_close)
         

@@ -4,7 +4,7 @@ import time
 from weakref import WeakKeyDictionary
 import warnings
 
-from pygame.locals import KEYDOWN, KEYUP
+from pygame.locals import KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP
 
 import Opioid2D
 
@@ -31,10 +31,13 @@ class PigScene( Opioid2D.Scene, pug.BaseObject):
         self._key_up_dict = {}
         self._collision_callback_dict = WeakKeyDictionary()
             # 2D dict by sprite, then (collide-with-Group, this-sprite-Group)
-        self.register_key_down(keys["ESCAPE"], 0, self.escape)
+        self.register_key_down(keys["ESCAPE"], self.escape)
         Opioid2D.Scene.__init__(self)
         pug.BaseObject.__init__(self, gname)   
-        if _DEBUG: print "PigScene.__init__", self.__class__.__name__   
+        if _DEBUG: print "PigScene.__init__", self.__class__.__name__ 
+        
+    def on_enter(self):
+        pass
                     
     def register_collision_callback( self, sprite, fn, 
                                      withGroup="all_colliders", 
@@ -109,8 +112,16 @@ spritegroup: If specified, only collisions as a member of this group will be
         self.process_keylist( ev)
 
     def handle_keyup( self, ev):
-        """handle_keydown( ev): ev is a pygame keydown event"""
+        """handle_keydown( ev): ev is a pygame keyup event"""
         self.process_keylist( ev)
+        
+    def handle_mousebuttondown(self, ev):
+        """handle_mousebuttondown( ev): ev is a pygame mousebuttondown event""" 
+        self.process_keylist( ev)
+        
+    def handle_mousebuttonup(self, ev):
+        """handle_mousebuttonup( ev): ev is a pygame mousebuttonup event""" 
+        self.process_keylist( ev)        
         
     def process_keylist( self, ev):
         """process_keylist( ev): call registered key event callbacks
@@ -120,14 +131,24 @@ key_dict: the key_dict to use
 """
         if ev.type == KEYDOWN:
             dict = self._key_down_dict
+            key = ev.key
         elif ev.type == KEYUP:
             dict = self._key_up_dict
-        mod = 0
-        if ev.mod:
+            key = ev.key
+        elif ev.type == MOUSEBUTTONDOWN:
+            dict = self._key_down_dict
+            key = 1000 + ev.button
+        elif ev.type == MOUSEBUTTONUP:
+            dict = self._key_up_dict
+            key = 1000 + ev.button
+
+        mod = 0 
+        if hasattr(ev,"mod") and ev.mod is not 0:
             for modval in keymods.itervalues():
                 if ev.mod & modval:
                     mod += modval 
-        fn_list = dict.get(( mod, ev.key), [])
+        
+        fn_list = dict.get(( mod, key), [])
         for fn_info in fn_list:
             fn_info[0](*fn_info[1],**fn_info[2])
     
@@ -244,9 +265,6 @@ key_down. In the future, maybe key_hold.
         self.on_enter()
         self.start()
         
-    def on_enter(self):
-        pass
-
     def start(self):
         """call after enter() and before state changes"""
         if not getattr(Opioid2D.Director, 'game_started', False):
@@ -533,8 +551,9 @@ Update the PigScene's node tracking dict for node. Possible commands: 'Delete'
         else:
             base_code = [base_code]
         #add layers line
-        base_code += [baseIndent, _INDENT,'layers = ', 
-                      str(get_available_layers()),'\n']
+        layers = get_available_layers()
+        if layers != ["Background"]:
+            base_code += [baseIndent, _INDENT,'layers = ', str(layers),'\n']
         code = ''.join(base_code + custom_code_list)
         if _DEBUG: print "*******************exit scene save"
         return code

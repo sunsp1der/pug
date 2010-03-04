@@ -5,7 +5,7 @@ from pug.component import *
 
 from pig.util import angle_to
 
-class Follow_Mouse(Component):
+class Mouse_Follow(Component):
     """Object follows the mouse pointer"""
     # component_info
     _set = 'pig'
@@ -52,4 +52,4 @@ class Follow_Mouse(Component):
                 owner.rotation = angle_to(my_pos, mousepos)
             owner.position = mousepos
         
-register_component( Follow_Mouse)
+register_component( Mouse_Follow)

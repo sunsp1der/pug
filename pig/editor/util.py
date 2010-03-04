@@ -4,6 +4,8 @@ import os.path
 from inspect import getmro
 import time
 from copy import copy
+import shutil
+import subprocess
 
 import wx
 
@@ -23,7 +25,6 @@ from pig.editor import EditorState
 from pig.PigDirector import PigDirector
 
 _DEBUG = False
-PigSprite = None # import later
 
 _IMAGEPATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Images")
 def get_image_path(filename):
@@ -46,7 +47,74 @@ def get_available_groups():
         return PigDirector.scene._groups.keys()
     except:
         return []
+
+def create_new_project(project_path=None):
+    "create_new_project(project_path=None)->if successful, returns project_path"
+    if not project_path:
+        this_folder = os.path.split( os.path.abspath(__file__))[0]
+        source = os.path.join( this_folder, "New_Project")
+        parent = wx.GetApp().get_project_frame()
+        dlg = wx.TextEntryDialog( parent,
+                                  "Project Name",
+                                  "Create New Project", 
+                                  "My Project")
+        if dlg.ShowModal() != wx.ID_OK:
+            return
+        new_project_name = dlg.GetValue()
+        dlg.Destroy()
+        dlg = wx.DirDialog( parent, "Create project in folder:",
+                            style=wx.DD_DEFAULT_STYLE )
+        if dlg.ShowModal() != wx.ID_OK:
+            return
+        dest_folder = dlg.GetPath()
+        project_path = os.path.join( dest_folder, new_project_name)
+        dlg.Destroy()
+    try:
+        shutil.copytree(source, project_path)
+    except:
+        show_exception_dialog()          
+        return  
+    return project_path
+
+def open_project( project_path=None, force=False, quit=True): 
+    """open_project( project_path=None, force=False, quit=True)->True if openned
     
+project_path: the main folder of the projet to open
+force: if True, don't ask the user if they want to save current file
+quit: if True, quit the current project after opening new one. 
+"""
+    
+    interface = wx.GetApp().get_project_object()
+    if force or interface._pre_quit_func():
+        if not project_path:
+            parent = wx.GetApp().get_project_frame()
+            dlg = wx.DirDialog( parent, "Select project folder:",
+                                style=wx.DD_DEFAULT_STYLE )
+            if dlg.ShowModal() != wx.ID_OK:
+                return
+            project_path = dlg.GetPath()
+            dlg.Destroy()
+        project_editor = os.path.join( project_path, "edit_project.py")
+        if not os.path.isfile( project_editor):
+            wx.MessageDialog( wx.GetApp().get_project_frame(),
+                        'File edit_project.py not found in ' + project_path,
+                        'Invalid Project Folder',
+                        wx.OK | wx.ICON_INFORMATION)
+            return False        
+        if quit:
+            interface.quit( False)
+        python_process(project_editor)
+        return True
+
+def python_process( python_file, *args):
+    if os.name == "nt":
+        cmd = ["pythonw"]
+    else:
+        cmd = ["python"]
+    cmd += [python_file]
+    cmd += args
+    subprocess.Popen(cmd)
+
 def save_object(obj, name=None, parentWindow=None):
     """save_object(obj): Export obj as a class to objects folder
 
@@ -118,10 +186,10 @@ parentWindow: the parent window of name dialog. If not provided, the
             archetype = True
         else:
             archetype = False
-        global PigSprite
-        if PigSprite is None:
-            from pig.PigSprite import PigSprite as pigsprite
-            PigSprite = pigsprite
+        try: 
+            pigsprite = PigSprite
+        except:
+            from pig.PigSprite import PigSprite
         exporter = code_export( obj, path, True, {'name':objName,
                                                   'base_class':PigSprite})
         objDict = get_available_objects( True)

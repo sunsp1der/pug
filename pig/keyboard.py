@@ -1,6 +1,6 @@
 # keyboard.py
 # keyboard utilities
-
+import pygame
 # this is the list of all available keys
 # changing the order of this list will change the order in pug dropdowns
 key_list = [
@@ -9,32 +9,34 @@ key_list = [
     ("LEFT",276),
     ("RIGHT",275),
     ("SPACE",32),
-    ("a",97),
-    ("b",98),
-    ("c",99),
-    ("d",100),
-    ("e",101),
-    ("f",102),
-    ("g",103),
-    ("h",104),
-    ("i",105),
-    ("j",106),
-    ("k",107),
-    ("l",108),
-    ("m",109),
-    ("n",110),
-    ("o",111),
-    ("p",112),
-    ("q",113),
-    ("r",114),
-    ("s",115),
-    ("t",116),
-    ("u",117),
-    ("v",118),
-    ("w",119),
-    ("x",120),
-    ("y",121),
-    ("z",122),
+    ("LEFT_MOUSE",1001),
+    ("RIGHT_MOUSE",1003),
+    ("A",97),
+    ("B",98),
+    ("C",99),
+    ("D",100),
+    ("E",101),
+    ("F",102),
+    ("G",103),
+    ("H",104),
+    ("I",105),
+    ("J",106),
+    ("K",107),
+    ("L",108),
+    ("M",109),
+    ("N",110),
+    ("O",111),
+    ("P",112),
+    ("Q",113),
+    ("R",114),
+    ("S",115),
+    ("T",116),
+    ("U",117),
+    ("V",118),
+    ("W",119),
+    ("X",120),
+    ("Y",121),
+    ("Z",122),
     ("0",48),
     ("1",49),
     ("2",50),
@@ -248,13 +250,9 @@ for _name, _val in key_list:
 # lshift = 1, rshift = 2, lctrl = 64, rctrl = 128, lalt = 256, ralt = 512
 keymod_list = (
     ("", 0),
-    ("SHIFT", 3),
-    ("CTRL", 192),
-    ("ALT", 768),
-    ("SHIFT_CTRL", 195),
-    ("SHIFT_ALT", 771),
-    ("ALT_CTRL", 960),
-    ("SHIFT_CTRL_ALT", 963)
+    ("SHIFT", pygame.KMOD_SHIFT),
+    ("CTRL", pygame.KMOD_CTRL),
+    ("ALT", pygame.KMOD_ALT)
 )
 # create constant values and dict
 keymods = {}

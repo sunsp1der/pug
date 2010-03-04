@@ -19,15 +19,10 @@ from pug.syswx.component_browser import ComponentBrowseFrame
 from pug.syswx.pugmdi import PugMDI
 
 from pig import PigScene, PigSprite, Director
-from pig.util import get_available_scenes, get_available_objects, \
-                            set_project_path, start_scene, \
-                            save_game_settings, get_project_path,\
-                            skip_deprecated_warnings
-                            
+from pig.util import *
+from pig.editor.StartScene import StartScene
 from pig.editor import EditorState, graphicsManager
-from pig.editor.util import close_scene_windows, save_scene_as, \
-                                    wait_for_state, \
-                                    wait_for_exit_scene, get_image_path
+from pig.editor.util import *
  
 _DEBUG = False
 
@@ -54,7 +49,7 @@ scene: the scene to load initially
         except:
             # we're probably not in linux
             pass
-        
+        rootfile = fix_project_path(rootfile)
         projectPath = os.path.dirname(os.path.realpath(rootfile))
         set_project_path( projectPath)
         self.project_name = os.path.split(projectPath)[1]
@@ -80,9 +75,9 @@ scene: the scene to load initially
 
         thread.start_new_thread(start_opioid, 
                                           (self.pug_settings.rect_opioid_window,
-                                           'Pig Scene',
+                                           'P.I.G. Scene',
                                            get_image_path('pig.png'),
-                                           PigScene))
+                                           StartScene))
         time.sleep(1)
         
         pug.App(projectObject=self, 
@@ -101,7 +96,7 @@ settingsObj: an object similar to the one below... if it is missing any default
         class game_settings():
             title = defaultTitle
             initial_scene = '__Working__'
-            rect_opioid_window = (20, 20, 800, 600)
+            rect_opioid_window = (25, 25, 800 , 600)
             fullscreen = False
             save_settings_on_quit = True
             
@@ -120,8 +115,9 @@ settingsObj: an object similar to the one below... if it is missing any default
 """
         # DEFAULT PUG SETTINGS
         class pug_settings():
-            initial_scene = "PigScene"
-            rect_opioid_window = (0, 0, 800, 600)
+            initial_scene = "__Working__"
+            rect_Pig_Editor = (520, 80, 500, 670)
+            rect_opioid_window = (0, 0, 800 , 600)
             save_settings_on_quit = True
 
         if settingsObj:
@@ -185,7 +181,10 @@ settingsObj: an object similar to the one below... if it is missing any default
                 self.sceneclass = scene
                 if available_scenes[scene].__module__ == 'scenes.__Working__':
                     self._new_scene = False
-        self.set_scene(self.Director.scene.__class__, True)
+        if self.Director.scene.__class__ == StartScene:
+            self.set_scene(PigScene, True)
+        else:
+            self.set_scene(self.Director.scene.__class__, True)
         # default menus
         if not self.cached[2]:
             app.add_global_menu("Pig",
@@ -213,7 +212,7 @@ settingsObj: an object similar to the one below... if it is missing any default
                                 'objectpath':self.scene.__class__.__name__}],
                         ['selection', {'name':"Selection"}],
                         ],
-                    title=''.join(["Pig Editor - ", self.project_name]),
+                    title=''.join(["P.I.G. Editor - ", self.project_name]),
                     name="Pig Editor")
             frame.GetNotebook().Split(2, wx.LEFT)
             size = frame.GetSize()
@@ -229,8 +228,12 @@ settingsObj: an object similar to the one below... if it is missing any default
             self.cached[0] = True       
         self._initialized = True     
             
-    def quit(self):
-        self.Director.quit()
+    def quit(self, query=True):
+        """quit( query=True)
+        
+query: if True, query the user about saving the current scene first
+"""        
+        self.Director.quit( query=query)
         
     def view_scene(self):
         """Show scene data in a window"""
@@ -343,10 +346,10 @@ Callback from PugApp...
  
     def _on_pug_quit(self):
         if getattr(self.game_settings,'save_settings_on_quit',True):
-            if '__Working__' in self.Director.scene.__module__:
-                self.game_settings.initial_scene = '__Working__'
-            else:
-                self.game_settings.initial_scene = self.scene.__class__.__name__
+#            if '__Working__' in self.Director.scene.__module__:
+#                self.game_settings.initial_scene = '__Working__'
+#            else:
+            self.game_settings.initial_scene = self.scene.__class__.__name__
             try:
                 save_game_settings( self.game_settings)
             except:
@@ -368,7 +371,8 @@ event: a wx.Event
             wx.YES_NO | wx.CANCEL | wx.YES_DEFAULT | wx.ICON_QUESTION)
         wx.GetApp().projectFrame.RequestUserAttention()
         answer = dlg.ShowModal() 
-        if answer == wx.ID_YES and not self.Director.game_started:
+        if answer == wx.ID_YES:
+            self.stop_scene()
             saved = self.save_using_working_scene()
             if not saved:
                 dlg = wx.MessageDialog( wx.GetApp().projectFrame,
@@ -392,12 +396,18 @@ event: a wx.Event
 
     def new_project(self):
         """Create a new pig project"""
-        pass
+        project_path = create_new_project()
+        if project_path:
+            self.open_project( project_path)            
     
-    def open_project(self):
+    def open_project(self, project_path=None):
         """Open a pig project"""
-        pass
-
+        try:
+            open_project( project_path)
+        except:
+            show_exception_dialog()
+            return
+            
     def _get_use_working_scene(self): 
         return self._use_working_scene
     def _set_use_working_scene(self, value):
@@ -508,7 +518,7 @@ Run the scene being editted in a new process.
                     if continue_shutdown == wx.ID_NO:
                         return False                               
             save_game_settings( self.game_settings)
-            subprocess.Popen(["python","main.py",self.scene.__class__.__name__])
+            python_process("main.py", "__Working__")
         except:
             show_exception_dialog()
             return False
@@ -552,18 +562,13 @@ def start_opioid( rect, title, icon, scene):
     skip_deprecated_warnings()    
     time.sleep(0.1)
     
-    if os.name == "nt":
-        loc = (rect[0]+3, rect[1]+28)
-    else:
-        loc = rect[0:2]
-    os.environ['SDL_VIDEO_WINDOW_POS'] = \
-            "%d,%d" % loc
+    set_opioid_window_position(rect[0:2])
     Opioid2D.Display.init(rect[2:4], 
                           title=title, 
                           icon=icon)
     Opioid2D.Director.game_started = False
-    Opioid2D.Director.playing_in_editor = True    
-    Opioid2D.Director.run( scene)       
+    Opioid2D.Director.playing_in_editor = True
+    Opioid2D.Director.run( scene)        
          
 def _scene_list_generator():
     """_scene_list_generator( includeNewScene=True)-> list of scenes + 'New'
@@ -601,8 +606,8 @@ _interfacePugview = {
                                'doc':"Commit current scene to disk"}],
 #        ['view_scene', pug.Routine,  {'label':'   View Scene'}],
         ['reload_scene', None, {'label':'   Reload Scene'}],
-        ['use_working_scene', None, {'label':'   Use Working Scene',
-                    'doc':'Uncheck to go back to last committed version'}],
+#        ['use_working_scene', None, {'label':'   Use Working Scene',
+#                    'doc':'Uncheck to go back to last committed version'}],
         [' Objects', pug.Label],
         ['addObjectClass', ObjectsDropdown, 
              {'prepend_list':[("New Sprite", PigSprite)],

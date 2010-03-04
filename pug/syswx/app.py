@@ -106,6 +106,9 @@ projectFolder: where file menus start at.  Defaults to current working dir.
             self.post_init(object)
             return
         self.finalize_project_object(object)
+        
+    def get_project_object(self):
+        return self.projectObject
                     
     def abort_init(self, event=None):
         """Close project while trying to set a project object"""
@@ -185,24 +188,25 @@ called every second until the object is initialized"""
         print
         raise Exception(msg)
 
-    def _evt_project_frame_close(self, event = None):
+    def _evt_project_frame_close(self, event=None, query=True):
         if (event and not event.CanVeto()) or self.quitting:
             if event:
                 event.Skip()
             return
-        if hasattr(self.projectObject, "_pre_quit_func"):
-            doquit = self.projectObject._pre_quit_func( event)
-            if not doquit:
-                return
-        else:
-            dlg = wx.MessageDialog(self.projectFrame,
-                           "Close all windows and exit project?",
-                           'Project Frame Closed', 
-                wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-        #TODO: would be nice if the dlg could be forced above other apps
-            if dlg.ShowModal() != wx.ID_YES:
-                dlg.Destroy()
-                return
+        if query:
+            if hasattr(self.projectObject, "_pre_quit_func"):
+                doquit = self.projectObject._pre_quit_func( event)
+                if not doquit:
+                    return
+            else:
+                dlg = wx.MessageDialog(self.projectFrame,
+                               "Close all windows and exit project?",
+                               'Project Frame Closed', 
+                    wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+            #TODO: would be nice if the dlg could be forced above other apps
+                if dlg.ShowModal() != wx.ID_YES:
+                    dlg.Destroy()
+                    return
         self.quit()
         if event:
             event.Skip()

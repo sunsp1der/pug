@@ -7,7 +7,7 @@ from pig.editor.agui import KeyDropdown
 from pig.PigDirector import PigDirector
 from pig.components.physics.Forward_Motion import Forward_Motion
 
-class Keyboard_Drive_Controls( Forward_Motion):
+class Key_Drive_Controls( Forward_Motion):
     """Keys for forward, backward, and rotate left/right"""
     #component_info
     _set = 'pig'
@@ -76,5 +76,5 @@ class Keyboard_Drive_Controls( Forward_Motion):
         for info in self.k_info:
             scene.unregister_key(info)                
                 
-register_component( Keyboard_Drive_Controls)
+register_component( Key_Drive_Controls)
 

@@ -1,35 +1,27 @@
 now:	
-	reload_level key (for scene!?)		
-	make multiple instances of same graphic appear offset
-		util.placevisible
-	save query when changing levels or quitting
-	option to open component,sprite,scene file. default save is project component file
-	new components should override old. project loaded last.
-	new_project
-		open_project
-		dialog
-			folder
-			name
-			all settings
+	sound
+		Sound_On_Collision
+		Sound_On_Key
+		Sound_On_Click
+	behavior
+		Delete_On_Click
+	scene
+		sound
+			Sound_On_Enter
 	finalize demos
-	brief tutorial
-
-next_version:
-
-Finalize:
-	TODO list
-		Undo!
+		test_components
+		simple shooting gallery game
 	html tutorial
 		create project
 		create scene
 		create sprites
 		add components
+	TODO list
+		Undo! - save query when changing levels or quitting
+		Open file for editing
+		Separate runtime necessities
 	create zip tarball exe?
 
-fun stuff:
-	so many frickin components to make :) 
-		REVIEW POWERPACK demo components for non collision components
-	
 bugs: 
 	scene tree doesn't show selected object 
 		when obj is first added?
@@ -42,6 +34,12 @@ bugs:
 	crash - selecting an object while changing selectionwin to another view 
 
 later: 
+	figure out actual path to python executable
+	make multiple instances of same graphic appear offset
+		util.placevisible
+	option to open component,sprite,scene file. default save is project component file
+	new components should override old. project loaded last.
+		registration argument to ignore over-write
 	make mouse follow stop properly with 'stop_within'
 	set gname
 		demo of heads watching a ufo
