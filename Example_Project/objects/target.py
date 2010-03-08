@@ -5,7 +5,7 @@ from pug.all_components import Collision_Destroy
 
 ### target autocode ###
 class target(PigSprite):
-    image = 'art/pig.png'
+    image = 'art\\pig.png'
     layer = 'Background'
     def on_create(self):
         self.position.x = 656.0

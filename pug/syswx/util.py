@@ -1,5 +1,6 @@
 import traceback
 from sys import exc_info
+import os
 
 import wx
 from wx.lib.dialogs import ScrolledMessageDialog

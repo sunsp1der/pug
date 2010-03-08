@@ -1,7 +1,7 @@
 """Various ingame functions to make life easier when using pig"""
 
 import math
-import os, os.path
+import os
 import sys
 from time import sleep
 from inspect import isclass
@@ -16,12 +16,6 @@ from pig.PigDirector import PigDirector
 
 projectPath = os.getcwd()
 _revertScene = None
-
-def prettify_path( path):
-    "prettify_path( path)-> path with '/' as divider"
-    ret = path.replace('\\','/')
-    ret = ret.replace('//','/')
-    return ret
 
 def skip_deprecated_warnings():
     """skip_deprecated_warnings()
@@ -78,6 +72,7 @@ _game_settings file unless otherwise noted.
     useWorking: if True, use the __working__.py file when running the scene of 
                 the same name
 """
+    skip_deprecated_warnings()
     projectPath = fix_project_path(projectPath)
     if os.path.isfile(projectPath):
         projectPath = os.path.dirname(projectPath)
@@ -110,6 +105,13 @@ _game_settings file unless otherwise noted.
     set_opioid_window_position( position)
     Opioid2D.Display.init(resolution, units, title, fullscreen, icon)
     Opioid2D.Director.start_game = True
+    # Import Psyco if available
+    try:
+        import psyco
+        psyco.full()
+    except ImportError:
+        pass
+    
     Opioid2D.Director.run(initial_scene)
     
 def set_opioid_window_position( position):    
@@ -219,7 +221,6 @@ the objects folder."""
         return objDict[obj]
     return None
     
-
 def set_project_path( path):
     global projectPath
     path = os.path.realpath(path)

@@ -3,6 +3,7 @@ from inspect import CO_VARARGS as _CO_VARARGS, \
 from new import code as _code, function as _function, \
     instancemethod as _instancemethod
 import weakref
+from types import StringTypes as _StringTypes
 from types import MethodType as _MethodType
 
 from pug.code_storage.constants import _INDENT, _STORE_UNICODE, _PRETTIFY_FLOATS

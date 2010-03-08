@@ -1,13 +1,6 @@
 now:	
-	sound
-		Sound_On_Collision
-		Sound_On_Key
-		Sound_On_Click
-	behavior
-		Delete_On_Click
-	scene
-		sound
-			Sound_On_Enter
+	does close work when scene is playing?
+	audio filepicker still changing working directory?
 	finalize demos
 		test_components
 		simple shooting gallery game
@@ -23,6 +16,15 @@ now:
 	create zip tarball exe?
 
 bugs: 
+	sound just clicks!?
+		sound
+			Sound_On_Collision
+			Sound_On_Key
+		scene
+			simple docs
+				open text file in default program
+			sound
+				Sound_On_Enter
 	scene tree doesn't show selected object 
 		when obj is first added?
 		when scene is not shown during selection?

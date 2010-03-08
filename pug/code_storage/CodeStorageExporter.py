@@ -10,7 +10,7 @@ from pug.code_storage.constants import _INDENT, _STORE_UNICODE, _PRETTIFY_FLOATS
 from pug.component import ComponentObject, Component
 from pug.component.ComponentObject import ComponentSet
 from pug.gname import GnamedObject
-from pug.util import make_name_valid, get_type_name
+from pug.util import make_valid_attr_name, get_type_name
 import pug.all_components as all_components
 
 _DEBUG = False
@@ -374,7 +374,7 @@ Set up storageDict.  See CodeStorageExporter documentation for details.
         return storageDict
     
     def create_valid_storage_name(self, name):
-        storage_name = make_name_valid(name)
+        storage_name = make_valid_attr_name(name)
         if storage_name in self.storageNames:
             suffix = 2
             base_name = storage_name

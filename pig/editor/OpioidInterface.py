@@ -227,6 +227,13 @@ settingsObj: an object similar to the one below... if it is missing any default
                 time.sleep(0.1)
             self.cached[0] = True       
         self._initialized = True     
+        # Import Psyco if available
+        try:
+            import psyco
+            psyco.full()
+        except ImportError:
+            pass
+        
             
     def quit(self, query=True):
         """quit( query=True)
