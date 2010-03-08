@@ -18,7 +18,7 @@ from pug import code_export, CodeStorageExporter
 from pug.component import Component
 from pug.syswx.util import show_exception_dialog
 from pug.syswx.SelectionWindow import SelectionWindow
-from pug.util import make_name_valid
+from pug.util import make_valid_attr_name
 
 from pig.util import get_available_scenes, get_available_objects
 from pig.editor import EditorState
@@ -141,7 +141,7 @@ parentWindow: the parent window of name dialog. If not provided, the
             if name == cls.__name__ or name=='Sprite' or name=='PigSprite':
                 name = ''.join(['My',name])
                 break
-        name = make_name_valid(name)
+        name = make_valid_attr_name(name)
         while not objName:
             if dlg.ShowModal() == wx.ID_OK:
                 name = dlg.GetValue()
@@ -348,7 +348,7 @@ parentWindow: the parent window of name dialog. If not provided, the
         name = scene.__class__.__name__
         if name == 'PigScene' or name == 'Scene':
             name = 'MyScene'
-        name = make_name_valid(name)
+        name = make_valid_attr_name(name)
         name.capitalize()
         if _DEBUG: print "util: save_scene_as 1"
         parentWindow=None

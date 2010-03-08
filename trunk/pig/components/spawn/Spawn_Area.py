@@ -1,7 +1,6 @@
 import random
 import weakref
 from inspect import isclass
-from types import StringTypes
 
 from Opioid2D import *
 from Opioid2D.public.Node import Node
@@ -9,7 +8,7 @@ from Opioid2D.public.Node import Node
 from pug.component import *
 from pug import Dropdown
 
-from pig.util import get_available_objects, get_project_object
+from pig.util import get_project_object
 from pig.editor.agui import ObjectsDropdown
 
 class Spawn_Area(Component):
@@ -148,9 +147,9 @@ class Spawn_Area(Component):
             if self.add_velocity:
                 obj.velocity += velocity
             obj.do_register() # wait to activate object until start data set
-            if self.owner_callback and hasattr(owner,'callback'):
+            if self.owner_callback and hasattr(owner, self.owner_callback):
                 getattr(owner,'callback')(obj, self)
-            if self.obj_callback and hasattr(obj,'callback'):
+            if self.obj_callback and hasattr(obj, self.obj_callback):
                 getattr(obj,'callback')(self)
             self.spawn_count += 1
             spawned_objects.append(obj)

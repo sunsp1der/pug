@@ -8,9 +8,8 @@ from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.syswx.attributeguis import *
 from pug.code_storage import add_subclass_skip_attributes
 from pug.code_storage.constants import _INDENT
-from pug.util import make_name_valid
+from pug.util import make_valid_attr_name, prettify_path
 
-from pig.util import prettify_path
 from pig.PigDirector import PigDirector
 from pig.editor.util import get_available_layers, save_object, \
                                 exporter_cleanup
@@ -50,7 +49,7 @@ Opioid2d Sprite with features for use with pug"""
                                             or name == 'PigSprite':
                         name = ''.join(['My',name])    
                         break            
-                name = make_name_valid(name)
+                name = make_valid_attr_name(name)
                 self.gname = name
             self._archetype = True
         elif TF == False:
@@ -229,7 +228,7 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
         if storageDict['as_class']:
             if not dummy or dummy.image_file != self.image_file:
                 custom_code += [baseIndent, _INDENT, 'image = ', 
-                                prettify_path(repr(self.image_file)),'\n']
+                                repr(prettify_path(self.image_file)),'\n']
             if not dummy or dummy.layer_name != self.layer_name:
                 custom_code += [baseIndent, _INDENT, 'layer = ', 
                                 repr(self.layer_name),'\n']
@@ -241,7 +240,7 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
             name = storage_name
             if not dummy or dummy.image_file != self.image_file:
                 custom_code += [baseIndent, name, '.image = ', 
-                                    prettify_path(repr(self.image_file)),'\n']
+                                    repr(prettify_path(self.image_file)),'\n']
             if not dummy or dummy.layer_name != self.layer_name:
                 custom_code += [baseIndent, name, '.layer = ', 
                                     repr(self.layer_name),'\n']
@@ -319,7 +318,7 @@ _spritePugview = {
         ['rotation'],
         ['scale'],
         [' Image', pug.Label],
-        ['image_file', pug.ImageBrowser],
+        ['image_file', pug.ImageBrowser, {'subfolder':'art'}],
         ['color'],
         ['lighting'],
     #        ['', Label, {'label':' Groups'}],

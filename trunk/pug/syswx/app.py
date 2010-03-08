@@ -11,7 +11,7 @@ from inspect import getsourcefile
 
 import wx
 
-from pug.util import make_name_valid
+from pug.util import make_valid_attr_name
 from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.syswx.util import show_exception_dialog
 from pug.syswx.pugframe import PugFrame
@@ -464,7 +464,7 @@ settingsObj: a class with values like those created in create_frame_settings.
         self.settings = settingsObj
             
     def getrect_setting_name(self, frame):
-        return make_name_valid(''.join([_RECTPREFIX,frame.Name]))
+        return make_valid_attr_name(''.join([_RECTPREFIX,frame.Name]))
             
     def create_frame_settings(self, settingsObj=None):
         """create_frame_settings(settingsObj=None)->setting data class

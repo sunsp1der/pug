@@ -15,6 +15,7 @@ from pug.syswx.attributeguis.subobject import SubObject
 from pug.syswx.attributeguis.components import Components
 from pug.syswx.attributeguis.dropdown import Dropdown
 from pug.syswx.attributeguis.image_browser import ImageBrowser
+from pug.syswx.attributeguis.filename import Filename
 from pug.syswx.attributeguis.play_buttons import PlayButtons
 from pug.syswx.attributeguis.gname_dropdown import GnameDropdown
 from pug.syswx.attributeguis.listedit import ListEdit

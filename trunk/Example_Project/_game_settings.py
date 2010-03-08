@@ -1,5 +1,6 @@
 ### game_settings autocode ###
 class game_settings():
+    defaultTitle = 'Example_Project'
     fullscreen = False
     initial_scene = 'test'
     rect_opioid_window = (25, 25, 800, 600)

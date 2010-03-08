@@ -15,13 +15,20 @@ _IMAGEPATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Images")
 def get_image_path(filename):
     return os.path.join (_IMAGEPATH, filename)
 
-def make_name_valid(name):
+def make_valid_attr_name(name):
     name = re.sub(r'^\d*','',name) # remove digits from front
     name = re.sub(r'\W','_',name) # replace non alpha numerics with _
     return name
 
+def prettify_path( path):
+    "prettify_path( path)-> normalized path with os separator as divider"
+    ret = os.path.normpath(path)
+#    ret = ret.replace('\\', os.sep)
+#    ret = ret.replace('//', os.sep)
+    return ret
+
 def check_name_valid(name):
-    validname = make_name_valid(name)
+    validname = make_valid_attr_name(name)
     return name == validname
 
 _cache = {}
