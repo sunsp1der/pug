@@ -1,6 +1,7 @@
 import pygame
-import os
 
+# this needs to be imported before pygame is initialized
+pygame.mixer.pre_init(22050,-16,2,1024)
 SoundDict = {}
 
 def get_sound( filename, tag=""):
@@ -22,9 +23,8 @@ def load_sound(name):
         class NoneSound:
             def play(self): pass
         return NoneSound()
-    fullname = os.path.join('data', name)
     try:
-        sound = pygame.mixer.Sound(fullname)
+        sound = pygame.mixer.Sound(name)
     except pygame.error, message:
         print 'Cannot load sound:', name
         raise SystemExit, message

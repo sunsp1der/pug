@@ -30,7 +30,8 @@ Uses a browser dialog to facilitate picking a graphics file
     def __init__(self, attribute, window, aguidata={}, **kwargs):
         #attributes
         self.subfolder = aguidata.get('subfolder',"")
-        self.fullpath = aguidata.get('fullpath', False)                        
+        self.fullpath = aguidata.get('fullpath', False)
+        self.wildcards = aguidata.get('wildcards',"All files (*.*)|*.*")                        
         SPACING = 4 # for button
         
         # control
@@ -66,17 +67,13 @@ Uses a browser dialog to facilitate picking a graphics file
             folder,file = os.path.split(file)
         else:
             folder = os.path.join(wx.GetApp().projectFolder, self.subfolder)
-            file = ""
-        wildcard = "wav file (*.wav)|*.wav|"     \
-                   "mp3 file (*.mp3)|*.mp3|" \
-                   "midi files (*.mid)|*.mid|" \
-                   "All files (*.*)|*.*"            
+            file = ""            
         dlg = wx.FileDialog(
             self.control, 
             message="Choose a file",
             defaultDir=folder,
             defaultFile=file,
-            wildcard=wildcard,
+            wildcard=self.wildcards,
             style=wx.OPEN | wx.CHANGE_DIR
             )
         if dlg.ShowModal() == wx.ID_OK:

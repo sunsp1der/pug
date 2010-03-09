@@ -273,6 +273,7 @@ key_down. In the future, maybe key_hold.
                     if node.archetype:
                         node.delete()
                 Opioid2D.Director.game_started = True                        
+                self.on_start()
                 self.all_nodes_callback( 'on_added_to_scene', self)        
                 self.all_nodes_callback( 'on_game_start')
             else:
@@ -280,6 +281,10 @@ key_down. In the future, maybe key_hold.
                 return
         self.all_nodes_callback( 'on_scene_start', self)             
         self.started = True
+        
+    def on_start(self):
+        """Callback hook for when scene starts playing"""
+        pass
     
     def stop(self):
         """Stop a level that is playing"""
@@ -549,7 +554,7 @@ Update the PigScene's node tracking dict for node. Possible commands: 'Delete'
             base_code = base_code.splitlines()[0:-1]
             base_code.append('\n')
         else:
-            base_code = [base_code]
+            base_code = [base_code +'\n']
         #add layers line
         layers = get_available_layers()
         if layers != ["Background"]:

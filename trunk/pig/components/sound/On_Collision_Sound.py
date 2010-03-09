@@ -3,9 +3,10 @@ from Opioid2D.public.Node import Node
 from pug.component import *
 
 from pig.audio import get_sound
-from pig.editor.agui import SoundFile
+from pig.components import Collision_Callback
+from pig.editor.agui import SoundFile 
 
-class On_Destroy_Sound( Component):
+class On_Collision_Sound( Collision_Callback):
     """Owner plays a sound when destroyed"""
     # component_info
     _set = 'pig'
@@ -14,7 +15,7 @@ class On_Destroy_Sound( Component):
     # attributes:   
     _field_list = [
         ["sound", SoundFile, {'doc':"The sound to play"}]
-        ]
+        ] + Collision_Callback._field_list 
     
     sound = None
     
@@ -24,9 +25,9 @@ class On_Destroy_Sound( Component):
         self.soundObject = get_sound( self.sound)
 
     @component_method
-    def on_destroy(self):
-        "Play the sound when object is destroyed"
+    def on_collision(self, toSprite, fromSprite, toGroup, fromGroup):
+        "Play the sound when object collides"
         self.soundObject.play()
     
-register_component( On_Destroy_Sound)
+register_component( On_Collision_Sound)
     

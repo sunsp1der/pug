@@ -1,11 +1,8 @@
-import pygame
-
 from Opioid2D.public.Node import Node
 
 from pug.component import *
-from pug import Filename
 
-from pig.editor.agui import KeyDropdown
+from pig.editor.agui import KeyDropdown, SoundFile
 from pig.audio import get_sound
 from pig.keyboard import keys
 from pig import PigDirector
@@ -19,7 +16,7 @@ class On_Key_Sound( Component):
     # attributes:   
     _field_list = [
         ["key", KeyDropdown, {'doc':"The key that triggers the sound"}],
-        ["sound", Filename, {'doc':"The sound to play",'subfolder':'sounds'}]
+        ["sound", SoundFile, {'doc':"The sound to play"}]
         ]
     
     key = keys["S"]
@@ -28,7 +25,7 @@ class On_Key_Sound( Component):
     
     @component_method
     def on_added_to_scene(self, scene):
-        "Get the sound object"
+        "Get the sound object and set it to play when key is pressed"
         self.soundObject = get_sound( self.sound)
         self.kinfo = scene.register_key_down(self.key, self.play)
 
@@ -37,7 +34,7 @@ class On_Key_Sound( Component):
 
     @component_method
     def on_destroy(self):
-        "Play the sound when object is destroyed"
+        "Unregister key"
         PigDirector.scene.unregister_key(self.kinfo)
     
 register_component( On_Key_Sound)

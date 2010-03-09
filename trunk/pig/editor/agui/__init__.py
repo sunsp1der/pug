@@ -5,3 +5,4 @@ from pig.editor.agui.scene_nodes import SceneNodes
 from pig.editor.agui.scene_layers import SceneLayers
 from pig.editor.agui.key_dropdown import KeyDropdown
 from pig.editor.agui.objects_dropdown import ObjectsDropdown
+from pig.editor.agui.sound_file import SoundFile

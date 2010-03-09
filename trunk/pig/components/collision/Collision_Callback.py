@@ -19,7 +19,7 @@ from pig.editor.agui.group_dropdown import GroupDropdown, register_group
 class Collision_Callback( Component):
     """Object's "on_collision" method is called when it collides
     
-arguments: on_collision( toSprite, fromSprite, toGroup, fromGroup)
+arguments: on_collision( toSprite, fromSprite, toGroup, my_group)
 """
     #component_info
     _set = 'pig'
@@ -27,26 +27,27 @@ arguments: on_collision( toSprite, fromSprite, toGroup, fromGroup)
     _class_list = [Sprite]
     # attributes: ['name', 'doc', {extra info}]
     _field_list = [
-            ['withGroup', GroupDropdown, {'doc':"Group to collide with"}],
-            ['fromGroup', GroupDropdown, 
-                        {'doc':"Group to join and use for collision tests"}]
+            ['with_group', GroupDropdown, {'doc':"Group to collide with"}],
+            ['my_group', GroupDropdown, 
+                    {'doc':
+                    "The group this object joins and uses for collision tests"}]
             ]
     # defaults
-    _withGroup = "all_colliders"
-    _fromGroup = "all_colliders"
+    _with_group = "all_colliders"
+    _my_group = "all_colliders"
     
     @component_method
     def on_added_to_scene(self, scene):
         "Register for object.on_collision callback when object added to scene"
-        self.owner.join_group( self._fromGroup)
+        self.owner.join_group( self._my_group)
         PigDirector.scene.register_collision_callback( self.owner, 
                                                     self.owner.on_collision,
-                                                    self.withGroup,
-                                                    self.fromGroup,
+                                                    self.with_group,
+                                                    self.my_group,
                                                     ignore_duplicate=True)
         
     @component_method
-    def on_collision(self, toSprite, fromSprite, toGroup, fromGroup):
+    def on_collision(self, toSprite, fromSprite, toGroup, my_group):
         "This component doesn't do anything in the on_collision callback"
         pass
         
@@ -58,21 +59,21 @@ arguments: on_collision( toSprite, fromSprite, toGroup, fromGroup)
     def __del__(self):
         "__del__(): when component is deleted, unregister groups from gui"
         if self.ref():
-            register_group( (self.ref, "withGroup"), None)        
-            register_group( (self.ref, "fromGroup"), None)        
+            register_group( (self.ref, "with_group"), None)        
+            register_group( (self.ref, "my_group"), None)        
         
-    def get_withGroup(self):
-        return self._withGroup
-    def set_withGroup(self, group):
-        register_group( (self.ref, "withGroup"), group)        
-        self._withGroup = group
-    withGroup = property (get_withGroup, set_withGroup)
+    def get_with_group(self):
+        return self._with_group
+    def set_with_group(self, group):
+        register_group( (self.ref, "with_group"), group)        
+        self._with_group = group
+    with_group = property (get_with_group, set_with_group)
 
-    def get_fromGroup(self):
-        return self._fromGroup
-    def set_fromGroup(self, group):
-        register_group( (self.ref, "fromGroup"), group)        
-        self._fromGroup = group
-    fromGroup = property (get_fromGroup, set_fromGroup)
+    def get_my_group(self):
+        return self._my_group
+    def set_my_group(self, group):
+        register_group( (self.ref, "my_group"), group)        
+        self._my_group = group
+    my_group = property (get_my_group, set_my_group)
     
 register_component( Collision_Callback)

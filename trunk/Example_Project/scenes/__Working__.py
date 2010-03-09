@@ -4,12 +4,18 @@
 from objects.target import target
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
-from pug.all_components import Forward_Motion, Collision_Callback,\
-    Key_Drive_Controls, Key_Spawn, On_Key_Sound, On_Destroy_Sound
+from pug.all_components import Open_File_On_Start, Forward_Motion,\
+    Collision_Callback, Key_Drive_Controls, Key_Spawn, On_Key_Sound,\
+    On_Destroy_Sound
 ### End import autocode ###
 
 ### test autocode ###
 class test(PigScene):
+    def __init__(self, *args, **kwargs):
+        PigScene.__init__(self, *args, **kwargs)
+        self.components.add( Open_File_On_Start(
+                file='scenes\\fakeit.txt') )
+
     def on_enter(self):
         # Archetypes
         target_archetype = target(gname='target')
@@ -23,8 +29,7 @@ class test(PigScene):
         pigsprite_instance.position.y = 145.0
         pigsprite_instance.components.add( Forward_Motion(
                 speed=-150) )
-        pigsprite_instance.components.add( Collision_Callback(
-                withGroup='arp') )
+        pigsprite_instance.components.add( Collision_Callback() )
 
         pigsprite_instance_2 = PigSprite()
         pigsprite_instance_2.image = 'art\\ufo2.png'
@@ -36,7 +41,7 @@ class test(PigScene):
                 key=1003,
                 object='Growstar') )
         pigsprite_instance_2.components.add( On_Key_Sound(
-                sound='sounds\\pig.mp3') )
+                sound='sounds\\pickup.wav') )
 
         target_instance = target()
         target_instance.image = 'art\\explosion2.png'

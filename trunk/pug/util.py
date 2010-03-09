@@ -12,6 +12,9 @@ import inspect
 _DEBUG = False
 
 _IMAGEPATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Images")
+
+from start_file import start_file
+
 def get_image_path(filename):
     return os.path.join (_IMAGEPATH, filename)
 
