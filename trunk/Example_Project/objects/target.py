@@ -10,6 +10,5 @@ class target(PigSprite):
     def on_create(self):
         self.position.x = 656.0
         self.position.y = 432.0
-        self.components.add( Collision_Destroy(
-                fromGroup='arp') )
+        self.components.add( Collision_Destroy() )
 ### End target autocode ###
