@@ -82,8 +82,10 @@ projectFolder: where file menus start at.  Defaults to current working dir.
         
         
     def set_project_folder(self, projectFolder=None):
-        if projectFolder:
-            self.projectFolder = os.path.dirname(projectFolder)
+        if os.path.isfile(projectFolder):
+            projectFolder = os.path.dirname(projectFolder)
+        if projectFolder and os.path.isdir(projectFolder):
+            self.projectFolder = projectFolder
         else:
             self.projectFolder = os.getcwd()
                    

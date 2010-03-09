@@ -1,16 +1,15 @@
 from Opioid2D import Director
 
-from pig import PigScene
-
 from pug.component import *
 
+from pig import PigScene
 from pig.keyboard import *
 
 class Utility_Keys( Component):
     """Add some basic utility keys to the scene"""
     # component_info
     _set = 'pig'
-    _type = 'controls'
+    _type = 'utilities'
     _class_list = [PigScene]
     # attributes: ['name', 'doc', {extra info}]
     _field_list = [
@@ -20,7 +19,7 @@ class Utility_Keys( Component):
     restart_ctrl_r = True
     
     @component_method
-    def on_enter(self):
+    def on_start(self):
         self.k_info = self.owner.register_key_down( (keymods["CTRL"],keys["R"]),
                                                     self.restart)
         

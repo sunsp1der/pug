@@ -81,7 +81,7 @@ scene: the scene to load initially
         time.sleep(1)
         
         pug.App(projectObject=self, 
-                      projectFolder=projectPath,
+                      projectFolder=get_project_path(),
                       projectObjectName=self.project_name)
         self.Director.realquit()
 
@@ -485,7 +485,9 @@ doSave: save working copy first
                        wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
                 continue_shutdown = dlg.ShowModal()
                 if continue_shutdown == wx.ID_NO:
-                    return False               
+                    return False  
+            else:
+                self.set_scene(self.scene.__class__.__name__, True)
         #self.reload_scene()
         pug.set_default_pugview("Component", _dataMethodPugview)
 #        app = wx.GetApp()
@@ -514,7 +516,7 @@ disk.
 Run the scene being editted in a new process.
 """
         try:
-            if doSave:
+            if doSave and not self.Director.game_started:
                 saved = self.save_using_working_scene()
                 if not saved:
                     dlg = wx.MessageDialog( wx.GetApp().projectFrame,
@@ -552,7 +554,10 @@ Add an object to the scene
         node = objectclass()
         if objectclass == PigSprite and type(self.scene.state) == EditorState:
             # set a default image for basic sprite
-            node.set_image("art/pig.png")
+            try:
+                node.set_image("art/pig.png")
+            except:
+                pass
             node.position = \
                     Opioid2D.Vector(*Opioid2D.Display.get_view_size()) * 0.5
             node.layer = "Background"
