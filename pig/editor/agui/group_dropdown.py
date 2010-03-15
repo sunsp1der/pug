@@ -25,7 +25,7 @@ For kwargs optional arguments, see the Base attribute GUI
         Dropdown.setup(self, attribute, window, aguidata)
 
 group_dict = {}
-DEFAULT_GROUP = "all_colliders"
+DEFAULT_GROUP = "colliders"
 
 def register_group( tag, group):
     """register_group( tag, group)

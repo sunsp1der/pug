@@ -15,19 +15,18 @@ class Life_Zone(Component):
             ['set_to_screen', 
 """Set zone to screen size plus owner's image size 
 when added to scene. Other settings ignored."""],
-            ['x', "Left origin of zone"],
-            ['y', "Top origin of zone"],
+            ['x', "Left edge of zone"],
+            ['y', "Top edge of zone"],
             ['width', "Width of zone"],
             ['height', "Height of zone"],
-            ['xx', "Right corner of zone (ignore width)"],
-            ['yy', "Bottom corner of zone (ignore height)"],
+            ['xx', "Right edge of zone (ignore width)"],
+            ['yy', "Bottom edge of zone (ignore height)"],
             ['radius', 
              "Zone is circle of this radius from origin (ignore width/height)"],
             ['direction', "Start direction of semi-circular zone arc"],
             ['arc', "Arc of semi-circular zone"],
-            ['group_name', 
-"""Each different zone creates a scene group. 
-None: automatically generated name,"""]
+            ['group_name', "Each different zone creates a scene group.\n"+
+                            "None: automatically generated name,"]
             ]
     #defaults
     set_to_screen = True
@@ -49,7 +48,7 @@ None: automatically generated name,"""]
     @component_method
     def on_added_to_scene(self, scene):
         """Start timer when object is added to scene"""
-        self.set_zone()
+        self.owner.do(Opioid2D.CallFunc( self.set_zone))
         
     @component_method
     def on_exit_scene(self, scene):
@@ -60,8 +59,7 @@ None: automatically generated name,"""]
         owner = self.owner
         if self.set_to_screen:
             if owner.image:
-                radius = math.hypot(owner.image.height, 
-                                    owner.image.width) * 0.5
+                radius = math.hypot(owner.rect.height, owner.rect.width) * 0.5
             else:
                 radius = 0
             self.x = 0 - radius

@@ -25,6 +25,8 @@ bugs:
 	crash - selecting an object while changing selectionwin to another view 
 
 later: 
+	drag n drop
+	allow lists of categories for components... file in multiple places
 	figure out actual path to python executable
 	make multiple instances of same graphic appear offset
 		util.placevisible

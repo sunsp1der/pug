@@ -11,7 +11,7 @@ from pug import Dropdown
 from pig.util import get_project_object
 from pig.editor.agui import ObjectsDropdown
 
-class Spawn_Area(Component):
+class Spawner(Component):
     """Owner spawns other objects"""
     # component_info
     _set = 'pig'
@@ -105,6 +105,14 @@ class Spawn_Area(Component):
         velocity = owner.velocity
         scale = owner.scale
         for i in range(count):
+            if self.max_objects_spawned > -1 and \
+                    self.spawn_count >= self.max_objects_spawned:
+                if self.delete_when_done:
+                    owner.do(Delete())
+                break
+            if self.max_spawns_in_scene > 0 and \
+                    len(self.spawned_objects) >= self.max_spawns_in_scene:
+                break            
             obj = self.spawn_class( register=False)
             self.spawned_objects[self.spawn_count] = obj
             x_pos = 0
@@ -153,14 +161,6 @@ class Spawn_Area(Component):
                 getattr(obj,'callback')(self)
             self.spawn_count += 1
             spawned_objects.append(obj)
-            if self.max_objects_spawned > -1 and \
-                    self.spawn_count >= self.max_objects_spawned:
-                if self.delete_when_done:
-                    owner.do(Delete())
-                break
-            if self.max_spawns_in_scene > 0 and \
-                    len(self.spawned_objects) >= self.max_spawns_in_scene:
-                break            
         return spawned_objects               
             
     def get_next_spawn_time(self):
@@ -187,4 +187,4 @@ scheduled unless max_objects_spawned has been reached. """
     def stop_spawning(self):
         self.action.abort()
         
-register_component( Spawn_Area)
+register_component( Spawner)
