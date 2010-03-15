@@ -3,11 +3,11 @@ from objects.Bullet import Bullet
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
 from pug.all_components import Key_Drive_Controls, Key_Spawn,\
-    Collision_Destroy, On_Collision_Sound
+    Collision_Destroy, Join_Group
 ### End import autocode ###
 
-### Shooting_Gallery autocode ###
-class Shooting_Gallery(PigScene):
+### ShootingGallery autocode ###
+class ShootingGallery(PigScene):
     def on_enter(self):
         # Archetypes
         Bullet_archetype = Bullet(gname='Bullet')
@@ -39,8 +39,6 @@ class Shooting_Gallery(PigScene):
         pigsprite_instance.components.add( Collision_Destroy(
                 with_group='bullet',
                 my_group='target') )
-        pigsprite_instance.components.add( On_Collision_Sound(
-                sound='sounds\\pickup.wav',
-                with_group='org',
-                my_group='chig') )
-### End Shooting_Gallery autocode ###
+        pigsprite_instance.components.add( Join_Group(
+                group='target') )
+### End ShootingGallery autocode ###

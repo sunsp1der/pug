@@ -6,10 +6,10 @@ from Opioid2D.public.Node import Node
 
 from pig.keyboard import keys
 from pig.editor.agui import ObjectsDropdown, KeyDropdown
-from pig.components.spawn.Spawn_Area import Spawn_Area
+from pig.components.spawn.Spawner import Spawner
 from pig.PigDirector import PigDirector
 
-class Key_Spawn( Spawn_Area):
+class Key_Spawn( Spawner):
     """Owner spawns other objects when destroyed"""
     # component_info
     _set = 'pig'

@@ -3,7 +3,7 @@
 ### import autocode ###
 from objects.PurpleFacer import PurpleFacer
 from objects.UpFO import UpFO
-from pug.all_components import Spawn_Area
+from pug.all_components import Spawner
 from pig.PigScene import PigScene
 ### End import autocode ###
 
@@ -22,13 +22,13 @@ class AimedSpawn_Test(PigScene):
         purplefacer_instance.image = 'art/cannon.png'
         purplefacer_instance.position.x = 432.0
         purplefacer_instance.position.y = 459.0
-        purplefacer_instance.components.add( Spawn_Area(
+        purplefacer_instance.components.add( Spawner(
                 object='UpFO',
                 spawn_interval=0.3,
                 spawn_variance=0.0,
                 spawn_location='right',
                 spawn_offset=(1, 0)) )
-        purplefacer_instance.components.add( Spawn_Area(
+        purplefacer_instance.components.add( Spawner(
                 object='UpFO',
                 spawn_interval=0.3,
                 spawn_variance=0.0,

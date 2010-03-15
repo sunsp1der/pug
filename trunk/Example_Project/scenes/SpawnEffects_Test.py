@@ -1,7 +1,7 @@
 """SpawnEffects_Test.py"""
 
 ### import autocode ###
-from pug.all_components import Grow_Shrink, Self_Destruct, Spawn_Area
+from pug.all_components import Grow_Shrink, Self_Destruct, Spawner
 from objects.Fadestar import Fadestar
 from objects.Growstar import GrowStar
 from objects.YellowPug import YellowPug
@@ -27,11 +27,11 @@ class SpawnEffects_Test(PigScene):
         yellowpug_instance.position.y = 313.0
         yellowpug_instance.scale.x = 5.0
         yellowpug_instance.scale.y = 5.0
-        yellowpug_instance.components.add( Spawn_Area(
+        yellowpug_instance.components.add( Spawner(
                 object='Fadestar',
                 spawn_interval=0.5,
                 spawn_variance=0.29999999999999999) )
-        yellowpug_instance.components.add( Spawn_Area(
+        yellowpug_instance.components.add( Spawner(
                 object='Growstar',
                 spawn_interval=0.5,
                 spawn_variance=0.29999999999999999) )

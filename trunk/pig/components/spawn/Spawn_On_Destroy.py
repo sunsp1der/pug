@@ -5,9 +5,9 @@ from pug.component import component_method, register_component
 from Opioid2D.public.Node import Node
 
 from pig.editor.agui import ObjectsDropdown
-from pig.components import Spawn_Area
+from pig.components import Spawner
 
-class Spawn_On_Destroy( Spawn_Area):
+class Spawn_On_Destroy( Spawner):
     """Owner spawns other objects when destroyed"""
     # component_info
     _set = 'pig'
@@ -34,7 +34,7 @@ class Spawn_On_Destroy( Spawn_Area):
 
     @component_method
     def on_added_to_scene(self, scene):
-        "Over-ride Spawn_Area's on_added_to_scene... don't do anything."
+        "Over-ride Spawner's on_added_to_scene... don't do anything."
         pass
 
     @component_method

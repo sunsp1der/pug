@@ -17,7 +17,7 @@ class Join_Group( Component):
             ['group', GroupDropdown, {'doc':"Group to join"}]
             ]
     # defaults
-    _group = "all_colliders"
+    _group = "colliders"
 
     @component_method
     def on_added_to_scene(self, scene):
@@ -29,7 +29,10 @@ class Join_Group( Component):
         Component.__init__(self,  *args, **kwargs)
 
     def __del__(self):
-        register_group( (self.ref, "group"), None)
+        try:
+            register_group( (self.ref, "group"), None)
+        except:
+            pass
 
     def get_group(self):
         return self._group

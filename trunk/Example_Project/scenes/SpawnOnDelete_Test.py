@@ -3,7 +3,7 @@
 ### import autocode ###
 from objects.ExplodeParticle import ExplodeParticle
 from objects.StarBomb import StarBomb
-from pug.all_components import Spawn_Area
+from pug.all_components import Spawner
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
 ### End import autocode ###
@@ -25,7 +25,7 @@ class SpawnOnDelete_Test(PigScene):
         PigSprite_instance.layer = 'Background'
         PigSprite_instance.position.x = 401.0
         PigSprite_instance.position.y = 551.0
-        PigSprite_instance.components.add( Spawn_Area(
+        PigSprite_instance.components.add( Spawner(
                 object='StarBomb',
                 spawn_interval=3.0,
                 spawn_location='center',

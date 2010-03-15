@@ -19,7 +19,7 @@ from pig.components.physics.Set_Motion import Set_Motion
 from pig.components.physics.Forward_Motion import Forward_Motion
 from pig.components.physics.Random_Motion import Random_Motion
 from pig.components.settings.Set_Gname import Set_Gname
-from pig.components.spawn.Spawn_Area import Spawn_Area
+from pig.components.spawn.Spawner import Spawner
 from pig.components.spawn.Spawn_On_Destroy import Spawn_On_Destroy
 from pig.components.sound.On_Destroy_Sound import On_Destroy_Sound
 from pig.components.sound.On_Key_Sound import On_Key_Sound

@@ -360,7 +360,7 @@ parentWindow: the parent window of name dialog. If not provided, the
         if _DEBUG: print "util: save_scene_as 2"
         while not sceneName:
             if dlg.ShowModal() == wx.ID_OK:
-                name = str(dlg.GetValue())
+                name = make_valid_attr_name(str(dlg.GetValue()))
                 if name == 'PigScene' or name == 'Scene':
                     errorDlg = wx.MessageDialog( dlg, 
                            "You can't use the names 'PigScene' or 'Scene'",

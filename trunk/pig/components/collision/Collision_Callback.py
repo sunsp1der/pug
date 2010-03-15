@@ -33,8 +33,8 @@ arguments: on_collision( toSprite, fromSprite, toGroup, my_group)
                     "The group this object joins and uses for collision tests"}]
             ]
     # defaults
-    _with_group = "all_colliders"
-    _my_group = "all_colliders"
+    _with_group = "colliders"
+    _my_group = "colliders"
     
     @component_method
     def on_added_to_scene(self, scene):

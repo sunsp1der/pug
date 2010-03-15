@@ -1,12 +1,16 @@
 import os.path
 from types import StringTypes
 import time
-from weakref import WeakKeyDictionary
+from weakref import WeakKeyDictionary, proxy
 import warnings
+import sys
+import traceback
 
 from pygame.locals import KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP
 
 import Opioid2D
+from Opioid2D.internal.objectmgr import ObjectManager
+from Opioid2D.public.Scene import SceneCallbacks
 
 import pug
 from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
@@ -17,7 +21,21 @@ from pig.editor.agui import SceneNodes, SceneLayers
 from pig.editor.util import get_available_layers, save_object
 from pig.keyboard import keys, keymods
 
-_DEBUG = False
+_DEBUG = False 
+
+def OnCollision(self, group1, group2, sprite1, sprite2):
+    """Override so that the collision callback sig is:
+callback( toSprite, fromSprite, toGroup, fromGroup)
+"""
+    try:
+        sprite1 = ObjectManager.c2py(sprite1)
+        sprite2 = ObjectManager.c2py(sprite2)
+        func = self.scene._collision_handlers[group1,group2]
+        func(sprite1, sprite2, group1, group2)
+    except:
+        traceback.print_exc(file=sys.stdout)
+        raise
+SceneCallbacks.OnCollision = OnCollision    
 
 class PigScene( Opioid2D.Scene, pug.BaseObject):
     """PigScene - Opioid2d Scene with features for use with pug"""
@@ -40,17 +58,17 @@ class PigScene( Opioid2D.Scene, pug.BaseObject):
         pass
                     
     def register_collision_callback( self, sprite, fn, 
-                                     withGroup="all_colliders", 
-                                     spriteGroup="all_colliders",
+                                     toGroup="colliders",
+                                     fromGroup="colliders", 
                                      ignore_duplicate=False):
-        """register_collision_callback(sprite, fn, withGroup, spriteGroup)->Add
+        """register_collision_callback(sprite, fn, toGroup, fromGroup)->Add
         
-sprite: when this sprite collides with spriteGroup, fn will be called 
+sprite: when this sprite collides with toGroup, fn will be called 
 fn: the function to be called with args: (sprite, sprite-it-hit)
-withGroup: when 'sprite' collides with this group, fn will be called. Defaults 
-    to 'all_colliders' if not specified.
-spriteGroup: collisions will be detected by checking withGroup sprites vs
-    spriteGroup sprites. defaults to "all_colliders" if not specified. 'sprite' 
+fromGroup: when 'sprite' collides with this group, fn will be called. Defaults 
+    to 'colliders' if not specified.
+toGroup: collisions will be detected by checking fromGroup sprites vs
+    toGroup sprites. defaults to "colliders" if not specified. 'sprite' 
     will automatically be added to this group.
 ignore_duplicate: if fn is already in the list of callbacks for this 
     sprite/group combination, do not add a second call
@@ -58,13 +76,13 @@ ignore_duplicate: if fn is already in the list of callbacks for this
 return value: True if the method was added, False if not (usually because it was
 a duplicate and ignore_duplicate was set to True)
 
-Designing withGroup and spriteGroup efficiently will improve program 
+Designing fromGroup and toGroup efficiently will improve program 
 performance. Avoid setting up situations where unnecessary collisions tests are
 made.  
 """     
-        sprite.join_group(spriteGroup)
+        sprite.join_group(toGroup)
         idx1 = sprite
-        idx2 = (withGroup, spriteGroup)
+        idx2 = (toGroup, fromGroup)
         sprite_dict = self._collision_callback_dict.get(idx1)
         if not sprite_dict:
             self._collision_callback_dict[idx1] = {idx2:[fn]}
@@ -76,33 +94,53 @@ made.
                 if ignore_duplicate and (fn in callback_list):
                     return False
                 callback_list.append(fn)
-        def collision_method( toSprite, fromSprite):
-            try:
-                callback_list = self._collision_callback_dict[toSprite]\
-                                                        [idx2]
-            except:
-                pass
-            for callback in callback_list:
-                callback( toSprite, fromSprite, spriteGroup, withGroup)                    
-        self._collision_handlers[spriteGroup, withGroup] = collision_method
-        self._cObj.EnableCollisions(spriteGroup, withGroup)
+        self._collision_handlers[toGroup, fromGroup] = self.collide_callbacker
+        self._cObj.EnableCollisions(toGroup, fromGroup)
         return True
-    
-    def unregister_collision_callback(self, sprite, withGroup=None, 
-                                                        spriteGroup=None):
-        """unregister_collision_callback( sprite, withGroup, spriteGroup)
+
+    def collide_callbacker( self, toSprite, fromSprite, toGroup, fromGroup,
+                              check_reverse=True):
+        """collision_callbacker(...)
+        
+args: (toSprite, fromSprite, toGroup, fromGroup, check_reverse)
+toSprite: sprite that collided
+fromSprite: sprite it collided with
+toGroup: group that toSprite was checked as
+fromGroup: group that fromSprite was checked as
+check_reverse: if True, automatically checks the reverse collision. That is,
+    collision_callbacker( fromSprite, toSprite, fromGroup, toGroup)
+
+This method calls back individual sprites that have registered for collision
+callbacks using register_collision_callback
+"""        
+        collision_dict = self._collision_callback_dict
+        try:
+            callback_list = collision_dict[toSprite][(toGroup, fromGroup)]
+        except:
+            pass
+        else:
+            for callback in callback_list:
+                callback( toSprite, fromSprite, toGroup, fromGroup)
+        # we only get one callback, so check if fromSprite needs a call
+        # this is slow and could possibly be improved
+        if check_reverse:
+            self.collide_callbacker( fromSprite, toSprite, fromGroup, toGroup, 
+                                   False)
+        
+    def unregister_collision_callback(self, sprite, toGroup=None,fromGroup=None): 
+        """unregister_collision_callback( sprite, toGroup, fromGroup)
         
 sprite: the sprite to unregister
-withgroup: If specified, only collisions with this group will be unregistered.
-spritegroup: If specified, only collisions as a member of this group will be
+toGroup: If specified, only collisions as a member of this group will be
     unregistered
+fromGroup: If specified, only collisions with this group will be unregistered.
 """
         sprite_dict = self._collision_callback_dict.get(sprite, {})
-        if withGroup or spriteGroup:
+        if fromGroup or toGroup:
             keys = sprite_dict.keys()
             for key in keys():
-                if (withGroup is None or key[0]==withGroup) and \
-                        (spriteGroup is None or key[1]==spriteGroup):
+                if (fromGroup is None or key[0]==fromGroup) and \
+                        (toGroup is None or key[1]==toGroup):
                     sprite_dict.pop(key)
         else:
             self._collision_callback_dict[sprite]={}
