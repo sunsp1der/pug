@@ -83,28 +83,31 @@ project_path: the main folder of the projet to open
 force: if True, don't ask the user if they want to save current file
 quit: if True, quit the current project after opening new one. 
 """
-    
     interface = wx.GetApp().get_project_object()
-    if force or interface._pre_quit_func():
-        if not project_path:
+    if interface and not force and not interface._pre_quit_func():
+            return
+    if not project_path:
+        if interface:
             parent = wx.GetApp().get_project_frame()
-            dlg = wx.DirDialog( parent, "Select project folder:",
-                                style=wx.DD_DEFAULT_STYLE )
-            if dlg.ShowModal() != wx.ID_OK:
-                return
-            project_path = dlg.GetPath()
-            dlg.Destroy()
-        project_editor = os.path.join( project_path, "edit_project.py")
-        if not os.path.isfile( project_editor):
-            wx.MessageDialog( wx.GetApp().get_project_frame(),
-                        'File edit_project.py not found in ' + project_path,
-                        'Invalid Project Folder',
-                        wx.OK | wx.ICON_INFORMATION)
-            return False        
-        if quit:
-            interface.quit( False)
-        python_process(project_editor)
-        return True
+        else:
+            parent = None
+        dlg = wx.DirDialog( parent, "Select project folder:",
+                            style=wx.DD_DEFAULT_STYLE )
+        if dlg.ShowModal() != wx.ID_OK:
+            return
+        project_path = dlg.GetPath()
+        dlg.Destroy()
+    project_editor = os.path.join( project_path, "edit_project.py")
+    if not os.path.isfile( project_editor):
+        wx.MessageDialog( wx.GetApp().get_project_frame(),
+                    'File edit_project.py not found in ' + project_path,
+                    'Invalid Project Folder',
+                    wx.OK | wx.ICON_INFORMATION)
+        return False        
+    if interface and quit:
+        interface.quit( False)
+    python_process(project_editor)
+    return True
 
 def python_process( python_file, *args):
     if os.name == "nt":

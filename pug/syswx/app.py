@@ -41,6 +41,7 @@ projectFolder: where file menus start at.  Defaults to current working dir.
     busyState = False
     setting_selection = False
     progressDialog = None
+    projectObject = None
     initTryCounter = 0
     settings = object()
     projectFrame = None
