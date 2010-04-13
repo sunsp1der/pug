@@ -16,7 +16,7 @@ class Self_Destruct(Component):
 Otherwise, use this component's 'start_timer' method."""],
             ]
     #defaults
-    timer_secs = 3
+    timer_secs = 3.0
     start_automatically = True
     
     timerAction = None # this can be aborted if necessary

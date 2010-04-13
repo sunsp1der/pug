@@ -271,10 +271,13 @@ Try to set the aguis attribute to the value shown in the control
                 return True                  
         else:
             try:
+                if type(attribute_value) == type(1) and \
+                            type(control_value) == type(0.1):
+                    typedValue = control_value 
                 # if we have a basic attribute type, and we're not setting 
                 # to None, typecast our control_value to the attribute 
                 # value's current type
-                if type(attribute_value) in BASIC_TYPES and \
+                elif type(attribute_value) in BASIC_TYPES and \
                                                     control_value is not None:
                     typedValue = type(attribute_value)(control_value)
                 else:
