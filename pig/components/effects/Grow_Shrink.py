@@ -3,6 +3,8 @@ from Opioid2D.public.Node import Node
 
 from pug.component import *
 
+from pig.PigDirector import PigDirector
+
 class Grow_Shrink(Component):
     """Owner grows into scene and/or shrinks away when destroyed."""
     #component_info
@@ -14,12 +16,15 @@ class Grow_Shrink(Component):
             ['grow_in_secs',
                     "Number of seconds to take growing in. -1 = no grow."],
             ['shrink_out_secs',
-"Number of seconds to take fading out when owner is destroyed. -1 = no grow."]
+                    "Number of seconds to take fading out when owner is" + \
+                    " destroyed. -1 = no grow."],
+            ['shrink_out_collisions',
+                    'Allow object to collide while shrinking out']            
             ]
     #defaults
     grow_in_secs = 3.0
-    grow_in_scale = (1.0, 1.0)
     shrink_out_secs = 3.0
+    shrink_out_collisions = False
 
     @component_method
     def on_added_to_scene(self, scene):
@@ -42,6 +47,8 @@ dstscale: destination scale to grow to. Default: self.owner.scale
         
     @component_method
     def on_destroy(self):
+        if not self.shrink_out_collisions:
+            PigDirector.scene.unregister_collision_callback(self.owner)        
         self.shrink_out()
         
     def shrink_out(self, secs=None):

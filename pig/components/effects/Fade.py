@@ -1,7 +1,9 @@
-from Opioid2D import AlphaFade, CallFunc
+from Opioid2D import AlphaFade, CallFunc, Delay
 from Opioid2D.public.Node import Node
 
 from pug.component import *
+
+from pig.PigDirector import PigDirector
 
 class Fade(Component):
     """Owner fades in and/or fades out."""
@@ -14,11 +16,13 @@ class Fade(Component):
             ['fade_in_secs',
                     "Number of seconds to take fading in. -1 = no fade."],
             ['fade_out_secs',
-"Number of seconds to take fading out when owner is destroyed. -1 = no fade."]
+"Number of seconds to take fading out when owner is destroyed. -1 = no fade."],
+            ['fade_out_collisions','Allow object to collide while fading out']
             ]
     #defaults
     fade_in_secs = 3.0
     fade_out_secs = 3.0
+    fade_out_collisions = False
 
     @component_method
     def on_added_to_scene(self, scene):
@@ -41,6 +45,12 @@ dstalpha: destination alpha to fade in to. Default: self.owner.alpha
         
     @component_method
     def on_destroy(self):
+        if not self.fade_out_collisions:
+            PigDirector.scene.unregister_collision_callback(self.owner)
+#            self.owner.do( Delay(0) + CallFunc(
+#                            PigDirector.scene.unregister_collision_callback,
+#                            self.owner)
+#                          )
         self.fade_out()
         
     def fade_out(self, secs=None):

@@ -40,7 +40,7 @@ class Spawn_On_Destroy( Spawner):
     @component_method
     def on_destroy(self):
         "Do spawn when object is destroyed"
-        self.spawn()        
+        self.spawn()      
  
 register_component( Spawn_On_Destroy)
         

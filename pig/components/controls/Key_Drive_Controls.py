@@ -5,7 +5,7 @@ from pug.component import *
 from pig.keyboard import *
 from pig.editor.agui import KeyDropdown
 from pig.PigDirector import PigDirector
-from pig.components.physics.Forward_Motion import Forward_Motion
+from pig.components.behavior.Forward_Motion import Forward_Motion
 
 class Key_Drive_Controls( Forward_Motion):
     """Keys for forward, backward, and rotate left/right"""

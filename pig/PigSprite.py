@@ -166,6 +166,7 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
             print '    ', dict.data
         if not dict:
             if _DEBUG: print '    delete'
+            self.destroy_blockers.unregister( self.destroy_callback)
             self.delete()        
 
     def delete(self):
@@ -334,9 +335,17 @@ _spritePugview = {
         [' Functions', pug.Label],
         ['delete',"Delete this sprite"],
     #        ['_delete_test'],
-    #        ['_test_referrers'],
     ]       
  }
+
+########################################################
+# reveal this to test PigSprite deletion problems
+_spritePugview['attributes'].append(['test_referrers'])
+from pug.util import test_referrers
+def _test_referrers( self):
+    test_referrers(self)
+PigSprite.test_referrers = _test_referrers
+####################################################
 
 if hasattr(PigSprite,'test'):
     _spritePugview['attributes'].append(['test'])

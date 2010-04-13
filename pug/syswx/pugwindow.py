@@ -667,9 +667,9 @@ Automatically calls on_<setting>(val, event) callback.
             
     def _add_RefreshApply_Items(self, parent):
         parent.Append(help='Apply values to object',
-                      id=_TOOL_APPLY, text=u'Apply\tF5')
+                      id=_TOOL_APPLY, text=u'Apply\tF6')
         parent.Append(help='Refresh values', 
-                   id=_TOOL_REFRESH, text=u'Refresh\tF6')
+                   id=_TOOL_REFRESH, text=u'Refresh\tF5')
         parent.Append(id=_TOOL_AUTOAPPLY, kind=wx.ITEM_CHECK, 
             help='When off, only apply changes when Apply is selected',
             text=u'Auto-Apply')

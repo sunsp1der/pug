@@ -6,7 +6,7 @@ class Set_Motion(Component):
     """Set owner's velocity, acceleration, rotation and friction when it's
 added to a scene."""
     _set = 'pig'
-    _type = 'physics'
+    _type = 'behavior'
     _class_list = [Node]
     _field_list = [
             ['velocity_x', 'Horizontal velocity'],
@@ -37,7 +37,6 @@ Friction is multiplied."""],
         """Set the motion when object is added to scene"""
         self.set_motion()
         
-    @component_method
     def set_motion(self):
         """Apply the motion settings"""
         owner = self.owner

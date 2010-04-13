@@ -7,7 +7,7 @@ class Random_Motion(Component):
     """Set a random velocity, rotation and spin on the object when it's added to 
 a scene."""
     _set = 'pig'
-    _type = 'physics'
+    _type = 'behavior'
     _class_list = [Node]
     _field_list = [
             ['angle_min', 'Minimum angle of movement'],

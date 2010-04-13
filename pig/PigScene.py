@@ -65,11 +65,11 @@ class PigScene( Opioid2D.Scene, pug.BaseObject):
         
 sprite: when this sprite collides with toGroup, fn will be called 
 fn: the function to be called with args: (sprite, sprite-it-hit)
+toGroup: sprite's group. collisions will be detected by checking fromGroup 
+    sprites vs toGroup sprites. defaults to "colliders" if not specified. 
+    'sprite' will automatically be added to this group.
 fromGroup: when 'sprite' collides with this group, fn will be called. Defaults 
     to 'colliders' if not specified.
-toGroup: collisions will be detected by checking fromGroup sprites vs
-    toGroup sprites. defaults to "colliders" if not specified. 'sprite' 
-    will automatically be added to this group.
 ignore_duplicate: if fn is already in the list of callbacks for this 
     sprite/group combination, do not add a second call
     
@@ -142,8 +142,9 @@ fromGroup: If specified, only collisions with this group will be unregistered.
                 if (fromGroup is None or key[0]==fromGroup) and \
                         (toGroup is None or key[1]==toGroup):
                     sprite_dict.pop(key)
-        else:
+        elif sprite_dict:
             self._collision_callback_dict[sprite]={}
+            pass
             
     def handle_keydown( self, ev):
         """handle_keydown( ev): ev is a pygame keydown event"""
