@@ -36,12 +36,18 @@ def component_method_wrapper(*args, **kwargs):
     method_list = kwargs.pop('___component_methods')
     for method in method_list:
         if method:
-            if _DEBUG: print method, args, kwargs
+#            if _DEBUG: print method, args, kwargs
             if not method.im_self.enabled:
                 continue
             retvalue =  method(*args,**kwargs)
     if original_method:
-        retvalue = original_method( obj, *args, **kwargs)
+        try:
+            retvalue = original_method( obj, *args, **kwargs)
+        except:
+            # hack
+            # we hit this sometimes if an object's class has been changed
+            original_method = getattr(obj.__class__, original_method.__name__)
+            retvalue = original_method( obj, *args, **kwargs)
     return retvalue
 
 class ComponentSet(object):

@@ -42,8 +42,8 @@ arguments: on_collision( toSprite, fromSprite, toGroup, my_group)
         self.owner.join_group( self._my_group)
         PigDirector.scene.register_collision_callback( self.owner, 
                                                     self.owner.on_collision,
-                                                    self.with_group,
                                                     self.my_group,
+                                                    self.with_group,
                                                     ignore_duplicate=True)
         
     @component_method

@@ -9,7 +9,7 @@ class Forward_Motion(Component):
 Warning: This component uses a tick_action, so it may be slow."""
     #component_info
     _set = 'pig'
-    _type = 'physics'
+    _type = 'behavior'
     _class_list = [Node]
     # attributes: ['name', 'doc', {extra info}]
     _field_list = [

@@ -186,5 +186,10 @@ scheduled unless max_objects_spawned has been reached. """
                     
     def stop_spawning(self):
         self.action.abort()
+    
+    def pop_spawned(self):
+        """pop_spawned(): pop and return a spawned object"""
+        return self.spawned_objects.popitem()[1]
+    
         
 register_component( Spawner)

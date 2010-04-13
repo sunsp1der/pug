@@ -1,3 +1,5 @@
+bullet not being deleted
+
 now:	
 	finalize demos
 		test_components
@@ -19,12 +21,12 @@ bugs:
 		when scene is not shown during selection?
 	changing scenes causes bad label in dropdown
 		after save
-	original_method problem with 'unbound method'!?
 	add object after save
 	leftover items in scene graph after deleting both layers
 	crash - selecting an object while changing selectionwin to another view 
 
 later: 
+	round out floats (mouseover for full display)
 	drag n drop
 	allow lists of categories for components... file in multiple places
 	figure out actual path to python executable
