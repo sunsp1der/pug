@@ -21,21 +21,7 @@ from pig.editor.agui import SceneNodes, SceneLayers
 from pig.editor.util import get_available_layers, save_object
 from pig.keyboard import keys, keymods
 
-_DEBUG = False 
-
-def OnCollision(self, group1, group2, sprite1, sprite2):
-    """Override so that the collision callback sig is:
-callback( toSprite, fromSprite, toGroup, fromGroup)
-"""
-    try:
-        sprite1 = ObjectManager.c2py(sprite1)
-        sprite2 = ObjectManager.c2py(sprite2)
-        func = self.scene._collision_handlers[group1,group2]
-        func(sprite1, sprite2, group1, group2)
-    except:
-        traceback.print_exc(file=sys.stdout)
-        raise
-SceneCallbacks.OnCollision = OnCollision    
+_DEBUG = False     
 
 class PigScene( Opioid2D.Scene, pug.BaseObject):
     """PigScene - Opioid2d Scene with features for use with pug"""
@@ -294,7 +280,7 @@ key_down. In the future, maybe key_hold.
             return False
     
     def escape(self):
-        if getattr(Opioid2D.Director, 'playing_in_editor', False):
+        if getattr(Opioid2D.Director, 'viewing_in_editor', False):
             import wx
             wx.CallAfter(wx.GetApp().projectObject.stop_scene)
         else:
@@ -364,7 +350,8 @@ key_down. In the future, maybe key_hold.
         """get_ordered_nodes(include_all=False)->list of nodes 
         
 Return a list of scene nodes, sorted by layer then create-time.
-include_all: if True, return nodes that are not in a layer.        
+include_all: if True, return nodes that are not in a layer. This is a weird case
+    used mainly for debugging
         
 Note that due to the non-deterministic nature of Opioid z-ordering, the order
 returned will be from top to bottom in terms of layers, but pseudo-random in
@@ -384,12 +371,14 @@ terms of nodes within the layers"""
                 if hasattr(node.layer,'name'):
                     nodesorter = '_'.join([layersort[node.layer_name],
                                        '%04d'%self.nodes[node]])
+                elif not include_all:
+                    continue
                 else:
-                    nodesorter = '_'.join(['zzz',
-                                       '%04d'%self.nodes[node]])
-                    print "scene.get_ordered_nodes nolayer:", \
-                                str(node), node.gname
-                    if not include_all:
+                    try:
+                        nodesorter = '_'.join(['zzz', '%04d'%self.nodes[node]])
+                        print "scene.get_ordered_nodes nolayer:", str(node), \
+                                                                node.gname
+                    except:
                         continue
                 ordered_nodes[nodesorter] = node
             nodenums = ordered_nodes.keys()
@@ -484,7 +473,32 @@ Update the PigScene's node tracking dict for node. Possible commands: 'Delete'
         return get_available_layers()
 
     scene_layers = property(get_scene_layers, doc=
-            'Utility property for viewing layers without __editor__ layer')        
+            'Utility property for viewing layers without __editor__ layer')
+    
+    def _get_code_file(self):
+        """_get_code_file(): return scene file with some special circumstances
+
+If scene is unsaved, allow option to save it first. If not saved, return None.
+If scene is a working scene, return 
+"""
+        if getattr(Opioid2D.Director, 'viewing_in_editor', False):
+            import wx
+            interface = wx.GetApp().get_project_object()
+            filename = interface.commit_scene()
+            if not filename or Opioid2D.Director.scene.__class__ == PigScene:
+                errorDlg = wx.MessageDialog( wx.GetApp().get_project_frame(),
+                       "Your scene must be saved before viewing source.",
+                       "Save Scene First",
+                       wx.OK)
+                errorDlg.ShowModal()
+                errorDlg.Destroy() 
+                return
+            file = pug.BaseObject._get_code_file(self)
+            if os.path.split(file)[1] == '__Working__.py':
+                file = os.path.join(os.path.split(file)[0], filename)
+            return file
+        else:
+            return pug.BaseObject._get_code_file(self)           
     
     # code storage customization
     def _create_object_code(self, storageDict, indentLevel, exporter):
@@ -614,6 +628,20 @@ Update the PigScene's node tracking dict for node. Possible commands: 'Delete'
 # force derived classes to use PigScene as base class
 PigScene._codeStorageDict['base_class']=PigScene
 # pug pugview stuff
+            
+def OnCollision(self, group1, group2, sprite1, sprite2):
+    """Override so that the collision callback sig is:
+callback( toSprite, fromSprite, toGroup, fromGroup)
+"""
+    try:
+        sprite1 = ObjectManager.c2py(sprite1)
+        sprite2 = ObjectManager.c2py(sprite2)
+        func = self.scene._collision_handlers[group1,group2]
+        func(sprite1, sprite2, group1, group2)
+    except:
+        traceback.print_exc(file=sys.stdout)
+        raise
+SceneCallbacks.OnCollision = OnCollision            
             
 _scenePugview = {
     'name':'PigScene Editor',

@@ -11,23 +11,21 @@ class ExplodeParticle(PigSprite):
     image = 'art\\pig.png'
     layer = 'Background'
     def on_create(self):
-        self.position.x = 489.0
-        self.position.y = 193.0
+        self.position.x = 702.0
+        self.position.y = 325.0
         self.scale.x = 0.30000001192092896
         self.scale.y = 0.30000001192092896
         self.color = (1.0, 0.0, 0.0, 1.0)
         self.components.add( Random_Motion(
-                angle_min=-45,
-                angle_max=45,
-                velocity_min=75,
-                velocity_max=125) )
+                velocity_min=150,
+                velocity_max=200) )
         self.components.add( Set_Motion(
-                acceleration_y=100,
+                acceleration_y=200,
                 rotated=False) )
         self.components.add( Self_Destruct(
-                timer_secs=2) )
+                timer_secs=0.5) )
         self.components.add( Grow_Shrink(
-                grow_in_secs=0.2,
-                shrink_out_secs=1.0) )
+                grow_in_secs=0.1,
+                shrink_out_secs=0.5) )
         self.components.add( Face_Motion() )
 ### End ExplodeParticle autocode ###

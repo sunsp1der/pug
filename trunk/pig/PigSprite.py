@@ -195,6 +195,13 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
     def save_sprite(self):
         """Save this object as a class in the project's object folder"""
         save_object( self)
+        
+    def _get_code_file(self):
+        "_get_code_file(): return the scene file if this is not a derived class"
+        if self.__class__ == PigSprite:
+            return PigDirector.scene._get_code_file()
+        else:
+            return pug.BaseObject._get_code_file(self)   
     
     # code storage customization
     @classmethod
@@ -287,17 +294,21 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
             'custom_export_func': _create_object_code,
             'as_class': True,
                         }
-    add_subclass_skip_attributes(_codeStorageDict, pug.BaseObject)    
+    add_subclass_skip_attributes(_codeStorageDict, pug.BaseObject) 
 
 # force derived classes to use PigSprite as a base. Advanced users can get
 # around this however they need to
 # PigSprite._codeStorageDict['base_class'] = PigSprite
 
-#@ test function 
-#    def test(self):
-#        self.set_image("art/button.png")
-
-
+# test function 
+    def test(self):
+        from pug.util import edit_process
+        module = self._get_code_file()
+#        cmd = "C:\Python25\Lib\idlelib\idle.bat" + module.__file__
+        # cmd = "C:\Python25\Lib\idlelib\idle.bat" 
+        # subprocess.Popen(cmd)
+        edit_process (module)
+        
 _spritePugview = {
     'name':'PigSprite Editor',
     'skip_menus':['Export'],
@@ -340,11 +351,11 @@ _spritePugview = {
 
 ########################################################
 # reveal this to test PigSprite deletion problems
-_spritePugview['attributes'].append(['test_referrers'])
-from pug.util import test_referrers
-def _test_referrers( self):
-    test_referrers(self)
-PigSprite.test_referrers = _test_referrers
+#_spritePugview['attributes'].append(['test_referrers'])
+#from pug.util import test_referrers
+#def _test_referrers( self):
+#    test_referrers(self)
+#PigSprite.test_referrers = _test_referrers
 ####################################################
 
 if hasattr(PigSprite,'test'):

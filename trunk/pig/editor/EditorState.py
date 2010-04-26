@@ -80,6 +80,14 @@ class EditorState(PigState):
             wx.CallAfter(self.interface.quit)
         if ev.key == Opioid2D.K_w and ctrlDown:
             wx.CallAfter(wx.GetApp().raise_all_frames)
+        if ev.key == Opioid2D.K_u and ctrlDown:
+            try:
+                app = wx.GetApp()
+                wx.CallAfter(app.raise_all_frames)
+                wx.CallAfter(app.get_object_pugframe(
+                                Opioid2D.Director.scene).pugWindow.view_source)
+            except:
+                pass
             
     def handle_keyup(self, ev):
         pass

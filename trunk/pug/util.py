@@ -4,19 +4,85 @@ from __future__ import with_statement
 import re
 import cPickle
 import copy
-from weakref import WeakKeyDictionary, ref
 import sys
 import os
 import inspect
-
-_DEBUG = False
-
-_IMAGEPATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Images")
+import subprocess
+import signal
 
 from start_file import start_file
 
+_DEBUG = False
+
+_processes = {}
+def python_process( python_file, *args, **kwargs):
+    """python_process( python_file, *args, **kwargs)
+    
+Run python_file in a new process
+args: string arguments to process
+kwargs: flags and options
+    close_duplicates: close all processes with same command line. Default=False
+"""        
+    if os.name == "nt":
+        cmd = ["pythonw"]
+    else:
+        cmd = ["python"]
+    cmd += [python_file]
+    if args:
+        cmd += list(args)
+    proc = subprocess.Popen(cmd)
+    cmd = ' '.join(cmd)
+    if kwargs.get('close_duplicates', False):
+        kill_subprocesses(cmd)
+    if _processes.has_key(cmd):
+        _processes[cmd].append(proc)
+    else:
+        _processes[cmd] = [proc,]
+        
+def kill_subprocesses(cmdline=None):
+    "kill_subprocess(cmdline): kill all cmdline subprocesses,default: kill ALL"
+    if cmdline:
+        proclist = _processes.get(cmdline,[])
+        for oldproc in proclist:
+            if oldproc.poll() is None:
+                killcmd = "taskkill /PID " + str(oldproc.pid)
+                subprocess.Popen(killcmd)                
+    else:
+        for cmdline in _processes.iterkeys():
+            kill_subprocesses(cmdline)
+    
+if os.name == "nt":
+    _default_editor = "idle.pyw"
+else:
+    _default_editor = "idle.py" 
+_default_editor = os.path.join(os.path.split(sys.executable)[0],
+                               'Lib','idlelib',_default_editor)
+def edit_process( filename, *args, **kwargs):
+    """edit_process( filename, *args, **kwargs)
+    
+Edit filename in editor
+args: arguments to process
+kwargs: flags and options
+    close_duplicates: close all processes with same command line. Default=True
+    editor: path to editor executable. Default=pug.util._default_editor    
+"""    
+    if kwargs.has_key('editor'):
+        editor = kwargs.pop('editor')
+    else:
+        editor = _default_editor
+    if not kwargs.has_key('close_duplicates'):
+        kwargs['close_duplicates']=True
+    python_process(editor, filename, *args, **kwargs)
+    
+_IMAGEPATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Images")
 def get_image_path(filename):
     return os.path.join (_IMAGEPATH, filename)
+
+def get_code_file( obj):
+    module = inspect.getmodule(obj).__file__
+    if module[-3:] == "pyc":
+        module = module [:-1]
+    return module
 
 def make_valid_attr_name(name):
     name = re.sub(r'^\d*','',name) # remove digits from front

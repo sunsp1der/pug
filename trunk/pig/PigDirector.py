@@ -10,6 +10,9 @@ import Opioid2D
 opioid_quit = Opioid2D.Director.quit
 PigDirector = Opioid2D.Director
 
+# this presents incorrect scene errors in code
+PigDirector.scene = None
+
 #hack for quitting pug when opioid quits
 QUITTING = False
 def pig_quit( query=True):
@@ -30,7 +33,12 @@ query: if True, have the app confirm project closure.
         return 
 # set up our special quit
 def real_quit():
-    opioid_quit()
+    global QUITTING    
+    wx.GetApp().get_project_object().kill_subprocesses()
+    if not QUITTING:
+        opioid_quit()
+    QUITTING = True
+    
 
 PigDirector.quit = pig_quit # hack to make opioid quit=pugquit 
 PigDirector.realquit = real_quit

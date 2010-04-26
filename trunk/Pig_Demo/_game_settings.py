@@ -1,5 +1,6 @@
 ### game_settings autocode ###
 class game_settings():
+    defaultTitle = 'Pig_Demo'
     fullscreen = False
     initial_scene = 'Shooting_Gallery'
     rect_opioid_window = (25, 25, 800, 600)

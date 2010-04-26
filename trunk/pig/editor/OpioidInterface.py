@@ -13,6 +13,7 @@ import Opioid2D
 from Opioid2D.public.Node import Node
 
 import pug
+from pug.util import kill_subprocesses
 from pug.component.pugview import _dataPugview, _dataMethodPugview
 from pug.syswx.util import show_exception_dialog, cache_default_view
 from pug.syswx.component_browser import ComponentBrowseFrame
@@ -70,12 +71,12 @@ scene: the scene to load initially
 #                              title='Pig Scene', 
 #                              icon=get_image_path('pug.png'))
 #        Opioid2D.Director.game_started = False
-#        Opioid2D.Director.playing_in_editor = True
+#        Opioid2D.Director.viewing_in_editor = True
 #        thread.start_new_thread(self.Director.run, (PigScene,))
 
         thread.start_new_thread(start_opioid, 
                                           (self.pug_settings.rect_opioid_window,
-                                           'P.I.G. Scene',
+                                           os.path.split(projectPath)[1],
                                            get_image_path('pig.png'),
                                            StartScene))
         time.sleep(1)
@@ -214,10 +215,10 @@ settingsObj: an object similar to the one below... if it is missing any default
                         ],
                     title=''.join(["P.I.G. Editor - ", self.project_name]),
                     name="Pig Editor")
+            app.set_project_frame(frame)
             frame.GetNotebook().Split(2, wx.LEFT)
             size = frame.GetSize()
             frame.GetNotebook().GetPage(1).SetSize([size[0]/2,size[1]])
-            app.set_project_frame(frame)
         # cache a sprite view for speed on first selection
         if not self.cached[0]:
             dummy = PigSprite( register=False)
@@ -308,6 +309,9 @@ value can be either an actual scene class, or the name of a scene class
     
     def reload_scene(self):
         """Reload scene from version on disk"""
+        if self.Director.scene.__class__ == PigScene:
+            self.set_scene("PigScene")
+            return
         self.revert_working_scene()
         self.set_scene(self.scene.__class__.__name__, True)
         
@@ -456,8 +460,10 @@ event: a wx.Event
         
     def commit_scene(self):
         self.stop_scene()
-        if save_scene_as():
+        filename = save_scene_as()
+        if filename:
             self.revert_working_scene()
+        return filename
 
     def rewind_scene(self):
         """rewind_scene(): reset the scene and play it again"""
@@ -561,7 +567,29 @@ Add an object to the scene
             node.position = \
                     Opioid2D.Vector(*Opioid2D.Display.get_view_size()) * 0.5
             node.layer = "Background"
+        # avoid overlapping sprites exactly
+        okay_position = False
+        nodes = self.Director.scene._get_nodes().keys()
+        nodeloc = [node.rect.left, node.rect.top,
+                   node.rect.width, node.rect.height]
+        while okay_position == False:
+            okay_position = True
+            for obj in nodes:
+                if obj == node:
+                    continue
+                if nodeloc == [obj.rect.left, obj.rect.top, 
+                               obj.rect.width, obj.rect.height]:
+                    nodeloc[0] += 10
+                    nodeloc[1] += 10
+                    okay_position = False
+                    break
+        node.rect.left = nodeloc[0]
+        node.rect.top = nodeloc[1]
+        
         wx.GetApp().set_selection([node])
+        
+    def kill_subprocesses(self):
+        kill_subprocesses()
         
     def reload_object_list(self):
         """Load changes made to object class files"""
@@ -579,7 +607,7 @@ def start_opioid( rect, title, icon, scene):
                           title=title, 
                           icon=icon)
     Opioid2D.Director.game_started = False
-    Opioid2D.Director.playing_in_editor = True
+    Opioid2D.Director.viewing_in_editor = True
     Opioid2D.Director.run( scene)        
          
 def _scene_list_generator():
@@ -601,6 +629,7 @@ _interfacePugview = {
     'size':(350,350),
     'name':'Pig Editor',
     'skip_menus':['Export'],    
+    'no_source':True,
     'attributes':[ 
         ['Project', pug.Label, {'font_size':10}],
         ['Controls', pug.PlayButtons, {'execute':'execute_scene', 
@@ -615,7 +644,8 @@ _interfacePugview = {
               'list_generator':_scene_list_generator}],
         ['commit_scene', None, {
                                'label':"   Save Scene", 
-                               'doc':"Commit current scene to disk"}],
+                               'doc':"Commit current scene to disk",
+                               'no_return_popup':True}],
 #        ['view_scene', pug.Routine,  {'label':'   View Scene'}],
         ['reload_scene', None, {'label':'   Reload Scene'}],
 #        ['use_working_scene', None, {'label':'   Use Working Scene',

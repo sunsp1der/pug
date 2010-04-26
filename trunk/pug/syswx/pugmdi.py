@@ -164,6 +164,7 @@ PugMDI(self, objInfoList, title, show, parent)
     def on_view_object_deleted(self, window, obj):
         pass
         
+        
 class PugMDIChild(wx.aui.AuiMDIChildFrame, PugFrame):
     """PugMDIChild(...): an MDI child derived which operates like a PugFrame
     
