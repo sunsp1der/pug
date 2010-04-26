@@ -5,7 +5,6 @@ from inspect import getmro
 import time
 from copy import copy
 import shutil
-import subprocess
 
 import wx
 
@@ -18,7 +17,7 @@ from pug import code_export, CodeStorageExporter
 from pug.component import Component
 from pug.syswx.util import show_exception_dialog
 from pug.syswx.SelectionWindow import SelectionWindow
-from pug.util import make_valid_attr_name
+from pug.util import make_valid_attr_name, python_process
 
 from pig.util import get_available_scenes, get_available_objects
 from pig.editor import EditorState
@@ -109,15 +108,6 @@ quit: if True, quit the current project after opening new one.
     python_process(project_editor)
     return True
 
-def python_process( python_file, *args):
-    if os.name == "nt":
-        cmd = ["pythonw"]
-    else:
-        cmd = ["python"]
-    cmd += [python_file]
-    cmd += args
-    subprocess.Popen(cmd)
-
 def save_object(obj, name=None, parentWindow=None):
     """save_object(obj): Export obj as a class to objects folder
 
@@ -127,8 +117,17 @@ parentWindow: the parent window of name dialog. If not provided, the
 """
     if not isinstance(obj, Node):
         raise TypeError('save_object() arg 1 must be a Node')
+    if getattr(obj, 'archetype', False):
+        # we don't want every instance to be an archetype
+        obj.archetype = False
+        archetype = True
+    else:
+        archetype = False    
     if not name:
-        name = obj.gname
+        if archetype:
+            name = obj.gname
+        else:
+            name = obj.gname+"Class"
         if not name:
             name = obj.__class__.__name__
         if parentWindow == None:
@@ -183,12 +182,6 @@ parentWindow: the parent window of name dialog. If not provided, the
         objName = name
         path = os.path.join('objects',''.join([name,'.py']))
     try:
-        if getattr(obj, 'archetype', False):
-            # we don't want every instance to be an archetype
-            obj.archetype = False
-            archetype = True
-        else:
-            archetype = False
         try: 
             pigsprite = PigSprite
         except:

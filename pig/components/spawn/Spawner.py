@@ -19,7 +19,7 @@ class Spawner(Component):
     _class_list = [Node]
     # attributes:   
     _field_list = [
-        ["object", ObjectsDropdown, {'component':True,
+        ["spawn_object", ObjectsDropdown, {'component':True,
                                      'doc':"The object class to spawn"}],
         ["spawn_interval",
                 "Seconds between spawns (0 for no automatic spawning)"],
@@ -27,7 +27,8 @@ class Spawner(Component):
                 "spawn_interval can vary this many seconds"],
         ["spawn_location", Dropdown, {'list':['area', 'center', 'edges', 'top',
                                               'bottom','left','right'], 
-                            'doc':"The area where objects can be spawned"}],
+                    'doc':"The area where objects can be spawned. All\n"+\
+                          "locations except 'center' are randomized areas."}],
         ["spawn_offset", 
          "Spawn location is offset by this much (scaled by owner size)"],
         ["spawn_delay","Wait this many seconds before beginning to spawn"],
@@ -50,11 +51,11 @@ class Spawner(Component):
                        "callback( this_component)"])],
         ]
     # attribute defaults
-    object = None
+    spawn_object = None
     spawn_interval = 2.0
     spawn_variance = 1.0
     spawn_delay = 0.0
-    spawn_location = 'area'
+    spawn_location = 'center'
     spawn_offset = (0,0)
     min_objects_per_spawn = 1
     max_objects_per_spawn = 1
@@ -89,8 +90,8 @@ class Spawner(Component):
     @component_method 
     def spawn(self):
         "spawn()->[objects_spawned] Perform the spawn as set up"
-        if self.object != self.last_object:
-            self.spawn_class = get_project_object(self.object)            
+        if self.spawn_object != self.last_object:
+            self.spawn_class = get_project_object(self.spawn_object)            
         if not isclass(self.spawn_class) or not self.enabled:
             return None
         if not self.spawned_objects:

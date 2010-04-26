@@ -22,7 +22,8 @@ import wx.lib.scrolledpanel
 import wx.lib.buttons
 
 from pug.aguilist import create_raw_aguilist, create_pugview_aguilist
-from pug.util import pugSave, pugLoad, get_simple_name
+from pug.util import pugSave, pugLoad, get_simple_name, get_code_file, \
+                        edit_process
 from pug.constants import *
 from pug.syswx.helpframe import HelpFrame
 from pug.syswx.wxconstants import *
@@ -413,7 +414,7 @@ Generally, this is called when an attribute gui has changed size.
                 menu.AppendSeparator()
                 self._add_PrivateDataMenu_Items(menu) 
             menu.AppendSeparator()
-            self._add_RefreshApply_Items(menu)
+            self._add_StandardView_Items(menu)
             self.refresh_settings()
 #        menu.DestroyId(1)
 
@@ -428,7 +429,7 @@ Generally, this is called when an attribute gui has changed size.
             else:
                 self.viewMenu.Check(Id, False)
         
-    def apply(self, event = None):
+    def apply(self, event=None):
         if not self.settings['auto_apply'] and event.Id != _TOOL_APPLY:
             return
         if not self.objectRef or not self.objectRef():
@@ -442,7 +443,7 @@ Generally, this is called when an attribute gui has changed size.
         self.refresh()
         if _DEBUG: print "DONE apply\n"
 
-    def refresh(self, event = None):
+    def refresh(self, event=None):
         if self._doingApply:
             return
         if not self.objectRef or not self.objectRef():
@@ -456,7 +457,7 @@ Generally, this is called when an attribute gui has changed size.
     def help_context(self, event=None):
         wx.ContextHelp( self)
     
-    def show_help(self, event = None, object=None, attribute=""):
+    def show_help(self, event=None, object=None, attribute=""):
         customFrame = None
         try:
             if event and event.Id == _HELP_INFO:
@@ -545,25 +546,32 @@ Automatically calls on_<setting>(val, event) callback.
         if val != oldsetting:
             callback = ''.join(["on_",settingname])
             if hasattr(self,callback):
-                getattr(self,callback)(val, event)
+                getattr(self,callback)(val, event)                
+                
+    def view_source(self, event=None):
+        if hasattr(self.object, '_get_code_file'):
+            file = self.object._get_code_file()
+        else:
+            file = get_code_file(self.object)
+        edit_process( file)
             
     def refresh_settings(self):
         for setting in self.settings:
             self.change_setting(setting, self.settings[setting])
 
-    def on_hide_1_underscore(self, val, event = None):
+    def on_hide_1_underscore(self, val, event=None):
         if val and not self.settings['hide_2_underscore']:
             self.change_setting('hide_2_underscore', 1, event)
         elif self.aguilist:            
             self.create_aguilist()
 
-    def on_hide_2_underscore(self, val, event = None):
+    def on_hide_2_underscore(self, val, event=None):
         if not val and self.settings['hide_1_underscore']:
             self.change_setting('hide_1_underscore', 0, event)
         elif self.aguilist:            
             self.create_aguilist()
 
-    def on_auto_refresh(self, val, event = None):
+    def on_auto_refresh(self, val, event=None):
         """if val, do a refresh and set timer to do the next one, else stop"""
         if val:
             self._auto_refresh(250)
@@ -608,7 +616,7 @@ Automatically calls on_<setting>(val, event) callback.
                       id = _MENU_EXPORT_OBJECT_AS, 
                       text='Export object code as ...')
    
-    def code_export(self, event = None):
+    def code_export(self, event=None):
         if self.hasSavedAs.get(event.Id + 1):
             lastfolder, lastfilename = self.hasSavedAs.get(event.Id + 1)
             self.apply()
@@ -626,7 +634,7 @@ Automatically calls on_<setting>(val, event) callback.
             event.Id += 1
             self.code_export_as(event)
                     
-    def code_export_as(self, event = None):
+    def code_export_as(self, event=None):
         if self.hasSavedAs.get(event.Id):
             defaultfolder, defaultfilename = self.hasSavedAs.get(event.Id)
         else:
@@ -665,7 +673,7 @@ Automatically calls on_<setting>(val, event) callback.
             self.change_setting("hide_1_underscore", 1)
 
             
-    def _add_RefreshApply_Items(self, parent):
+    def _add_StandardView_Items(self, parent):
         parent.Append(help='Apply values to object',
                       id=_TOOL_APPLY, text=u'Apply\tF6')
         parent.Append(help='Refresh values', 
@@ -678,9 +686,14 @@ Automatically calls on_<setting>(val, event) callback.
                    text=u'Auto-Refresh')        
         self._attach_setting("auto_apply", parent, _TOOL_AUTOAPPLY, True)        
         self._attach_setting("auto_refresh", parent, _TOOL_AUTOREFRESH, False)
+        if self._currentView.get('no_source', False):
+            return
+        parent.AppendSeparator()        
+        parent.Append(help="View object's source file", 
+                   id=_TOOL_VIEWSOURCE, text=u'View Source\tCtrl+U')
         
 
-    def save_object_state(self, event = None):
+    def save_object_state(self, event=None):
         if self.hasSavedAs.get(event.Id + 1):
             lastfolder, lastfilename = self.hasSavedAs.get(event.Id + 1)
             self.apply()
@@ -695,7 +708,7 @@ Automatically calls on_<setting>(val, event) callback.
             event.Id += 1
             self.save_object_state_as( event)
         
-    def save_object_state_as(self, event = None):
+    def save_object_state_as(self, event=None):
         if self.hasSavedAs.get(event.Id):
             defaultfolder, defaultfilename = self.hasSavedAs.get(event.Id)
         else:
@@ -711,7 +724,7 @@ Automatically calls on_<setting>(val, event) callback.
             self.save_object_state(event)
         dlg.Destroy()
         
-    def load_object_state(self, event = None):
+    def load_object_state(self, event=None):
         app = wx.GetApp()
         filename = ''.join([self.defaultFilename,'.pug'])            
         dlg = wx.FileDialog(self, "Load State", 
@@ -799,6 +812,7 @@ Automatically calls on_<setting>(val, event) callback.
         self.Bind(wx.EVT_MENU, self._evt_setting, id=_TOOL_AUTOAPPLY)            
         self.Bind(wx.EVT_MENU, self.apply, id=_TOOL_APPLY)
         self.Bind(wx.EVT_MENU, self.refresh, id=_TOOL_REFRESH) 
+        self.Bind(wx.EVT_MENU, self.view_source, id=_TOOL_VIEWSOURCE) 
         #help menu
         self.Bind(wx.EVT_MENU, self.show_help, id=_HELP_INFO)       
         self.Bind(wx.EVT_MENU, self.help_context, id=_HELP_CONTEXT)       
@@ -807,6 +821,7 @@ _TOOL_AUTOAPPLY = wx.NewId()
 _TOOL_APPLY = wx.NewId()
 _TOOL_AUTOREFRESH = wx.NewId()
 _TOOL_REFRESH = wx.NewId()
+_TOOL_VIEWSOURCE = wx.NewId()
 _MENU_HIDE1UNDERSCORE = wx.NewId()
 _MENU_HIDE2UNDERSCORE = wx.NewId()
 _MENU_SAVE = wx.NewId()

@@ -18,7 +18,7 @@ class Key_Spawn( Spawner):
     # attributes:   
     _field_list = [
         ['key', KeyDropdown, {'doc':"Press this key to spawn"}],                   
-        ["object", ObjectsDropdown, {'component':True,
+        ["spawn_object", ObjectsDropdown, {'component':True,
                                      'doc':"The object class to spawn"}],
         ["spawn_location", Dropdown, {'list':['area', 'center', 'edges', 'top',
                                               'bottom','left','right'], 

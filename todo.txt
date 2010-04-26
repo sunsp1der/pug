@@ -1,21 +1,18 @@
-bullet not being deleted
-
 now:	
 	finalize demos
 		test_components
-		simple shooting gallery game
 	html tutorial
 		create project
-		create scene
 		create sprites
+		create scene
 		add components
 	TODO list
 		Undo! - save query when changing levels or quitting
-		Open file for editing
 		Separate runtime necessities
 	create zip tarball exe?
 
 bugs: 
+	show menus when object is selected
 	scene tree doesn't show selected object 
 		when obj is first added?
 		when scene is not shown during selection?

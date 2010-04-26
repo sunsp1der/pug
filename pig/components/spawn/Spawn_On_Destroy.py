@@ -15,7 +15,7 @@ class Spawn_On_Destroy( Spawner):
     _class_list = [Node]
     # attributes:   
     _field_list = [
-        ["object", ObjectsDropdown, {'component':True,
+        ["spawn_object", ObjectsDropdown, {'component':True,
                                      'doc':"The object class to spawn"}],
         ["spawn_location", Dropdown, {'list':['area', 'center', 'edges', 'top',
                                               'bottom','left','right'], 

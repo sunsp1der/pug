@@ -337,7 +337,9 @@ Set up storageDict.  See CodeStorageExporter documentation for details.
             else:
                 suffix = '_instance'
             storage_name = storageDict.get('name', 
-                       ''.join([get_type_name(obj), suffix]).lower())            
+                       ''.join([get_type_name(obj), suffix]).lower())
+            if storage_name == get_type_name(obj):
+                storage_name = storage_name + '_instance'         
         storageDict['storage_name'] = \
                 self.create_valid_storage_name(storage_name)
         # base_class and import_module
