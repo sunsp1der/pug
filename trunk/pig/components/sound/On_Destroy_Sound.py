@@ -21,7 +21,10 @@ class On_Destroy_Sound( Component):
     @component_method
     def on_added_to_scene(self, scene):
         "Get the sound object"
-        self.soundObject = get_sound( self.sound)
+        if self.sound:
+            self.soundObject = get_sound( self.sound)
+        else:
+            self.enabled = False
 
     @component_method
     def on_destroy(self):

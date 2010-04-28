@@ -368,9 +368,15 @@ terms of nodes within the layers"""
             ordered_nodes = {}
             myNodes = self.nodes.keys()
             for node in myNodes:
-                if hasattr(node.layer,'name'):
-                    nodesorter = '_'.join([layersort[node.layer_name],
-                                       '%04d'%self.nodes[node]])
+                if node.layer_name:
+                    try:
+                        nodesorter = '_'.join([layersort[node.layer_name],
+                                           '%04d'%self.nodes[node]])
+                    except:
+                        if not node.layer_name:
+                            pass
+                        else:
+                            raise
                 elif not include_all:
                     continue
                 else:

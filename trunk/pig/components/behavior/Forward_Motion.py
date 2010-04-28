@@ -1,4 +1,4 @@
-from Opioid2D import RealTickFunc, CallFunc, Vector
+from Opioid2D import RealTickFunc, Vector
 from Opioid2D.public.Node import Node
 
 from pug.component import *
@@ -49,7 +49,9 @@ speed: set object's forward velocity or acceleration to this value. Defaults to
         self.speed_vector = Vector(0, -speed)
 
         if speed:
-            self.tick_action = RealTickFunc( self.update_forward_motion).do()
+            if not self.tick_action:
+                self.tick_action = RealTickFunc(self.update_forward_motion)
+                self.tick_action.do()
         else:
             if self.tick_action:
                 self.tick_action.abort()            

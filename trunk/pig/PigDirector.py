@@ -33,8 +33,11 @@ query: if True, have the app confirm project closure.
         return 
 # set up our special quit
 def real_quit():
-    global QUITTING    
-    wx.GetApp().get_project_object().kill_subprocesses()
+    global QUITTING
+    try:       
+        wx.GetApp().get_project_object().kill_subprocesses()
+    except:
+        pass
     if not QUITTING:
         opioid_quit()
     QUITTING = True

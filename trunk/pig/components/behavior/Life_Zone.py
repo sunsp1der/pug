@@ -12,9 +12,8 @@ class Life_Zone(Component):
     _class_list = [Node]
     # attributes: ['name', 'doc', {extra info}]
     _field_list = [
-            ['set_to_screen', 
-"""Set zone to screen size plus owner's image size 
-when added to scene. Other settings ignored."""],
+            ['set_to_screen', "Set zone to screen size plus owner's image\n"+\
+                        "size when added to scene. Other settings ignored."],
             ['x', "Left edge of zone"],
             ['y', "Top edge of zone"],
             ['width', "Width of zone"],
