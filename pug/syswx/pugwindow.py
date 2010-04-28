@@ -686,7 +686,8 @@ Automatically calls on_<setting>(val, event) callback.
                    text=u'Auto-Refresh')        
         self._attach_setting("auto_apply", parent, _TOOL_AUTOAPPLY, True)        
         self._attach_setting("auto_refresh", parent, _TOOL_AUTOREFRESH, False)
-        if self._currentView.get('no_source', False):
+        if type(self._currentView) is type({}) and \
+                            self._currentView.get('no_source', False):
             return
         parent.AppendSeparator()        
         parent.Append(help="View object's source file", 

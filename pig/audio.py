@@ -12,7 +12,10 @@ tag: if you want to create different sound objects with the same sound file, for
     instance if you wanted to change the volume of each individually, give them 
     all different tags.
 """ 
-    index = filename+tag
+    try:
+        index = filename+tag
+    except:
+        index = ""
     sound = SoundDict.get(index, None)
     if sound is None:
         sound = SoundDict[index] = load_sound(filename)

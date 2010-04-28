@@ -22,7 +22,7 @@ class Bullet(PigSprite):
         self.components.add( On_Collision_Sound(
                 sound='sounds\\snap.wav',
                 with_group='target',
-                my_group='FANCY') )
+                my_group='bullet') )
         self.components.add( Life_Zone() )
         self.components.add( Fade(
                 fade_in_secs=0.0,

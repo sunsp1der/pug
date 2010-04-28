@@ -2,6 +2,7 @@
 
 from pig.components.behavior.Face_Object import Face_Object
 from pig.components.behavior.Life_Zone import Life_Zone
+from pig.components.behavior.Motion_Zone import Motion_Zone
 from pig.components.behavior.Self_Destruct import Self_Destruct
 from pig.components.behavior.Face_Motion import Face_Motion
 from pig.components.behavior.Set_Motion import Set_Motion
@@ -25,7 +26,6 @@ from pig.components.spawn.Spawn_On_Destroy import Spawn_On_Destroy
 from pig.components.sound.On_Destroy_Sound import On_Destroy_Sound
 from pig.components.sound.On_Key_Sound import On_Key_Sound
 from pig.components.sound.On_Collision_Sound import On_Collision_Sound
-
 from pig.components.scene.Utility_Keys import Utility_Keys
 from pig.components.scene.On_Start_Sound import On_Start_Sound
 from pig.components.scene.Open_File_On_Start import Open_File_On_Start

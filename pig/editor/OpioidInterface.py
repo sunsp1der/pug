@@ -608,7 +608,12 @@ def start_opioid( rect, title, icon, scene):
                           icon=icon)
     Opioid2D.Director.game_started = False
     Opioid2D.Director.viewing_in_editor = True
-    Opioid2D.Director.run( scene)        
+    try:
+        Opioid2D.Director.run( scene)
+    except ImportError:
+        raise
+    except:
+        raise
          
 def _scene_list_generator():
     """_scene_list_generator( includeNewScene=True)-> list of scenes + 'New'
