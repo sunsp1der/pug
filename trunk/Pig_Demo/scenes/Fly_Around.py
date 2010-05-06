@@ -1,12 +1,20 @@
 ### import autocode ###
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
-from pug.all_components import Key_Direction_Controls, Motion_Zone, Mouse_Face,\
-    Key_Spawn, Collision_Destroy, On_Destroy_Sound, Spawn_On_Destroy, Spawner
+from pug.all_components import Utility_Keys, On_Start_Sound,\
+    Key_Direction_Controls, Motion_Zone, Mouse_Face, Key_Spawn,\
+    Collision_Destroy, On_Destroy_Sound, Spawn_On_Destroy, Spawner
 ### End import autocode ###
 
 ### Fly_Around autocode ###
 class Fly_Around(PigScene):
+    def __init__(self, *args, **kwargs):
+        PigScene.__init__(self, *args, **kwargs)
+        self.components.add( Utility_Keys(
+                info_F1='scenes\\Fly_Around_Help.txt') )
+        self.components.add( On_Start_Sound(
+                sound='sounds\\snap.wav') )
+
     def on_enter(self):
         # Sprites
         pigsprite_instance = PigSprite()

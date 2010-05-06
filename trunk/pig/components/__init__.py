@@ -10,7 +10,7 @@ from pig.components.behavior.Forward_Motion import Forward_Motion
 from pig.components.behavior.Random_Motion import Random_Motion
 from pig.components.behavior.Stop_Motion_On_Destroy import Stop_Motion_On_Destroy
 from pig.components.collision.Collision_Callback import Collision_Callback
-from pig.components.collision.Join_Group import Join_Group 
+from pig.components.collision.Join_Collision_Group import Join_Collision_Group 
 from pig.components.collision.Collision_Destroy import Collision_Destroy
 from pig.components.controls.Mouse_Follow import Mouse_Follow
 from pig.components.controls.Mouse_Face import Mouse_Face
@@ -28,4 +28,4 @@ from pig.components.sound.On_Key_Sound import On_Key_Sound
 from pig.components.sound.On_Collision_Sound import On_Collision_Sound
 from pig.components.scene.Utility_Keys import Utility_Keys
 from pig.components.scene.On_Start_Sound import On_Start_Sound
-from pig.components.scene.Open_File_On_Start import Open_File_On_Start
+from pig.components.scene.On_Key_Sound_Scene import On_Key_Sound_Scene

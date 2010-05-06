@@ -7,7 +7,7 @@ class GroupDropdown (Dropdown):
     
 This dropdown can be used to track the groups used by objects in a scene.
 It is intended to be used with with components that have a group attribute.
-See pig.components.collision.Join_Group for example usage.
+See pig.components.collision.Join_Collision_Group for example usage.
     
 GroupDropdown(attribute, window, aguidata, **kwargs)
 
@@ -31,14 +31,16 @@ def register_group( tag, group):
     """register_group( tag, group)
     
 tag: a unique tag. Usually a tuple: (ref to component object, attribute)
-group: the group name. If group == None, tag will be deleted from dict
+group: the group name. 
 """
     if group == DEFAULT_GROUP:
         pass
-    elif group is None:
-        group_dict.pop(tag, None)
     else:
         group_dict[tag] = group
+        
+def unregister_group( tag):
+    "unregister_group( tag): remove tag from group_dict. See register_group"
+    group_dict.pop(tag, None)
         
 def get_group_list():
     group_list = [DEFAULT_GROUP]

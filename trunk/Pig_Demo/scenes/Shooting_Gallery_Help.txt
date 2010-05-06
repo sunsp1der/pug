@@ -1,0 +1,7 @@
+Try to shoot the flying targets
+
+Controls:
+	Left and Right Arrow: Aim
+	Spacebar: Fire
+	
+	

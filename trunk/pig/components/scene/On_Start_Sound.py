@@ -1,5 +1,3 @@
-from Opioid2D import Director
-
 from pug.component import *
 
 from pig import PigScene
@@ -22,7 +20,7 @@ class On_Start_Sound( Component):
     @component_method
     def on_start(self):
         "Get and play the sound object"
-        self.soundObject = get_sound( self.sound)
-        self.soundObject.play()        
+        self.sound_object = get_sound( self.sound)
+        self.sound_object.play()        
         
 register_component( On_Start_Sound)

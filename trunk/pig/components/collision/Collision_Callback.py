@@ -13,7 +13,8 @@ from Opioid2D.public.Sprite import Sprite
 from pug.component import *
 
 from pig.PigDirector import PigDirector
-from pig.editor.agui.group_dropdown import GroupDropdown, register_group
+from pig.editor.agui.group_dropdown import GroupDropdown, register_group, \
+        unregister_group
 
 
 class Collision_Callback( Component):
@@ -39,7 +40,7 @@ arguments: on_collision( toSprite, fromSprite, toGroup, my_group)
     @component_method
     def on_added_to_scene(self, scene):
         "Register for object.on_collision callback when object added to scene"
-        self.owner.join_group( self._my_group)
+        self.owner.join_collision_group( self._my_group)
         PigDirector.scene.register_collision_callback( self.owner, 
                                                     self.owner.on_collision,
                                                     self.my_group,
@@ -59,8 +60,8 @@ arguments: on_collision( toSprite, fromSprite, toGroup, my_group)
     def __del__(self):
         "__del__(): when component is deleted, unregister groups from gui"
         if self.ref():
-            register_group( (self.ref, "with_group"), None)        
-            register_group( (self.ref, "my_group"), None)        
+            unregister_group( (self.ref, "with_group"))        
+            unregister_group( (self.ref, "my_group"))        
         
     def get_with_group(self):
         return self._with_group

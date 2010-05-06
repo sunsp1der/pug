@@ -6,7 +6,7 @@ from pug.component import *
 
 from pig.editor.agui.group_dropdown import *
 
-class Join_Group( Component):
+class Join_Collision_Group( Component):
     """Object joins a sprite group for collisions or other uses."""
     #component_info
     _set = 'pig'
@@ -21,7 +21,7 @@ class Join_Group( Component):
 
     @component_method
     def on_added_to_scene(self, scene):
-        self.owner.join_group( self.group)
+        self.owner.join_collision_group( self.group)
         
 ### track all available groups for editor dropdowns
     def __init__(self, *args, **kwargs):
@@ -30,7 +30,7 @@ class Join_Group( Component):
 
     def __del__(self):
         try:
-            register_group( (self.ref, "group"), None)
+            unregister_group( (self.ref, "group"))
         except:
             pass
 
@@ -41,4 +41,4 @@ class Join_Group( Component):
         self._group = group
     group = property (get_group, set_group)
         
-register_component( Join_Group)
+register_component( Join_Collision_Group)

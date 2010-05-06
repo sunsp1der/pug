@@ -1,0 +1,8 @@
+
+Shoot the flying objects without getting hit.
+
+Controls:
+	Move: arrow keys.
+	Aim: mouse.  
+	Fire: mouse button.
+	Restart game: ctrl-R

@@ -4,7 +4,8 @@ from pug.component import component_method, register_component
 
 from Opioid2D.public.Node import Node
 
-from pig.editor.agui import ObjectsDropdown
+from pig.audio import get_sound
+from pig.editor.agui import ObjectsDropdown, SoundFile
 from pig.components import Spawner
 
 class Spawn_On_Destroy( Spawner):
@@ -17,6 +18,7 @@ class Spawn_On_Destroy( Spawner):
     _field_list = [
         ["spawn_object", ObjectsDropdown, {'component':True,
                                      'doc':"The object class to spawn"}],
+        ["sound", SoundFile, {'doc':"Sound to play when a spawn occurs"}],                                     
         ["spawn_location", Dropdown, {'list':['area', 'center', 'edges', 'top',
                                               'bottom','left','right'], 
                             'doc':"The area where objects can be spawned"}],
@@ -34,8 +36,10 @@ class Spawn_On_Destroy( Spawner):
 
     @component_method
     def on_added_to_scene(self, scene):
-        "Over-ride Spawner's on_added_to_scene... don't do anything."
-        pass
+        "Load the sound, if any"
+        if self.sound:
+            self.sound_object = get_sound( self.sound)
+
 
     @component_method
     def on_destroy(self):

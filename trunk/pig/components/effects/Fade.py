@@ -47,10 +47,7 @@ dstalpha: destination alpha to fade in to. Default: self.owner.alpha
     def on_destroy(self):
         if not self.fade_out_collisions:
             PigDirector.scene.unregister_collision_callback(self.owner)
-#            self.owner.do( Delay(0) + CallFunc(
-#                            PigDirector.scene.unregister_collision_callback,
-#                            self.owner)
-#                          )
+            self.owner.leave_collision_groups()
         self.fade_out()
         
     def fade_out(self, secs=None):

@@ -1,7 +1,7 @@
 ### import autocode ###
 from pig.PigSprite import PigSprite
-from pug.all_components import Set_Motion, Grow_Shrink, Collision_Destroy,\
-    On_Collision_Sound, Life_Zone, Join_Group
+from pug.all_components import Set_Motion, Collision_Destroy,\
+    On_Collision_Sound, Life_Zone
 ### End import autocode ###
 
 ### Bullet autocode ###

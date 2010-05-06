@@ -247,7 +247,7 @@ query: if True, query the user about saving the current scene first
         """Show scene data in a window"""
         pug.frame(self.scene)
             
-    def set_scene(self, value, forceReload = False):
+    def set_scene(self, value, forceReload=False):
         """set_scene(value): set the current scene class in the Director
 
 value can be either an actual scene class, or the name of a scene class        
@@ -263,6 +263,7 @@ value can be either an actual scene class, or the name of a scene class
                     value = PigScene
         else:
             if value not in self.sceneDict.values():
+                self.reload_scene_list()
                 value = self.sceneDict.get(value.__name__, value)
         oldscene = self.Director.scene
         if oldscene.__class__ != value or forceReload:
@@ -298,7 +299,7 @@ value can be either an actual scene class, or the name of a scene class
             scene = None
         return scene
     sceneclass = property(_get_sceneclass, set_scene, 
-                     doc="Pick an Opioid2D scene class to edit")
+                     doc="Scene class currently being edited")
     
     def _get_scene(self):
         try:
@@ -446,6 +447,9 @@ event: a wx.Event
             saved = save_scene_as()
             if not saved:
                 return False
+            else:
+                self.sceneDict[self.Director.scene.__class__.__name__] = \
+                                                self.Director.scene.__class__
             # we want to save as the new scene name AND as working scene...
         if self._new_scene:
             # hack in user code from original file
@@ -455,6 +459,9 @@ event: a wx.Event
         saved = save_scene_as( self.scene.__class__.__name__, '__Working__.py')
         if not saved:
             return False
+        else:
+            self.sceneDict[self.Director.scene.__class__.__name__] = \
+                                                self.Director.scene.__class__
         wx.GetApp().refresh()
         return True            
         
@@ -463,6 +470,8 @@ event: a wx.Event
         filename = save_scene_as()
         if filename:
             self.revert_working_scene()
+            self.sceneDict[self.Director.scene.__class__.__name__] = \
+                                                self.Director.scene.__class__
         return filename
 
     def rewind_scene(self):
@@ -611,7 +620,9 @@ def start_opioid( rect, title, icon, scene):
     try:
         Opioid2D.Director.run( scene)
     except ImportError:
-        raise
+        pass # we're exiting Opioid altogether...
+#        print "start_opioid: gotcha"
+#        raise
     except:
         raise
          
@@ -646,7 +657,8 @@ _interfacePugview = {
         [' Current Scene', pug.Label],
         ['sceneclass', pug.Dropdown, 
              {'label':'   Select Scene',
-              'list_generator':_scene_list_generator}],
+              'list_generator':_scene_list_generator,
+              'doc':"Pick a scene to edit"}],
         ['commit_scene', None, {
                                'label':"   Save Scene", 
                                'doc':"Commit current scene to disk",

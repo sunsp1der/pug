@@ -1,60 +1,66 @@
 now:	
-	fading targets still kill player
-	test components
-		Face_Motion
-			Shooting_Gallery via Explode_Particle		
-		Face_Object
-		Forward_Motion
-		Life_Zone
-			Shooting_Gallery via Bullet
-			*
-		Motion_Zone
-		Random_Motion
-			Shooting_Gallery via Explode_Particle		
-			Shooting_Gallery via Target					
-		Self_Destruct
-			Shooting_Gallery via Explode_Particle		
-		Set_Motion
-			Shooting_Gallery via Explode_Particle		
-			Shooting_Gallery via Bullet
-		Stop_Motion_On_Destroy
-			Shooting_Gallery via Bullet
-		Collision_Callback
-		Collision_Destroy
-			Shooting_Gallery via Bullet
-			Shooting_Gallery via Target					
-			Shooting_Gallery via Target					
-		Join_Group
-		Key_Direction_Controls
-		Key_Drive_Controls
-		Key_Spawn
-		Mouse_Face
-		Mouse_Follow
-		Fade
-			Shooting_Gallery via Target					
-			Shooting_Gallery via Bullet
-		Grow_Shrink
-			Shooting_Gallery via Target					
-			Shooting_Gallery via Explode_Particle		
-			Shooting_Gallery via Bullet
-		On_Start_Sound
-		Open_File_On_Start
-		Utility_Keys
-		Set_Gname
-		On_Collision_Destroy
-			Shooting_Gallery via Bullet
-		On_Destroy_Sound
-		On_Key_Sound
-		Spawn_On_Destroy
-			Shooting_Gallery via Target					
-		Spawner
-			Shooting_Gallery via Launcher
-	add option to run only one instance of info file		
-	add info file for demos
 	html tutorial
 		view demos
 		examine sprites
-		add components		
+		components		
+			add, remove, browse
+			test components
+				Face_Motion
+					Shooting_Gallery via Explode_Particle		
+				Face_Object
+				Forward_Motion
+				Life_Zone
+					Shooting_Gallery via Bullet			
+				Motion_Zone
+					Fly_Around
+				Random_Motion
+					Shooting_Gallery via Explode_Particle		
+					Shooting_Gallery via Target					
+				Self_Destruct
+					Shooting_Gallery via Explode_Particle		
+				Set_Motion
+					Shooting_Gallery via Explode_Particle		
+					Shooting_Gallery via Bullet
+				Stop_Motion_On_Destroy
+					Shooting_Gallery via Bullet
+				Collision_Callback
+				Collision_Destroy
+					Shooting_Gallery via Bullet
+					Shooting_Gallery via Target					
+				Join_Group
+				Key_Direction_Controls
+					Fly_Around
+				Key_Drive_Controls
+					Shooting_Gallery
+				Key_Spawn
+					Shooting_Gallery
+				Mouse_Face
+					Fly_Around
+				Mouse_Follow
+				Fade
+					Shooting_Gallery via Target					
+					Shooting_Gallery via Bullet
+				Grow_Shrink
+					Shooting_Gallery via Target					
+					Shooting_Gallery via Explode_Particle		
+					Shooting_Gallery via Bullet
+				On_Start_Sound
+					Fly_Around
+				Utility_Keys
+					Fly_Around
+					Shooting_Gallery
+				On_Key_Sound_Scene
+				Set_Gname
+				On_Collision_Sound
+					Shooting_Gallery via Bullet
+				On_Destroy_Sound
+					Fly_Around
+				On_Key_Sound
+				Spawn_On_Destroy
+					Shooting_Gallery via Target
+					Fly_Around				
+				Spawner
+					Shooting_Gallery via Launcher
 		create sprite
 		save sprite
 		create scene
@@ -76,6 +82,7 @@ bugs:
 	crash - selecting an object while changing selectionwin to another view 
 
 later: 
+	allow gnamed objects in objects dropdown (e.g. Spawner)
 	round out floats (mouseover for full display)
 	drag n drop
 	allow lists of categories for components... file in multiple places
