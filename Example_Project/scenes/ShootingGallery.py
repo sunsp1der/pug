@@ -3,7 +3,7 @@ from objects.Bullet import Bullet
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
 from pug.all_components import Key_Drive_Controls, Key_Spawn,\
-    Collision_Destroy, Join_Group
+    Collision_Destroy, Join_Collision_Group
 ### End import autocode ###
 
 ### ShootingGallery autocode ###
@@ -39,6 +39,6 @@ class ShootingGallery(PigScene):
         pigsprite_instance.components.add( Collision_Destroy(
                 with_group='bullet',
                 my_group='target') )
-        pigsprite_instance.components.add( Join_Group(
+        pigsprite_instance.components.add( Join_Collision_Group(
                 group='target') )
 ### End ShootingGallery autocode ###

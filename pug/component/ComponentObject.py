@@ -9,7 +9,7 @@ from pug.component.component import *
 _DEBUG = False
 
 class ComponentObject(object):
-
+    __components = None
     def __del__(self):
         if _DEBUG: print "ComponentObject.__del__"
         self.__components = None
@@ -17,12 +17,11 @@ class ComponentObject(object):
     def __init__(self):
         self.__components = ComponentSet(self)
 
-    def components(doc): 
-        """Returns the component set associated with this object."""
-        def get_components(self):
-            return self.__components
-        return property(get_components, doc=doc)
-    components = components(components.__doc__)
+    def get_components(self):
+        return self.__components
+    components = property(get_components,
+                doc="Returns the component set associated with this object.")
+
     _codeStorageDict = {
             'skip_attributes': ['__components']                        
                         }    

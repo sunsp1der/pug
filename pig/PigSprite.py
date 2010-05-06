@@ -33,9 +33,25 @@ Opioid2d Sprite with features for use with pug"""
     def __init__(self, img=None, gname='', register=True):
         pug.BaseObject.__init__(self, gname=gname)
         Sprite._preinit(self, img)
+        self.collision_groups = set([])
         self.on_create()
         if register:
             self.do_register()
+            
+    def join_collision_group(self, group):
+        "join_collision_group(group): join_group, add to self.collision_groups"
+        self.collision_groups.add(group)
+        self.join_group(group)
+        
+    def leave_collision_groups(self):
+        "leave_collision_groups(): leave all collision groups"
+        for group in self.collision_groups:
+            Sprite.leave_group(self, group)
+        self.collision_groups=set([])
+        
+    def leave_group(self, group):
+        self.collision_groups.discard(group)
+        Sprite.leave_group(self, group)
         
     def set_archetype(self, TF):
         if TF == "True":
@@ -116,7 +132,6 @@ system. It does nothing in the base class, but is meant for overriding or for
 stacking with pug.components.
 """
         pass
-#        print "on_collision", self, toSprite, fromSprite, toGroup, fromGroup
 
     def destroy(self):
         """destroy(): set sprite up for deletion, but allow option to block

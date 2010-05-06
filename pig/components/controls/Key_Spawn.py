@@ -5,7 +5,8 @@ from pug.component import component_method, register_component
 from Opioid2D.public.Node import Node
 
 from pig.keyboard import keys
-from pig.editor.agui import ObjectsDropdown, KeyDropdown
+from pig.audio import get_sound
+from pig.editor.agui import ObjectsDropdown, KeyDropdown, SoundFile
 from pig.components.spawn.Spawner import Spawner
 from pig.PigDirector import PigDirector
 
@@ -20,6 +21,7 @@ class Key_Spawn( Spawner):
         ['key', KeyDropdown, {'doc':"Press this key to spawn"}],                   
         ["spawn_object", ObjectsDropdown, {'component':True,
                                      'doc':"The object class to spawn"}],
+        ["sound", SoundFile, {'doc':"Sound to play when a spawn occurs"}],                                     
         ["spawn_location", Dropdown, {'list':['area', 'center', 'edges', 'top',
                                               'bottom','left','right'], 
                             'doc':"The area where objects can be spawned"}],
@@ -47,6 +49,8 @@ class Key_Spawn( Spawner):
         "Set spawn key"
         self.k_info = [None,]
         self.k_info[0] = scene.register_key_down( self.key, self.spawn)
+        if self.sound:
+            self.sound_object = get_sound( self.sound)        
 
     @component_method
     def on_destroy(self):

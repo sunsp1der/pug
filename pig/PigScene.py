@@ -66,7 +66,7 @@ Designing fromGroup and toGroup efficiently will improve program
 performance. Avoid setting up situations where unnecessary collisions tests are
 made.  
 """     
-        sprite.join_group(toGroup)
+        sprite.join_collision_group(toGroup)
         idx1 = sprite
         idx2 = (toGroup, fromGroup)
         sprite_dict = self._collision_callback_dict.get(idx1)
@@ -107,11 +107,12 @@ callbacks using register_collision_callback
         else:
             for callback in callback_list:
                 callback( toSprite, fromSprite, toGroup, fromGroup)
+# WAS THIS UNNECESSARY AFTER ALL!?                
         # we only get one callback, so check if fromSprite needs a call
         # this is slow and could possibly be improved
-        if check_reverse:
-            self.collide_callbacker( fromSprite, toSprite, fromGroup, toGroup, 
-                                   False)
+#        if check_reverse:
+#            self.collide_callbacker( fromSprite, toSprite, fromGroup, toGroup, 
+#                                   False)
         
     def unregister_collision_callback(self, sprite, toGroup=None,fromGroup=None): 
         """unregister_collision_callback( sprite, toGroup, fromGroup)

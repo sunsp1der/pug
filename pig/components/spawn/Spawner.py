@@ -9,7 +9,8 @@ from pug.component import *
 from pug import Dropdown
 
 from pig.util import get_project_object
-from pig.editor.agui import ObjectsDropdown
+from pig.audio import get_sound
+from pig.editor.agui import ObjectsDropdown, SoundFile
 
 class Spawner(Component):
     """Owner spawns other objects"""
@@ -21,6 +22,7 @@ class Spawner(Component):
     _field_list = [
         ["spawn_object", ObjectsDropdown, {'component':True,
                                      'doc':"The object class to spawn"}],
+        ["sound", SoundFile, {'doc':"Sound to play when a spawn occurs"}],
         ["spawn_interval",
                 "Seconds between spawns (0 for no automatic spawning)"],
         ["spawn_variance",
@@ -52,6 +54,7 @@ class Spawner(Component):
         ]
     # attribute defaults
     spawn_object = None
+    sound = None
     spawn_interval = 2.0
     spawn_variance = 1.0
     spawn_delay = 0.0
@@ -69,6 +72,7 @@ class Spawner(Component):
     obj_callback = None
     # other defaults
     last_object = None
+    sound_object = None
     spawn_count = 0
     spawn_class = None
     spawned_objects = None
@@ -77,7 +81,8 @@ class Spawner(Component):
     @component_method
     def on_added_to_scene(self, scene):
         "Start spawn timer when object is added to scene"
-        self.spawned_objects = weakref.WeakValueDictionary()
+        if self.sound:
+            self.sound_object = get_sound( self.sound)
         self.start_spawning()
         
     def start_spawning(self):
@@ -89,12 +94,12 @@ class Spawner(Component):
     
     @component_method 
     def spawn(self):
-        "spawn()->[objects_spawned] Perform the spawn as set up"
+        "spawn()->[objects_spawned]: spawn objects"
         if self.spawn_object != self.last_object:
-            self.spawn_class = get_project_object(self.spawn_object)            
+            self.spawn_class = get_project_object(self.spawn_object)
         if not isclass(self.spawn_class) or not self.enabled:
-            return None
-        if not self.spawned_objects:
+            return []
+        if self.spawned_objects is None:
             self.spawned_objects = weakref.WeakValueDictionary()
         owner = self.owner
         spawned_objects = []
@@ -162,6 +167,8 @@ class Spawner(Component):
                 getattr(obj,'callback')(self)
             self.spawn_count += 1
             spawned_objects.append(obj)
+        if spawned_objects and self.sound_object:
+            self.sound_object.play()            
         return spawned_objects               
             
     def get_next_spawn_time(self):

@@ -5,11 +5,16 @@ from objects.Launcher import Launcher
 from objects.Target import Target
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
-from pug.all_components import Key_Drive_Controls, Key_Spawn
+from pug.all_components import Utility_Keys, Key_Drive_Controls, Key_Spawn
 ### End import autocode ###
 
 ### Shooting_Gallery autocode ###
 class Shooting_Gallery(PigScene):
+    def __init__(self, *args, **kwargs):
+        PigScene.__init__(self, *args, **kwargs)
+        self.components.add( Utility_Keys(
+                info_F1='scenes\\Shooting_Gallery_Help.txt') )
+
     def on_enter(self):
         # Archetypes
         Bullet_archetype = Bullet(gname='Bullet')
@@ -39,6 +44,7 @@ class Shooting_Gallery(PigScene):
                 backward_key=None) )
         cannon.components.add( Key_Spawn(
                 spawn_object='Bullet',
+                sound='sounds\\snap.wav',
                 spawn_offset=(0, -1),
                 max_spawns_in_scene=1) )
 ### End Shooting_Gallery autocode ###
