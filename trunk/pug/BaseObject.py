@@ -2,7 +2,7 @@
 
 import pug
 from pug.util import get_code_file
-from pug.code_storage import add_subclass_skip_attributes
+from pug.code_storage import add_subclass_storageDict_key
 
 class BaseObject(pug.GnamedObject, pug.ComponentObject):
     """BaseObject
@@ -26,5 +26,5 @@ plus a few utility functions
         return get_code_file(self)
     
     _codeStorageDict = {}
-    add_subclass_skip_attributes(_codeStorageDict, pug.GnamedObject)
-    add_subclass_skip_attributes(_codeStorageDict, pug.ComponentObject)    
+    add_subclass_storageDict_key(_codeStorageDict, pug.GnamedObject)
+    add_subclass_storageDict_key(_codeStorageDict, pug.ComponentObject)    

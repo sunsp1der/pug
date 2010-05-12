@@ -6,7 +6,7 @@ from Opioid2D.public.Sprite import SpriteMeta
 import pug
 from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.syswx.attributeguis import *
-from pug.code_storage import add_subclass_skip_attributes
+from pug.code_storage import add_subclass_storageDict_key
 from pug.code_storage.constants import _INDENT
 from pug.util import make_valid_attr_name, prettify_path
 
@@ -309,7 +309,7 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
             'custom_export_func': _create_object_code,
             'as_class': True,
                         }
-    add_subclass_skip_attributes(_codeStorageDict, pug.BaseObject) 
+    add_subclass_storageDict_key(_codeStorageDict, pug.BaseObject) 
 
 # force derived classes to use PigSprite as a base. Advanced users can get
 # around this however they need to

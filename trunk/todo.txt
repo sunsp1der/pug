@@ -62,12 +62,19 @@ now:
 				Spawner
 					Shooting_Gallery via Launcher
 		create sprite
+			new graphic
 		save sprite
 		create scene
 		create a project
-	TODO list
-		Undo! - save query when changing levels or quitting
-		Separate runtime necessities
+		edit code
+		file layout
+		appendix:
+			working file
+		TODO list
+			Undo! - save query when changing levels or quitting
+			Separate runtime necessities
+			More automated component loading
+			Resources
 	create zip tarball exe?
 
 bugs: 

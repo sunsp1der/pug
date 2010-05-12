@@ -1,4 +1,5 @@
 import sys
+import _pythonpather
 from pig.util import run_pig_scene
 
 # command line arguments
