@@ -19,17 +19,18 @@ actually different from the original, 'filename', 'errfilename' etc.
     exporter.export(filename, obj, asClass, dict)
     return exporter
 
-def add_subclass_attributes( storageDict, subclass):
-    """add_subclass_attributes( storageDict, subclass)->list of adds
+def add_subclass_storageDict_key( storageDict, subclass,key='skip_attributes'):
+    """add_subclass_storageDict_info( storageDict, subclass, key)->list of adds
     
-Add subclass's codeStorageDict's attributes to storageDict. This will take care
-of name mangling as well
+Add subclass's codeStorageDict's info from 'key' to storageDict. This will take 
+care of name mangling as well. Generally used for keys: attributes, and
+skip_attributes.
 """
     subDict = getattr(subclass,'_codeStorageDict',{})
-    subAttributes = subDict.get('attributes',[])
-    if subAttributes and not(storageDict.get('attributes')):
-        storageDict['attributes'] = []
-    list = storageDict['attributes']
+    subAttributes = subDict.get(key,[])
+    if subAttributes and not(storageDict.get(key)):
+        storageDict[key] = []
+    list = storageDict[key]
     addList = []
     for attribute in subAttributes:
         if attribute.startswith('__'):
@@ -38,25 +39,4 @@ of name mangling as well
             continue
         addList.append(attribute)
     list+=addList
-    return addList
-    
-def add_subclass_skip_attributes( storageDict, subclass):
-    """add_subclass_skip_attributes( storageDict, subclass)->list of adds
-    
-Add subclass's codeStorageDict's skip_attributes to storageDict. This will take 
-care of name mangling as well
-"""
-    subDict = getattr(subclass,'_codeStorageDict',{})
-    subAttributes = subDict.get('skip_attributes',[])
-    if subAttributes and not(storageDict.get('skip_attributes')):
-        storageDict['skip_attributes'] = []
-    list = storageDict['skip_attributes']
-    addList = []
-    for attribute in subAttributes:
-        if attribute.startswith('__'):
-            attribute = ''.join(['_',subclass.__name__,attribute])
-        if attribute in list:
-            continue
-        addList.append(attribute)
-    list+=addList
-    return addList 
+    return addList     

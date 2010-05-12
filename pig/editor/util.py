@@ -13,6 +13,7 @@ from Opioid2D.public.Node import Node
 from Opioid2D.public.Vector import VectorReference
 from Opioid2D.public.Image import ImageInstance
 
+import pug
 from pug import code_export, CodeStorageExporter
 from pug.component import Component
 from pug.syswx.util import show_exception_dialog
@@ -70,10 +71,25 @@ def create_new_project(project_path=None):
         dlg.Destroy()
     try:
         shutil.copytree(source, project_path)
+        create_pythonpather( project_path)
     except:
         show_exception_dialog()          
         return  
     return project_path
+
+def create_pythonpather( path):
+    filename = os.path.join( path, '_pythonpather.py')
+    pp_file = open( filename, 'w')
+    pp_code = """# This file makes sure adds pig and pug to the search path
+    
+try:
+    import sys
+    sys.path.append('""" + os.path.split(pug.__path__[0])[0]+"""')
+except:
+    pass
+"""
+    pp_file.write( pp_code)
+    pp_file.close
 
 def open_project( project_path=None, force=False, quit=True): 
     """open_project( project_path=None, force=False, quit=True)->True if openned

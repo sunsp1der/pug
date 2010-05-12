@@ -15,7 +15,7 @@ from Opioid2D.public.Scene import SceneCallbacks
 import pug
 from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.code_storage.constants import _INDENT
-from pug.code_storage import add_subclass_skip_attributes
+from pug.code_storage import add_subclass_storageDict_key
 
 from pig.editor.agui import SceneNodes, SceneLayers
 from pig.editor.util import get_available_layers, save_object
@@ -630,7 +630,7 @@ If scene is a working scene, return
                                 '_PigScene__node_num', '_key_down_dict', 
                                 '_key_up_dict']
              }   
-    add_subclass_skip_attributes(_codeStorageDict, pug.BaseObject)
+    add_subclass_storageDict_key(_codeStorageDict, pug.BaseObject)
 
 # force derived classes to use PigScene as base class
 PigScene._codeStorageDict['base_class']=PigScene
