@@ -6,5 +6,5 @@ class SoundFile( Filename):
 #                   "mp3 file (*.mp3)|*.mp3|" \
 #                   "midi files (*.mid)|*.mid|" \
 #                   "All files (*.*)|*.*"
-        aguidata['subfolder'] = "sounds"
+        aguidata['subfolder'] = "sound"
         Filename.__init__(self, attribute, window, aguidata=aguidata, **kw)

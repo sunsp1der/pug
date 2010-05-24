@@ -26,7 +26,7 @@ class Bullet(PigSprite):
         self.components.add( Life_Zone() )
         self.components.add( Fade(
                 fade_in_secs=0.0,
-                fade_out_secs=0.1) )
+                fade_out_secs=0.2) )
         self.components.add( Collision_Destroy(
                 with_group='target',
                 my_group='bullet') )

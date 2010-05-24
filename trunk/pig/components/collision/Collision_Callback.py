@@ -20,8 +20,7 @@ from pig.editor.agui.group_dropdown import GroupDropdown, register_group, \
 class Collision_Callback( Component):
     """Object's "on_collision" method is called when it collides
     
-arguments: on_collision( toSprite, fromSprite, toGroup, my_group)
-"""
+arguments: on_collision( toSprite, fromSprite, toGroup, my_group)"""
     #component_info
     _set = 'pig'
     _type = 'collision'

@@ -18,16 +18,16 @@ which is stored in AguiLabelSizer.line, to visually separate text from text on
 next line.
 """
     
-    def __init__(self, parent, label='', line = True, flag=0, font=None):
+    def __init__(self, parent, label='', line=True, style=0, font=None):
         wx.BoxSizer.__init__(self, orient=wx.VERTICAL)
-        text = wx.StaticText(parent, label=label)
+        text = wx.StaticText(parent, label=label, style=style)
         if font:
             text.SetFont(font)
         text.SetMinSize((-1,-1))     
         self.AddSpacer((1, WX_TEXTEDIT_LABEL_YOFFSET))
         textSizer = wx.BoxSizer(orient=wx.HORIZONTAL)
         textSizer.Add(text, 1, wx.EXPAND | wx.WEST, 2)
-        self.AddSizer(textSizer, 1)
+        self.AddSizer(textSizer, 1, wx.EXPAND)
         if line:
             line = wx.StaticLine(parent=parent, style = 0)            
             self.Add(line, flag=wx.EXPAND)

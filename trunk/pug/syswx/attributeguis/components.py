@@ -31,18 +31,24 @@ For kwargs optional arguments, see the Base attribute GUI
     def __init__(self, attribute, window, aguidata={}, **kwargs):
         #label
         label = wx.Panel(window, style=0)
-        if not hasattr(self, 'defaultBackgroundColor'):
-            defaultBackgroundColor = label.GetBackgroundColour()
-            r = defaultBackgroundColor[0] - 10
-            g = defaultBackgroundColor[1] - 10
-            b = defaultBackgroundColor[2] - 10
-            if r < 0: r = 0
-            if g < 0: g = 0
-            if b < 0: b = 0
-            defaultBackgroundColor.Set(r,g,b)
-            self.__class__.defaultBackgroundColor = defaultBackgroundColor
-        textSizer = AguiLabelSizer(parent=label, line=True)
-        label.SetSizer(textSizer)
+#        if not hasattr(self, 'defaultBackgroundColor'):
+#            defaultBackgroundColor = label.GetBackgroundColour()
+#            r = defaultBackgroundColor[0] - 10
+#            g = defaultBackgroundColor[1] - 10
+#            b = defaultBackgroundColor[2] - 10
+#            if r < 0: r = 0
+#            if g < 0: g = 0
+#            if b < 0: b = 0
+#            defaultBackgroundColor.Set(r,g,b)
+#            self.__class__.defaultBackgroundColor = defaultBackgroundColor
+        labelAreaSizer = wx.BoxSizer(orient=wx.VERTICAL)
+        textSizer = AguiLabelSizer(parent=label, line=False)
+        labelAreaSizer.AddSizer(textSizer, 0, wx.TOP, 1)
+        availSizer = AguiLabelSizer(parent=label, line=True, label='available:')
+        availSizer.textCtrl.SetWindowStyleFlag(wx.TE_RIGHT)
+        availSizer.textCtrl.SetForegroundColour('gray')
+        labelAreaSizer.AddSizer(availSizer, 1, wx.EXPAND | wx.TOP, 6)
+        label.SetSizer(labelAreaSizer)
         label.textCtrl = textSizer.textCtrl
                     
         #control
@@ -80,7 +86,7 @@ For kwargs optional arguments, see the Base attribute GUI
         # tree of available components
         addTree = ComponentAddTree(parent=control)
         addTree.SetPopupMinWidth(100)
-        addTree.SetToolTipString("Component to add to object")
+        addTree.SetToolTipString("Component to add")
         addSizer.Add( addTree, 1)
         self.addTree = addTree
         # add button
@@ -139,7 +145,7 @@ For kwargs optional arguments, see the Base attribute GUI
         for child in self.control.GetChildren():
             if isinstance(child, wx.TopLevelWindow):
                 wx.CallAfter( child.Close)
-        aguidata.setdefault('background_color', self.defaultBackgroundColor)
+#        aguidata.setdefault('background_color', self.defaultBackgroundColor)
         aguidata.setdefault('label','   components')
         try:
             resetObject = self.object != window.object

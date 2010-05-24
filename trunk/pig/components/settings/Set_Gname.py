@@ -17,7 +17,7 @@ class Set_Gname(Component):
     
     @component_method
     def on_added_to_scene(self, scene):
-        """Start facing motion when object is added to scene"""
+        """Set gname when object is added to scene"""
         if self.gname:
             self.owner.gname = self.gname
 

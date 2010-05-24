@@ -25,6 +25,7 @@ Warning: This component uses a tick_action, so it may be slow."""
     actual_offset = 0
     tick_action = None
     last_rotation = None
+    last_speed = None
     
     @component_method
     def on_added_to_scene(self, scene):
@@ -57,6 +58,7 @@ speed: set object's forward velocity or acceleration to this value. Defaults to
                 self.tick_action.abort()            
                 self.tick_action = None
             self.last_rotation = None
+            self.last_speed = None
             self.set_motion()            
         
     @component_method
@@ -75,10 +77,12 @@ speed: set object's forward velocity or acceleration to this value. Defaults to
     def update_forward_motion(self):
         if not self.enabled:
             return
-        if self.owner.rotation == self.last_rotation:
+        if self.owner.rotation == self.last_rotation and\
+                self.speed == self.last_speed:
             return        
         self.set_motion()        
         self.last_rotation = self.owner.rotation
+        self.last_speed = self.speed
         
         
 register_component( Forward_Motion)

@@ -1,9 +1,25 @@
 now:	
 	html tutorial
-		view demos
-		examine sprites
-		components		
-			add, remove, browse
+		saving the scene
+			no undo
+			working version			
+		create sprite
+			new graphic
+		save sprite
+			archetypes
+		create scene
+			self-destruct-o
+			load an object
+				connection to archetypes
+			change the object
+		create a project
+		edit code
+			step-by-step
+		appendix game and pug settings
+		appendix file layout
+			file layout
+			working file
+		appendix components		
 			test components
 				Face_Motion
 					Shooting_Gallery via Explode_Particle		
@@ -61,15 +77,7 @@ now:
 					Fly_Around				
 				Spawner
 					Shooting_Gallery via Launcher
-		create sprite
-			new graphic
-		save sprite
-		create scene
-		create a project
-		edit code
-		file layout
-		appendix:
-			working file
+			
 		TODO list
 			Undo! - save query when changing levels or quitting
 			Separate runtime necessities

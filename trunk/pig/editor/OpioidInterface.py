@@ -18,6 +18,7 @@ from pug.component.pugview import _dataPugview, _dataMethodPugview
 from pug.syswx.util import show_exception_dialog, cache_default_view
 from pug.syswx.component_browser import ComponentBrowseFrame
 from pug.syswx.pugmdi import PugMDI
+from pug.syswx.drag_drop import FileDropTarget
 
 from pig import PigScene, PigSprite, Director
 from pig.util import *
@@ -216,9 +217,13 @@ settingsObj: an object similar to the one below... if it is missing any default
                     title=''.join(["P.I.G. Editor - ", self.project_name]),
                     name="Pig Editor")
             app.set_project_frame(frame)
-            frame.GetNotebook().Split(2, wx.LEFT)
-            size = frame.GetSize()
-            frame.GetNotebook().GetPage(1).SetSize([size[0]/2,size[1]])
+        else:
+            frame = app.get_project_frame()
+        target = FileDropTarget(self)
+        frame.SetDropTarget( target)
+        frame.GetNotebook().Split(2, wx.LEFT)
+        size = frame.GetSize()
+        frame.GetNotebook().GetPage(1).SetSize([size[0]/2,size[1]])
         # cache a sprite view for speed on first selection
         if not self.cached[0]:
             dummy = PigSprite( register=False)
@@ -234,7 +239,10 @@ settingsObj: an object similar to the one below... if it is missing any default
             psyco.full()
         except ImportError:
             pass
-        
+
+    def on_drop_files(self, x, y, filenames):
+        # pass to util function
+        return on_drop_files( x, y, filenames)
             
     def quit(self, query=True):
         """quit( query=True)

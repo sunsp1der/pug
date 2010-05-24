@@ -4,9 +4,12 @@ import wx
 from wx.lib.imagebrowser import ImageDialog, FindFiles, ID_CHECK_BG
 
 class PugImageDialog(ImageDialog):
-    def __init__(self, *args, **kwargs):
-        ImageDialog.__init__(self,*args,**kwargs)
+    def __init__(self, parent, set_dir = None, filter = None):
+        ImageDialog.__init__(self, parent, set_dir)
         self.image_view.SetBackgroundMode( ID_CHECK_BG)
+        if filter:
+            self.ChangeFileTypes(filter)
+                        
     def SetSelected(self, val):
         """Select the first list item equal to val"""
         num = self.fl_list.index(val)

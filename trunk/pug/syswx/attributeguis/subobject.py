@@ -13,23 +13,25 @@ from pug.syswx.agui_text_ctrl import AguiTextCtrl
 class SubObject (Base):
     """An attribute gui for editing attributes of an object
 
-SubObject(attribute, window, **kwargs)
+SubObject(attribute, window, aguidata, **kwargs)
 attribute: what attribute of window.object is being controlled
-window: the parent pugWindow. 
-kwargs:
+window: the parent pugWindow.
+aguidata:
+    format_floats: round floats to 3 decimal places. 
+                    defaults to pug.constants.FORMAT_FLOATS
     sub_attributes: a list of the object's attributes to be shown. For example,
                     a point object might have ['x', 'y']
     no_button: normally this agui has a button to open a pugview for the object.
                     If this is true, there will be no button. Default: False
-For other kwargs arguments, see the Base attribute GUI
+For other aguidata arguments, see the Base attribute GUI
 
-Contains one row for each attribute listed in kwarg: 'sub_attributes'. Each row 
-has a simple text entry for the sub_attribute. This has the effect of creating a
-text edit gui for each sub_attribute.
+Contains one row for each attribute listed in aguidata: 'sub_attributes'. Each 
+row has a simple text entry for the sub_attribute. This has the effect of 
+creating a text edit gui for each sub_attribute.
     
 This control is generally meant to be used for object instances, but could be 
 used for any object. It is especially useful for things like vectors that are
-simple objects that contain a few values in them (i.e. X and Y)
+simple objects that contain a few values within them (i.e. X and Y)
 """
     def __init__(self, attribute, window, aguidata={},**kwargs):
         #attributes
@@ -64,15 +66,15 @@ simple objects that contain a few values in them (i.e. X and Y)
         subcount = len(sub_attributes)
         for sub in sub_attributes:
             subnum += 1
-            controlText = AguiTextCtrl( control)
+            controlText = AguiTextCtrl(control, aguidata.get('format_floats',
+                                                             None))
             controlText.Bind(wx.EVT_TEXT_ENTER, self.apply)
             controlText.Bind(wx.EVT_KILL_FOCUS, self.apply)
             controlHSizer = wx.BoxSizer(orient=wx.HORIZONTAL)
             controlHSizer.Add(controlText,1)
             controlSizer.AddSizer(controlHSizer, flag=wx.EXPAND)               
             self.subControlList += [(sub,controlText)]
-            rightLabel = AguiLabelSizer(label, sub, subnum == subcount, 
-                                       flag=wx.ALIGN_RIGHT)
+            rightLabel = AguiLabelSizer(label, sub, subnum == subcount)
             rightLabel.SetMinSize((-1,controlText.MinSize[1]+1))
             if subnum == 1:
                 if aguidata.get('no_button', False):

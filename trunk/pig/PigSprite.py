@@ -12,7 +12,7 @@ from pug.util import make_valid_attr_name, prettify_path
 
 from pig.PigDirector import PigDirector
 from pig.editor.util import get_available_layers, save_object, \
-                                exporter_cleanup
+                                exporter_cleanup, _fl_art_types
 
 
 _DEBUG = False
@@ -102,7 +102,8 @@ Opioid2d Sprite with features for use with pug"""
         # HACK: but it slows down animations ALOT. wtf with this?!
         #Sprite.set_image(self,image)
         
-    image_file = property(get_image_file, set_image_file)
+    image_file = property(get_image_file, set_image_file, 
+                          doc="The filename of this sprite's image")
     
     # scene management
     def _set_gname(self, value):
@@ -315,14 +316,6 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
 # around this however they need to
 # PigSprite._codeStorageDict['base_class'] = PigSprite
 
-# test function 
-    def test(self):
-        from pug.util import edit_process
-        module = self._get_code_file()
-#        cmd = "C:\Python25\Lib\idlelib\idle.bat" + module.__file__
-        # cmd = "C:\Python25\Lib\idlelib\idle.bat" 
-        # subprocess.Popen(cmd)
-        edit_process (module)
         
 _spritePugview = {
     'name':'PigSprite Editor',
@@ -338,16 +331,19 @@ _spritePugview = {
                            "It will not appear in the game."])],
         ['save_sprite', None, {'label':'   Save Object',
                                'use_defaults': True}],
+        [' Components', pug.Label],
+        ['components'],
+        [' Image', pug.Label],
+        ['image_file', pug.ImageBrowser, {'subfolder':'art', 
+                                          'filter':_fl_art_types}],
+        ['color'],
         [' Spacial', pug.Label],
         ['layer_name', pug.Dropdown, {'list_generator':get_available_layers,
                                       'label':'   layer'}],
         ['position'],
         ['rotation'],
         ['scale'],
-        [' Image', pug.Label],
-        ['image_file', pug.ImageBrowser, {'subfolder':'art'}],
-        ['color'],
-        ['lighting'],
+#        ['lighting'],
     #        ['', Label, {'label':' Groups'}],
     #        ['group', Dropdown, 
     #                      'list_generator':get_available_groups,
@@ -356,24 +352,21 @@ _spritePugview = {
     #        ['rotation_speed'],
     #        ['velocity'],
     #        ['acceleration'],
-        [' Components', pug.Label],
-        ['components'],
         [' Functions', pug.Label],
         ['delete',"Delete this sprite"],
     #        ['_delete_test'],
     ]       
  }
-
+pug.add_pugview('PigSprite', _spritePugview, True)
 ########################################################
-# reveal this to test PigSprite deletion problems
+## reveal this to test PigSprite deletion problems
 #_spritePugview['attributes'].append(['test_referrers'])
 #from pug.util import test_referrers
 #def _test_referrers( self):
 #    test_referrers(self)
 #PigSprite.test_referrers = _test_referrers
 ####################################################
-
 if hasattr(PigSprite,'test'):
     _spritePugview['attributes'].append(['test'])
 
-pug.add_pugview('PigSprite', _spritePugview, True)
+
