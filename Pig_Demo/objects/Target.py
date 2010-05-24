@@ -23,11 +23,11 @@ class Target(PigSprite):
                 max_objects_per_spawn=20,
                 add_velocity=True) )
         self.components.add( Fade(
-                fade_in_secs=0.0,
-                fade_out_secs=0.5) )
+                fade_in_secs=-1.0,
+                fade_out_secs=0.3) )
         self.components.add( Grow_Shrink(
                 grow_in_secs=0.6,
-                shrink_out_secs=0.0) )
+                shrink_out_secs=-1.0) )
         self.components.add( Life_Zone() )
         self.components.add( Random_Motion(
                 angle_min=-30,

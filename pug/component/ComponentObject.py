@@ -20,7 +20,7 @@ class ComponentObject(object):
     def get_components(self):
         return self.__components
     components = property(get_components,
-                doc="Returns the component set associated with this object.")
+                doc="Components attached to this object.")
 
     _codeStorageDict = {
             'skip_attributes': ['__components']                        

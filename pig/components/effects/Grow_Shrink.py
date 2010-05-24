@@ -16,8 +16,8 @@ class Grow_Shrink(Component):
             ['grow_in_secs',
                     "Number of seconds to take growing in. -1 = no grow."],
             ['shrink_out_secs',
-                    "Number of seconds to take fading out when owner is" + \
-                    " destroyed. -1 = no grow."],
+                    "Number of shrink-out seconds when owner is"+\
+                    "destroyed. -1 = no grow."],
             ['shrink_out_collisions',
                     'Allow object to collide while shrinking out']            
             ]
@@ -47,6 +47,7 @@ dstscale: destination scale to grow to. Default: self.owner.scale
         
     @component_method
     def on_destroy(self):
+        "Shrink out the object"
         if not self.shrink_out_collisions:
             PigDirector.scene.unregister_collision_callback(self.owner)        
         self.shrink_out()

@@ -10,3 +10,4 @@ BASIC_TYPES = [BooleanType, IntType, LongType, FloatType, ComplexType,
 # defaults
 PUGFRAME_DEFAULT_SIZE = 350, 400
 PUGFRAME_ATTRIBUTE_PREFIX = "   "
+FORMAT_FLOATS = True

@@ -5,6 +5,7 @@ import sys
 
 import Opioid2D 
 
+import _pythonpather
 import pug
 
 from pig.editor.OpioidInterface import OpioidInterface

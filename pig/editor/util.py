@@ -7,6 +7,7 @@ from copy import copy
 import shutil
 
 import wx
+from wx.lib.dialogs import ScrolledMessageDialog
 
 import Opioid2D
 from Opioid2D.public.Node import Node
@@ -20,7 +21,8 @@ from pug.syswx.util import show_exception_dialog
 from pug.syswx.SelectionWindow import SelectionWindow
 from pug.util import make_valid_attr_name, python_process
 
-from pig.util import get_available_scenes, get_available_objects
+from pig.util import get_available_scenes, get_available_objects, \
+                        get_project_path
 from pig.editor import EditorState
 from pig.PigDirector import PigDirector
 
@@ -29,6 +31,19 @@ _DEBUG = False
 _IMAGEPATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Images")
 def get_image_path(filename):
     return os.path.join (_IMAGEPATH, filename)
+
+# art file extensions in common between wx and opioid/pygame
+_fl_art_types =(
+            # display, filter
+            ("All supported formats", "All"),
+            ("BMP (*.bmp)", "*.bmp"),
+            ("GIF (*.gif)", "*.gif"),
+            ("PNG (*.png)", "*.png"),
+            ("JPEG (*.jpg)", "*.jpg"),
+            ("PCX (*.pcx)", "*.pcx"),
+            ("TIFF (*.tif)", "*.tif"),
+            ("All Files", "*.*"),
+            )
 
 def get_available_layers():
     """get_available_layers() -> list of available layers in Director"""
@@ -327,7 +342,8 @@ archetypes, and multiple archetypes with the same name...
         if showDialog:
             errorend = ['\nIgnore errors and save (not recommended)?']
             errormsg = '\n'.join(errors + errorend)
-            dlg = wx.MessageDialog( None, errormsg, "Scene Errors",
+            dlg = wx.MessageDialog( wx.GetApp().get_project_frame(), errormsg, 
+                                    "Scene Errors",
                                     style = wx.YES_NO | wx.NO_DEFAULT)
             if dlg.ShowModal() == wx.ID_YES:
                 return None
@@ -337,7 +353,79 @@ archetypes, and multiple archetypes with the same name...
             return errors
     else:
         return None
-    
+
+_filetypes = [
+             ['art',['jpg','png','gif','bmp','pcx','tif']],
+             ['sound',['wav']],
+             ]
+def on_drop_files( x, y, filenames): 
+    types = _filetypes[:]
+    for type in types:
+        type.append([])
+    unknown = []
+    for filename in filenames:
+        splitname = filename.rsplit('.',1)
+        typefound = False
+        if len(splitname) == 1:
+            unknown.append(filename)
+            continue
+        for type in types:
+            if splitname[1].lower() in type[1]:
+                type[2].append(filename)
+                typefound = True
+                break
+        if not typefound:
+            unknown.append(filename)
+    projectPath = get_project_path()
+    if len(filenames) - len(unknown) == 1:
+        filename = filenames[0]
+        dest = projectPath
+        if unknown:
+            return ([])
+        for type in types:
+            if type[2]:
+                title = "Copy "+type[0]+" into project" 
+                dest = os.path.join(dest, type[0], os.path.split(filename)[1])
+        dlg = wx.MessageDialog( wx.GetApp().get_project_frame(),
+                    "Copy file:\n"+filename+"\nto:\n"+dest+"?\n\n"+\
+                    "If file exists, it will be overwritten.",
+                    title, wx.YES_NO | wx.ICON_QUESTION)
+        wx.GetApp().raise_all_frames()
+        if dlg.ShowModal() == wx.ID_YES:
+            try:
+                shutil.copyfile(filename, dest)
+            except:
+                show_exception_dialog()
+        return [dest]
+    else:
+        title = "Copy multiple files into project"
+        message = ""
+        copies = []
+        for type in types:
+            if not type[2]:
+                continue
+            message += "Copy "+type[0]+" files:\n\n"
+            for filename in type[2]:
+                dest = os.path.join(projectPath, type[0], 
+                                    os.path.split(filename)[1])
+                message += "> "+filename+" to "+dest+"\n"
+                copies += (filename,dest)
+            message += "\n"
+        message += "If files exist, they will be overwritten."
+        dlg = wx.MessageDialog( wx.GetApp().get_project_frame(),
+                    message, title, wx.YES_NO | wx.ICON_QUESTION)
+        wx.GetApp().raise_all_frames()
+        copied = []
+        if dlg.ShowModal() == wx.ID_YES:
+            for filename, dest in copies:
+                try:                
+                    shutil.copyfile(filename, dest)
+                except:
+                    show_exception_dialog()
+                else:
+                    copied.append(dest)
+        return copied
+
 def save_scene():
     """Save scene to disk"""
     name = PigDirector.scene.__class__.__name__

@@ -140,7 +140,8 @@ tree on the left and info on the right.
             for cls in component._class_list:
                 if c:
                     textlist.append('           ')
-                textlist+=[cls.__module__,'.',cls.__name__,'\n']
+                textlist+=[cls.__name__,
+                           ' (',cls.__module__,'.',cls.__name__,')\n']
         if component._field_list:
             textlist.append('\n')
             textlist+=['Fields:']

@@ -16,7 +16,7 @@ class Fade(Component):
             ['fade_in_secs',
                     "Number of seconds to take fading in. -1 = no fade."],
             ['fade_out_secs',
-"Number of seconds to take fading out when owner is destroyed. -1 = no fade."],
+"Number of fade-out seconds when owner is destroyed. -1 = no fade."],
             ['fade_out_collisions','Allow object to collide while fading out']
             ]
     #defaults
@@ -45,6 +45,7 @@ dstalpha: destination alpha to fade in to. Default: self.owner.alpha
         
     @component_method
     def on_destroy(self):
+        "fade out object"
         if not self.fade_out_collisions:
             PigDirector.scene.unregister_collision_callback(self.owner)
             self.owner.leave_collision_groups()
@@ -56,7 +57,7 @@ dstalpha: destination alpha to fade in to. Default: self.owner.alpha
             secs = self.fade_out_secs
         if secs >= 0:
             self.owner.block_destroy(self)
-            self.owner.do( AlphaFade(0.0, secs) + \
+            self.owner.do( AlphaFade(0.0, secs=secs) + \
                     CallFunc(self.owner.block_destroy, self, block=False))
 
 register_component(Fade)

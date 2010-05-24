@@ -27,7 +27,8 @@ Uses a browser dialog to facilitate picking a graphics file
         else:
             folder = os.path.join(wx.GetApp().projectFolder,self.subfolder)
             file = None
-        dlg = PugImageDialog(self.control, folder)
+        dlg = PugImageDialog(self.control, folder, 
+                             self.aguidata.get('filter',None))
         if file:
             dlg.SetSelected(file)
         if dlg.ShowModal() == wx.ID_OK:

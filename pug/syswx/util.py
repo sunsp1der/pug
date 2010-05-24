@@ -23,10 +23,12 @@ def get_icon():
 def show_exception_dialog( parent=None):
     """ExceptionDialog(parent): show exception info in a dialog"""
     info = exc_info()
+    if parent is None:
+        parent = wx.GetApp().get_project_frame()
     err = ScrolledMessageDialog(parent, 
                                    str(traceback.format_exc()),
                                    info[0].__name__,
-                                   size=(500, 220))
+                                   size=(450, 220))
     # scroll to bottom
     err.Children[0].ShowPosition(len(traceback.format_exc()))
     err.ShowModal()

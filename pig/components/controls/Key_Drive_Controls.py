@@ -20,13 +20,17 @@ class Key_Drive_Controls( Forward_Motion):
                         'Only works if accelerate is True'],                    
             ['rotation_speed', 'How fast object turns'],
             ['forward_key', KeyDropdown, 
-                    {'doc':'Press this key to set objects forward velocity'}],
+                    {'doc':"Press this key to set this\n"+\
+                            "object's forward velocity"}],
             ['backward_key', KeyDropdown, 
-                    {'doc':'Press this key to set objects backward velocity'}],
+                    {'doc':"Press this key to set this\n"+\
+                            "object's backward velocity"}],
             ['left_key', KeyDropdown, 
-             {'doc':'Press this key to set objects leftward rotation speed'}],
+                    {'doc':"Press this key to set this object's\n"+\
+                            "leftward rotation speed"}],
             ['right_key', KeyDropdown, 
-             {'doc':'Press this key to set objects rightward rotation speed'}],
+                    {'doc':"Press this key to set this object's\n"+\
+                            "rightward rotation speed"}],
             ]
     #defaults
     friction = 0.98
