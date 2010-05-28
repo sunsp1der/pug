@@ -13,7 +13,7 @@ class Target(PigSprite):
         self.position.y = 266.0
         self.scale.x = 0.5
         self.scale.y = 0.5
-        self.color = (1.0, 0.0, 1.0, 1.0)
+        self.tint = (1.0, 0.0, 1.0)
         self.components.add( Collision_Destroy(
                 with_group='bullet',
                 my_group='target') )

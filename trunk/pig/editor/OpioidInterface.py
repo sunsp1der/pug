@@ -58,8 +58,8 @@ scene: the scene to load initially
 
         self.reload_scene_list()        
         self.import_settings()
-        if getattr(self.game_settings, 'title'):
-            self.project_name = self.game_settings.title 
+        if getattr(self.project_settings, 'title'):
+            self.project_name = self.project_settings.title 
 
         self.Display = Opioid2D.Display
         self.Director = Director   
@@ -87,27 +87,27 @@ scene: the scene to load initially
                       projectObjectName=self.project_name)
         self.Director.realquit()
 
-    def create_default_game_settings(self, settingsObj=None):
-        """create_default_game_settings(settingsObj=None)->setting data class
+    def create_default_project_settings(self, settingsObj=None):
+        """create_default_project_settings(settingsObj=None)->setting data class
 
 settingsObj: an object similar to the one below... if it is missing any default
     attributes, they will be replaced here.
 """    
         # DEFAULT GAME SETTINGS
-        defaultTitle = os.path.split(get_project_path())[1]
-        class game_settings():
-            title = defaultTitle
+        default_title = os.path.split(get_project_path())[1]
+        class project_settings():
+            title = default_title
             initial_scene = '__Working__'
             rect_opioid_window = (25, 25, 800 , 600)
             fullscreen = False
             save_settings_on_quit = True
             
         if settingsObj:
-            for attr, data in game_settings.__dict__.iteritems():
+            for attr, data in project_settings.__dict__.iteritems():
                 settingsObj.__dict__.setdefault(attr, data)
             return settingsObj
         else:
-            return game_settings
+            return project_settings
     
     def create_default_pug_settings(self, settingsObj=None):
         """create_default_pug_settings(settingsObj=None)->setting data class
@@ -155,21 +155,21 @@ settingsObj: an object similar to the one below... if it is missing any default
 
         # game settings
         try:
-            from _game_settings import game_settings
+            from _project_settings import project_settings
         except:
-            game_settings = self.create_default_game_settings()
-            if not game_settings.initial_scene:
-                game_settings.initial_scene = self.pug_settings.initial_scene
+            project_settings = self.create_default_project_settings()
+            if not project_settings.initial_scene:
+                project_settings.initial_scene = self.pug_settings.initial_scene
             try:
-                save_game_settings( game_settings)
+                save_project_settings( project_settings)
             except:
                 if wx.GetApp():
                     show_exception_dialog()
                 else:
                     raise
         else:
-            game_settings = self.create_default_game_settings(game_settings)
-        self.game_settings = game_settings
+            project_settings = self.create_default_project_settings(project_settings)
+        self.project_settings = project_settings
           
     cached=[0, 0, 0]      
     def _post_init(self):
@@ -365,13 +365,13 @@ Callback from PugApp...
                                 obj.position[1] + vector[1])  
  
     def _on_pug_quit(self):
-        if getattr(self.game_settings,'save_settings_on_quit',True):
+        if getattr(self.project_settings,'save_settings_on_quit',True):
 #            if '__Working__' in self.Director.scene.__module__:
-#                self.game_settings.initial_scene = '__Working__'
+#                self.project_settings.initial_scene = '__Working__'
 #            else:
-            self.game_settings.initial_scene = self.scene.__class__.__name__
+            self.project_settings.initial_scene = self.scene.__class__.__name__
             try:
-                save_game_settings( self.game_settings)
+                save_project_settings( self.project_settings)
             except:
                 show_exception_dialog()
         if getattr(self.pug_settings,'save_settings_on_quit',True):
@@ -549,7 +549,7 @@ Run the scene being editted in a new process.
                     continue_shutdown = dlg.ShowModal()
                     if continue_shutdown == wx.ID_NO:
                         return False                               
-            save_game_settings( self.game_settings)
+            save_project_settings( self.project_settings)
             python_process("main.py", "__Working__")
         except:
             show_exception_dialog()
@@ -664,11 +664,11 @@ _interfacePugview = {
 
         [' Current Scene', pug.Label],
         ['sceneclass', pug.Dropdown, 
-             {'label':'   Select Scene',
+             {'label':'   Scene',
               'list_generator':_scene_list_generator,
               'doc':"Pick a scene to edit"}],
         ['commit_scene', None, {
-                               'label':"   Save Scene", 
+                               'label':"   Commit Scene", 
                                'doc':"Commit current scene to disk",
                                'no_return_popup':True}],
 #        ['view_scene', pug.Routine,  {'label':'   View Scene'}],
@@ -686,13 +686,13 @@ _interfacePugview = {
                               'label':'   Add Object'}],                              
 
         [' Settings', pug.Label],
-        ['game_settings'],
+        ['project_settings'],
         ['pug_settings'],
 
         [' Utilities', pug.Label],
-        ['reload_scene_list', None, {'label':'   Reload Scenes',
+        ['reload_scene_list', None, {'label':'   Load Scenes',
                                      'use_defaults':True}],
-        ['reload_object_list', pug.Routine, {'label':'   Reload Objects'}],        
+        ['reload_object_list', pug.Routine, {'label':'   Load Objects'}],        
 #        ['open_selection_frame', None, 
 #                {'label':'   View Selection'}],
         ['browse_components', None, 

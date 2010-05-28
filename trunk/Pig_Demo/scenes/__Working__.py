@@ -39,6 +39,7 @@ class Shooting_Gallery(PigScene):
         cannon.layer = 'Background'
         cannon.position.x = 400.0
         cannon.position.y = 514.0
+        cannon.opacity = 0.5
         cannon.components.add( Key_Drive_Controls(
                 forward_key=None,
                 backward_key=None) )

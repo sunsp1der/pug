@@ -7,7 +7,6 @@ from copy import copy
 import shutil
 
 import wx
-from wx.lib.dialogs import ScrolledMessageDialog
 
 import Opioid2D
 from Opioid2D.public.Node import Node
@@ -148,24 +147,18 @@ parentWindow: the parent window of name dialog. If not provided, the
 """
     if not isinstance(obj, Node):
         raise TypeError('save_object() arg 1 must be a Node')
-    if getattr(obj, 'archetype', False):
-        # we don't want every instance to be an archetype
-        obj.archetype = False
-        archetype = True
-    else:
-        archetype = False    
     if not name:
-        if archetype:
+        if obj.archetype:
             name = obj.gname
         else:
-            name = obj.gname+"Class"
+            if obj.gname:
+                name = obj.gname+"Class"
+            else:
+                name = "MyClass"
         if not name:
             name = obj.__class__.__name__
         if parentWindow == None:
             parentWindow = wx.GetActiveWindow()
-        dlg = wx.TextEntryDialog( parentWindow, 
-                                  "Enter the object's class/file name", 
-                                  "Save Object", name)
         objName = ''
         # we generally don't want to save with the same name as 
         # a base class of the same object
@@ -174,6 +167,9 @@ parentWindow: the parent window of name dialog. If not provided, the
             if name == cls.__name__ or name=='Sprite' or name=='PigSprite':
                 name = ''.join(['My',name])
                 break
+        dlg = wx.TextEntryDialog( parentWindow, 
+                                  "Enter the object's class/file name", 
+                                  "Save Object", name)
         name = make_valid_attr_name(name)
         while not objName:
             if dlg.ShowModal() == wx.ID_OK:
@@ -213,6 +209,12 @@ parentWindow: the parent window of name dialog. If not provided, the
         objName = name
         path = os.path.join('objects',''.join([name,'.py']))
     try:
+        if getattr(obj, 'archetype', False):
+            # we don't want every instance to be an archetype
+            obj.archetype = False
+            archetype = True
+        else:
+            archetype = False    
         try: 
             pigsprite = PigSprite
         except:

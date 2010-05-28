@@ -1,22 +1,7 @@
 now:	
 	html tutorial
-		saving the scene
-			no undo
-			working version			
-		create sprite
-			new graphic
-		save sprite
-			archetypes
-		create scene
-			self-destruct-o
-			load an object
-				connection to archetypes
-			change the object
-		create a project
-		edit code
-			step-by-step
-		appendix game and pug settings
-		appendix file layout
+		file layout
+			run w/o editor
 			file layout
 			working file
 		appendix components		

@@ -45,9 +45,9 @@ def start_scene():
         sleep(0.1)
     PigDirector.scene.start()    
     
-def save_game_settings( gameSettings):
-    pug.code_export( gameSettings, "_game_settings.py", True, 
-                 {'name':'game_settings'})        
+def save_project_settings( gameSettings):
+    pug.code_export( gameSettings, "_project_settings.py", True, 
+                 {'name':'project_settings'})        
 
 def run_pig_scene( projectPath, scenename=None, position=None, resolution=None, 
                    title=None, fullscreen=None, icon='', units=None, 
@@ -58,7 +58,7 @@ args: ( scenename, projectPath, position=None, resolution=None,
                    title=None, fullscreen=None, icon=None, units=None, 
                    use_working=False)
 All arguments with None defaults will default to info found in the 
-_game_settings file unless otherwise noted.                  
+_project_settings file unless otherwise noted.                  
     projectPath: the root path of this project. If projectPath is a file path, 
                 just the folder will be used. If that folder is the 'scenes'
                 folder, the parent of that folder will be used.
@@ -80,20 +80,20 @@ _game_settings file unless otherwise noted.
             projectPath = os.path.dirname(projectPath)
     set_project_path (projectPath)
     try:
-        from _game_settings import game_settings
+        from _project_settings import project_settings
     except:
         raise ValueError("No scenes have been created yet. Run edit_project.py")
     # settings
     if position is None:
-        position = game_settings.rect_opioid_window[0:2]        
+        position = project_settings.rect_opioid_window[0:2]        
     if resolution is None:
-        resolution = game_settings.rect_opioid_window[2:4]
+        resolution = project_settings.rect_opioid_window[2:4]
     if title is None:
-        title = game_settings.title
+        title = project_settings.title
     if fullscreen is None:
-        fullscreen = game_settings.fullscreen
+        fullscreen = project_settings.fullscreen
     if scenename is None:
-        scenename = game_settings.initial_scene
+        scenename = project_settings.initial_scene
         
     # get scene    
     scenedict = get_available_scenes( useWorking=useWorking)# use __Working__.py

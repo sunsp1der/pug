@@ -5,7 +5,6 @@ from Opioid2D.public.Sprite import SpriteMeta
 
 import pug
 from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
-from pug.syswx.attributeguis import *
 from pug.code_storage import add_subclass_storageDict_key
 from pug.code_storage.constants import _INDENT
 from pug.util import make_valid_attr_name, prettify_path
@@ -54,9 +53,14 @@ Opioid2d Sprite with features for use with pug"""
         Sprite.leave_group(self, group)
         
     def set_archetype(self, TF):
+        """set_archetype( TF): set archetype property.
+        
+if TF is True create default gname. 
+if TF is "True" set archetype to True, but don't create default name
+""" 
         if TF == "True":
             self._archetype = True
-        elif TF == True:
+        elif TF is True:
             if not self.gname:
                 name = self.__class__.__name__
                 superclasses = getmro(self.__class__)[1:]
@@ -73,7 +77,7 @@ Opioid2d Sprite with features for use with pug"""
     def get_archetype(self):
         return self._archetype
     archetype = property( get_archetype, set_archetype, 
-                          doc="Used by editor. Does not appear in game.")
+                          doc="Sprite used by editor. Does not appear in game.")
         
     def set_image(self, image):
         if isinstance(image, basestring):
@@ -189,6 +193,21 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
         PigDirector.scene.update_node(self, "Delete") # register self with scene                
         Sprite.delete(self)
         
+    def set_tint(self, tint):
+        """set_tint( tint)
+ 
+tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
+    the alpha element will be ignored. Use set_alpha or to set that."""
+        color = (tint[0], tint[1], tint[2], self.get_alpha())
+        Sprite.set_color( self, color)
+        
+    def get_tint(self):
+        "get_tint()->the (red, green, blue) color value of the sprite"
+        color = Sprite.get_color( self)
+        return (color[0], color[1], color[2])
+    
+    tint = property(get_tint, set_tint, doc="The color tint of the sprite")
+    
     def do_register(self):
         "do_register(): register with the PigScene"
         PigDirector.scene.register_node(self)        
@@ -297,7 +316,7 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
         return ''.join(code)
     
     _codeStorageDict = {
-            'skip_attributes': ['_actions', '_image_file', 'image_file', 
+            'skip_attributes': ['_actions', '_image_file', 'image_file','color',
                                 'layer_name','_init_image','_init_layer',
                                 'register', 'destroy_blockers', '_archetype'], 
             'instance_attributes': ['*'],
@@ -336,7 +355,8 @@ _spritePugview = {
         [' Image', pug.Label],
         ['image_file', pug.ImageBrowser, {'subfolder':'art', 
                                           'filter':_fl_art_types}],
-        ['color'],
+        ['tint', pug.ColorPicker,{'text_control':True}],
+        ['alpha'],
         [' Spacial', pug.Label],
         ['layer_name', pug.Dropdown, {'list_generator':get_available_layers,
                                       'label':'   layer'}],

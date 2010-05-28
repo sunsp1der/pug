@@ -13,7 +13,7 @@ class Bullet(PigSprite):
         self.position.y = 531.0
         self.scale.x = 0.20000000298023224
         self.scale.y = 0.20000000298023224
-        self.color = (0.0, 1.0, 0.0, 1.0)
+        self.tint = (0.0, 1.0, 0.0)
         self.components.add( Set_Motion(
                 velocity_y=-500) )
         self.components.add( Grow_Shrink(

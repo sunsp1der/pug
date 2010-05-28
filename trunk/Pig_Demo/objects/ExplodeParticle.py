@@ -15,7 +15,7 @@ class ExplodeParticle(PigSprite):
         self.position.y = 325.0
         self.scale.x = 0.30000001192092896
         self.scale.y = 0.30000001192092896
-        self.color = (1.0, 0.0, 0.0, 1.0)
+        self.tint = (1.0, 0.0, 0.0)
         self.components.add( Random_Motion(
                 velocity_min=150,
                 velocity_max=200) )
