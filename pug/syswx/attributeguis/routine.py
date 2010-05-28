@@ -27,6 +27,7 @@ special aguidata entries:
         alternative to the attribute argument.
     'use_defaults': execute routine using all default args if possible
     'no_return_popup': if this is true, don't show a return value popup
+    'show_parens': if True, show parenthesis even if method has no arguments
 See Base attribute gui for other argument info
 """
         control = wx.Panel(window, 
@@ -151,7 +152,10 @@ See Base attribute gui for other argument info
             else:
                 tooltip = "Execute"
             fn = self.execute
-            arguments = '()'
+            if self.aguidata.get('show_parens',False):
+                arguments = '( )'
+            else:
+                arguments = ''
         buttonSize=WX_BUTTON_BMP_SIZE
         run_bmp = wx.ArtProvider.GetBitmap(bmp, 
                                         wx.ART_TOOLBAR, buttonSize)        

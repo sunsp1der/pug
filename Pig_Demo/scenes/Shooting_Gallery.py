@@ -3,6 +3,7 @@ from objects.Bullet import Bullet
 from objects.ExplodeParticle import ExplodeParticle
 from objects.Launcher import Launcher
 from objects.Target import Target
+from objects.bloosprite import bloosprite
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
 from pug.all_components import Utility_Keys, Key_Drive_Controls, Key_Spawn
@@ -39,6 +40,7 @@ class Shooting_Gallery(PigScene):
         cannon.layer = 'Background'
         cannon.position.x = 400.0
         cannon.position.y = 514.0
+        cannon.opacity = 0.5
         cannon.components.add( Key_Drive_Controls(
                 forward_key=None,
                 backward_key=None) )
