@@ -10,7 +10,7 @@ class FadeTest(PigScene):
     def on_enter(self):
         # Sprites
         pigsprite_instance = PigSprite()
-        pigsprite_instance.image = 'art\\pig.png'
+        pigsprite_instance.image = 'art\\pug.png'
         pigsprite_instance.layer = 'Background'
         pigsprite_instance.position.x = 400.0
         pigsprite_instance.position.y = 300.0
@@ -21,7 +21,7 @@ class FadeTest(PigScene):
                 shrink_out_secs=0.0) )
 
         pigsprite_instance_2 = PigSprite()
-        pigsprite_instance_2.image = 'art\\pig.png'
+        pigsprite_instance_2.image = 'art\\pug.png'
         pigsprite_instance_2.layer = 'Background'
         pigsprite_instance_2.position.x = 398.0
         pigsprite_instance_2.position.y = 387.0

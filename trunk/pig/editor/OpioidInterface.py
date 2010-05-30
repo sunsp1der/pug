@@ -78,7 +78,7 @@ scene: the scene to load initially
         thread.start_new_thread(start_opioid, 
                                           (self.pug_settings.rect_opioid_window,
                                            os.path.split(projectPath)[1],
-                                           get_image_path('pig.png'),
+                                           get_image_path('pug.png'),
                                            StartScene))
         time.sleep(1)
         
@@ -578,7 +578,7 @@ Add an object to the scene
         if objectclass == PigSprite and type(self.scene.state) == EditorState:
             # set a default image for basic sprite
             try:
-                node.set_image("art/pig.png")
+                node.set_image("art/pug.png")
             except:
                 pass
             node.position = \

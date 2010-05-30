@@ -18,7 +18,7 @@ class Fly_Around(PigScene):
     def on_enter(self):
         # Sprites
         pigsprite_instance = PigSprite()
-        pigsprite_instance.image = 'art\\pig.png'
+        pigsprite_instance.image = 'art\\pug.png'
         pigsprite_instance.layer = 'Background'
         pigsprite_instance.position.x = 400.0
         pigsprite_instance.position.y = 300.0
@@ -49,12 +49,13 @@ class Fly_Around(PigScene):
                 add_velocity=True) )
 
         pigsprite_instance_2 = PigSprite()
-        pigsprite_instance_2.image = 'art\\blank.png'
+        pigsprite_instance_2.image = 'art\\block.png'
         pigsprite_instance_2.layer = 'Background'
         pigsprite_instance_2.position.x = 400.0
         pigsprite_instance_2.position.y = 300.0
         pigsprite_instance_2.scale.x = 400.0
         pigsprite_instance_2.scale.y = 300.0
+        pigsprite_instance_2.alpha = 0.0
         pigsprite_instance_2.components.add( Spawner(
                 spawn_object='Target',
                 spawn_interval=0.7,

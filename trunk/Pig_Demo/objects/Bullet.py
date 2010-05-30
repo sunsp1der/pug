@@ -6,7 +6,7 @@ from pug.all_components import Set_Motion, Grow_Shrink, On_Collision_Sound,\
 
 ### Bullet autocode ###
 class Bullet(PigSprite):
-    image = 'art\\pig.png'
+    image = 'art\\pug.png'
     layer = 'Background'
     def on_create(self):
         self.position.x = 316.0
