@@ -35,7 +35,7 @@ class Shooting_Gallery(PigScene):
         launcher_instance_2.rotation = 90.0
 
         cannon = PigSprite(gname='cannon')
-        cannon.image = 'art\\pig.png'
+        cannon.image = 'art\\pug.png'
         cannon.layer = 'Background'
         cannon.position.x = 400.0
         cannon.position.y = 514.0

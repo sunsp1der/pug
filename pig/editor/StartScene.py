@@ -7,7 +7,7 @@ class StartScene(PigScene):
 #        # Sprites
         from pig import PigSprite
         pigsprite_instance = PigSprite()
-        pigsprite_instance.image = 'art/pig.png'
+        pigsprite_instance.image = 'art/pug.png'
         pigsprite_instance.layer = 'Background'
         pigsprite_instance.position.x = 400.0
         pigsprite_instance.position.y = 300.0  

@@ -8,7 +8,7 @@ from pug.all_components import Random_Motion, Set_Motion, Self_Destruct,\
 
 ### ExplodeParticle autocode ###
 class ExplodeParticle(PigSprite):
-    image = 'art\\pig.png'
+    image = 'art\\pug.png'
     layer = 'Background'
     def on_create(self):
         self.position.x = 702.0
