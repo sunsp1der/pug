@@ -3,6 +3,7 @@
 import math
 import os
 import sys
+import traceback
 from time import sleep
 from inspect import isclass
 
@@ -97,10 +98,24 @@ _project_settings file unless otherwise noted.
         
     # get scene    
     scenedict = get_available_scenes( useWorking=useWorking)# use __Working__.py
-    try:
-        initial_scene = scenedict[scenename]
-    except:
-        raise ValueError("Scene not found: "+scenename) 
+    from pig.PigScene import PigScene
+    if scenename == 'PigScene':
+        from pig.PigScene import PigScene
+        initial_scene = PigScene
+    else:
+        try:
+            initial_scene = scenedict[scenename]
+        except:
+            if useWorking:
+                module = __import__('scenes.__Working__')
+                workingClasses = find_classes_in_module(module.__Working__, 
+                                                        Opioid2D.Scene)
+                for cls in workingClasses:
+                    if cls.__name__ == scenename:
+                        exec('from scenes.__Working__ import ' + scenename)
+                        break
+            exec('from scenes.' + scenename + ' import ' + scenename)
+            raise ValueError("Problem with scene: "+scenename) 
     
     set_opioid_window_position( position)
     Opioid2D.Display.init(resolution, units, title, fullscreen, icon)
@@ -132,19 +147,25 @@ def fix_project_path( path):
         return path
 
 availableScenes = None
-def get_available_scenes( doReload=False, useWorking=True):
-    """get_available_scenes( doReload=False, useWorking=False) -> dict
+def get_available_scenes( doReload=False, useWorking=True, errors=None):
+    """get_available_scenes( doReload=False, useWorking=False, errors=None)>dict
     
 Get all Scenes available in modules in Scenes folder. Return dict of available 
 Scene sub-classes {"sceneName":sceneClass}. PigScene is automatically included.  
 doReload: if True, don't just import scene modules, but reload them
 useWorking: if True, and the class in the __Working__.py file is in the class
     list, use the __Working__ scene to replace the one in the list.
+errors: if a dict is passed in, it will be filled with the results of 
+    sys.exc_info() for each module that had a problem being imported. Indexed
+    by module
 """
+    if type(errors) != type({}):
+        errors=None
     global availableScenes
     if availableScenes is not None and not doReload:
         return availableScenes.copy()
-    sceneList = get_package_classes('scenes', Opioid2D.Scene, doReload)
+    sceneList = get_package_classes('scenes', Opioid2D.Scene, doReload,
+                                    errors=errors)
     # use __Working__ scene as override
     workingModule = 'scenes.__Working__'
     needsReload = workingModule in sys.modules
@@ -154,8 +175,12 @@ useWorking: if True, and the class in the __Working__.py file is in the class
     except ImportError:
         pass
     except:
-        print "Exception while loading working module."
-        print sys.exc_info()[1]
+        if getattr(Opioid2D.Director,"editorMode",False):
+            if errors:
+                errors[workingModule] = sys.exc_info()
+        else:
+            print "Exception while loading working module."
+            print traceback.format_exc()
     else:
         if doReload and needsReload:
             sys.modules.pop(workingModule)
@@ -190,16 +215,20 @@ returns the committed version.
     return _revertScene
 
 availableObjects = None
-def get_available_objects( doReload=False):
-    """get_available_objects( doReload=False) -> list of Opioid2D.Nodes
+def get_available_objects( doReload=False, errors=None):
+    """get_available_objects( doReload=False, errors=None)->dict of objects
     
 Get all Nodes available in modules in Objects folder. Return a dict of available
 'name':class. PigSprite is automatically included.
-doReload: if True reload all object modules from disk"""
+doReload: if True reload all object modules from disk
+errors: if a dict is passed in, it will be filled with the results of 
+    sys.exc_info() for each module that had a problem being imported. Indexed
+    by module
+"""
     global availableObjects
     if availableObjects is not None and not doReload:
         return availableObjects.copy()
-    objectList = get_package_classes('objects', Node, doReload)
+    objectList = get_package_classes('objects', Node, doReload, errors=errors)
     objectDict = {}
     for item in objectList:
         objectDict[item.__name__]=item

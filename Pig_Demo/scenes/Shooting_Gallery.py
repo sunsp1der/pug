@@ -3,7 +3,6 @@ from objects.Bullet import Bullet
 from objects.ExplodeParticle import ExplodeParticle
 from objects.Launcher import Launcher
 from objects.Target import Target
-from objects.bloosprite import bloosprite
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
 from pug.all_components import Utility_Keys, Key_Drive_Controls, Key_Spawn
@@ -46,7 +45,7 @@ class Shooting_Gallery(PigScene):
                 backward_key=None) )
         cannon.components.add( Key_Spawn(
                 spawn_object='Bullet',
-                sound='sounds\\snap.wav',
+                sound='sound\\snap.wav',
                 spawn_offset=(0, -1),
                 max_spawns_in_scene=1) )
 ### End Shooting_Gallery autocode ###

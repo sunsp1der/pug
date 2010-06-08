@@ -478,7 +478,7 @@ settingsObj: any frame settings members will be replaced
             pass
         for frame in wx.GetTopLevelWindows():
             # setting entry like: framename_rect = (x, y, width, height)
-            if not frame.Name:
+            if not frame.Name or frame.Name == 'frame':
                 continue
             name = self.getrect_setting_name(frame)
             data = (frame.Position[0], frame.Position[1], 

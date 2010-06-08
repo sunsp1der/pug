@@ -20,11 +20,13 @@ def pig_quit( query=True):
     
 query: if True, have the app confirm project closure.
 """
+    if not query:
+        return real_quit()
+    global QUITTING
     if not wx.GetApp() or \
                 not getattr(wx.GetApp().projectObject,'_initialized', False): 
         real_quit()
         return
-    global QUITTING
     if not QUITTING:
         QUITTING = True
         app = wx.GetApp()

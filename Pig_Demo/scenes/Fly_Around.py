@@ -1,4 +1,5 @@
 ### import autocode ###
+from objects.SpawnWall import SpawnWall
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
 from pug.all_components import Utility_Keys, On_Start_Sound,\
@@ -13,9 +14,13 @@ class Fly_Around(PigScene):
         self.components.add( Utility_Keys(
                 info_F1='scenes\\Fly_Around_Help.txt') )
         self.components.add( On_Start_Sound(
-                sound='sounds\\snap.wav') )
+                sound='sound\\snap.wav') )
 
     def on_enter(self):
+        # Archetypes
+        SpawnWall_archetype = SpawnWall(gname='SpawnWall')
+        SpawnWall_archetype.archetype = True
+
         # Sprites
         pigsprite_instance = PigSprite()
         pigsprite_instance.image = 'art\\pug.png'
@@ -41,25 +46,11 @@ class Fly_Around(PigScene):
                 with_group='target',
                 my_group='player') )
         pigsprite_instance.components.add( On_Destroy_Sound(
-                sound='sounds\\snap.wav') )
+                sound='sound\\snap.wav') )
         pigsprite_instance.components.add( Spawn_On_Destroy(
                 spawn_object='ExplodeParticle',
-                min_objects_per_spawn=15,
-                max_objects_per_spawn=15,
+                obs_per_spawn = 15,
+                obs_per_spawn_variance = 5,
                 add_velocity=True) )
 
-        pigsprite_instance_2 = PigSprite()
-        pigsprite_instance_2.image = 'art\\block.png'
-        pigsprite_instance_2.layer = 'Background'
-        pigsprite_instance_2.position.x = 400.0
-        pigsprite_instance_2.position.y = 300.0
-        pigsprite_instance_2.scale.x = 400.0
-        pigsprite_instance_2.scale.y = 300.0
-        pigsprite_instance_2.alpha = 0.0
-        pigsprite_instance_2.components.add( Spawner(
-                spawn_object='Target',
-                spawn_interval=0.7,
-                spawn_location='edges',
-                max_objects_per_spawn=3,
-                match_scale=False) )
 ### End Fly_Around autocode ###

@@ -553,7 +553,8 @@ Automatically calls on_<setting>(val, event) callback.
             file = self.object._get_code_file()
         else:
             file = get_code_file(self.object)
-        edit_process( file)
+        if file:
+            edit_process( file)
             
     def refresh_settings(self):
         for setting in self.settings:

@@ -101,10 +101,11 @@ def check_name_valid(name):
     return name == validname
 
 _cache = {}
+_error_cache = {}
     
 def get_package_classes(  package='', superClass=object, doReload=False, 
-                          folder=None):
-    """get_package_classes( package, superClass, doReload, folder) > list
+                          folder=None, errors=None):
+    """get_package_classes( package, superClass, doReload, folder, errors)> list
     
 Find all classes defined in a package. Will search all modules found within the 
 given package. Returns a list of those classes.
@@ -113,11 +114,23 @@ superClass=object: only classes that are a subclass of this will be returned
 doReload=False: force a reload on any modules found
 folder=None: this folder will be added to the sys.path for the search. Note that
     this may create inaccessible __module__ paths in the found classes
+errors=None: if a dict is passed in, it will be filled with the results of 
+    sys.exc_info() for each module that had a problem being imported. Indexed
+    by module
 """
+    if type(errors) is not type({}):
+        errors = None  
+    exception_dict = {}
     if not doReload and _cache.get((package, superClass, folder)):
+        if errors is not None:
+            exceptions = _error_cache.get((package, superClass, folder))
+            errors.update( exceptions)
         return _cache.get((package, superClass, folder))[:]
     if folder and folder not in sys.path:
         sys.path.insert(0, folder)
+        remove_folder = True
+    else:
+        remove_folder = False
     classList = []
     packagePath = package.split('.')
     searchFolder = os.path.join(os.getcwd(),*packagePath)
@@ -129,9 +142,11 @@ folder=None: this folder will be added to the sys.path for the search. Note that
         modulename, ext = os.path.splitext(filename)
         if ext == '.py':
             # import the .py file
+            errorkey = '.'.join([package, modulename])
             try:
                 module = __import__('.'.join([package, modulename]))
             except:
+                exception_dict[errorkey] = sys.exc_info()
                 continue
             depth = 0
             while depth+1 < len(packagePath):
@@ -140,8 +155,11 @@ folder=None: this folder will be added to the sys.path for the search. Note that
             if module:
                 classList += find_classes_in_module(module, superClass, 
                                                     doReload)
-    if folder:
+    if errors is not None:
+        errors.update(exception_dict)
+    if remove_folder:
         sys.path.remove(folder)
+    _error_cache[(package, superClass, folder)] = exception_dict
     _cache[(package, superClass, folder)] = classList[:]
     return classList
 
