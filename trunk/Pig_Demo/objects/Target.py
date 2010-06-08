@@ -19,8 +19,8 @@ class Target(PigSprite):
                 my_group='target') )
         self.components.add( Spawn_On_Destroy(
                 spawn_object='ExplodeParticle',
-                min_objects_per_spawn=10,
-                max_objects_per_spawn=20,
+                obs_per_spawn=15,
+                obs_per_spawn_variance=5,
                 add_velocity=True) )
         self.components.add( Fade(
                 fade_in_secs=-1.0,

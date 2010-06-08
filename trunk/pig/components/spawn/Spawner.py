@@ -25,7 +25,7 @@ class Spawner(Component):
         ["sound", SoundFile, {'doc':"Sound to play when a spawn occurs"}],
         ["spawn_interval",
                 "Seconds between spawns (0 for no automatic spawning)"],
-        ["spawn_variance",
+        ["spawn_interval_variance",
                 "spawn_interval can vary this many seconds"],
         ["spawn_location", Dropdown, {'list':['area', 'center', 'edges', 'top',
                                               'bottom','left','right'], 
@@ -34,17 +34,18 @@ class Spawner(Component):
         ["spawn_offset", 
          "Spawn location is offset by this much (scaled by owner size)"],
         ["spawn_delay","Wait this many seconds before beginning to spawn"],
-        ["min_objects_per_spawn","Minimum number of objects created per spawn"],
-        ["max_objects_per_spawn","Maximum number of objects created per spawn"],
-        ["max_objects_spawned",
-"Total number of objects owner can create over its lifetime (-1 = unlimited)"],
+        ["obs_per_spawn","Number of objects created per spawn"],
+        ["obs_per_spawn_variance",
+                    "obs_per_spawn can vary by this much"],
         ["max_spawns_in_scene",
-            "Maximum number of spawns in scene at one time (-1 = unlimited)"],
+    "Maximum number of spawned objects in scene at one time (-1 = unlimited)"],
+        ["total_objects_spawned",
+"Total number of objects owner can create over its lifetime (-1 = unlimited)"],
+        ["delete_when_done",
+   "Delete this object after total_objects_spawned have been spawned"],
         ["match_scale", "Multiply spawned object's scale by owner's scale"],
         ["add_rotation", "Add owner's rotation to spawned object's rotation"],
         ["add_velocity", "Add owner's velocity to spawned object's velocity"],
-        ["delete_when_done",
-   "Delete this object after the specified number of objects has been spawned"],
         ["owner_callback", 
             "\n".join(["Call this method of owner right after a spawn happens.",
                        "callback( spawned_object, this_component)"])],
@@ -56,16 +57,16 @@ class Spawner(Component):
     spawn_object = None
     sound = None
     spawn_interval = 2.0
-    spawn_variance = 1.0
+    spawn_interval_variance = 1.0
     spawn_delay = 0.0
     spawn_location = 'center'
     spawn_offset = (0,0)
-    min_objects_per_spawn = 1
-    max_objects_per_spawn = 1
+    obs_per_spawn = 1
+    obs_per_spawn_variance = 0
     match_scale = True
     add_rotation = True
     add_velocity = False
-    max_objects_spawned = -1
+    total_objects_spawned = -1
     max_spawns_in_scene = -1
     delete_when_done = True
     owner_callback = None
@@ -81,15 +82,22 @@ class Spawner(Component):
     @component_method
     def on_added_to_scene(self, scene):
         "Start spawn timer when object is added to scene"
+        self.setup_spawner()
+        self.start_spawning()
+            
+    def setup_spawner(self):
+        "Setup for the spawner. Subclasses should call this."
         if self.sound:
             self.sound_object = get_sound( self.sound)
-        self.start_spawning()
+        if self.spawned_objects is None:
+            self.spawned_objects = weakref.WeakValueDictionary()
         
     def start_spawning(self):
         "Start the spawn timer. To skip delay, call check_spawn"
         if self.spawn_interval > 0:
             self.action = self.owner.do( Delay(self.spawn_delay \
-                   + random.uniform(-self.spawn_variance, self.spawn_variance))\
+                   + random.uniform(-self.spawn_interval_variance, 
+                                    self.spawn_interval_variance))\
                    + CallFunc( self.check_spawn))
     
     @component_method 
@@ -99,20 +107,19 @@ class Spawner(Component):
             self.spawn_class = get_project_object(self.spawn_object)
         if not isclass(self.spawn_class) or not self.enabled:
             return []
-        if self.spawned_objects is None:
-            self.spawned_objects = weakref.WeakValueDictionary()
         owner = self.owner
         spawned_objects = []
-        count = random.randint(self.min_objects_per_spawn,
-                               self.max_objects_per_spawn)
+        count = self.obs_per_spawn + \
+                random.randint(-self.obs_per_spawn_variance,
+                               self.obs_per_spawn_variance)
         rect = owner.rect
         rotation = owner.rotation
         position = owner.position
         velocity = owner.velocity
         scale = owner.scale
         for i in range(count):
-            if self.max_objects_spawned > -1 and \
-                    self.spawn_count >= self.max_objects_spawned:
+            if self.total_objects_spawned > -1 and \
+                    self.spawn_count >= self.total_objects_spawned:
                 if self.delete_when_done:
                     owner.do(Delete())
                 break
@@ -173,16 +180,17 @@ class Spawner(Component):
             
     def get_next_spawn_time(self):
         "get_next_spawn_time()-> how long to wait before next spawn"
-        return self.spawn_interval + random.uniform(-self.spawn_variance, 
-                                                self.spawn_variance)
+        return self.spawn_interval + random.uniform(
+                                                -self.spawn_interval_variance, 
+                                                self.spawn_interval_variance)
         
     def check_spawn(self, schedule_next=True):
         """check_spawn(): do a spawn if criteria are met 
         
 This method checks against max_spawns_in_scene and count. Another spawn will be
-scheduled unless max_objects_spawned has been reached. """
-        if self.max_objects_spawned > -1 and \
-                self.spawn_count >= self.max_objects_spawned:
+scheduled unless total_objects_spawned has been reached. """
+        if self.total_objects_spawned > -1 and \
+                self.spawn_count >= self.total_objects_spawned:
             return None
         if self.spawn_interval > 0 and schedule_next:
             self.action = self.owner.do( Delay(self.get_next_spawn_time()) + \

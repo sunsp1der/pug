@@ -286,6 +286,13 @@ key_down. In the future, maybe key_hold.
             wx.CallAfter(wx.GetApp().projectObject.stop_scene)
         else:
             Opioid2D.Director.quit()
+            
+    def handle_quit(self, ev):
+        try:
+            import wx
+            wx.CallAfter(wx.GetApp()._evt_project_frame_close)
+        except:
+            Opioid2D.Director.quit()      
                 
     def enter(self):
         self.on_enter()

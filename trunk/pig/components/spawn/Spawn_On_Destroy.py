@@ -24,8 +24,9 @@ class Spawn_On_Destroy( Spawner):
                             'doc':"The area where objects can be spawned"}],
         ["spawn_offset", 
          "Spawn location is offset by this much (scaled by owner size)"],
-        ["min_objects_per_spawn","Minimum number of objects created"],
-        ["max_objects_per_spawn","Maximum number of objects created"],
+        ["obs_per_spawn","Number of objects created per spawn"],
+        ["obs_per_spawn_variance",
+                    "obs_per_spawn can vary by this much"],
         ["match_scale", "Multiply spawned object's scale by owner's scale"],
         ["add_rotation", "Add owner's rotation to spawned object's rotation"],
         ["add_velocity", "Add owner's velocity to spawned object's velocity"],
@@ -36,10 +37,8 @@ class Spawn_On_Destroy( Spawner):
 
     @component_method
     def on_added_to_scene(self, scene):
-        "Load the sound, if any"
-        if self.sound:
-            self.sound_object = get_sound( self.sound)
-
+        "Setup the spawner"
+        self.setup_spawner()
 
     @component_method
     def on_destroy(self):

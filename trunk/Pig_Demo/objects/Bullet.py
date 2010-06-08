@@ -20,7 +20,7 @@ class Bullet(PigSprite):
                 grow_in_secs=0.2,
                 shrink_out_secs=-1.0) )
         self.components.add( On_Collision_Sound(
-                sound='sounds\\snap.wav',
+                sound='sound\\snap.wav',
                 with_group='target',
                 my_group='bullet') )
         self.components.add( Life_Zone() )

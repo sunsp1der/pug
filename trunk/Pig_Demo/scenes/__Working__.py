@@ -45,7 +45,7 @@ class Shooting_Gallery(PigScene):
                 backward_key=None) )
         cannon.components.add( Key_Spawn(
                 spawn_object='Bullet',
-                sound='sounds\\snap.wav',
+                sound='sound\\snap.wav',
                 spawn_offset=(0, -1),
                 max_spawns_in_scene=1) )
 ### End Shooting_Gallery autocode ###

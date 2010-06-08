@@ -27,8 +27,9 @@ class Key_Spawn( Spawner):
                             'doc':"The area where objects can be spawned"}],
         ["spawn_offset", 
          "Spawn location is offset by this much (scaled by owner size)"],
-        ["min_objects_per_spawn","Minimum number of objects created"],
-        ["max_objects_per_spawn","Maximum number of objects created"],
+        ["obs_per_spawn","Number of objects created per spawn"],
+        ["obs_per_spawn_variance",
+                    "obs_per_spawn can vary by this much"],
         ["max_spawns_in_scene",
             "Maximum number of spawns in scene at one time (-1 = unlimited)"],        
         ["match_scale", "Multiply spawned object's scale by owner's scale"],
@@ -46,11 +47,10 @@ class Key_Spawn( Spawner):
 
     @component_method
     def on_added_to_scene(self, scene):
-        "Set spawn key"
+        "Set spawn key and setup the spawner"
         self.k_info = [None,]
         self.k_info[0] = scene.register_key_down( self.key, self.spawn)
-        if self.sound:
-            self.sound_object = get_sound( self.sound)        
+        self.setup_spawner()        
 
     @component_method
     def on_destroy(self):

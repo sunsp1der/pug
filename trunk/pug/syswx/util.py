@@ -1,5 +1,5 @@
 import traceback
-from sys import exc_info
+import sys
 import os
 
 import wx
@@ -20,19 +20,35 @@ class TestEventHandler( wx.EvtHandler):
 def get_icon():
     return wx.Icon( get_image_path('pug.ico'), wx.BITMAP_TYPE_ICO)
 
-def show_exception_dialog( parent=None):
-    """ExceptionDialog(parent): show exception info in a dialog"""
-    info = exc_info()
+def show_exception_dialog( parent=None, prefix='', exc_info=None):
+    """ExceptionDialog(parent=None, prefix='')
+
+show exception info in a dialog
+parent: parent frame
+prefix: show in title of window before exception type
+exc_info: if provided, this is the data from sys.exc_info(). If not, use the
+    current sys.exc_info()
+"""
+    if exc_info is None:
+        info = sys.exc_info()
+    else:
+        info = exc_info
     if parent is None:
         parent = wx.GetApp().get_project_frame()
-    err = ScrolledMessageDialog(parent, 
-                                   str(traceback.format_exc()),
-                                   info[0].__name__,
-                                   size=(450, 220))
+    filepath = traceback.extract_tb(info[2])[-1:][0][0]
+    try:
+        title = prefix + info[0].__name__ + ' in ' + os.path.split(filepath)[1]
+    except:
+        title = prefix + info[0].__name__
+    msg = traceback.format_exception(info[0], info[1], info[2])
+    msg = ''.join(msg)
+    err = ScrolledMessageDialog(parent, msg, title, size=(640, 320),
+                            style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
     # scroll to bottom
-    err.Children[0].ShowPosition(len(traceback.format_exc()))
+    err.Children[0].ShowPosition(len(msg))
     err.ShowModal()
     err.Destroy()
+    return 
 
 def cache_aguilist( aguilist):
     for agui in aguilist:

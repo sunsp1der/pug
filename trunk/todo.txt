@@ -1,9 +1,5 @@
 now:	
 	html tutorial
-		file layout
-			run w/o editor
-			file layout
-			working file
 		appendix components		
 			test components
 				Face_Motion

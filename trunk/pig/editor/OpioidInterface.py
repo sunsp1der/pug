@@ -6,14 +6,17 @@ import shutil
 import time
 import thread
 import subprocess
+import sys
 
 import wx
+from wx.lib.dialogs import ScrolledMessageDialog
 
 import Opioid2D
 from Opioid2D.public.Node import Node
 
 import pug
-from pug.util import kill_subprocesses
+import pug.component
+from pug.util import kill_subprocesses, get_package_classes
 from pug.component.pugview import _dataPugview, _dataMethodPugview
 from pug.syswx.util import show_exception_dialog, cache_default_view
 from pug.syswx.component_browser import ComponentBrowseFrame
@@ -41,6 +44,7 @@ scene: the scene to load initially
     _use_working_scene = True
     _new_scene = True
     _initialized = False
+    _quitting = False
     def __init__(self, rootfile, scene=PigScene):
         if _DEBUG: print "OpioidInterface.__init__"
         try:
@@ -56,7 +60,6 @@ scene: the scene to load initially
         set_project_path( projectPath)
         self.project_name = os.path.split(projectPath)[1]
 
-        self.reload_scene_list()        
         self.import_settings()
         if getattr(self.project_settings, 'title'):
             self.project_name = self.project_settings.title 
@@ -65,23 +68,15 @@ scene: the scene to load initially
         self.Director = Director   
         self.Director.editorMode = True
                 
-#        pug.ProjectInterface.__init__(self)
-#        os.environ['SDL_VIDEO_WINDOW_POS'] = \
-#                "%d,%d" % self.pug_settings.rect_opioid_window[0:2]
-#        Opioid2D.Display.init(self.pug_settings.rect_opioid_window[2:4], 
-#                              title='Pig Scene', 
-#                              icon=get_image_path('pug.png'))
-#        Opioid2D.Director.game_started = False
-#        Opioid2D.Director.viewing_in_editor = True
-#        thread.start_new_thread(self.Director.run, (PigScene,))
-
         thread.start_new_thread(start_opioid, 
                                           (self.pug_settings.rect_opioid_window,
                                            os.path.split(projectPath)[1],
                                            get_image_path('pug.png'),
                                            StartScene))
-        time.sleep(1)
-        
+        # wait for scene to load
+        while not getattr(self.Director, 'scene', False):
+            time.sleep(0.001)
+
         pug.App(projectObject=self, 
                       projectFolder=get_project_path(),
                       projectObjectName=self.project_name)
@@ -168,25 +163,33 @@ settingsObj: an object similar to the one below... if it is missing any default
                 else:
                     raise
         else:
-            project_settings = self.create_default_project_settings(project_settings)
+            project_settings = self.create_default_project_settings(
+                                                            project_settings)
         self.project_settings = project_settings
           
     cached=[0, 0, 0]      
     def _post_init(self):
         app = wx.GetApp()
         app.set_pug_settings( self.pug_settings)
+        code_exceptions = {}
+        initial_scene = getattr(self.pug_settings, 'initial_scene', 'PigScene')
+        self.reload_scene_list( doReload=True)
         # initial scene
-        if getattr(self.pug_settings, 'initial_scene'):
-            scene = self.pug_settings.initial_scene
-            available_scenes = get_available_scenes()
-            if scene in available_scenes:
-                self.sceneclass = scene
-                if available_scenes[scene].__module__ == 'scenes.__Working__':
+        if initial_scene != 'PigScene' and initial_scene in self.sceneDict:
+            # test initial scene
+            try:
+                test_scene_code( initial_scene)
+            except:
+                key = '*Error loading initial scene ('+initial_scene+')'                
+                code_exceptions[key] = sys.exc_info()
+                self.sceneclass = PigScene
+            else:
+                self.sceneclass = initial_scene
+                if self.sceneclass.__module__ == 'scenes.__Working__':
                     self._new_scene = False
-        if self.Director.scene.__class__ == StartScene:
-            self.set_scene(PigScene, True)
         else:
-            self.set_scene(self.Director.scene.__class__, True)
+            self.sceneclass = PigScene
+        
         # default menus
         if not self.cached[2]:
             app.add_global_menu("Pig",
@@ -239,7 +242,10 @@ settingsObj: an object similar to the one below... if it is missing any default
             psyco.full()
         except ImportError:
             pass
-
+        
+        # create a project file error report at startup
+        self.reload_project_files( errors=code_exceptions)
+   
     def on_drop_files(self, x, y, filenames):
         # pass to util function
         return on_drop_files( x, y, filenames)
@@ -256,11 +262,12 @@ query: if True, query the user about saving the current scene first
         pug.frame(self.scene)
             
     def set_scene(self, value, forceReload=False):
-        """set_scene(value): set the current scene class in the Director
+        """set_scene(value, forceReload=False): set the current scene 
 
-value can be either an actual scene class, or the name of a scene class        
+value: can be either an actual scene class, or the name of a scene class
+forceReload: if True, reload all scenes and objects first. 
 """
-        if (forceReload):
+        if forceReload is True:
             self.reload_object_list()
             self.reload_scene_list()
         if value == str(value):
@@ -275,7 +282,14 @@ value can be either an actual scene class, or the name of a scene class
                 value = self.sceneDict.get(value.__name__, value)
         oldscene = self.Director.scene
         if oldscene.__class__ != value or forceReload:
-            if _DEBUG: print "Interface.set_scene", value
+            if _DEBUG: print "OpioidInterface.set_scene", value
+            try:
+                test_scene_code(value.__name__)
+            except:
+                self.set_scene( PigScene, forceReload=True)
+                wx.GetApp().get_project_frame().refresh()
+                show_exception_dialog( prefix='Unable to set scene: ')
+                return
             self._new_scene = True
             self.set_selection([])
             close_scene_windows(oldscene)
@@ -321,8 +335,14 @@ value can be either an actual scene class, or the name of a scene class
         if self.Director.scene.__class__ == PigScene:
             self.set_scene("PigScene")
             return
-        self.revert_working_scene()
-        self.set_scene(self.scene.__class__.__name__, True)
+        scenename = self.scene.__class__.__name__
+        try:
+            test_scene_code(scenename)
+        except:
+            show_exception_dialog(prefix='Unable to reload scene: ')
+        else:
+            self.revert_working_scene()
+            self.set_scene(scenename, True)
         
     def revert_working_scene(self):
         """copy scene file into __Working__ scene file"""
@@ -331,12 +351,68 @@ value can be either an actual scene class, or the name of a scene class
                                      ''.join([scenename, '.py']))
         working_file = os.path.join('scenes', '__Working__.py')
         shutil.copy( original_file, working_file)
-
     
-    def reload_scene_list(self, doReload=True):
+    def reload_scene_list(self, doReload=True, errors=None):
         """Load changes made to scene class files"""
-        self.sceneDict = get_available_scenes( doReload, self.use_working_scene)
+        self.sceneDict = get_available_scenes( doReload, self.use_working_scene,
+                                               errors=errors)
+
+    def reload_object_list(self, doReload=True, errors=None):
+        """Load changes made to object class files"""
+        addName = self.addObjectClass.__name__
+        objectDict = get_available_objects( doReload, errors=errors)
+        self.addObjectClass = objectDict.get(addName, PigSprite)
         
+    def reload_components(self, doReload=True, errors=None):
+        """Load changes made to project components"""
+        get_package_classes('components', pug.component.Component,
+                            doReload=doReload, errors=errors)
+        
+    def reload_project_files(self, doReload=True, errors=None,
+                             show_dialog=True):
+        """reload_project_files(doReload=True, errors=None, show_dialog=True)
+
+doReload: force reload of all files
+errors: dict of errors. Will be filled with file errors. Errors can be provided
+    in one of two forms... 1)module: sys.exc_info() or 2)*header: sys.exc_info()
+show_dialog: show a dialog displaying all file errors found
+"""
+        if errors is None:
+            errors = {}
+        self.reload_components(doReload=doReload, errors=errors)
+        self.reload_object_list(doReload=doReload, errors=errors)
+        self.reload_scene_list(doReload=doReload, errors=errors)
+        if show_dialog and errors:
+            keys = errors.keys()
+            top_keys = [] # *'d keys with specific error headers
+            mod_keys = [] # standard keys with error module
+            for key in keys:
+                if key[0]=='*':
+                    top_keys.append(key)
+                else:
+                    mod_keys.append(key)
+            keys.sort()
+            top_keys.sort()
+            msg = 'The following errors were found in the project files:\n\n'
+            for header in top_keys:
+                info = errors[header]
+                header = header[1:]
+                msg += header + ':\n\n'
+                msg += ''.join(traceback.format_exception(*info))
+                msg += '_'*90 + '\n\n'
+            for mod in mod_keys:
+                msg += 'Error in module ' + mod +':\n\n'
+                info = errors[mod]
+                msg += ''.join(traceback.format_exception(*info))
+                msg += '_'*90 + '\n\n'
+            err = ScrolledMessageDialog( wx.GetApp().get_project_frame(),
+                                         msg, 'Project File Errors', 
+                                         size=(640, 320), 
+                            style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER) 
+            err.ShowModal()
+            err.Destroy()            
+ 
+                    
     def set_selection(self, selectList):
         """set_selection( selectList)
         
@@ -385,6 +461,9 @@ Callback from PugApp...
 This function runs when wx is closed.
 event: a wx.Event
 """
+        if self._quitting:
+            return
+        self._quitting = True 
         dlg = wx.MessageDialog( wx.GetApp().projectFrame,
                        "Save Working Scene Before Quit?",
                        'Project Frame Closed', 
@@ -401,8 +480,10 @@ event: a wx.Event
                        wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
                 continue_shutdown = dlg.ShowModal()
                 if continue_shutdown == wx.ID_NO:
+                    self._quitting = False
                     return False
         elif answer == wx.ID_CANCEL:
+            self._quitting = False
             return False
         return True
     
@@ -607,13 +688,7 @@ Add an object to the scene
         
     def kill_subprocesses(self):
         kill_subprocesses()
-        
-    def reload_object_list(self):
-        """Load changes made to object class files"""
-        addName = self.addObjectClass.__name__
-        objectDict = get_available_objects( True)
-        self.addObjectClass = objectDict.get(addName, PigSprite)
-       
+               
 def start_opioid( rect, title, icon, scene):
     #start up opioid with a little pause for threading
     skip_deprecated_warnings()    
@@ -629,9 +704,9 @@ def start_opioid( rect, title, icon, scene):
         Opioid2D.Director.run( scene)
     except ImportError:
         pass # we're exiting Opioid altogether...
-#        print "start_opioid: gotcha"
 #        raise
     except:
+#        print "start_opioid: gotcha"
         raise
          
 def _scene_list_generator():
@@ -660,8 +735,7 @@ _interfacePugview = {
                                        'stop':'stop_scene',
                                        'rewind':'rewind_scene',
                                        'play':'play_scene',
-                                       'doc':'Controls for current scene'}],        
-
+                                       'doc':'Controls for current scene'}],
         [' Current Scene', pug.Label],
         ['sceneclass', pug.Dropdown, 
              {'label':'   Scene',
@@ -683,16 +757,19 @@ _interfacePugview = {
         ['add_object', None, {'doc':\
               'Add an object to the scene.\nSelect object type above.',
                               'use_defaults':True,
-                              'label':'   Add Object'}],                              
+                              'label':'   Add Object'}],
 
         [' Settings', pug.Label],
         ['project_settings'],
         ['pug_settings'],
 
         [' Utilities', pug.Label],
-        ['reload_scene_list', None, {'label':'   Load Scenes',
-                                     'use_defaults':True}],
-        ['reload_object_list', pug.Routine, {'label':'   Load Objects'}],        
+        ['reload_project_files', None, {'label':'    Reload Files',
+                                        'use_defaults':True,
+                    'doc':"Reload all scene, object,\nand component files"}],
+#        ['reload_scene_list', None, {'label':'   Load Scenes',
+#                                     'use_defaults':True}],
+#        ['reload_object_list', pug.Routine, {'label':'   Load Objects'}],
 #        ['open_selection_frame', None, 
 #                {'label':'   View Selection'}],
         ['browse_components', None, 

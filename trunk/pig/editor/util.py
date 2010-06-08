@@ -55,6 +55,37 @@ def get_available_layers():
     except:
         return []
     
+def test_scene_code(scenename):
+    """test_scene_code( scenename)
+
+This method tests a scene's code (including the enter function) without actually
+loading it into view. It is meant to be used in a try clause and will raise the
+exception that caused the scene to fail.    
+
+scenename: name of scene to test
+"""
+    if scenename == 'PigScene':
+        # we'll assume PigScene is okay
+        return
+    if wx.GetApp() and wx.GetApp().get_project_object():
+        wx.GetApp().get_project_object().reload_object_list()
+    else:
+        get_available_objects(True)
+    exec('import scenes.' + scenename + ' as reload_module')
+    reload(reload_module)
+    exec('from scenes.'+scenename+' import '+scenename+' as scene')
+    test = scene()
+    try:
+        test.enter()
+    except:
+        # for some reason, if we don't do the following, images get broken
+        Opioid2D.ResourceManager.clear_cache()
+        raise
+    else:
+        # for some reason, if we don't do the following, images get broken
+        Opioid2D.ResourceManager.clear_cache()
+        
+    
 def get_available_groups():
     """get_available_groups() -> list of available groups in Director"""
     try:

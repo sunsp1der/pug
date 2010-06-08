@@ -91,10 +91,7 @@ class EditorState(PigState):
             
     def handle_keyup(self, ev):
         pass
-            
-    def handle_quit(self, ev):
-        wx.CallAfter(wx.GetApp()._evt_project_frame_close)
-        
+                    
     def realtick(self):
         self.graphicsManager.update()    
 

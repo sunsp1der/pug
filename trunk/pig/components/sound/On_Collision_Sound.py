@@ -5,6 +5,7 @@ from pug.component import *
 from pig.audio import get_sound
 from pig.components import Collision_Callback
 from pig.editor.agui import SoundFile 
+import pig.audio
 
 class On_Collision_Sound( Collision_Callback):
     """Owner plays a sound when destroyed"""
@@ -18,7 +19,7 @@ class On_Collision_Sound( Collision_Callback):
         ] + Collision_Callback._field_list 
     
     sound = None
-    
+
     @component_method
     def on_added_to_scene(self, scene):
         "Get the sound object"
@@ -28,6 +29,6 @@ class On_Collision_Sound( Collision_Callback):
     def on_collision(self, toSprite, fromSprite, toGroup, fromGroup):
         "Play the sound when object collides"
         self.sound_object.play()
-    
+        
 register_component( On_Collision_Sound)
     
