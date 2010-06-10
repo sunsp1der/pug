@@ -96,8 +96,7 @@ class Spawner(Component):
         "Start the spawn timer. To skip delay, call check_spawn"
         if self.spawn_interval > 0:
             self.action = self.owner.do( Delay(self.spawn_delay \
-                   + random.uniform(-self.spawn_interval_variance, 
-                                    self.spawn_interval_variance))\
+                   + self.get_next_spawn_wait())\
                    + CallFunc( self.check_spawn))
     
     @component_method 
@@ -178,8 +177,8 @@ class Spawner(Component):
             self.sound_object.play()            
         return spawned_objects               
             
-    def get_next_spawn_time(self):
-        "get_next_spawn_time()-> how long to wait before next spawn"
+    def get_next_spawn_wait(self):
+        "get_next_spawn_wait()-> how long to wait before next spawn"
         return self.spawn_interval + random.uniform(
                                                 -self.spawn_interval_variance, 
                                                 self.spawn_interval_variance)
@@ -193,7 +192,7 @@ scheduled unless total_objects_spawned has been reached. """
                 self.spawn_count >= self.total_objects_spawned:
             return None
         if self.spawn_interval > 0 and schedule_next:
-            self.action = self.owner.do( Delay(self.get_next_spawn_time()) + \
+            self.action = self.owner.do( Delay(self.get_next_spawn_wait()) + \
                                          CallFunc(self.check_spawn))
         if self.max_spawns_in_scene < 0 or \
                 len(self.spawned_objects) < self.max_spawns_in_scene:

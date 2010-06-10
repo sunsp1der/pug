@@ -27,9 +27,9 @@ class Grow_Shrink(Component):
     shrink_out_collisions = False
 
     @component_method
-    def on_added_to_scene(self, scene):
-        """Do grow in if grow_in_secs > 0"""
-        self.grow_in()
+    def on_first_display(self):
+        """Start the grow-in"""
+        self.owner.do(CallFunc( self.grow_in))
             
     def grow_in(self, secs=None, dstscale=None):
         """grow_in(secs=None, dstscale=None)

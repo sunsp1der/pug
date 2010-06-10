@@ -37,6 +37,29 @@ from_position and to_position in the form (x, y)
                             to_position[0] - from_position[0],
                             from_position[1] - to_position[1]))
     
+def rotate_point (point, origin, rotation):
+    """rotate_point (point, origin, rotation)
+    
+point: point to be rotated
+origin: point to rotate around
+rotation: degrees to rotate
+"""
+    r = math.radians(rotation + 90)
+    displacement = (point[0]-origin[0], point[1]-origin[1])
+    return (displacement[0]*math.cos(r)+displacement[1]*math.sin(r)+origin[0],
+            displacement[1]*math.cos(r)-displacement[0]*math.sin(r)+origin[1])
+
+def in_rotated_rect( point, rect, rotation=0):
+    """point_in_rect( point, rect,rotation=0)->True if point in rect
+    
+point:(x,y)
+rect: pygame.rect
+rotation: degrees
+"""
+    
+    newpoint = rotate_point( point, rect.center, -rotation)
+    return rect.collidepoint( newpoint)      
+    
 def start_scene():
     """Start a scene running"""
     Opioid2D.Director.start_game = True

@@ -92,14 +92,7 @@ update all selection boxes.
                 rect = node.get_rect()
                 if box.area.dragging:
                     if box.rect != box.area.rect:
-                        layer = Opioid2D.Director.scene.get_layer(
-                                                            "__editor__")
-                        position = Mouse.get_position()
-                        world_position = layer.convert_pos(position[0], 
-                                                           position[1])
-                        box.area.position = (0,0)
-                        node.position = world_position
-                        box.set_position(world_position)
+                        box.on_drag( node)
                 else:
                     if box.rect != rect:
                         box.surround_node( node)

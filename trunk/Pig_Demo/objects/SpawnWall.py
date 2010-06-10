@@ -6,7 +6,7 @@ from pug.all_components import Spawner
 ### SpawnWall autocode ###
 class SpawnWall(PigSprite):
     image = 'art\\block.png'
-    layer = 'Background'
+    layer = 'walls'
     def on_create(self):
         self.position.x = 394.0
         self.position.y = 413.0
@@ -14,9 +14,9 @@ class SpawnWall(PigSprite):
         self.scale.y = 5.0
         self.components.add( Spawner(
                 spawn_object='Target',
-                sound='',
                 spawn_interval=4.0,
-                spawn_location='edges',
+                spawn_location='top',
+                obs_per_spawn_variance=1,
                 max_spawns_in_scene=6,
                 match_scale=False) )
 ### End SpawnWall autocode ###
