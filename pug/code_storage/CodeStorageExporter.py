@@ -13,7 +13,7 @@ from pug.gname import GnamedObject
 from pug.util import make_valid_attr_name, get_type_name
 import pug.all_components as all_components
 
-_DEBUG = False
+_DEBUG = True
 
 class CodeStorageExporter():
     """Object that manages exporting autocode
@@ -917,7 +917,8 @@ iAttrList: When storing 'as_class', these attributes will be set in the init
             compObjClass = compStorageDict['base_class']
             compImportModule = compStorageDict['import_module']
             # just drop in the all_components magic
-            if all_components and compObjClass.__name__ in dir(all_components):
+            if all_components and compObjClass ==\
+                    getattr(all_components,compObjClass.__name__,None):
                 import_name = self.setup_import('pug.all_components', 
                                                 compObjClass.__name__)     
             else:                               
@@ -936,7 +937,8 @@ iAttrList: When storing 'as_class', these attributes will be set in the init
             compStorageDict = self.prepare_storageDict(comp, compStorageDict)
             compObjClass = compStorageDict['base_class']
             compImportModule = compStorageDict['import_module']
-            if all_components and compObjClass.__name__ in dir(all_components):
+            if all_components and compObjClass ==\
+                    getattr(all_components,compObjClass.__name__,None):
                 import_name = self.setup_import('pug.all_components', 
                                                 compObjClass.__name__)     
             else:                               

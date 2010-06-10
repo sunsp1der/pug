@@ -78,6 +78,7 @@ bugs:
 	crash - selecting an object while changing selectionwin to another view 
 
 later: 
+	process mouseclicks in canvas within interface, not in opioid thread
 	allow gnamed objects in objects dropdown (e.g. Spawner)
 	round out floats (mouseover for full display)
 	drag n drop

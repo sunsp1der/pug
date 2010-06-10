@@ -25,7 +25,7 @@ Opioid2d Sprite with features for use with pug"""
     _archetype = False
     destroy_blockers = None
     _pug_pugview_class = 'PigSprite'
-    
+    image = ''
     def __del__(self):
         pug.BaseObject.__del__(self)
     
@@ -80,12 +80,13 @@ if TF is "True" set archetype to True, but don't create default name
                           doc="Sprite used by editor. Does not appear in game.")
         
     def set_image(self, image):
+        Sprite.set_image(self, image)
         if isinstance(image, basestring):
             self._image_file = image
-        Sprite.set_image(self, image)
 
     def set_image_file(self, file):
         self._image_file = file
+        Sprite.set_image(self, file)
         (Delay(0) + CallFunc(Sprite.set_image, self, file)).do() 
     
     def get_image_file(self):
@@ -300,9 +301,8 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
             if not dummy or \
                     getattr(dummy, attr).radial != getattr(self,attr).radial:
                 custom_attr_code += [prefix, 
-                                     attr, '.', 'x = ', repr(vector.x),'\n']
-                custom_attr_code += [prefix, 
-                                     attr, '.', 'y = ', repr(vector.y),'\n']
+                                     attr, ' = (', repr(vector.x),
+                                     ', ', repr(vector.y),')','\n']
         custom_code += custom_attr_code
         if storageDict['as_class']:
             init_code = exporter.create_init_method(dodef=False, *info)
@@ -314,6 +314,11 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
             code.append(base_code)
         if _DEBUG: print "*******************exit sprite save: "+str(self)        
         return ''.join(code)
+#    def test(self):
+#        import cOpioid2D as _c
+#        self._image._cObj.hotspot = _c.Vec2(0,0)
+#        print self._image._cObj.hotspot.x, self._image._cObj.hotspot.y 
+#        return self._image._cObj
     
     _codeStorageDict = {
             'skip_attributes': ['_actions', '_image_file', 'image_file','color',

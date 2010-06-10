@@ -15,11 +15,14 @@ class SelectBox():
     
 A selection box around a given rect. Contains dict 'lines' of line sprites whose
 indexes are 'top', 'bottom', 'left', and 'right'. Also contains 'base' Sprite
-which is invisible and sets the center of the object.
+which is invisible and sets the center of the object. And 'area' sprite which is
+invisible and draggable.
  
-Some day, this should use line primitives instead of stretched sprites.
+Some day, this should use line primitives instead of stretched sprites. And even
+handles for scaling and rotating.
 """
     rect = None
+    drag_offset = (0,0)
     def __init__(self, node = None):
         """__init__( node=None)
 
@@ -31,6 +34,7 @@ node: any object containing a 'rect' attribute that is a pygame rect
         area.position = (0,0)        
         self.base = base
         self.area = area
+        self.area.box = self
         self.lines = {}
         self.rect = Rect([0,0,0,0])
         for side in ['left','right','top','bottom']:
@@ -40,7 +44,32 @@ node: any object containing a 'rect' attribute that is a pygame rect
         if node:
             self.surround_node( node)
             self.start_pulse()
-            
+    
+    def on_drag_begin(self):
+        layer = Opioid2D.Director.scene.get_layer("__editor__")
+        position = Opioid2D.Mouse.get_position()
+        world_position = layer.convert_pos(position[0], position[1])
+        node = self.get_node()
+        if node:
+            self.drag_offset = node.position - world_position
+        else:
+            self.drag_offset = (0,0)   
+        
+    def get_node(self):  
+        boxDict = Opioid2D.Director.scene.state.graphicsManager.boxDict
+        for node,box in boxDict.iteritems():
+            if box == self:
+                return node
+        
+    def on_drag(self, node):
+        layer = Opioid2D.Director.scene.get_layer("__editor__")
+        position = Opioid2D.Mouse.get_position()
+        self.area.position = (0,0)
+        new_position = layer.convert_pos(position[0], position[1])\
+                         + self.drag_offset
+        node.position = new_position 
+        self.base.set_position(new_position)
+        
     def start_pulse(self):
         pulse = Opioid2D.AlphaFade(0.6, 1.5, Opioid2D.PingPongMode)
         for sprite in self.lines.itervalues():
@@ -95,6 +124,7 @@ class SelectBoxAreaSprite( Opioid2D.gui.GUISprite):
     dragging = False
     
     def on_drag_begin(self):
+        self.box.on_drag_begin()
         Opioid2D.Director.scene.state.selectOnUp = None
         self.dragging = True
 

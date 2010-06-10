@@ -5,6 +5,7 @@ import wx
 
 import Opioid2D
 
+from pig.util import in_rotated_rect
 from pig.PigState import PigState
 
 _DEBUG = False
@@ -36,7 +37,7 @@ class EditorState(PigState):
         for layer in scene.layers:
             if layer == "__editor__":
                 continue
-            #node = scene.get_layer(layer).pick(x,y)
+            #node = scene.get_layer(layer).pick(x,y)s
             node = scene.pick(x, y, wx.GetApp().selectedObjectDict)
             if node is not None:
                 self.selectOnUp = weakref.ref(node)
@@ -45,7 +46,8 @@ class EditorState(PigState):
         
     def handle_mousebuttonup(self, event):
         if self.selectOnUp and self.selectOnUp() and \
-                self.selectOnUp().rect.collidepoint(event.pos):
+                in_rotated_rect( event.pos, self.selectOnUp().rect, 
+                                 self.selectOnUp().rotation):
             wx.CallAfter(self.interface.set_selection,[self.selectOnUp()])
             self.selectOnUp = None
         

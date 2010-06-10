@@ -645,14 +645,24 @@ Callback from pugApp notifying that app is becoming busy or unbusy.
         if isinstance(self.scene.state, EditorState):
             self.scene.state._on_set_busy_state(on)
             
-    addObjectClass = PigSprite
     def add_object(self, nodeclass=None):
         """add_object( nodeclass=None)
         
-Add an object to the scene
+If nodeclass is None, addObjectClass will be used.
 """
+        # delay hack necessary to solve Opioid2D thread problem with images
         if nodeclass is None:
-            objectclass = self.addObjectClass
+            nodeclass = self.addObjectClass
+        (Opioid2D.Delay(0) + Opioid2D.CallFunc(self.do_add_object, 
+                                               nodeclass)).do() 
+        
+    addObjectClass = PigSprite
+    def do_add_object(self, objectclass):
+        """do_add_object( objectclass)
+        
+Add an object of class objectclass to the scene. Because of timing issues with 
+Opioid2D, it is safer to call this via add_object. 
+"""
         if not issubclass(objectclass, Node):
             raise TypeError("add_object(): arg 1 must be a subclass of Node")
         node = objectclass()
@@ -683,7 +693,10 @@ Add an object to the scene
                     break
         node.rect.left = nodeloc[0]
         node.rect.top = nodeloc[1]
-        
+        if hasattr(node, 'set_image_file') and\
+                hasattr(node, 'get_image_file'):
+            # hack to fix Opioid image problems
+            node.set_image_file( node.get_image_file())
         wx.GetApp().set_selection([node])
         
     def kill_subprocesses(self):

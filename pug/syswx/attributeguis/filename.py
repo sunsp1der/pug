@@ -109,10 +109,12 @@ Uses a browser dialog to facilitate picking a graphics file
             if not folder:
                 folder = os.path.dirname(self.control.value)
                 val = ''.join(folder,file)
+            tooltip = val
         else:
-            val = ""
+            val = None
             file = ""
-        self.control.text.SetToolTipString(val)            
+            tooltip = ""
+        self.control.text.SetToolTipString(tooltip)            
         self.control.text.SetValue(file)
         self.control.value = val
         

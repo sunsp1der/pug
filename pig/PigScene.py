@@ -17,6 +17,7 @@ from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.code_storage.constants import _INDENT
 from pug.code_storage import add_subclass_storageDict_key
 
+from pig.util import in_rotated_rect
 from pig.editor.agui import SceneNodes, SceneLayers
 from pig.editor.util import get_available_layers, save_object
 from pig.keyboard import keys, keymods
@@ -307,7 +308,8 @@ key_down. In the future, maybe key_hold.
                         node.delete()
                 Opioid2D.Director.game_started = True                        
                 self.on_start()
-                self.all_nodes_callback( 'on_added_to_scene', self)        
+                self.all_nodes_callback( 'on_added_to_scene', self)
+                self.all_nodes_callback( 'on_first_display')        
                 self.all_nodes_callback( 'on_game_start')
             else:
                 # do nothing if we're not starting the game
@@ -340,9 +342,12 @@ key_down. In the future, maybe key_hold.
         """Send a callback to all nodes in the scene"""
         if _DEBUG: print "PigScene.all_nodes_callback:",callback,self.nodes.data
         for node in self.nodes:
-            func = getattr(node, callback, None)
-            if func:
-                if _DEBUG: print "PigScene.node_callback",callback,node
+            try:
+                func = getattr(node, callback)
+            except:
+                pass
+            else:
+#                if _DEBUG: print "PigScene.node_callback",callback,node
                 func( *args, **kwargs)
                        
     # node info storage
@@ -410,9 +415,8 @@ Get all nodes whose rects overlap (x,y)
         nodelist = self.get_ordered_nodes()
         picklist = []
         for node in nodelist:
-            rect = node.rect
-            if rect.collidepoint(x, y):
-                picklist.append(node)  
+            if in_rotated_rect( (x,y), node.rect, node.rotation):
+                picklist.append(node)
         return picklist
 
     def pick(self, x, y, selectedObjectDict={}):
@@ -454,22 +458,23 @@ selectedObjectDict: a list of selected objects. If possible, pick will return an
 Update the PigScene's node tracking dict for node. Possible commands: 'Delete'
 """
         nodes = self.nodes
-        if _DEBUG: print "PigScene.update_node", node, command
+#        if _DEBUG: print "PigScene.update_node", node, command
         if not nodes.has_key(node):
-            if _DEBUG: print "   not registered:", node
+#            if _DEBUG: print "   not registered:", node
             return
         else:
-            if  _DEBUG: print "   registered"
+#            if  _DEBUG: print "   registered"
             node_num = nodes[node]
         if getattr(node,'deleted',False) or command == 'Delete':
             if nodes.has_key(node):
                 try:
                     nodes.__delitem__(node)
-                    if _DEBUG: print "   deleted"
+#                    if _DEBUG: print "   deleted"
                 except:
-                    if _DEBUG: print "   could not delete (already gone?)"
-            else:
-                if _DEBUG: print "   unable to delete"
+                    pass
+#                    if _DEBUG: print "   could not delete (already gone?)"
+#            else:
+#                if _DEBUG: print "   unable to delete"
             return            
         # node_num tracks the order of node additions
         nodes[node] = node_num # this call sets off callbacks for nodes gui        
@@ -477,9 +482,19 @@ Update the PigScene's node tracking dict for node. Possible commands: 'Delete'
     def register_node(self, node):        
 #        """register(node): a new node is joining scene. Do callbacks"""
         if _DEBUG: print "PigScene.register_node:",node
-        if getattr(Opioid2D.Director, 'game_started', False) and \
-                    hasattr(node, "on_added_to_scene"):
-            node.on_added_to_scene(self)
+        if getattr(Opioid2D.Director, 'game_started', False):
+            try:
+                func = getattr(node, 'on_added_to_scene')
+            except:
+                pass
+            else:
+                func(self)
+            try:
+                func = getattr(node,'on_first_display')
+            except:
+                pass
+            else:
+                func()
         self.nodes[node] = self.__node_num
         self.__node_num += 1
             

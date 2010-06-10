@@ -1,51 +1,54 @@
 ### import autocode ###
-from objects.Bullet import Bullet
-from objects.ExplodeParticle import ExplodeParticle
-from objects.Launcher import Launcher
-from objects.Target import Target
+from objects.SpawnWall import SpawnWall
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
-from pug.all_components import Utility_Keys, Key_Drive_Controls, Key_Spawn
+from pug.all_components import Fade, Collision_Destroy, Grow_Shrink,\
+    Key_Drive_Controls, Join_Collision_Group, Spawner
 ### End import autocode ###
 
-### Shooting_Gallery autocode ###
-class Shooting_Gallery(PigScene):
-    def __init__(self, *args, **kwargs):
-        PigScene.__init__(self, *args, **kwargs)
-        self.components.add( Utility_Keys(
-                info_F1='scenes\\Shooting_Gallery_Help.txt') )
-
+### FadeTest autocode ###
+class FadeTest(PigScene):
+    layers = ['Background', 'walls']
     def on_enter(self):
-        # Archetypes
-        Bullet_archetype = Bullet(gname='Bullet')
-        Bullet_archetype.archetype = True
-
-        ExplodeParticle_archetype = ExplodeParticle(gname='ExplodeParticle')
-        ExplodeParticle_archetype.archetype = True
-
-        Target_archetype = Target(gname='Target')
-        Target_archetype.archetype = True
-
         # Sprites
-        launcher_instance = Launcher()
+        pigsprite_instance = PigSprite()
+        pigsprite_instance.image = 'art\\pug.png'
+        pigsprite_instance.layer = 'Background'
+        pigsprite_instance.position = (400.0, 300.0)
+        pigsprite_instance.components.add( Fade(
+                fade_in_secs=0.0) )
+        pigsprite_instance.components.add( Collision_Destroy() )
+        pigsprite_instance.components.add( Grow_Shrink(
+                shrink_out_secs=0.0) )
 
-        launcher_instance_2 = Launcher()
-        launcher_instance_2.position.x = 43.0
-        launcher_instance_2.position.y = 175.0
-        launcher_instance_2.rotation = 90.0
+        pigsprite_instance_2 = PigSprite()
+        pigsprite_instance_2.image = 'art\\pug.png'
+        pigsprite_instance_2.layer = 'Background'
+        pigsprite_instance_2.position = (398.0, 387.0)
+        pigsprite_instance_2.components.add( Key_Drive_Controls() )
+        pigsprite_instance_2.components.add( Join_Collision_Group() )
 
-        cannon = PigSprite(gname='cannon')
-        cannon.image = 'art\\pug.png'
-        cannon.layer = 'Background'
-        cannon.position.x = 400.0
-        cannon.position.y = 514.0
-        cannon.opacity = 0.5
-        cannon.components.add( Key_Drive_Controls(
-                forward_key=None,
-                backward_key=None) )
-        cannon.components.add( Key_Spawn(
-                spawn_object='Bullet',
-                sound='sound\\snap.wav',
-                spawn_offset=(0, -1),
-                max_spawns_in_scene=1) )
-### End Shooting_Gallery autocode ###
+        pigsprite_instance_3 = PigSprite()
+        pigsprite_instance_3.image = 'art\\pug.png'
+        pigsprite_instance_3.layer = 'Background'
+        pigsprite_instance_3.position = (410.0, 310.0)
+
+        spawnwall_instance = SpawnWall()
+        spawnwall_instance.position = (201.0, 316.0)
+        spawnwall_instance.rotation = 45.0
+        spawnwall_instance.tint = (0.0, 0.0, 0.50196081399917603)
+        spawnwall_instance.components.add( Spawner(
+                spawn_object='Target',
+                spawn_interval=4.0,
+                spawn_location='area',
+                obs_per_spawn_variance=1,
+                max_spawns_in_scene=6,
+                match_scale=False) )
+        spawnwall_instance.components.remove_duplicate_of( Spawner(
+                spawn_object='Target',
+                spawn_interval=4.0,
+                spawn_location='top',
+                obs_per_spawn_variance=1,
+                max_spawns_in_scene=6,
+                match_scale=False) )
+### End FadeTest autocode ###
