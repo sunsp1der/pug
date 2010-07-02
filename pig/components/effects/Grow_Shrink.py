@@ -6,7 +6,7 @@ from pug.component import *
 from pig.PigDirector import PigDirector
 
 class Grow_Shrink(Component):
-    """Owner grows into scene and/or shrinks away when destroyed."""
+    """Object grows into scene and/or shrinks away when destroyed."""
     #component_info
     _set = 'pig'
     _type = 'effect'
@@ -14,10 +14,10 @@ class Grow_Shrink(Component):
     # attributes: ['name', 'doc', {extra info}]
     _field_list = [
             ['grow_in_secs',
-                    "Number of seconds to take growing in. -1 = no grow."],
+                    "Number of seconds to take growing in. -1 = no grow in."],
             ['shrink_out_secs',
                     "Number of shrink-out seconds when owner is"+\
-                    "destroyed. -1 = no grow."],
+                    "destroyed. -1 = no shrink outs."],
             ['shrink_out_collisions',
                     'Allow object to collide while shrinking out']            
             ]

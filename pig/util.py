@@ -11,6 +11,7 @@ import Opioid2D
 from Opioid2D.public.Node import Node
 
 import pug
+import pug.component
 from pug.util import get_package_classes, find_classes_in_module
 
 from pig.PigDirector import PigDirector
@@ -44,7 +45,7 @@ point: point to be rotated
 origin: point to rotate around
 rotation: degrees to rotate
 """
-    r = math.radians(rotation + 90)
+    r = math.radians(-rotation)
     displacement = (point[0]-origin[0], point[1]-origin[1])
     return (displacement[0]*math.cos(r)+displacement[1]*math.sin(r)+origin[0],
             displacement[1]*math.cos(r)-displacement[0]*math.sin(r)+origin[1])
@@ -55,8 +56,7 @@ def in_rotated_rect( point, rect, rotation=0):
 point:(x,y)
 rect: pygame.rect
 rotation: degrees
-"""
-    
+""" 
     newpoint = rotate_point( point, rect.center, -rotation)
     return rect.collidepoint( newpoint)      
     
@@ -120,10 +120,11 @@ _project_settings file unless otherwise noted.
         scenename = project_settings.initial_scene
         
     # get scene    
+    import pig.components
+    get_package_classes('components', pug.component.Component)    
     scenedict = get_available_scenes( useWorking=useWorking)# use __Working__.py
     from pig.PigScene import PigScene
     if scenename == 'PigScene':
-        from pig.PigScene import PigScene
         initial_scene = PigScene
     else:
         try:

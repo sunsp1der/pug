@@ -35,11 +35,8 @@ class MyInterface(pug.ProjectInterface):
         self.game.quit(True)    
     
 def init_pug():
-    print "1"    
     interface = MyInterface()
-    print  "2"
     pug.App( projectObject=interface, projectObjectName='MyGame')
-    print "3"
     
 if __name__ == '__main__':
     init_pug()

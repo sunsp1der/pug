@@ -1,5 +1,46 @@
 now:	
+	default_title in project_settings
+	create default project_settings for run_pig_scene
+	when you click off a dropdown, item is selected, but textarea doesn't change		
+	
 	html tutorial
+		TODO list
+			Undo! - save query when changing levels or quitting
+			Separate runtime necessities
+			Resources
+	create zip tarball exe?
+
+bugs: 
+	show menus when object is selected
+	scene tree doesn't show selected object 
+		when obj is first added?
+		when scene is not shown during selection?
+	changing scenes causes bad label in dropdown
+		after save
+	add object after save
+	leftover items in scene graph after deleting both layers
+	crash - selecting an object while changing selectionwin to another view 
+
+later: 
+	process mouseclicks in canvas within interface, not in opioid thread
+	allow gnamed objects in objects dropdown (e.g. Spawner)
+	allow lists of categories for components... file in multiple places
+	figure out actual path to python executable
+	option to open component,sprite,scene file. default save is project component file
+	make mouse follow stop properly with 'stop_within'
+	set gname
+		demo of heads watching a ufo
+	undo
+	make sure field is selected when tabbing through controls... even after change
+	figure out some way to make derived classes work better
+		probably option to select base class
+	clone sprites
+		component copy
+		scene_archetype - in list with object types
+			OR is it a savesprite callback and a component that lets you save
+				it in a scene folder
+	automatically recur into component folders
+
 		appendix components		
 			test components
 				Face_Motion
@@ -58,59 +99,10 @@ now:
 					Fly_Around				
 				Spawner
 					Shooting_Gallery via Launcher
-			
-		TODO list
-			Undo! - save query when changing levels or quitting
-			Separate runtime necessities
-			More automated component loading
-			Resources
-	create zip tarball exe?
-
-bugs: 
-	show menus when object is selected
-	scene tree doesn't show selected object 
-		when obj is first added?
-		when scene is not shown during selection?
-	changing scenes causes bad label in dropdown
-		after save
-	add object after save
-	leftover items in scene graph after deleting both layers
-	crash - selecting an object while changing selectionwin to another view 
-
-later: 
-	process mouseclicks in canvas within interface, not in opioid thread
-	allow gnamed objects in objects dropdown (e.g. Spawner)
-	round out floats (mouseover for full display)
-	drag n drop
-	allow lists of categories for components... file in multiple places
-	figure out actual path to python executable
-	make multiple instances of same graphic appear offset
-		util.placevisible
-	option to open component,sprite,scene file. default save is project component file
-	new components should override old. project loaded last.
-		registration argument to ignore over-write
-	make mouse follow stop properly with 'stop_within'
-	set gname
-		demo of heads watching a ufo
-	undo
-	only registered objects selectable by mouseclick
-	make sure field is selected when tabbing through controls... even after change
-	figure out some way to make derived classes work better
-		probably option to select base class
-	clone sprites
-		component copy
-		scene_archetype - in list with object types
-			OR is it a savesprite callback and a component that lets you save
-				it in a scene folder
-	automatically recur into component folders
-	add option for (set to None) on generic agui
+	
 	context button on window frame?
 	default RAW to show __ when there is a different default
-	add 'callback' feature to base agui
-		set name when archetype is selected
 	make checkbox highlight visible
-	put main.py startup functionality into a separate module. 
-		take care of __working__ startup appropriately
 	#TODO: integer agui (with spinners?)
 		derive from generic
 		range
@@ -132,22 +124,7 @@ later:
 		find_by_label
 	view a rect from a sprite?
 	sort ignoring capitals? (attributes in puglist)
-	clearer main.py
-		init function where possible... pug_opioid.util
-			import all object classes and scene classes
-	Tools menu 
-		code viewer
-		make object into component/base/gnamed object
-	component view
-		use default of highest level ancestor
-			eliminate most string _pugclass type stuff
-		add view options of all sub-classes
-		open button in label
-	remove close option from main windows
-	change name 'template' to 'view'
 	open console window
-	avoid adding right on top of another instance of same thing 
-		(move one big nudge down and to right)
 	font size for scene class
 	make opioid not respond during modal stuff
 	set_attribute callback for template
@@ -163,17 +140,13 @@ later:
 	custom menu creation
 		in templates:
 		'menus': {'__order__':[],name1:[]...,name2:[]...}
-	make pugwindow faster by making labels a separate sizer?
-	key/input event registry in scene
 	create groups gui for scene	
 	create get_groups function for pugsprite... checks against scene groups
-	collision
 	kb control in dropdowns
 		enter in dropdowns to apply
 		needs to post event
 	tooltips for component tree
 	validators for pug data
-	option to open editor from pugwindow
 	function to open browser for tutorial
 	sort component browser
 	make very simple editor interface... 
@@ -214,9 +187,6 @@ later:
 not understand:
 
 looks:
-	
-r&d:
-	integrate pycrust for editor
 	
 useability:
 	code_storage dict features: 

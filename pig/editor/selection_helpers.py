@@ -1,4 +1,5 @@
 from pygame import Rect
+from weakref import proxy
 
 import wx
 
@@ -8,7 +9,6 @@ from pig.editor.util import get_image_path
 
 _line_sprite_file = get_image_path("dot.png")
 _empty_sprite_file = get_image_path("empty.png")
-theGraphicsManager = None # set by GraphicsManager module
 
 class SelectBox():
     """SelectBox()
@@ -28,13 +28,14 @@ handles for scaling and rotating.
 
 node: any object containing a 'rect' attribute that is a pygame rect
 """
+        self.graphicsManager = Opioid2D.Director.scene.state.graphicsManager
         base = SelectBoxBaseSprite() 
         area = SelectBoxAreaSprite()
         area.attach_to(base)
         area.position = (0,0)        
         self.base = base
         self.area = area
-        self.area.box = self
+        self.area.box = proxy(self)
         self.lines = {}
         self.rect = Rect([0,0,0,0])
         for side in ['left','right','top','bottom']:
@@ -56,7 +57,7 @@ node: any object containing a 'rect' attribute that is a pygame rect
             self.drag_offset = (0,0)   
         
     def get_node(self):  
-        boxDict = Opioid2D.Director.scene.state.graphicsManager.boxDict
+        boxDict = self.graphicsManager.boxDict
         for node,box in boxDict.iteritems():
             if box == self:
                 return node
@@ -129,7 +130,7 @@ class SelectBoxAreaSprite( Opioid2D.gui.GUISprite):
         self.dragging = True
 
     def on_drag_end(self):
-        Opioid2D.Director.scene.state.selectOnUp = None
-        theGraphicsManager.update_selection_boxes()
-        wx.CallAfter(wx.GetApp().selection_refresh)
         self.dragging = False
+        Opioid2D.Director.scene.state.selectOnUp = None
+        self.graphicsManager.update_selection_boxes()
+        wx.CallAfter(wx.GetApp().selection_refresh)
