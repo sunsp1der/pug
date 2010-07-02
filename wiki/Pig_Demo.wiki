@@ -1,0 +1,6 @@
+#summary The PIG demo project
+
+= Introduction =
+
+An example project using PIG. Requires pig and pug. Run edit_project.py to try it. This is meant to be used with the Quick Start guide available in downloads. 
+
