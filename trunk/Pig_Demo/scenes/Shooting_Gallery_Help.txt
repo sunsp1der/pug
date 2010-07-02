@@ -1,4 +1,4 @@
-Try to shoot the flying targets
+Shoot the flying targets
 
 Controls:
 	Left and Right Arrow: Aim

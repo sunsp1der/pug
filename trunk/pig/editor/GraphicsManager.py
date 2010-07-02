@@ -105,5 +105,3 @@ update all selection boxes.
             pass
             
 graphicsManager = GraphicsManager()
-# interface with selection_helpers
-selection_helpers.theGraphicsManager = graphicsManager 

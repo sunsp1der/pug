@@ -202,6 +202,8 @@ settingsObj: an object similar to the one below... if it is missing any default
                         "Create a new PigScene"],
                  ["Save Working Scene\tCtrl+S", self.save_using_working_scene,
                         "Save current scene in scenes/__Working__.py"],
+                 ["Commit Scene\tShift+Ctrl+S", self.commit_scene,
+                        "Commit current scene into scenes folder"],
                  ["New Object\tShift+Ctrl+N", self.add_object,
                         "Add the currently selected add object to the scene"],
                  ["*DIVIDER*"],
@@ -777,7 +779,7 @@ _interfacePugview = {
         ['pug_settings'],
 
         [' Utilities', pug.Label],
-        ['reload_project_files', None, {'label':'    Reload Files',
+        ['reload_project_files', None, {'label':'   Reload Files',
                                         'use_defaults':True,
                     'doc':"Reload all scene, object,\nand component files"}],
 #        ['reload_scene_list', None, {'label':'   Load Scenes',

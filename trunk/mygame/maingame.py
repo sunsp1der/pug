@@ -27,7 +27,7 @@ autoRun: starts the game immediately upon creation
         self.font = pygame.font.Font(None, 36)
         self._color = 1
         self.colordelta = 0.1
-        self.message = None
+        self.message = "Hello, World"
         self.dummy = fake()
         self.dummy.back = self.background
         self.paused = False
