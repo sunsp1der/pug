@@ -1,6 +1,6 @@
-#summary Coming Soon
+#summary Todo list
 
-===Basic Opioid Editor===
+===TODO===
   * UNDO system
   * Actual installer
   * Make it easier to separate project runtime necessities
