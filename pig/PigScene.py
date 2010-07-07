@@ -137,6 +137,7 @@ fromGroup: If specified, only collisions with this group will be unregistered.
     def handle_keydown( self, ev):
         """handle_keydown( ev): ev is a pygame keydown event"""
         self.process_keylist( ev)
+        print ev.key
 
     def handle_keyup( self, ev):
         """handle_keydown( ev): ev is a pygame keyup event"""

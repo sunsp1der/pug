@@ -74,7 +74,7 @@ def save_project_settings( gameSettings):
                  {'name':'project_settings'})        
 
 def run_pig_scene( projectPath, scenename=None, position=None, resolution=None, 
-                   title=None, fullscreen=None, icon='', units=None, 
+                   title=None, fullscreen=None, icon=None, units=None, 
                    useWorking=False):
     """run_pig_scene( ...) Run a pig scene in a game window
     
@@ -109,15 +109,35 @@ _project_settings file unless otherwise noted.
         raise ValueError("No scenes have been created yet. Run edit_project.py")
     # settings
     if position is None:
-        position = project_settings.rect_opioid_window[0:2]        
+        try:
+            position = project_settings.rect_opioid_window[0:2]
+        except:
+            position = [0,0]        
     if resolution is None:
-        resolution = project_settings.rect_opioid_window[2:4]
+        try:
+            resolution = project_settings.rect_opioid_window[2:4]
+        except:
+            resolution = [800,600]
     if title is None:
-        title = project_settings.title
+        try:
+            title = project_settings.title
+        except:
+            title = "Pig Scene"
     if fullscreen is None:
-        fullscreen = project_settings.fullscreen
+        try:
+            fullscreen = project_settings.fullscreen
+        except:
+            fullscreen = False
     if scenename is None:
-        scenename = project_settings.initial_scene
+        try:
+            scenename = project_settings.initial_scene
+        except:
+            scenename = 'PigScene'
+    if icon is None:
+        try:
+            icon = project_settings.icon
+        except:
+            icon = ''
         
     # get scene    
     import pig.components

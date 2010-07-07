@@ -1,8 +1,6 @@
 now:	
-	default_title in project_settings
+	action commands
 	create default project_settings for run_pig_scene
-	when you click off a dropdown, item is selected, but textarea doesn't change		
-	
 	html tutorial
 		TODO list
 			Undo! - save query when changing levels or quitting
@@ -11,6 +9,9 @@ now:
 	create zip tarball exe?
 
 bugs: 
+	keydirection controls no fire up and to the left - keyboard bug!
+	spawn location edges crashes editor intermittent
+	motion zone component shows no pugview intermittent
 	show menus when object is selected
 	scene tree doesn't show selected object 
 		when obj is first added?

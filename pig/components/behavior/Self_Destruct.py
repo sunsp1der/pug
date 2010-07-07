@@ -31,8 +31,11 @@ Otherwise, use this component's 'start_timer' method."""],
         "start_timer(secs=None): If secs is none, default to self.timer_secs"
         if secs is None:
             secs = self.timer_secs
-        self.timerAction = self.owner.do( 
-                                    Delay(secs) + CallFunc(self.owner.destroy))
+        self.timerAction = self.owner.do( Delay(secs) + CallFunc(self.destruct))
+        
+    def destruct(self):
+        self.timerAction = None
+        self.owner.destroy()
         
     def abort_timer(self):
         "abort_timer(): Abort the self destruction"

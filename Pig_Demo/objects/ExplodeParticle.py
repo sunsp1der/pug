@@ -11,10 +11,8 @@ class ExplodeParticle(PigSprite):
     image = 'art\\pug.png'
     layer = 'Background'
     def on_create(self):
-        self.position.x = 702.0
-        self.position.y = 325.0
-        self.scale.x = 0.30000001192092896
-        self.scale.y = 0.30000001192092896
+        self.position = (702.0, 325.0)
+        self.scale = (0.30000001192092896, 0.30000001192092896)
         self.tint = (1.0, 0.0, 0.0)
         self.components.add( Random_Motion(
                 velocity_min=150,
