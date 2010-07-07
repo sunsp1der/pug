@@ -41,15 +41,17 @@ class Mouse_Follow(Component):
         if not self.enabled:
             return
         owner = self.owner
-        if not owner.layer:
+        try:
+            mousepos = owner.layer.convert_pos(Mouse.position[0], Mouse.position[1])
+            # convert from Opioid2D.Vector to simple co-ordinates 
+            my_pos = (owner.position[0], owner.position[1]) 
+            mousepos = (mousepos[0], mousepos[1])
+            if my_pos != mousepos:
+                if self.face_movement:
+                    owner.rotation = angle_to(my_pos, mousepos)
+                owner.position = mousepos
+        except: 
+            # stopping the scene in the middle of this can cause problems
             return
-        mousepos = owner.layer.convert_pos(Mouse.position[0], Mouse.position[1])
-        # convert from Opioid2D.Vector to simple co-ordinates 
-        my_pos = (owner.position[0], owner.position[1]) 
-        mousepos = (mousepos[0], mousepos[1])
-        if my_pos != mousepos:
-            if self.face_movement:
-                owner.rotation = angle_to(my_pos, mousepos)
-            owner.position = mousepos
         
 register_component( Mouse_Follow)

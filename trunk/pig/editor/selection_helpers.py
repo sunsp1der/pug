@@ -123,7 +123,9 @@ class SelectBoxAreaSprite( Opioid2D.gui.GUISprite):
     layer = "__editor__"
     draggable = True
     dragging = False
-    
+    def on_create(self):
+        self.graphicsManager = Opioid2D.Director.scene.state.graphicsManager
+        
     def on_drag_begin(self):
         self.box.on_drag_begin()
         Opioid2D.Director.scene.state.selectOnUp = None

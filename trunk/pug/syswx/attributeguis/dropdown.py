@@ -50,7 +50,7 @@ For kwargs optional arguments, see the Base attribute GUI
         control.SetPopupControl(self.listctrl)
         self.listctrl.SetSelectCallback(self.item_selected)
         control.Bind(wx.EVT_TEXT_ENTER, self.item_selected)
-        control.Bind(wx.EVT_KILL_FOCUS, self.item_selected)
+        control.Bind(wx.EVT_KILL_FOCUS, self.lost_focus)
         control.Bind(wx.EVT_KEY_DOWN, self.OnKey)
         kwargs['control_widget'] = control
         Base.__init__(self, attribute, window, aguidata, **kwargs)
@@ -116,6 +116,14 @@ For kwargs optional arguments, see the Base attribute GUI
             self.data = None
         self.set_tooltip()
         
+    def lost_focus(self, event=None):
+        if self.allow_typing and \
+                self.listctrl.GetStringValue() != self.control.Value:
+            self.data = self.control.Value
+            self.text = self.control.Value
+        Base.apply( self)
+        if self.callback:
+            self.callback(self.text, self.data)
         
     def item_selected(self, event=None):
         if self.allow_typing and \
@@ -126,7 +134,7 @@ For kwargs optional arguments, see the Base attribute GUI
             self.data = self.listctrl.GetSelectedData()
             self.text = self.listctrl.GetStringValue()
         if not self.applying: 
-            self.apply()
+            Base.apply( self)
         if self.callback:
             self.callback(self.text, self.data)
         self.set_tooltip()

@@ -1,5 +1,6 @@
 from Opioid2D import RealTickFunc, RotateTo, CallFunc
 from Opioid2D.public.Node import Node
+from Opioid2D.public.Math import angledelta
 
 from pug import get_gnamed_object, GnameDropdown
 from pug.component import *
@@ -32,6 +33,7 @@ class Face_Object(Component):
     @component_method
     def on_added_to_scene(self, scene):
         """Start facing target when object is added to scene"""
+        self.end_action = CallFunc(self.target_reached)
         self.start_facing_target()
         
     @component_method
@@ -60,14 +62,15 @@ class Face_Object(Component):
         
 position: an Opioid vector        
 Turn the object toward position. If None, use obj.position"""
-        if not self.enabled:
+        if not self.enabled: 
+            self.action.abort()
+            return
+        if not self.target:
+            return
+        obj = get_gnamed_object(self.target)
+        if not obj:
             return
         if position is None:
-            if not self.target:
-                return
-            obj = get_gnamed_object(self.target)
-            if not obj:
-                return
             position = obj.position
         target_angle = angle_to(self.owner.position, 
                          position) + self.offset
@@ -75,26 +78,20 @@ Turn the object toward position. If None, use obj.position"""
             # set owner to proper rotation instantly
             self.owner.rotation = target_angle
         else:
-            if self.owner.position == self.target.position:
-                self.target_reached()
-                return
+            if self.target_angle != target_angle:
             #create an action that will rotate owner to proper angle
-            if self.owner.rotation != target_angle:
-                if self.target_angle != target_angle:
-                    if self.action:
-                        self.action.target = target_angle
-                        self.action.speed = self.rotation_speed
-#                        self.action.abort()
-                    action = RotateTo(target_angle, 
-                                speed=self.rotation_speed) + \
-                                      CallFunc(self.target_reached)
-                    self.action = action.do(self.owner)
-                    self.target_angle = target_angle
-    
+                if self.action:
+                    self.action.abort()
+                self.action = (RotateTo(target_angle, 
+                                        speed=self.rotation_speed) + \
+                                self.end_action).do(self.owner)                        
+                self.target_angle = target_angle
+            if self.owner.rotation == self.target_angle:
+                self.target_reached()
+                    
     def target_reached(self):
         # opioid has a problem aborting the action if it's complete
         if self.action:
-            self.action.abort()
             self.action = None
         
 register_component( Face_Object)

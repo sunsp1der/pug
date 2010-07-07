@@ -8,7 +8,7 @@ class SpawnWall(PigSprite):
     image = 'art\\block.png'
     layer = 'walls'
     def on_create(self):
-        self.position = (394.0, 413.0)
+        self.position = (395.0, 424.0)
         self.scale = (100.0, 5.0)
         self.components.add( Spawner(
                 spawn_object='Target',

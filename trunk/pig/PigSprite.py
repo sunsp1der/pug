@@ -86,7 +86,7 @@ if TF is "True" set archetype to True, but don't create default name
 
     def set_image_file(self, file):
         self._image_file = file
-        Sprite.set_image(self, file)
+#        Sprite.set_image(self, file)
         (Delay(0) + CallFunc(Sprite.set_image, self, file)).do() 
     
     def get_image_file(self):

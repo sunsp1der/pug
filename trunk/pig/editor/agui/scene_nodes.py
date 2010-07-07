@@ -129,7 +129,10 @@ Special kwargs:
     def find_item_by_data(self, data, parentItem=None):  
         if parentItem == None:
             parentItem = self.GetRootItem()
-        item, cookie = self.GetFirstChild(parentItem)
+        try:
+            item, cookie = self.GetFirstChild(parentItem)
+        except:
+            return None
         while item:
             if self.GetPyData(item) == data:
                 return item

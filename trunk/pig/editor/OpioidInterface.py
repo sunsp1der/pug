@@ -89,9 +89,8 @@ settingsObj: an object similar to the one below... if it is missing any default
     attributes, they will be replaced here.
 """    
         # DEFAULT GAME SETTINGS
-        default_title = os.path.split(get_project_path())[1]
         class project_settings():
-            title = default_title
+            title = os.path.split(get_project_path())[1]
             initial_scene = '__Working__'
             rect_opioid_window = (25, 25, 800 , 600)
             fullscreen = False
@@ -198,7 +197,7 @@ settingsObj: an object similar to the one below... if it is missing any default
                  ["Open Project", self.open_project,
                         "Open a Pig project"],
                  ["*DIVIDER*"],
-                 ["New Scene\tCtrl+N", [self.set_scene, ("PigScene",), {}],
+                 ["New Scene\tCtrl+N", [self.set_scene, ("PigScene", True), {}],
                         "Create a new PigScene"],
                  ["Save Working Scene\tCtrl+S", self.save_using_working_scene,
                         "Save current scene in scenes/__Working__.py"],
@@ -665,13 +664,18 @@ If nodeclass is None, addObjectClass will be used.
 Add an object of class objectclass to the scene. Because of timing issues with 
 Opioid2D, it is safer to call this via add_object. 
 """
-        if not issubclass(objectclass, Node):
-            raise TypeError("add_object(): arg 1 must be a subclass of Node")
+        try:
+            if not issubclass(objectclass, Node):
+                print objectclass, Node
+                raise TypeError("add_object(): arg 1 must be a subclass of Node")
+        except:
+            print objectclass, Node
+            raise
         node = objectclass()
         if objectclass == PigSprite and type(self.scene.state) == EditorState:
             # set a default image for basic sprite
             try:
-                node.set_image("art/pug.png")
+                node.set_image("art\\pug.png")
             except:
                 pass
             node.position = \
@@ -699,7 +703,7 @@ Opioid2D, it is safer to call this via add_object.
                 hasattr(node, 'get_image_file'):
             # hack to fix Opioid image problems
             node.set_image_file( node.get_image_file())
-        wx.GetApp().set_selection([node])
+        wx.CallAfter(wx.GetApp().set_selection,[node])
         
     def kill_subprocesses(self):
         kill_subprocesses()
