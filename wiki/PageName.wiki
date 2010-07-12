@@ -1,7 +1,8 @@
 #summary Tutorial: Using Pig's Action system
+#labels Tutorial,Featured
 == Pig's Action System ==
 
-The Pig Editor allows you to layout your scene and, with the help of components, add quite a bit of functionality. Another way to add functionality to your objects is using *Actions*. Many Actions have to do with object movement, but there are many kinds of Actions available.
+The Pig Editor allows you to layout your scene and, with the help of components, add quite a bit of functionality. Another way to add functionality to your objects is by using *Actions*. Many Actions have to do with object movement, but there are many kinds of Actions available.
 
 == Getting Started Coding ==
 
@@ -78,6 +79,7 @@ Don't believe me? Check it out...
 You can use this same method for testing any of the Actions and Action chains in this tutorial. Don't forget to push the Stop button before you continue...
 
 ==Chaining Actions==
+
 You can perform one action after another simply by using the + sign when assigning actions to your sprite. For example, change the code in your on_added_scene method to look like this:
 {{{
     def on_added_to_scene(self, scene):
@@ -91,3 +93,23 @@ When you try it, you'll see that your sprite now moves down and to the right, th
 }}}
 Note that the '\' at the end of the line just means that the code will continue on the next line. So now try that. Just what we expected... move, return, delete.
 
+==Forking Actions==
+You can also make two Actions happen at the same time with a special Action called *Fork*. Inside a Fork action, you can write another Action chain that starts immediately. As an example, we'll use the RotateDelta action, which rotates a sprite and looks like this:
+{{{
+RotateDelta( degrees, seconds)
+}}}
+First, try it without the fork, like this:
+{{{
+    def on_added_to_scene(self, scene):
+        self.do( MoveDelta( (100, 50), 1) + RotateDelta(180, 2) + \
+                 MoveDelta( (-100, -50), 2) + Delete())
+}}}
+Try it. Just a regular chain. Move, rotate, move, then delete. Now we'll use a Fork with the RotateDelta. Change it to look like this:
+{{{
+    def on_added_to_scene(self, scene):
+        self.do( MoveDelta( (100, 50), 1) + Fork( RotateDelta(180, 2)) + \
+                 MoveDelta( (-100, -50), 2) + Delete())
+}}}
+Try it. Now it rotates at the same time as it moves back to its starting position. Basically, a Fork action just starts whatever Actions are inside it, then immediately goes on to the next Action in the original chain.
+==More Action Tricks==
+There are lots of other Actions you can work with to achieve the results you're looking for. To see a full list, and more detailed documentation, check out [Wikipage Actions].
