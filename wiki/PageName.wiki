@@ -1,0 +1,21 @@
+#summary Tutorial: Pig's Action system
+= Tutorial: Pig's Action system =
+
+== Introduction ==
+
+The Pig Editor allows you to layout your scene and, with the help of components, add quite a bit of functionality. Another way to add functionality to your objects is using *Actions*. Many Actions have to do with object movement, but there are many kinds of Actions available.
+
+
+== Getting Started Coding ==
+
+To create the examples in this tutorial, we'll start with an unaltered PigSprite. To do this:
+  # Start the Pig Editor by running edit_project.py
+  # Select PigSprite in the _Object to add_ dropdown in
+
+Add your content here.  Format your content with:
+  * Text in *bold* or _italic_
+  * Headings, paragraphs, and lists
+  * Automatic links to other wiki pages
+{{{
+
+}}}
