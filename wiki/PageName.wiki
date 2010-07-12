@@ -68,7 +68,7 @@ Next is the cool part: we tell the object (self) to _do_ an Action. The action i
 {{{
     MoveDelta( (x, y), seconds))
 }}}
-MoveDelta is an action that basically says 'move this much'. So, this particular MoveDelta action moves the object 100 units right along the x-axis and 50 units down along the y-axis. It takes one second to do that. 
+!MoveDelta is an action that basically says 'move this much'. So, this particular !MoveDelta action moves the object 100 units right along the x-axis and 50 units down along the y-axis. It takes one second to do that. 
 
 ==Testing==
 
