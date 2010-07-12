@@ -12,7 +12,7 @@ To create the examples in this tutorial, we'll start with a new sprite in a new 
   # Select Save Scene and enter 'Tutorial' as the name.
   # Select New Sprite in the _Object to add_ dropdown in the Project tab.
   # Press the Add Object button. A new sprite will appear in the center of the Canvas.
-  # Click on the Save Object button on the _Selection: PigSprite_ tab
+  # Click on the Save Object button on the _Selection: !PigSprite_ tab
   # Enter the name 'Tester' in the dialog
   # In the Editor's View menu, select View Source
 
@@ -94,7 +94,7 @@ When you try it, you'll see that your sprite now moves down and to the right, th
 Note that the '\' at the end of the line just means that the code will continue on the next line. So now try that. Just what we expected... move, return, delete.
 
 ==Forking Actions==
-You can also make two Actions happen at the same time with a special Action called *Fork*. Inside a Fork action, you can write another Action chain that starts immediately. As an example, we'll use the RotateDelta action, which rotates a sprite and looks like this:
+You can also make two Actions happen at the same time with a special Action called *Fork*. Inside a Fork action, you can write another Action chain that starts immediately. As an example, we'll use the !RotateDelta action, which rotates a sprite and looks like this:
 {{{
 RotateDelta( degrees, seconds)
 }}}
@@ -104,7 +104,7 @@ First, try it without the fork, like this:
         self.do( MoveDelta( (100, 50), 1) + RotateDelta(180, 2) + \
                  MoveDelta( (-100, -50), 2) + Delete())
 }}}
-Try it. Just a regular chain. Move, rotate, move, then delete. Now we'll use a Fork with the RotateDelta. Change it to look like this:
+Try it. Just a regular chain. Move, rotate, move, then delete. Now we'll use a Fork with the !RotateDelta. Change it to look like this:
 {{{
     def on_added_to_scene(self, scene):
         self.do( MoveDelta( (100, 50), 1) + Fork( RotateDelta(180, 2)) + \
