@@ -5,17 +5,42 @@
 
 The Pig Editor allows you to layout your scene and, with the help of components, add quite a bit of functionality. Another way to add functionality to your objects is using *Actions*. Many Actions have to do with object movement, but there are many kinds of Actions available.
 
-
 == Getting Started Coding ==
 
-To create the examples in this tutorial, we'll start with an unaltered PigSprite. To do this:
+To create the examples in this tutorial, we'll start with a new sprite in a new scene. To do this:
   # Start the Pig Editor by running edit_project.py
-  # Select PigSprite in the _Object to add_ dropdown in
+  # Select New Scene in the _Scene_ dropdown in the Project tab.
+  # Select New Sprite in the _Object to add_ dropdown in the Project tab.
+  # Press the Add Object button. A new sprite will appear in the center of the Canvas.
+  # Click on the Save Object button on the _Selection: PigSprite_ tab
+  # G
+  # In the Editor's View menu, select View Source
+  # When the editor asks for a scene name, call it 'Tutorial'
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+An editor window showing Tutorial.py will appear with the following code:
 {{{
+### import autocode ###
+from pig.PigScene import PigScene
+from pig.PigSprite import PigSprite
+### End import autocode ###
 
+### Tutorial autocode ###
+class Tutorial(PigScene):
+    def on_enter(self):
+        # Sprites
+        pigsprite_instance = PigSprite()
+        pigsprite_instance.image = 'art\\pug.png'
+        pigsprite_instance.layer = 'Background'
+        pigsprite_instance.position = (400.0, 300.0)
+### End Tutorial autocode ###
+}}}
+
+== Adding an Action and Testing == 
+
+Let's add a basic action to our pigsprite. Add code after the _End Tutorial autocode_ line so that the bottom of Tutorial.py looks like this:
+{{{
+        pigsprite_instance.position = (400.0, 300.0)
+### End Tutorial autocode ###
+
+        pigsprite
 }}}
