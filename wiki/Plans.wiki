@@ -1,6 +1,16 @@
 #summary Todo list
+#labels Phase-Design
 
-===TODO===
+==LITTLE TODO==
+  * Ingame Text
+  * Scoring System
+  * Damage System
+  * Collision Boxes
+  * Ingame gui
+
+==BIG TODO==
+  * Integrate a physics system
   * UNDO system
-  * Actual installer
+  * Actual installer that hopefully installs all dependencies as well
   * Make it easier to separate project runtime necessities
+  * Executable creation and packaging tool
