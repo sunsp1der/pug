@@ -1,0 +1,2 @@
+==PUG==
+Pug (Python Universal GUI) automatically creates GUI windows for python objects at runtime. These windows allow you to view and alter your objects at runtime, as well as save and load their states. It can be used as a testing platform and can also be adapted as an editor. In addition to saving the states of python objects as data, Pug has automatic code-generation features which allows you to create python class and instance files.
