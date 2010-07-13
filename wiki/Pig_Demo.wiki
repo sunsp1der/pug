@@ -1,5 +1,5 @@
-#summary The PIG demo project
+#summary A project demonstrating the features of Pig and Pug
 
-= PIG Demo =
+= Pig Demo =
 
-An example project using PIG. Requires pig and pug. Run edit_project.py to try it. This is meant to be used with the Quick Start guide available in [http://code.google.com/p/pug/downloads/list downloads]. 
+An example project using Pig. Requires Pig and Pug. Run edit_project.py to try it. This is meant to be used with the Quick Start guide available in [http://code.google.com/p/pug/downloads/list downloads]. 
