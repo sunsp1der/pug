@@ -1,0 +1,2 @@
+==PIG==
+Pig (Python Inventor Gizmo) is a 2d game-building environment based on the Pug system. It is GUI based, uses python, and includes automatic code generation, which means when you save your project from the editor, it creates python code that you can edit further. Pig is the main example project of the Pug system. To try it, go into the Pig_Demo folder and run edit_project.py
