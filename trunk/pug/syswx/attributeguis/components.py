@@ -180,6 +180,7 @@ For kwargs optional arguments, see the Base attribute GUI
             return
         instance = self.object.components.add(component)
         self.editList.component_added(instance)
+        self.window.refresh()
         
     def remove_button_click(self, event=None):
         component = self.editList.get_selected()
@@ -188,6 +189,7 @@ For kwargs optional arguments, see the Base attribute GUI
         self.object.components.remove(component)
         self.editList.component_removed()
         wx.CallAfter(gc.collect)
+        self.window.refresh()
 
     def edit_button_click(self, event=None):
         try:

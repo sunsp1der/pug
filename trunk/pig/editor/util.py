@@ -388,7 +388,7 @@ archetypes, and multiple archetypes with the same name...
         return None
 
 _filetypes = [
-             ['art',['jpg','png','gif','bmp','pcx','tif']],
+             ['art',['jpg','png','gif','bmp','pcx','tif','ttf']],
              ['sound',['wav']],
              ]
 def on_drop_files( x, y, filenames): 

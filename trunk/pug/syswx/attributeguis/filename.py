@@ -22,6 +22,8 @@ aguidata: {
     'subfolder': default folder added to os.getcwd(). Defaults to ''.
     'fullpath': if True, store file's absolute location. Otherwise, just store
         location data relative to os.getcwd(). Defaults to False
+    'wildcards': wildcard data in form 
+                    "All files (*.*)|*.*|wav file (*.wav)|*.wav"
         }
 For other kwargs arguments, see the Base attribute GUI
 
@@ -93,6 +95,7 @@ Uses a browser dialog to facilitate picking a graphics file
                     if samefile:
                         file = short_path
                         break
+            os.chdir(cwd)                    
             self.set_control_value(file)
             self.apply()
             dlg.Destroy()

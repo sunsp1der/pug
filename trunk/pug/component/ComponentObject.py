@@ -108,6 +108,10 @@ simply be added. If it's a class, an instance will be created and added.
             if original_method:
                 functools.update_wrapper(wrapper, original_method)
             setattr(obj, name, wrapper)
+        try:
+            component.on_added_to_object()
+        except:
+            pass
         return component
     
     def get(self, comp=None):

@@ -1,4 +1,4 @@
-"""Various ingame functions to make life easier when using pig"""
+"""Various runtime functions to make life easier when using pig"""
 
 import math
 import os
@@ -18,6 +18,8 @@ from pig.PigDirector import PigDirector
 
 projectPath = os.getcwd()
 _revertScene = None
+
+GameData = pug.CallbackObject( gname='GameData')
 
 def skip_deprecated_warnings():
     """skip_deprecated_warnings()
@@ -62,21 +64,21 @@ rotation: degrees
     
 def start_scene():
     """Start a scene running"""
-    Opioid2D.Director.start_game = True
+    Opioid2D.Director.start_scene = True
     Opioid2D.Director.scene.state = None
     # give the Director a second to pull it together
     while PigDirector.scene.state:
         sleep(0.1)
     PigDirector.scene.start()    
     
-def save_project_settings( gameSettings):
-    pug.code_export( gameSettings, "_project_settings.py", True, 
+def save_project_settings( projectSettings):
+    pug.code_export( projectSettings, "_project_settings.py", True, 
                  {'name':'project_settings'})        
 
 def run_pig_scene( projectPath, scenename=None, position=None, resolution=None, 
                    title=None, fullscreen=None, icon=None, units=None, 
                    useWorking=False):
-    """run_pig_scene( ...) Run a pig scene in a game window
+    """run_pig_scene( ...) Run a pig scene in a new window
     
 args: ( scenename, projectPath, position=None, resolution=None, 
                    title=None, fullscreen=None, icon=None, units=None, 
@@ -87,12 +89,12 @@ _project_settings file unless otherwise noted.
                 just the folder will be used. If that folder is the 'scenes'
                 folder, the parent of that folder will be used.
     scenename: the name of the scene to run (look in 'scenename'.py file)
-    position: (x, y) the topleft corner of the game window. 
-    resolution: (x,y) the width and height of the game window
-    title: the title to appear on the game window
-    fullscreen: True displays game in fullscreen mode
-    icon: icon graphic to use for game window
-    units: viewport size in game units. Defaults to resolution
+    position: (x, y) the topleft corner of the window. 
+    resolution: (x,y) the width and height of the window
+    title: the title to appear on the window
+    fullscreen: True displays window in fullscreen mode
+    icon: icon graphic to use for the window
+    units: viewport size in project units. Defaults to resolution
     useWorking: if True, use the __working__.py file when running the scene of 
                 the same name
 """
@@ -163,7 +165,7 @@ _project_settings file unless otherwise noted.
     
     set_opioid_window_position( position)
     Opioid2D.Display.init(resolution, units, title, fullscreen, icon)
-    Opioid2D.Director.start_game = True
+    Opioid2D.Director.start_scene = True
     # Import Psyco if available
     try:
         import psyco
@@ -172,6 +174,10 @@ _project_settings file unless otherwise noted.
         pass
     
     Opioid2D.Director.run(initial_scene)
+    
+def start_project():
+    Opioid2D.Director.project_started = True                        
+    
     
 def set_opioid_window_position( position):    
     if os.name == "nt":

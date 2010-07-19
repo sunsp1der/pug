@@ -13,24 +13,26 @@ window: the parent pugFrame
 For kwargs optional arguments, see the Base attribute GUI
 """
     def __init__(self, attribute, window, aguidata={}, **kwargs):
-        control = wx.TextCtrl(window, -1, 
-                              size=wx.Size(30, WX_STANDARD_HEIGHT), 
-                              style=wx.TAB_TRAVERSAL | wx.TE_PROCESS_ENTER)
-        control.SetMinSize(wx.Size(0, WX_STANDARD_HEIGHT))
-        control.Bind(wx.EVT_TEXT_ENTER, self.apply)
+        control = wx.Panel(window)
+        sizer = wx.BoxSizer(orient=wx.VERTICAL)
+        control.SetSizer(sizer)
+        textEntry = wx.TextCtrl( control)
+#        textEntry.SetMinSize((-1, WX_STANDARD_HEIGHT))
+        sizer.Add(textEntry,1,flag=wx.EXPAND)
+        textEntry.Bind(wx.EVT_TEXT_ENTER, self.apply)
+        textEntry.Bind(wx.EVT_KILL_FOCUS, self.apply)
+        self.textEntry = textEntry
+#        textEntry = AguiTextCtrl( window)
+#        control = textEntry
 
         kwargs['control_widget'] = control
         Base.__init__(self, attribute, window, aguidata, **kwargs)
         
+    def setup(self, attribute, window, aguidata):
+        Base.setup(self, attribute, window, aguidata)
+                        
     def get_control_value(self):
-        try:
-            val = eval(self.control.GetValue())
-        except:
-            val = self.control.GetValue()
-            
-        return val
+        return self.textEntry.GetValue()
     
     def set_control_value(self, value):
-        if (value == str(value)):
-            value = repr(value)
-        return self.control.SetValue(str(value))
+        return self.textEntry.SetValue(value)

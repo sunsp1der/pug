@@ -6,6 +6,7 @@ different ways of displaying and editing data.
 
 from pug.pugview_manager import get_agui_default_dict
 from pug.syswx.attributeguis.base import Base
+from pug.syswx.attributeguis.text import Text
 from pug.syswx.attributeguis.generic import Generic
 from pug.syswx.attributeguis.object_buttons import ObjectButtons
 from pug.syswx.attributeguis.routine import Routine
@@ -20,6 +21,7 @@ from pug.syswx.attributeguis.play_buttons import PlayButtons
 from pug.syswx.attributeguis.gname_dropdown import GnameDropdown
 from pug.syswx.attributeguis.listedit import ListEdit
 from pug.syswx.attributeguis.color_picker import ColorPicker
+#from pug.syswx.attributeguis.font_button import FontButton
  
 # default attribute gui types
 from pug.component.ComponentObject import ComponentSet

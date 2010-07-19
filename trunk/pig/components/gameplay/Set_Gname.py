@@ -6,7 +6,7 @@ class Set_Gname(Component):
     "When owner is added to scene, it's gname is set to the given string"
     #component_info
     _set = 'pig'
-    _type = 'settings'
+    _type = 'gameplay'
     _class_list = [Node]
     # attributes: ['name', 'doc', {extra info}]
     _field_list = [
