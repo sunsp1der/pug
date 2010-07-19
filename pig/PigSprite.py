@@ -77,7 +77,7 @@ if TF is "True" set archetype to True, but don't create default name
     def get_archetype(self):
         return self._archetype
     archetype = property( get_archetype, set_archetype, 
-                          doc="Sprite used by editor. Does not appear in game.")
+                doc="Sprite used by editor. Does not appear in running scene.")
         
     def set_image(self, image):
         Sprite.set_image(self, image)
@@ -87,7 +87,8 @@ if TF is "True" set archetype to True, but don't create default name
     def set_image_file(self, file):
         self._image_file = file
 #        Sprite.set_image(self, file)
-        (Delay(0) + CallFunc(Sprite.set_image, self, file)).do() 
+        if file is not None:
+            (Delay(0) + CallFunc(Sprite.set_image, self, file)).do() 
     
     def get_image_file(self):
         # TODO: find a way to actually look up this filename in the image
@@ -101,7 +102,7 @@ if TF is "True" set archetype to True, but don't create default name
         # the following line had problems on windows:
         #     Sprite.set_image(self,image)
         # HACK: putting a Delay before the set_image fixes the problem...
-#        if getattr(PigDirector, 'game_started', False):
+#        if getattr(PigDirector, 'project_started', False):
 #        else:
 #            (Delay(0) + CallFunc(Sprite.set_image, self, image)).do()
         # HACK: but it slows down animations ALOT. wtf with this?!
@@ -352,7 +353,7 @@ _spritePugview = {
         ['archetype', 
                 '\n'.join(["Select this to automatically save this sprite",
                            "to the objects folder when the scene is saved.",
-                           "It will not appear in the game."])],
+                           "It will not appear in the scene when running."])],
         ['save_sprite', None, {'label':'   Save Object',
                                'use_defaults': True}],
         [' Components', pug.Label],

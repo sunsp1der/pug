@@ -1,7 +1,7 @@
 ### import autocode ###
 from pig.PigSprite import PigSprite
 from pug.all_components import Collision_Destroy, Spawn_On_Destroy, Fade,\
-    Grow_Shrink, Life_Zone, Random_Motion
+    Grow_Shrink, Life_Zone, Random_Motion, Score_On_Destroy
 ### End import autocode ###
 
 ### Target autocode ###
@@ -32,4 +32,5 @@ class Target(PigSprite):
                 angle_max=30,
                 velocity_min=150,
                 velocity_max=400) )
+        self.components.add( Score_On_Destroy() )
 ### End Target autocode ###

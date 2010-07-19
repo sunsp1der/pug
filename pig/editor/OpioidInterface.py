@@ -566,7 +566,7 @@ event: a wx.Event
 
     def rewind_scene(self):
         """rewind_scene(): reset the scene and play it again"""
-        if not self.Director.game_started:
+        if not self.Director.project_started:
             return
         self.stop_scene()
         self.play_scene( False)
@@ -578,7 +578,7 @@ start the current scene playing.
 doSave: save working copy first
 """
         if _DEBUG: print "play_scene"
-        if self.Director.game_started:
+        if self.Director.project_started:
             # don't do anything if game started
             return False
         if doSave:
@@ -607,7 +607,7 @@ Stop the current scene from playing. if doRevert, Reload original state from
 disk.
 """
         if _DEBUG: print "stop_scene"
-        if not self.Director.game_started:
+        if not self.Director.project_started:
             return
         self.scene.stop()
         wait_for_exit_scene()
@@ -621,7 +621,7 @@ disk.
 Run the scene being editted in a new process.
 """
         try:
-            if doSave and not self.Director.game_started:
+            if doSave and not self.Director.project_started:
                 saved = self.save_using_working_scene()
                 if not saved:
                     dlg = wx.MessageDialog( wx.GetApp().projectFrame,
@@ -699,9 +699,9 @@ Opioid2D, it is safer to call this via add_object.
                     break
         node.rect.left = nodeloc[0]
         node.rect.top = nodeloc[1]
+        # deal with Opioid image idiosyncracies HACK
         if hasattr(node, 'set_image_file') and\
                 hasattr(node, 'get_image_file'):
-            # hack to fix Opioid image problems
             node.set_image_file( node.get_image_file())
         wx.CallAfter(wx.GetApp().set_selection,[node])
         
@@ -717,7 +717,7 @@ def start_opioid( rect, title, icon, scene):
     Opioid2D.Display.init(rect[2:4], 
                           title=title, 
                           icon=icon)
-    Opioid2D.Director.game_started = False
+    Opioid2D.Director.project_started = False
     Opioid2D.Director.viewing_in_editor = True
     try:
         Opioid2D.Director.run( scene)

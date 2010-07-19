@@ -52,17 +52,8 @@ enabled: When this is false, the component's component_methods will not
 @component_method: methods in a component with this decorator are made available
         to the object with this component. Note that component methods stack, so
         that if an object has 2 components with 'on_create' component methods,
-        the code 'object.on_create()' will execute BOTH component methods and 
-        object's native on_create method if it has one.
-        Component methods have loosened argument restrictions as well. If a 
-        component method receives arguments that are not declared in the
-        function definition, those arguments are ignored rather than creating an
-        exception. If a component method expects more arguments than it
-        receives, those arguments are automatically set to None.
-        Also note that component methods are automatically passed two arguments.
-        They receive the 'self' argument like any method AND IN ADDITION they
-        receive an 'owner' argument containing the object that the component is
-        attached to.
+        the code 'object.on_create()' will execute both component methods, then 
+        the object's native on_create method if it has one.
 """    
     _set = None
     _type = None
@@ -136,6 +127,10 @@ enabled: When this is false, the component's component_methods will not
                     duplicate = False
                     break
         return duplicate         
+    
+    def on_added_to_object(self):
+        """Stub for callback when this component is added to an object"""
+        pass
         
     def _create_object_code(self, storageDict, indentLevel, exporter):
         if storageDict['as_class']:

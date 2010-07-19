@@ -9,7 +9,7 @@ class Fade(Component):
     """Owner fades in and/or fades out."""
     #component_info
     _set = 'pig'
-    _type = 'effect'
+    _type = 'behavior'
     _class_list = [Node]
     # attributes: ['name', 'doc', {extra info}]
     _field_list = [

@@ -35,7 +35,7 @@ class Utility_Keys( Component):
         
     @component_method
     def do_restart(self):
-        Director.game_started = False
+        Director.project_started = False
         Director.set_scene( Director.scene.__class__)
         
         

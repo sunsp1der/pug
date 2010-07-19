@@ -1,5 +1,15 @@
 now:	
-	action commands
+	crash on Stop after playing scene a few times
+	if you try to overwrite a sprite or scene with one that is not currentlyof the same name, do the confirm dialog thing
+	try to make idle come up without second window
+	clean up code editing re: errors
+	create an edit file dialog
+	try getting rid of initial pug face
+	make color/tint code correspond to gui
+	started=True getting into scene attributes somehow
+	create pig.Actions
+		change tutorial wiki
+	add windib fix
 	create default project_settings for run_pig_scene
 	html tutorial
 		TODO list

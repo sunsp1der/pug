@@ -1,5 +1,7 @@
 """Load all components"""
 
+from pig.components.behavior.Fade import Fade
+from pig.components.behavior.Grow_Shrink import Grow_Shrink
 from pig.components.behavior.Face_Object import Face_Object
 from pig.components.behavior.Life_Zone import Life_Zone
 from pig.components.behavior.Motion_Zone import Motion_Zone
@@ -18,9 +20,10 @@ from pig.components.controls.Key_Spawn import Key_Spawn
 from pig.components.controls.Key_Direction_Controls \
                             import Key_Direction_Controls
 from pig.components.controls.Key_Drive_Controls import Key_Drive_Controls
-from pig.components.effects.Fade import Fade
-from pig.components.effects.Grow_Shrink import Grow_Shrink
-from pig.components.settings.Set_Gname import Set_Gname
+from pig.components.gui.Textbox import Textbox
+from pig.components.gui.ScoreText import ScoreText
+from pig.components.gameplay.Set_Gname import Set_Gname
+from pig.components.gameplay.Score_On_Destroy import Score_On_Destroy
 from pig.components.spawn.Spawner import Spawner
 from pig.components.spawn.Spawn_On_Destroy import Spawn_On_Destroy
 from pig.components.sound.On_Destroy_Sound import On_Destroy_Sound

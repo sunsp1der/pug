@@ -15,6 +15,7 @@ from pug.ProjectInterface import ProjectInterface
 from pug.component.ComponentObject import ComponentObject
 from pug.gname import GnamedObject,  get_gnamed_object
 from pug.BaseObject import BaseObject
+from pug.CallbackObject import CallbackObject
 
 # windowing system specific...
 from pug.syswx.app import pugApp as App

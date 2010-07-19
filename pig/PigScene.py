@@ -17,7 +17,7 @@ from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.code_storage.constants import _INDENT
 from pug.code_storage import add_subclass_storageDict_key
 
-from pig.util import in_rotated_rect
+from pig.util import in_rotated_rect, start_project
 from pig.editor.agui import SceneNodes, SceneLayers
 from pig.editor.util import get_available_layers, save_object
 from pig.keyboard import keys, keymods
@@ -137,7 +137,6 @@ fromGroup: If specified, only collisions with this group will be unregistered.
     def handle_keydown( self, ev):
         """handle_keydown( ev): ev is a pygame keydown event"""
         self.process_keylist( ev)
-        print ev.key
 
     def handle_keyup( self, ev):
         """handle_keydown( ev): ev is a pygame keyup event"""
@@ -301,43 +300,52 @@ key_down. In the future, maybe key_hold.
         self.start()
         
     def start(self):
-        """call after enter() and before state changes"""
-        if not getattr(Opioid2D.Director, 'game_started', False):
-            if getattr(Opioid2D.Director, 'start_game', False):
+        """start()
+
+Start the scene running. Called after enter() and before state changes
+"""
+        if not getattr(Opioid2D.Director, 'project_started', False):
+            if getattr(Opioid2D.Director, 'start_scene', False):
                 for node in self.get_ordered_nodes():
                     if node.archetype:
                         node.delete()
-                Opioid2D.Director.game_started = True                        
+                start_project()
                 self.on_start()
                 self.all_nodes_callback( 'on_added_to_scene', self)
                 self.all_nodes_callback( 'on_first_display')        
-                self.all_nodes_callback( 'on_game_start')
+                self.all_nodes_callback( 'on_project_start')
             else:
                 # do nothing if we're not starting the game
-                return
+                self.all_nodes_callback( 'on_added_to_editor', self)
         self.all_nodes_callback( 'on_scene_start', self)             
         self.started = True
         
-    def on_start(self):
-        """Callback hook for when scene starts playing"""
-        pass
-    
-    def stop(self):
-        """Stop a level that is playing"""
-        Opioid2D.Director.game_started = False  
-        Opioid2D.Director.start_game = False                     
-        self.started = False
-        self.exit()
+    def register_node(self, node):        
+#        """register(node): a new node is joining scene. Do callbacks"""
+        if _DEBUG: print "PigScene.register_node:",node
+        if getattr(Opioid2D.Director, 'project_started', False):
+            try:
+                func = getattr(node, 'on_added_to_scene')
+            except:
+                pass
+            else:
+                func(self)
+            try:
+                func = getattr(node,'on_first_display')
+            except:
+                pass
+            else:
+                func()
+        elif getattr(Opioid2D.Director, 'editorMode', False):
+            try:
+                func = getattr(node, 'on_added_to_editor')
+            except:
+                pass
+            else:
+                func(self)
+        self.nodes[node] = self.__node_num
+        self.__node_num += 1        
         
-    def exit(self):
-        if _DEBUG: print "PigScene.exit"
-        if not self.exitted:
-            self.all_nodes_callback('on_exit_scene', self)
-            nodes = self.nodes.keys()
-            for node in nodes:
-                if _DEBUG: print "   Delete Node:",node
-                node.delete()
-            self.exitted = True
     
     def all_nodes_callback(self, callback, *args, **kwargs):
         """Send a callback to all nodes in the scene"""
@@ -350,6 +358,27 @@ key_down. In the future, maybe key_hold.
             else:
 #                if _DEBUG: print "PigScene.node_callback",callback,node
                 func( *args, **kwargs)
+                        
+    def on_start(self):
+        """Callback hook for when scene starts playing"""
+        pass
+    
+    def stop(self):
+        """Stop a level that is playing"""
+        Opioid2D.Director.project_started = False  
+        Opioid2D.Director.start_scene = False                     
+        self.started = False
+        self.exit()
+        
+    def exit(self):
+        if _DEBUG: print "PigScene.exit"
+        if not self.exitted:
+            self.all_nodes_callback('on_exit_scene', self)
+            nodes = self.nodes.keys()
+            for node in nodes:
+                if _DEBUG: print "   Delete Node:",node
+                node.delete()
+            self.exitted = True
                        
     # node info storage
     def _get_nodes(self):
@@ -479,25 +508,6 @@ Update the PigScene's node tracking dict for node. Possible commands: 'Delete'
             return            
         # node_num tracks the order of node additions
         nodes[node] = node_num # this call sets off callbacks for nodes gui        
-            
-    def register_node(self, node):        
-#        """register(node): a new node is joining scene. Do callbacks"""
-        if _DEBUG: print "PigScene.register_node:",node
-        if getattr(Opioid2D.Director, 'game_started', False):
-            try:
-                func = getattr(node, 'on_added_to_scene')
-            except:
-                pass
-            else:
-                func(self)
-            try:
-                func = getattr(node,'on_first_display')
-            except:
-                pass
-            else:
-                func()
-        self.nodes[node] = self.__node_num
-        self.__node_num += 1
             
     def get_scene_layers(self):
         return get_available_layers()

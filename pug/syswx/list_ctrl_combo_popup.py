@@ -41,9 +41,11 @@ doesn't have as many features/accessors as the combo.ComboCtrl"""
     
     def GetSelectedData(self):
         if self.selected != -1:
-            return self.list.GetClientData(self.selected)   
-        else:
-            return None
+            try:
+                return self.list.GetClientData(self.selected)
+            except:
+                self.selected = -1
+        return None
     
     def OnPopup(self):
         if self.popupCallback:
