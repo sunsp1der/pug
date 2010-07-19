@@ -10,7 +10,7 @@ class On_Start_Sound( Component):
     _set = 'pig'
     _type = 'sound'
     _class_list = [PigScene]
-    # attributes: ['name', 'doc', {extra info}]
+    # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
         ["sound", SoundFile, {'doc':"The sound to play"}]
         ]

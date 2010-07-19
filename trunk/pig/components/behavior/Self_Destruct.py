@@ -9,7 +9,7 @@ class Self_Destruct(Component):
     _set = 'pig'
     _type = 'behavior'
     _class_list = [Node]
-    # attributes: ['name', 'doc', {extra info}]
+    # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
             ['timer_secs', "Seconds before object self destructs"],
             ['start_automatically', """Start timer when owner is added to scene.

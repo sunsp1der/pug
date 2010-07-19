@@ -85,7 +85,7 @@ For kwargs optional arguments, see the Base attribute GUI
         sizer.Add(addSizer, flag=wx.EXPAND)
         # tree of available components
         addTree = ComponentAddTree(parent=control)
-        addTree.SetPopupMinWidth(100)
+        addTree.SetPopupMinWidth(150)
         addTree.SetToolTipString("Component to add")
         addSizer.Add( addTree, 1)
         self.addTree = addTree

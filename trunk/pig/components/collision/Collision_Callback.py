@@ -25,7 +25,7 @@ arguments: on_collision( toSprite, fromSprite, toGroup, my_group)"""
     _set = 'pig'
     _type = 'collision'
     _class_list = [Sprite]
-    # attributes: ['name', 'doc', {extra info}]
+    # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
             ['with_group', GroupDropdown, {'doc':"Group to collide with"}],
             ['my_group', GroupDropdown, 

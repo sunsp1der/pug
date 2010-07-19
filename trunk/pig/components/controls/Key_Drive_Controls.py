@@ -13,7 +13,7 @@ class Key_Drive_Controls( Forward_Motion):
     _set = 'pig'
     _type = 'controls'
     _class_list = [Node]
-    # attributes: ['name', 'doc', {extra info}]
+    # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = Forward_Motion._field_list[:]
     _field_list += [
             ['friction','0-1 velocity multiplier.\n'+\

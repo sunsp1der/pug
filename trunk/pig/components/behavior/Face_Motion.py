@@ -14,7 +14,7 @@ Warning: This component uses a tick_action, so it may be slow.
     _set = 'pig'
     _type = 'behavior'
     _class_list = [Node]
-    # attributes: ['name', 'doc', {extra info}]
+    # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
             ['offset','Forward direction is offset by this much'],                   
             ]

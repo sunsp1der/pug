@@ -21,9 +21,9 @@ from pig.components.controls.Key_Direction_Controls \
                             import Key_Direction_Controls
 from pig.components.controls.Key_Drive_Controls import Key_Drive_Controls
 from pig.components.gui.Textbox import Textbox
-from pig.components.gui.ScoreText import ScoreText
+from pig.components.gui.Value_Tracker_Text import Value_Tracker_Text
 from pig.components.gameplay.Set_Gname import Set_Gname
-from pig.components.gameplay.Score_On_Destroy import Score_On_Destroy
+from pig.components.gameplay.Value_On_Destroy import Value_On_Destroy
 from pig.components.spawn.Spawner import Spawner
 from pig.components.spawn.Spawn_On_Destroy import Spawn_On_Destroy
 from pig.components.sound.On_Destroy_Sound import On_Destroy_Sound

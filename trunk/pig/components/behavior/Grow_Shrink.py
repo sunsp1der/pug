@@ -11,7 +11,7 @@ class Grow_Shrink(Component):
     _set = 'pig'
     _type = 'behavior'
     _class_list = [Node]
-    # attributes: ['name', 'doc', {extra info}]
+    # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
             ['grow_in_secs',
                     "Number of seconds to take growing in. -1 = no grow in."],
