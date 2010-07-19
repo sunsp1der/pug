@@ -16,14 +16,18 @@ class Textbox(Component):
     _set = 'pig'
     _type = 'gui'
     _class_list = [Node]
-    # attributes: ['name', 'doc', {extra info}]
-    _field_list = [
-            ['text','Text to display'],
+    # separate these to make derived components easier to write
+    _font_fields = [ 
             ['font_file',Filename,{'doc':'Font to use', 'subfolder':'art',
                               'wildcards':"truetype font (*.ttf)|*.ttf"}],
             ['font_size','The point size of the font'],
             ['max_width','The maximum text width in pixels'],
             ]
+    # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
+    _field_list = [
+            ['text','Text to display'],
+            ]
+    _field_list += _font_fields
     #defaults
     __text = 'text'
     __font_file = None

@@ -13,7 +13,7 @@ class Utility_Keys( Component):
     _set = 'pig'
     _type = 'utilities'
     _class_list = [PigScene]
-    # attributes: ['name', 'doc', {extra info}]
+    # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
             ['restart_ctrl_r', 'If True, ctrl-r restarts scene'],
             ['info_F1', Filename, {'doc':'Open this file if user presses F1'}],

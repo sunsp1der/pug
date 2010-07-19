@@ -11,7 +11,7 @@ class Fade(Component):
     _set = 'pig'
     _type = 'behavior'
     _class_list = [Node]
-    # attributes: ['name', 'doc', {extra info}]
+    # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
             ['fade_in_secs',
                     "Number of seconds to take fading in. -1 = no fade."],

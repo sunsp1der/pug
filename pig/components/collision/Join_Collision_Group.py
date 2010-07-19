@@ -12,7 +12,7 @@ class Join_Collision_Group( Component):
     _set = 'pig'
     _type = 'collision'
     _class_list = [Sprite]
-    # attributes: ['name', 'doc', {extra info}]
+    # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
             ['group', GroupDropdown, {'doc':"Group to join"}]
             ]

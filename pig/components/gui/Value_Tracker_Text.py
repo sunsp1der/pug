@@ -1,4 +1,4 @@
-"ScoreText.py"
+"Value_Tracker_Text.py"
 from Opioid2D.public.Node import Node
 
 from pug import Filename, Text
@@ -7,45 +7,52 @@ from pug.component import *
 from pig.components import Textbox
 from pig.util import GameData
 
-class ScoreText(Textbox):
-    "Show score from GameData"
+class Value_Tracker_Text(Textbox):
+    "Show a value from GameData"
     #component_info
     _set = 'pig'
     _type = 'gui'
     _class_list = [Node]
-    # attributes: ['name', 'doc', {extra info}]
+    # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
             ['prefix',Text,{
-                'doc':'Score value will have this written before the number'}],
+                'doc':'Display this before the value'}],
+            ['value_name',Text,{'doc':'Name of GameData attribute to track'}],
+            ['decimal_places',"If value is a number, show this\n"+\
+                                "many decimal places"],
             ['default',Text,{'doc:':'Text to display in editor\n'+\
                              '(prefix added automatically)'}],
-            ['font_file',Filename,{'doc':'Font to use', 'subfolder':'art',
-                              'wildcards':"truetype font (*.ttf)|*.ttf"}],
-            ['font_size','The point size of the font'],
-            ['max_width','The maximum text width in pixels'],
             ]
+    _field_list += Textbox._font_fields
     #defaults
     __default = '000'
     __prefix = 'Score: '
+    value_name = 'score'
+    decimal_places = 0
         
     @component_method
     def on_added_to_scene(self, scene):
         """Set score to zero unless otherwise set"""
-        GameData.register_callback( "score", self.on_score_change)
-        if getattr(GameData, "score", None) is None:
-            GameData.score = 0
+        GameData.register_callback( self.value_name, self.on_value_change)
+        if getattr(GameData, self.value_name, None) is None:
+            setattr( GameData, self.value_name, 0)
             
-    def on_score_change(self, *a, **kw):
+    def on_value_change(self, *a, **kw):
         self.set_text()            
             
     @component_method
     def set_text(self, text=None):
-        "Show current score"
+        "Show current value"
         if text is None:
-            if getattr(GameData, "score", None) is None:
+            if getattr(GameData, self.value_name, None) is None:
                 text = self.prefix + self.default
             else:
-                text = self.prefix + str(getattr(GameData,"score",self.default))
+                val = getattr(GameData, self.value_name, self.default)
+                if type(val) == float:
+                    val =  ("%."+str(self.decimal_places)+"f") % val
+                else:
+                    val = str(val)
+                text = self.prefix + val
         Textbox.set_text( self, text)
         
     def set_default(self, default):
@@ -63,4 +70,4 @@ class ScoreText(Textbox):
     prefix = property(get_prefix, set_prefix)            
                 
         
-register_component( ScoreText)
+register_component( Value_Tracker_Text)

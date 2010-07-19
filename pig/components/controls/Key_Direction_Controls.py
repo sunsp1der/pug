@@ -12,7 +12,7 @@ class Key_Direction_Controls( Component):
     _set = 'pig'
     _type = 'controls'
     _class_list = [Node]
-    # attributes: ['name', 'doc', {extra info}]
+    # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
             ['x_velocity', 'Horizontal velocity set by up and down keys'],
             ['y_velocity', 'Vertical velocity set by left and right keys'],

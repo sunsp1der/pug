@@ -10,7 +10,7 @@ component with the mouse-pointer as the target."""
     _set = 'pig'
     _type = 'controls'
     _class_list = [Node]
-    # attributes: ['name', 'doc', {extra info}]
+    # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
             ['rotation_speed',
                     'Speed to turn. Negative = always face object exactly.'],

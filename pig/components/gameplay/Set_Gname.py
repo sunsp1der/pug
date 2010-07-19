@@ -8,7 +8,7 @@ class Set_Gname(Component):
     _set = 'pig'
     _type = 'gameplay'
     _class_list = [Node]
-    # attributes: ['name', 'doc', {extra info}]
+    # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
             ['gname','gname to set owner to when added to scene'],                   
             ]
