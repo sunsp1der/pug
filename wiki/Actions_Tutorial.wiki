@@ -33,11 +33,11 @@ class Tester(PigSprite):
 
 == Adding an Action and Testing == 
 
-Let's add a basic Action to our pigsprite. To do this, first we need to import the Actions into our file. Add this code after the _End import autocode_ line.
+Let's add a basic Action to our pigsprite. To do this, first we need to import all the Actions into our file. Add this code after the _End import autocode_ line.
 {{{
-from Opioid2D import *
+from pig.actions import *
 }}}
-This simply makes all the standard Actions available.
+This makes all the standard Actions available. You can also import them individually by replacing the '*' with their names, but for now we're just importing them all at once.
 
 Next, add the following code after the _End Tester autocode_ line.
 {{{
@@ -50,7 +50,7 @@ Your file should now look like this:
 from pig.PigSprite import PigSprite
 ### End import autocode ###
 
-from Opioid2D import *
+from pig.actions import *
 
 ### Tester autocode ###
 class Tester(PigSprite):
