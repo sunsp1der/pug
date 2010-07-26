@@ -37,7 +37,7 @@ Let's add a basic Action to our pigsprite. To do this, first we need to import a
 {{{
 from pig.actions import *
 }}}
-This makes all the standard Actions available. You can also import them individually by replacing the '*' with their names, but for now we're just importing them all at once.
+This makes all the standard Actions available. You can also import them individually by replacing the '`*`' with their names, but for now we're just importing them all at once.
 
 Next, add the following code after the _End Tester autocode_ line.
 {{{
