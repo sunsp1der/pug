@@ -11,6 +11,15 @@ doesn't have as many features/accessors as the combo.ComboCtrl"""
         self.PostCreate(wx.PreListBox())
         wx.combo.ComboPopup.__init__(self)
         
+    def Create(self, parent):
+        wx.ListBox.Create(self, parent, style=wx.LB_SINGLE)
+        self.list = self
+        self.Bind(wx.EVT_LEFT_DOWN, self.OnMouseSelect)
+        self.Bind(wx.EVT_MOTION, self.OnMotion)
+        self.selected = -1
+        self.selectCallback = None
+        self.popupCallback = None
+        
     def AddItem(self, text, data=None):
         item = self.Append(text)
         self.SetClientData(item, data)
@@ -24,15 +33,6 @@ doesn't have as many features/accessors as the combo.ComboCtrl"""
             self.list.Select(selected)
         event.Skip()
 
-    def Create(self, parent):
-        wx.ListBox.Create(self, parent, style=wx.LB_SINGLE)
-        self.list = self
-        self.Bind(wx.EVT_LEFT_DOWN, self.OnMouseSelect)
-        self.Bind(wx.EVT_MOTION, self.OnMotion)
-        self.selected = -1
-        self.selectCallback = None
-        self.popupCallback = None
-        
     def DeselectAll(self):
         return self.list.DeselectAll()
         
@@ -47,7 +47,17 @@ doesn't have as many features/accessors as the combo.ComboCtrl"""
                 self.selected = -1
         return None
     
+    def OnSelect(self, event, selected):
+        #if selected != -1:
+        self.selected = selected
+        self.didSelect = True
+        self.Dismiss()
+        event.Skip()
+        if self.selectCallback:
+            self.selectCallback(event)
+    
     def OnPopup(self):
+        self.didSelect = False
         if self.popupCallback:
             self.popupCallback(self)
         if self.selected:
@@ -75,15 +85,6 @@ callback(self)
         selected = self.list.GetSelection()
         self.OnSelect( event, selected)
 
-    def OnSelect(self, event, selected):
-        #if selected != -1:
-        self.selected = selected
-        
-        self.Dismiss()
-        event.Skip()
-        if self.selectCallback:
-            self.selectCallback(event)        
-    
     def OnMouseSelect(self, event):
         selected = self.list.HitTest(event.GetPosition())
         self.OnSelect(event, selected)    

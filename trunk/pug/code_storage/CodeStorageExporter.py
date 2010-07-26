@@ -13,7 +13,7 @@ from pug.gname import GnamedObject
 from pug.util import make_valid_attr_name, get_type_name
 import pug.all_components as all_components
 
-_DEBUG = False
+_DEBUG = True
 
 class CodeStorageExporter():
     """Object that manages exporting autocode

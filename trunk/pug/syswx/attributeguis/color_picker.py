@@ -47,13 +47,16 @@ For more aguidata optional arguments, see the Base attribute GUI
                         
     def get_control_value(self):
         color = self.colorPicker.GetColour()
-        color = (color[0]/255.0, color[1]/255.0, color[2]/255.0, 1.0)
+        print "c1",color            
+        color = (color[0], color[1], color[2], 1.0)
         if not self.aguidata.get('return_alpha', False):
             color = (color[0], color[1], color[2])
+        print "c",color            
         return color
     
     def set_control_value(self, value):
-        value = (value[0]*255, value[1]*255, value[2]*255)            
+        print "v",value
+        value = (value[0], value[1], value[2])            
         return self.colorPicker.SetColour(value)
            
             

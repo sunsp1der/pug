@@ -1,4 +1,4 @@
-from Opioid2D import Director
+from Opioid2D import Director, Delay, CallFunc
 
 from pug import Filename
 from pug.component import *
@@ -36,7 +36,7 @@ class Utility_Keys( Component):
     @component_method
     def do_restart(self):
         Director.project_started = False
-        Director.set_scene( Director.scene.__class__)
+        (Delay(0)+CallFunc(Director.set_scene, Director.scene.__class__)).do()
         
         
 register_component( Utility_Keys)

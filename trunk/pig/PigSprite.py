@@ -200,13 +200,14 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
  
 tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
     the alpha element will be ignored. Use set_alpha or to set that."""
-        color = (tint[0], tint[1], tint[2], self.get_alpha())
+        color = (tint[0]/255.0, tint[1]/255.0, tint[2]/255.0, self.get_alpha())
         Sprite.set_color( self, color)
         
     def get_tint(self):
         "get_tint()->the (red, green, blue) color value of the sprite"
         color = Sprite.get_color( self)
-        return (color[0], color[1], color[2])
+        return (int(round(color[0]*255.0)), int(round(color[1]*255)), 
+                int(round(color[2]*255)))
     
     tint = property(get_tint, set_tint, doc="The color tint of the sprite")
     

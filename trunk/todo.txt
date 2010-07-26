@@ -1,27 +1,18 @@
 now:	
-	on_added_to_scene ugly crash when args wrong (no scene)
-	crash on Stop after playing scene a few times
-	not closing editor after new project
-	if you try to overwrite a sprite or scene with one that is not currentlyof the same name, do the confirm dialog thing
-	try to make idle come up without second window
-	clean up code editing re: errors
-	create an edit file dialog
-	dropdowns are still whack
-	try getting rid of initial pug face
-	make color/tint code correspond to gui
-	started=True getting into scene attributes somehow
-	create pig.Actions
-		change tutorial wiki
-	add windib fix
-	create default project_settings for run_pig_scene
-	html tutorial
-		TODO list
-			Undo! - save query when changing levels or quitting
-			Separate runtime necessities
-			Resources
+X	save scene and object
+X		no pigsprite or sprite or invalid names
+X		verify if name changed and overwrite
+X	create an edit file dialog
+X	dropdowns are still whack
+X	make color/tint code correspond to gui
+X	create pig.Actions
+X		change tutorial wiki
+X	create default project_settings for run_pig_scene
+	
 	create zip tarball exe?
 
 bugs: 
+	started=True got into scene attributes somehow
 	keydirection controls no fire up and to the left - keyboard bug!
 	spawn location edges crashes editor intermittent
 	motion zone component shows no pugview intermittent
@@ -36,6 +27,10 @@ bugs:
 	crash - selecting an object while changing selectionwin to another view 
 
 later: 
+	memory leak!
+	Undo! - save query when changing levels or quitting
+	Separate runtime necessities
+	Resources
 	process mouseclicks in canvas within interface, not in opioid thread
 	allow gnamed objects in objects dropdown (e.g. Spawner)
 	allow lists of categories for components... file in multiple places

@@ -410,6 +410,7 @@ terms of nodes within the layers"""
                 a+=1
             ordered_nodes = {}
             myNodes = self.nodes.keys()
+            nodesorter = None
             for node in myNodes:
                 if node.layer_name:
                     try:
@@ -429,7 +430,8 @@ terms of nodes within the layers"""
                                                                 node.gname
                     except:
                         continue
-                ordered_nodes[nodesorter] = node
+                if nodesorter:
+                    ordered_nodes[nodesorter] = node
             nodenums = ordered_nodes.keys()
             nodenums.sort()
             nodenums.reverse()
