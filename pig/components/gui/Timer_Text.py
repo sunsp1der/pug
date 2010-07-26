@@ -15,9 +15,10 @@ class Timer_Text(Value_Tracker_Text):
     _class_list = [Node]
     # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
-            ['prefix',Text,{
-                'doc':'Display this before the time'}],
-            ['interval','How often the timer is updated']
+            ['prefix',Text,{'doc':'Display this before the time'}],
+            ['start_time',"Starting value of timer, in seconds"],
+            ['end_time',"Ending value of timer, in seconds"],
+            ['interval','How often the timer is updated'],
             ['decimal_places',"Decimal places to show for seconds"],
             ]
     _field_list += Value_Tracker_Text._font_fields    

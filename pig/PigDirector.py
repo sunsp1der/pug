@@ -38,6 +38,7 @@ def real_quit():
     global QUITTING
     try:       
         wx.GetApp().get_project_object().kill_subprocesses()
+        wx.GetApp()._evt_project_frame_close(query=False)
     except:
         pass
     if not QUITTING:

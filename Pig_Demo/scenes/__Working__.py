@@ -6,7 +6,7 @@ from objects.Target import Target
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
 from pug.all_components import Utility_Keys, Key_Drive_Controls, Key_Spawn,\
-    ScoreText
+    Value_Tracker_Text
 ### End import autocode ###
 
 ### Shooting_Gallery autocode ###
@@ -52,5 +52,5 @@ class Shooting_Gallery(PigScene):
         pigsprite_instance = PigSprite()
         pigsprite_instance.layer = 'Background'
         pigsprite_instance.position = (702.0, 542.0)
-        pigsprite_instance.components.add( ScoreText() )
+        pigsprite_instance.components.add( Value_Tracker_Text() )
 ### End Shooting_Gallery autocode ###

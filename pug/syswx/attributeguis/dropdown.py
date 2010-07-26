@@ -121,6 +121,9 @@ For kwargs optional arguments, see the Base attribute GUI
                 self.listctrl.GetStringValue() != self.control.Value:
             self.data = self.control.Value
             self.text = self.control.Value
+        elif not self.listctrl.didSelect:
+            self.refresh()
+            return
         Base.apply( self)
         if self.callback:
             self.callback(self.text, self.data)

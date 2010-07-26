@@ -26,7 +26,7 @@ from pug.syswx.drag_drop import FileDropTarget
 from pig import PigScene, PigSprite, Director
 from pig.util import *
 from pig.editor.StartScene import StartScene
-from pig.editor import EditorState, graphicsManager
+from pig.editor import hacks, EditorState, graphicsManager
 from pig.editor.util import *
  
 _DEBUG = False
@@ -206,6 +206,8 @@ settingsObj: an object similar to the one below... if it is missing any default
                  ["New Object\tShift+Ctrl+N", self.add_object,
                         "Add the currently selected add object to the scene"],
                  ["*DIVIDER*"],
+                 ["Edit Python File\tCtrl+E", edit_project_file,
+                        "Edit a python code file."],
                  ["Raise Windows\tCtrl+W", app.raise_all_frames,
                         "Raise all PUG Windows to top"],
                  ["Quit\tCtrl+Q", self.quit]])
@@ -333,15 +335,20 @@ forceReload: if True, reload all scenes and objects first.
     
     def reload_scene(self):
         """Reload scene from version on disk"""
+        if _DEBUG: print 'reload_scene 1'
         if self.Director.scene.__class__ == PigScene:
             self.set_scene("PigScene")
             return
+        if _DEBUG: print 'reload_scene 2'
         scenename = self.scene.__class__.__name__
         try:
+            if _DEBUG: print 'reload_scene 3'
             test_scene_code(scenename)
         except:
+            if _DEBUG: print 'reload_scene 3.2'            
             show_exception_dialog(prefix='Unable to reload scene: ')
         else:
+            if _DEBUG: print 'reload_scene 3.4'            
             self.revert_working_scene()
             self.set_scene(scenename, True)
         
@@ -707,6 +714,17 @@ Opioid2D, it is safer to call this via add_object.
         
     def kill_subprocesses(self):
         kill_subprocesses()
+        
+    def test(self, stage=1):
+        from objects.Target import Target
+        from weakref import proxy
+        global t
+        if stage == 0:
+            t = proxy(Target())
+        elif stage == 1:
+            print t
+        elif stage == 2:
+            pug.frame(t)
                
 def start_opioid( rect, title, icon, scene):
     #start up opioid with a little pause for threading
@@ -795,7 +813,7 @@ _interfacePugview = {
                 {'label':'   Browse Components'}],
 #        ['Director'],
 #        ['Display'],
-#       ['test', pug.Routine, {'routine':gc.collect}]
+       ['test', pug.Routine]
     ]
 }
 pug.add_pugview('OpioidInterface', _interfacePugview, True)

@@ -11,7 +11,7 @@ class Bullet(PigSprite):
     def on_create(self):
         self.position = (316.0, 531.0)
         self.scale = (0.20000000298023224, 0.20000000298023224)
-        self.tint = (0.0, 1.0, 0.0)
+        self.tint = (33, 210, 23)
         self.components.add( Set_Motion(
                 velocity_y=-500) )
         self.components.add( Grow_Shrink(
