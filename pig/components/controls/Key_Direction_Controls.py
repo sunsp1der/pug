@@ -69,6 +69,7 @@ class Key_Direction_Controls( Component):
         scene = PigDirector.scene
         for info in self.k_info:
             scene.unregister_key(info)
+        self.k_info = []
             
 register_component( Key_Direction_Controls)
 

@@ -37,6 +37,10 @@ class Value_Tracker_Text(Textbox):
         if getattr(GameData, self.value_name, None) is None:
             setattr( GameData, self.value_name, 0)
             
+    @component_method
+    def on_destroy(self):
+        GameData.unregister_callback(self.value_name, self.on_value_change)
+
     def on_value_change(self, *a, **kw):
         self.set_text()            
             

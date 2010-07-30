@@ -58,6 +58,7 @@ class Key_Spawn( Spawner):
         scene = PigDirector.scene
         for info in self.k_info:
             scene.unregister_key(info)
+        self.k_info = []
  
 register_component( Key_Spawn)
         

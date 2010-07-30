@@ -32,9 +32,8 @@ class EditorState(PigState):
         PigState.exit(self)
             
     def handle_mousebuttondown(self, event):
-        scene = Opioid2D.Director.scene
         x, y = event.pos
-        node = scene.pick(x, y, wx.GetApp().selectedObjectDict)
+        node = self.scene.pick(x, y, wx.GetApp().selectedObjectDict)
         if node is not None:
             self.selectOnUp = weakref.ref(node)
         else:

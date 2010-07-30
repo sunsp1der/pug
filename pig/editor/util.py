@@ -1,30 +1,21 @@
 """Various utility functions for the pig editor"""
 
-import os.path
-from inspect import getmro
 import time
-from copy import copy
 import shutil
 
 import wx
 
 import Opioid2D
 from Opioid2D.public.Node import Node
-from Opioid2D.public.Vector import VectorReference
-from Opioid2D.public.Image import ImageInstance
 
 import pug
-from pug import code_export, CodeStorageExporter
 from pug.component import Component
 from pug.syswx.util import show_exception_dialog
 from pug.syswx.SelectionWindow import SelectionWindow
-from pug.util import make_valid_attr_name, python_process, edit_process
+from pug.util import python_process, edit_process
 
-from pig.util import get_available_scenes, get_available_objects, \
-                        get_project_path
-from pig.editor import EditorState
-from pig.PigDirector import PigDirector
-from pig.editor.storage import *
+from pig.util import get_project_path
+from pig.editor.storage import * # included as a convenience
 
 _DEBUG = False
 
@@ -73,7 +64,7 @@ def get_available_layers():
         return layers        
     except:
         return []
-    
+        
 def test_scene_code(scenename):
     """test_scene_code( scenename)
 
@@ -93,24 +84,25 @@ scenename: name of scene to test
         get_available_objects(True)
     exec('import scenes.' + scenename + ' as reload_module')
 #    if _DEBUG: print "test_scene_code 2"
-    reload(reload_module)
+    reload(reload_module) #@UndefinedVariable
 #    if _DEBUG: print "test_scene_code 3"
     exec('from scenes.'+scenename+' import '+scenename+' as scene')
 #    if _DEBUG: print "test_scene_code 4"
-    test = scene()
     try:
 #        if _DEBUG: print "test_scene_code 5"        
+        test = scene() #@UndefinedVariable
+        test.test_scene = True
         test.enter()
+        test.exit()
     except:
         # for some reason, if we don't do the following, images get broken
         if _DEBUG: print "test_scene_code 5.2"        
-        Opioid2D.ResourceManager.clear_cache()
         raise
     else:
         # for some reason, if we don't do the following, images get broken
         if _DEBUG: print "test_scene_code 5.4"        
+    finally:
         Opioid2D.ResourceManager.clear_cache()
-        
     
 def get_available_groups():
     """get_available_groups() -> list of available groups in Director"""
@@ -195,51 +187,6 @@ quit: if True, quit the current project after opening new one.
     python_process(project_editor)
     return True
 
-def get_scene_errors(showDialog=True):
-    """get_scene_errors(showDialog=True)->error string
-    
-Check the scene for probable user errors. If showDialog is False, returns a list
-of errors or None if none found. If showDialog is True, brings up a dialog to
-allow the user to ignore the errors. This function checks for unnamed 
-archetypes, and multiple archetypes with the same name...
-"""
-    scene = PigDirector.scene
-    errors = []
-    if not scene:
-        error = "No scene loaded!"
-        errors.append(error)
-    else:
-        archetypeNames = []
-        for node in scene.nodes:
-            if node.archetype:
-                if node.gname:
-                    if node.gname in archetypeNames:
-                        error = ''.join(["Duplicate archetype name: ",
-                                         node.gname])
-                        errors.append(error)
-                    else:
-                        archetypeNames.append(node.gname)
-                else:
-                    error = ''.join(["Unnamed archetype: class ", 
-                                     node.__class__.__name__, " at ",
-                                     str(node.position.x), ", ",
-                                     str(node.position.y)])
-                    errors.append(error)
-    if errors:
-        if showDialog:
-            errorend = ['\nIgnore errors and save (not recommended)?']
-            errormsg = '\n'.join(errors + errorend)
-            dlg = wx.MessageDialog( wx.GetApp().get_project_frame(), errormsg, 
-                                    "Scene Errors",
-                                    style = wx.YES_NO | wx.NO_DEFAULT)
-            if dlg.ShowModal() == wx.ID_YES:
-                return None
-            else:
-                return errors
-        else:
-            return errors
-    else:
-        return None
 
 _filetypes = [
              ['art',['jpg','png','gif','bmp','pcx','tif','ttf']],
@@ -326,12 +273,18 @@ def wait_for_state(state):
         timer += 1
         if timer > 50:
             raise ValueError("Pug unable to set scene state")
+    time.sleep(0.05)         
     if _DEBUG: print "   State set"
 
 def wait_for_exit_scene():  
     PigDirector.scene.exit()
+    timer = 0
     while not PigDirector.scene.exitted:
         time.sleep(0.05) # give Opioid time to stop
+        timer += 1
+        if timer > 50:
+            raise ValueError("Pug unable to exit scene")
+    time.sleep(0.05)         
     
 def close_scene_windows( scene=None):
     """_close_scene_windows( scene=None)
@@ -381,10 +334,13 @@ Note: for this to work on nodes, it must be run BEFORE the scene is changed.
 
 def exporter_cleanup( exporter):
     # delete dummies from Opioid scene
+    from pig.PigScene import PigScene
     dummyDict = exporter.dummyDict
     dummyKeys = dummyDict.keys()
     for cls in dummyKeys:
         if issubclass(cls, Node):
             dummyDict[cls].delete()
+        if issubclass(cls, PigScene):
+            dummyDict[cls].exit()
     # wait for Opioid to catch up
     time.sleep(0.25)

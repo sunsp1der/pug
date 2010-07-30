@@ -49,7 +49,7 @@ scene: the scene to load initially
         if _DEBUG: print "OpioidInterface.__init__"
         try:
             # for process watching purposes
-            import dl
+            import dl #@UnresolvedImport
             libc = dl.open('/lib/libc.so.6')
             libc.call('prctl', 15, 'python_pig', 0, 0, 0)
         except:
@@ -140,7 +140,7 @@ settingsObj: an object similar to the one below... if it is missing any default
     def import_settings(self):
         # pug settings
         try:
-            from _pug_settings import pug_settings
+            from _pug_settings import pug_settings #@UnresolvedImport
         except:
             self.pug_settings = self.create_default_pug_settings()
             self.save_pug_settings()
@@ -149,7 +149,7 @@ settingsObj: an object similar to the one below... if it is missing any default
 
         # game settings
         try:
-            from _project_settings import project_settings
+            from _project_settings import project_settings #@UnresolvedImport
         except:
             project_settings = self.create_default_project_settings()
             if not project_settings.initial_scene:
@@ -311,6 +311,7 @@ forceReload: if True, reload all scenes and objects first.
                     else:
                         starttime = time.time()
                 time.sleep(0.05)
+            time.sleep(0.05)
             wait_for_state(EditorState)
             sceneFrame = wx.FindWindowByName("SceneFrame")
             if sceneFrame:
@@ -373,7 +374,7 @@ forceReload: if True, reload all scenes and objects first.
         
     def reload_components(self, doReload=True, errors=None):
         """Load changes made to project components"""
-        get_package_classes('components', pug.component.Component,
+        get_package_classes('components', pug.component.Component, #@UndefinedVariable
                             doReload=doReload, errors=errors)
         
     def reload_project_files(self, doReload=True, errors=None,
@@ -715,16 +716,21 @@ Opioid2D, it is safer to call this via add_object.
     def kill_subprocesses(self):
         kill_subprocesses()
         
-    def test(self, stage=1):
-        from objects.Target import Target
-        from weakref import proxy
-        global t
-        if stage == 0:
-            t = proxy(Target())
-        elif stage == 1:
-            print t
-        elif stage == 2:
-            pug.frame(t)
+    def test(self, test=None):#, range1=0, range2=100):
+        #get_all_objects(Component)
+        from pug.util import test_referrers
+        import gc
+        if test is None:
+            i = 0
+            for item in gc.garbage:
+                print i, gc.garbage[i]
+                i+=1
+        else:
+            pug.frame(gc.garbage[test])
+            x= test_referrers(gc.garbage[test])
+            if x: 
+                print test_referrers(x)
+                pug.frame(x)
                
 def start_opioid( rect, title, icon, scene):
     #start up opioid with a little pause for threading
@@ -813,7 +819,7 @@ _interfacePugview = {
                 {'label':'   Browse Components'}],
 #        ['Director'],
 #        ['Display'],
-       ['test', pug.Routine]
+#       ['test', pug.Routine]
     ]
 }
 pug.add_pugview('OpioidInterface', _interfacePugview, True)

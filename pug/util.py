@@ -344,5 +344,9 @@ to those referrers
         b = gc.get_referrers(ob)
         for ob2 in b:
             print "      ", ob2 
+            if ob2.__class__.__name__ == "EditorState":
+                return ob2
         print "_______________________"
     pass
+
+

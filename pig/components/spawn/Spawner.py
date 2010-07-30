@@ -84,7 +84,7 @@ class Spawner(Component):
         "Start spawn timer when object is added to scene"
         self.setup_spawner()
         self.start_spawning()
-            
+        
     def setup_spawner(self):
         "Setup for the spawner. Subclasses should call this."
         if self.sound:
@@ -183,13 +183,18 @@ class Spawner(Component):
                                                 -self.spawn_interval_variance, 
                                                 self.spawn_interval_variance)
         
+    @component_method
+    def on_destroy(self):
+        if self.action:
+            self.action.abort()
+        
     def check_spawn(self, schedule_next=True):
         """check_spawn(): do a spawn if criteria are met 
         
 This method checks against max_spawns_in_scene and count. Another spawn will be
 scheduled unless total_objects_spawned has been reached. """
-        if self.total_objects_spawned > -1 and \
-                self.spawn_count >= self.total_objects_spawned:
+        if not self.enabled or (self.total_objects_spawned > -1 and \
+                self.spawn_count >= self.total_objects_spawned):
             return None
         if self.spawn_interval > 0 and schedule_next:
             self.action = self.owner.do( Delay(self.get_next_spawn_wait()) + \

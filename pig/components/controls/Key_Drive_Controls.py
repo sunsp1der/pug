@@ -78,7 +78,8 @@ class Key_Drive_Controls( Forward_Motion):
         """unregister keys when component is destroyed"""
         scene = PigDirector.scene
         for info in self.k_info:
-            scene.unregister_key(info)                
+            scene.unregister_key(info)
+        self.k_info = []                
                 
 register_component( Key_Drive_Controls)
 

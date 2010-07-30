@@ -19,7 +19,7 @@ from pug.code_storage import add_subclass_storageDict_key
 
 from pig.util import in_rotated_rect, start_project
 from pig.editor.agui import SceneNodes, SceneLayers
-from pig.editor.util import get_available_layers, save_object
+from pig.editor.util import get_available_layers, save_object, exporter_cleanup
 from pig.keyboard import keys, keymods
 
 _DEBUG = False     
@@ -31,15 +31,17 @@ class PigScene( Opioid2D.Scene, pug.BaseObject):
     exitted = False
     _pug_pugview_class = 'PigScene'
     layers = ['Background']
+    k_info = []
     def __init__(self, gname=''):
+        if _DEBUG: print "do PigScene.__init__",self
         self._key_down_dict = {}
         self._key_up_dict = {}
         self._collision_callback_dict = WeakKeyDictionary()
             # 2D dict by sprite, then (collide-with-Group, this-sprite-Group)
-        self.register_key_down(keys["ESCAPE"], self.escape)
+        self.k_info = [self.register_key_down(keys["ESCAPE"], self.escape)]
         Opioid2D.Scene.__init__(self)
         pug.BaseObject.__init__(self, gname)   
-        if _DEBUG: print "PigScene.__init__", self.__class__.__name__ 
+        if _DEBUG: print "PigScene.__init__ done", self.__class__.__name__ 
         
     def on_enter(self):
         pass
@@ -363,6 +365,10 @@ Start the scene running. Called after enter() and before state changes
         """Callback hook for when scene starts playing"""
         pass
     
+    def on_exit(self):
+        """Callback hook for when scene is exitted"""
+        pass
+    
     def stop(self):
         """Stop a level that is playing"""
         Opioid2D.Director.project_started = False  
@@ -373,13 +379,29 @@ Start the scene running. Called after enter() and before state changes
     def exit(self):
         if _DEBUG: print "PigScene.exit"
         if not self.exitted:
+            #if _DEBUG: 
+            if _DEBUG: print "do PigScene.exit", self
+            self.on_exit()
             self.all_nodes_callback('on_exit_scene', self)
             nodes = self.nodes.keys()
             for node in nodes:
                 if _DEBUG: print "   Delete Node:",node
                 node.delete()
+            self._key_up_dict = {}
+            self._key_down_dict = {}
+            self._tickfunc = None
+            self._realtickfunc = None
+            self._callbacks = None
+            self._state = None
+            self._collision_callback_dict = None
+            self._collision_handlers = None
+            for info in self.k_info:
+                self.unregister_key( info)
+            self.k_info = []
             self.exitted = True
-                       
+        else:
+            pass
+                               
     # node info storage
     def _get_nodes(self):
         """_get_nodes()->CallbackWeakKeyDictionary of nodes"""
@@ -516,6 +538,13 @@ Update the PigScene's node tracking dict for node. Possible commands: 'Delete'
 
     scene_layers = property(get_scene_layers, doc=
             'Utility property for viewing layers without __editor__ layer')
+    
+    @classmethod
+    def _create_dummy(cls, exporter):
+        # make sure we have our dummy node and cleanup registered
+        if exporter_cleanup not in exporter.deleteCallbacks:
+            exporter.register_delete_callback( exporter_cleanup)
+        return cls()
     
     def _get_code_file(self):
         """_get_code_file(): return scene file with some special circumstances
@@ -661,9 +690,10 @@ If scene is a working scene, return
     _codeStorageDict = {
             'custom_export_func': _create_object_code,
             'as_class':True,
+            'dummy_creator': '_create_dummy',
             'skip_attributes': ['_nodes','_groups','scene_layers','layers',
                                 '_PigScene__node_num', '_key_down_dict', 
-                                '_key_up_dict']
+                                '_key_up_dict','started','k_info']
              }   
     add_subclass_storageDict_key(_codeStorageDict, pug.BaseObject)
 
