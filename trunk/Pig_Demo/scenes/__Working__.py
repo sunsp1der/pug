@@ -11,7 +11,6 @@ from pug.all_components import Utility_Keys, Key_Drive_Controls, Key_Spawn,\
 
 ### Shooting_Gallery autocode ###
 class Shooting_Gallery(PigScene):
-    started = True
     def __init__(self, *args, **kwargs):
         PigScene.__init__(self, *args, **kwargs)
         self.components.add( Utility_Keys(

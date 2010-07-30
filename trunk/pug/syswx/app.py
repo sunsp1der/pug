@@ -206,7 +206,6 @@ called every second until the object is initialized"""
                                "Close all windows and exit project?",
                                'Project Frame Closed', 
                     wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-            #TODO: would be nice if the dlg could be forced above other apps
                 if dlg.ShowModal() != wx.ID_YES:
                     dlg.Destroy()
                     return
@@ -249,15 +248,15 @@ object: the object being viewed. Alternatively, this can be a string identifying
             objList = [id(object)]
         if _DEBUG: print "app.pugframe_viewing: ",object, objList
         if self.pugFrameDict.get(frame, False):
-            self.pugFrameDict[frame]+=objList
+            self.pugFrameDict[frame]+=objList   
         else:
             self.pugFrameDict[frame]= objList
         if _DEBUG: print "   app.pugframe_viewing complete"
             
     def pugframe_stopped_viewing(self, frame, object):
         if frame in self.pugFrameDict:
-            if object in self.pugFrameDict[frame]:
-                self.pugFrameDict[frame].remove(object)
+            if id(object) in self.pugFrameDict[frame]:
+                self.pugFrameDict[frame].remove(id(object))
             
     def get_object_pugframe(self, object):
         """get_object_pugframe(object)
@@ -271,6 +270,7 @@ Return the PugFrame currently viewing 'object', or None if not found.
         for frame, objlist in self.pugFrameDict.iteritems():
             if frame and searchid in objlist:
                 pugframe = frame
+                break
         return pugframe
         
     def show_object_pugframe(self, object):

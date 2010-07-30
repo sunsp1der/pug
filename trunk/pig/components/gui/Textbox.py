@@ -34,7 +34,35 @@ class Textbox(Component):
     font = None
     __max_width = None
     __font_size = 32
-    
+        
+    @component_method
+    def set_text(self, text=None):
+        "Set the text to display"
+        if text is None:
+            text=self.text
+        self.__text = text
+        image = textbox( self.font, text, self.max_width) 
+        if self.owner:
+            self.action = (Opioid2D.Delay(0)+ Opioid2D.CallFunc(
+                                                self.do_set_text, image)).do()
+                
+    def do_set_text(self, image):
+        if self.owner: 
+            try:
+                self.owner.set_image( image)     
+            except:
+                pass
+            else:
+                self.owner.image_file = None
+
+    @component_method            
+    def on_delete(self):
+        "Deconstruct component"
+        #hack
+        if self.action:
+            if self.action._callbacks:
+                self.action._callbacks = None
+
     def set_font_size(self, font_size):
         self.__font_size = font_size
         self.set_font_file()
@@ -49,20 +77,7 @@ class Textbox(Component):
     def get_max_width(self):
         return self.__max_width
     max_width = property(get_max_width, set_max_width)
-    
-    @component_method
-    def set_text(self, text=None):
-        "Set the text to display"
-        if text is None:
-            text=self.text
-        self.__text = text
-        image = textbox( self.font, text, self.max_width) 
-        if self.owner:
-            (Opioid2D.Delay(0) + \
-             Opioid2D.CallFunc(Opioid2D.Sprite.set_image, 
-                               self.owner, image)).do() 
-            self.owner.image_file = None
-               
+       
     @component_method
     def get_text(self):
         "Get the displayed text"

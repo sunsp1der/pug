@@ -2,6 +2,26 @@
 
 loading and saving utility code"""
 
+import os.path
+from inspect import getmro
+from copy import copy
+
+import wx
+
+from Opioid2D.public.Node import Node
+from Opioid2D.public.Vector import VectorReference
+from Opioid2D.public.Image import ImageInstance
+
+from pug import code_export, CodeStorageExporter
+from pug.util import make_valid_attr_name
+from pug.syswx.util import show_exception_dialog
+
+from pig.util import get_available_scenes, get_available_objects
+from pig.PigDirector import PigDirector
+from pig.editor.EditorState import EditorState
+
+_DEBUG = False
+
 def save_object(obj, name=None, parentWindow=None):
     """save_object(obj): Export obj as a class to objects folder
 
@@ -14,6 +34,7 @@ parentWindow: the parent window of name dialog. If not provided, the
     if not name:
         if obj.archetype:
             name = obj.gname
+            basename = name
         else:
             if obj.gname:
                 name = obj.gname+"Class"
@@ -21,6 +42,7 @@ parentWindow: the parent window of name dialog. If not provided, the
                 name = "MyClass"
         if not name:
             name = obj.__class__.__name__
+            basename = name
         if parentWindow == None:
             parentWindow = wx.GetActiveWindow()
         objName = ''
@@ -57,7 +79,7 @@ parentWindow: the parent window of name dialog. If not provided, the
                     dlg.SetFocus()      
                     continue                
                 path = os.path.join('objects',''.join([name,'.py']))
-                if name != default:
+                if name != basename:
                     # verify overwrite
                     try:
                         test = file(path)
@@ -89,10 +111,7 @@ parentWindow: the parent window of name dialog. If not provided, the
             archetype = True
         else:
             archetype = False    
-        try: 
-            pigsprite = PigSprite
-        except:
-            from pig.PigSprite import PigSprite
+        from pig.PigSprite import PigSprite
         exporter = code_export( obj, path, True, {'name':objName,
                                                   'base_class':PigSprite})
         objDict = get_available_objects( True)
@@ -186,7 +205,7 @@ def archetype_changed( archetype, oldclass, archetype_exporter=None):
     
 def save_scene():
     """Save scene to disk"""
-    name = PigDirector.scene.__class__.__name__
+    name = PigDirector.scene.__class__.__name__ #@UndefinedVariable
     return save_scene_as(name)
         
 def save_scene_as( sceneName=None, fileName=None):#, parentWindow=None):
@@ -239,7 +258,7 @@ parentWindow: the parent window of name dialog. If not provided, the
                     dlg.SetFocus()      
                     continue
                 path = os.path.join('scenes',''.join([name,'.py']))
-                if name != default:
+                if name != scene.__class__.__name__:
                     try:
                         test = file(path)
                     except:
@@ -270,6 +289,7 @@ parentWindow: the parent window of name dialog. If not provided, the
     if _DEBUG: print "util: save_scene_as 4"
     selection = app.selectedObjectDict.keys()
     oldscene = PigDirector.scene
+    from pig.editor.util import wait_for_state
     wait_for_state( None)
     if _DEBUG: print "util: save_scene_as 5"
     wx.BeginBusyCursor()
@@ -300,3 +320,48 @@ parentWindow: the parent window of name dialog. If not provided, the
         return False
           
 
+def get_scene_errors(showDialog=True):
+    """get_scene_errors(showDialog=True)->error string
+    
+Check the scene for probable user errors. If showDialog is False, returns a list
+of errors or None if none found. If showDialog is True, brings up a dialog to
+allow the user to ignore the errors. This function checks for unnamed 
+archetypes, and multiple archetypes with the same name...
+"""
+    scene = PigDirector.scene
+    errors = []
+    if not scene:
+        error = "No scene loaded!"
+        errors.append(error)
+    else:
+        archetypeNames = []
+        for node in scene.nodes:
+            if node.archetype:
+                if node.gname:
+                    if node.gname in archetypeNames:
+                        error = ''.join(["Duplicate archetype name: ",
+                                         node.gname])
+                        errors.append(error)
+                    else:
+                        archetypeNames.append(node.gname)
+                else:
+                    error = ''.join(["Unnamed archetype: class ", 
+                                     node.__class__.__name__, " at ",
+                                     str(node.position.x), ", ",
+                                     str(node.position.y)])
+                    errors.append(error)
+    if errors:
+        if showDialog:
+            errorend = ['\nIgnore errors and save (not recommended)?']
+            errormsg = '\n'.join(errors + errorend)
+            dlg = wx.MessageDialog( wx.GetApp().get_project_frame(), errormsg, 
+                                    "Scene Errors",
+                                    style = wx.YES_NO | wx.NO_DEFAULT)
+            if dlg.ShowModal() == wx.ID_YES:
+                return None
+            else:
+                return errors
+        else:
+            return errors
+    else:
+        return None

@@ -13,7 +13,7 @@ from pug.gname import GnamedObject
 from pug.util import make_valid_attr_name, get_type_name
 import pug.all_components as all_components
 
-_DEBUG = True
+_DEBUG = False
 
 class CodeStorageExporter():
     """Object that manages exporting autocode
@@ -733,6 +733,7 @@ there are no attributes to set, this method returns "".
             else:
                 if dummy is not None:
                     dummyDict[obj_class] = dummy
+                    dummy.is_dummy = True
                     if _DEBUG: print "   bCSE created dummy" + str(dummy)
                 else:
                     # this is a little odd, but necessary due to threading
