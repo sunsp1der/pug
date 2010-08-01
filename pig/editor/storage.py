@@ -29,6 +29,7 @@ name: the name to save the object as. If not provided, a dialog will be opened
 parentWindow: the parent window of name dialog. If not provided, the 
     wx.ActiveWindow will be used
 """
+    basename = None
     if not isinstance(obj, Node):
         raise TypeError('save_object() arg 1 must be a Node')
     if not name:

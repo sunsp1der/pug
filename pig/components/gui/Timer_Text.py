@@ -5,10 +5,10 @@ from pug import Filename, Text
 from pug.component import *
 
 from pig.components import Value_Tracker_Text
-from pig.util import GameData
+from pig.util import get_gamedata
 
 class Timer_Text(Value_Tracker_Text):
-    "Show and update GameData.timer"
+    "Show and update gamedata.timer"
     #component_info
     _set = 'pig'
     _type = 'gui'
@@ -30,9 +30,10 @@ class Timer_Text(Value_Tracker_Text):
     @component_method
     def on_added_to_scene(self, scene):
         """Set score to zero unless otherwise set"""
-        GameData.register_callback( self.value_name, self.on_value_change)
-        if getattr(GameData, self.value_name, None) is None:
-            setattr( GameData, self.value_name, 0)
+        gamedata = get_gamedata()
+        gamedata.register_callback( self.value_name, self.on_value_change)
+        if getattr(gamedata, self.value_name, None) is None:
+            setattr( gamedata, self.value_name, 0)
             
     def on_value_change(self, *a, **kw):
         self.set_text()            
@@ -40,11 +41,12 @@ class Timer_Text(Value_Tracker_Text):
     @component_method
     def set_text(self, text=None):
         "Show current value"
+        gamedata = get_gamedata()
         if text is None:
-            if getattr(GameData, self.value_name, None) is None:
+            if getattr(gamedata, self.value_name, None) is None:
                 text = self.prefix + self.default
             else:
-                val = getattr(GameData, self.value_name, self.default)
+                val = getattr(gamedata, self.value_name, self.default)
                 if type(val) == float:
                     val =  ("%."+str(self.decimal_places)+"f") % val
                 else:

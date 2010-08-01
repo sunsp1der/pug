@@ -14,7 +14,9 @@ component with the mouse-pointer as the target."""
     _field_list = [
             ['rotation_speed',
                     'Speed to turn. Negative = always face mouse exactly.'],
-            ['offset', 'Offset the rotation by this much']
+            ['offset', 'Offset the rotation by this much'],
+            ['aaa',
+             '']
             ]
                 
     def check_facing(self, position=None):
@@ -24,7 +26,8 @@ position: an Opioid vector
 Turn the object toward position. If None, use mouse position."""
         if position is None:
             position = Mouse.position
+            print position
         Face_Object.check_facing(self, position)
                 
 from pug.component import register_component
-register_component( Mouse_Face)
+#register_component( Mouse_Face)

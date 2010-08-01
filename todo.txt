@@ -1,14 +1,17 @@
 now:	
-X	save scene and object
-X		no pigsprite or sprite or invalid names
-X		verify if name changed and overwrite
-X	create an edit file dialog
-X	dropdowns are still whack
-X	make color/tint code correspond to gui
-X	create pig.Actions
-X		change tutorial wiki
-X	create default project_settings for run_pig_scene
-	
+X	mouseface component broken
+X	callback sheet
+X	insert windib fix (check wx code thing)
+X	quitout not working
+X	tab should select all text in pug
+X	audiofail needs nonesound
+X	score stays same when editor stops
+X	import into storage correctly
+X	cannon archetype
+
+	double component listing on custom component
+		not using project components when run in editor
+	release mouse button3
 	create zip tarball exe?
 
 bugs: 

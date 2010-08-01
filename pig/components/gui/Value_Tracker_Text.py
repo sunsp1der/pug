@@ -5,10 +5,10 @@ from pug import Filename, Text
 from pug.component import *
 
 from pig.components import Textbox
-from pig.util import GameData
+from pig.util import get_gamedata
 
 class Value_Tracker_Text(Textbox):
-    "Show a value from GameData"
+    "Show a value from gamedata"
     #component_info
     _set = 'pig'
     _type = 'gui'
@@ -17,7 +17,7 @@ class Value_Tracker_Text(Textbox):
     _field_list = [
             ['prefix',Text,{
                 'doc':'Display this before the value'}],
-            ['value_name',Text,{'doc':'Name of GameData attribute to track'}],
+            ['value_name',Text,{'doc':'Name of gamedata attribute to track'}],
             ['decimal_places',"If value is a number, show this\n"+\
                                 "many decimal places"],
             ['default',Text,{'doc:':'Text to display in editor\n'+\
@@ -33,13 +33,15 @@ class Value_Tracker_Text(Textbox):
     @component_method
     def on_added_to_scene(self, scene):
         """Set score to zero unless otherwise set"""
-        GameData.register_callback( self.value_name, self.on_value_change)
-        if getattr(GameData, self.value_name, None) is None:
-            setattr( GameData, self.value_name, 0)
+        gamedata = get_gamedata()
+        gamedata.register_callback( self.value_name, self.on_value_change)
+        if getattr(gamedata, self.value_name, None) is None:
+            setattr( gamedata, self.value_name, 0)
             
     @component_method
     def on_destroy(self):
-        GameData.unregister_callback(self.value_name, self.on_value_change)
+        gamedata = get_gamedata()
+        gamedata.unregister_callback(self.value_name, self.on_value_change)
 
     def on_value_change(self, *a, **kw):
         self.set_text()            
@@ -47,11 +49,12 @@ class Value_Tracker_Text(Textbox):
     @component_method
     def set_text(self, text=None):
         "Show current value"
+        gamedata = get_gamedata()
         if text is None:
-            if getattr(GameData, self.value_name, None) is None:
+            if getattr(gamedata, self.value_name, None) is None:
                 text = self.prefix + self.default
             else:
-                val = getattr(GameData, self.value_name, self.default)
+                val = getattr(gamedata, self.value_name, self.default)
                 if type(val) == float:
                     val =  ("%."+str(self.decimal_places)+"f") % val
                 else:

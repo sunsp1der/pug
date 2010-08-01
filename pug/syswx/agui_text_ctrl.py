@@ -25,10 +25,16 @@ This is a wx.TextCtrl with some special features:
         wx.TextCtrl.__init__(self, parent, 
                           size=wx.Size(30, WX_STANDARD_HEIGHT), 
                           style=wx.TE_PROCESS_ENTER)# | wx.TAB_TRAVERSAL)
+        self.Bind(wx.EVT_NAVIGATION_KEY, self.select_all)  
+        self.Bind(wx.EVT_TEXT_ENTER, self.select_all) # doesn't work !?     
         self.SetMinSize(wx.Size(-1, WX_STANDARD_HEIGHT))
         self.floatValue = None
         self.lastValue = None
         self.formatFloats = formatFloats
+        
+    def select_all(self, event):
+        self.SelectAll()
+        event.Skip()
         
     def GetValue(self):
         if self.floatValue and wx.TextCtrl.GetValue(self)==self.lastValue:

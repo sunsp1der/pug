@@ -34,6 +34,8 @@ class Textbox(Component):
     font = None
     __max_width = None
     __font_size = 32
+    
+    action = None
         
     @component_method
     def set_text(self, text=None):

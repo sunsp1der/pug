@@ -22,6 +22,7 @@ Run python_file in a new process
 args: string arguments to process
 kwargs: flags and options
     close_duplicates: close all processes with same command line. Default=False
+    no_record: don't keep a record of this for kill_subprocesses. Default=False
 """        
     if os.name == "nt":
         cmd = ["pythonw"]
@@ -34,10 +35,11 @@ kwargs: flags and options
     cmd = ' '.join(cmd)
     if kwargs.get('close_duplicates', False):
         kill_subprocesses(cmd)
-    if _processes.has_key(cmd):
-        _processes[cmd].append(proc)
-    else:
-        _processes[cmd] = [proc,]
+    if not kwargs.get('no_record', False):
+        if _processes.has_key(cmd):
+            _processes[cmd].append(proc)
+        else:
+            _processes[cmd] = [proc,]
         
 def kill_subprocesses(cmdline=None):
     "kill_subprocess(cmdline): kill all cmdline subprocesses,default: kill ALL"
@@ -46,7 +48,10 @@ def kill_subprocesses(cmdline=None):
         for oldproc in proclist:
             if oldproc.poll() is None:
                 killcmd = "taskkill /PID " + str(oldproc.pid)
-                subprocess.Popen(killcmd)                
+                try:
+                    subprocess.Popen(killcmd)
+                except:
+                    pass                
     else:
         for cmdline in _processes.iterkeys():
             kill_subprocesses(cmdline)

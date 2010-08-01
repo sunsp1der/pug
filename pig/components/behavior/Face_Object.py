@@ -65,12 +65,12 @@ Turn the object toward position. If None, use obj.position"""
         if not self.enabled: 
             self.action.abort()
             return
-        if not self.target:
-            return
-        obj = get_gnamed_object(self.target)
-        if not obj:
-            return
         if position is None:
+            if not self.target:
+                return
+            obj = get_gnamed_object(self.target)
+            if not obj:
+                return
             position = obj.position
         target_angle = angle_to(self.owner.position, 
                          position) + self.offset

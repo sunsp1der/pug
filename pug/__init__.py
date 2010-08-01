@@ -13,6 +13,7 @@ from pug.ProjectInterface import ProjectInterface
 
 # objects
 from pug.component.ComponentObject import ComponentObject
+import all_components
 from pug.gname import GnamedObject,  get_gnamed_object
 from pug.BaseObject import BaseObject
 from pug.CallbackObject import CallbackObject

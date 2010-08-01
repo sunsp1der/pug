@@ -19,11 +19,19 @@ from pig.PigDirector import PigDirector
 projectPath = os.getcwd()
 _revertScene = None
 
-if os.name == "nt":
-    os.environ['SDL_VIDEODRIVER'] = "windib"
-
+#if os.name == "nt":
+os.environ['SDL_VIDEODRIVER'] = "windib"
 
 GameData = pug.CallbackObject( gname='GameData')
+def create_gamedata(**kw):
+    global GameData
+    GameData.clear_callbacks()
+    GameData = pug.CallbackObject( gname='GameData')
+    for attr, data in kw.iteritems():
+        setattr(GameData, attr, data)
+def get_gamedata():
+    return GameData
+create_gamedata()
 
 def skip_deprecated_warnings():
     """skip_deprecated_warnings()

@@ -206,6 +206,8 @@ settingsObj: an object similar to the one below... if it is missing any default
                  ["New Object\tShift+Ctrl+N", self.add_object,
                         "Add the currently selected add object to the scene"],
                  ["*DIVIDER*"],
+#                 ["Selection Tab", self.open_selection_frame, 
+#                        "Open a new tab to view selected objects"],
                  ["Edit Python File\tCtrl+E", edit_project_file,
                         "Edit a python code file."],
                  ["Raise Windows\tCtrl+W", app.raise_all_frames,
@@ -374,7 +376,8 @@ forceReload: if True, reload all scenes and objects first.
         
     def reload_components(self, doReload=True, errors=None):
         """Load changes made to project components"""
-        get_package_classes('components', pug.component.Component, #@UndefinedVariable
+        get_package_classes('components', 
+                            pug.component.Component, #@UndefinedVariable
                             doReload=doReload, errors=errors)
         
     def reload_project_files(self, doReload=True, errors=None,
@@ -441,7 +444,7 @@ Callback from PugApp...
         
     def open_selection_frame(self):
         """Open a pug window for selected object"""
-        wx.GetApp().open_selection_frame()
+        wx.GetApp().get_project_frame().open_selection_child()
         
     def nudge(self, vector):
         for obj in wx.GetApp().selectedObjectDict:
@@ -619,6 +622,7 @@ disk.
             return
         self.scene.stop()
         wait_for_exit_scene()
+        create_gamedata()
         pug.set_default_pugview("Component", _dataPugview)
         if doRevert:
             self.set_scene(self.scene.__class__.__name__, True)
