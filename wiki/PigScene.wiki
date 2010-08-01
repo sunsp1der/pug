@@ -1,0 +1,15 @@
+#summary Description of the PigScene object
+PigScene is the base sprite object for the Pig system. 
+
+=== Callbacks ===
+
+A number of callbacks are received by PigScene. These are useful for responding to events as well as for stacking with Components:
+{{{
+def on_enter(self):
+    "called when the scene is entered, whether in the editor or not"
+
+def on_start(self):
+    "called when the scene is started (not in editor)"
+
+def on_exit(self): 
+    "called when the scene is exitted"
