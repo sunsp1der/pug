@@ -41,7 +41,8 @@ module: pug.all_components.
     old_component = getattr(pug.all_components, component.__name__, None)
     if old_component and old_component.__module__ != component.__module__ and\
                         not ignore_duplicates:
-        print "Duplicate component name: ",component.__name__," overwritten"
+        print "Duplicate component name: ",component.__name__,"overwritten by",\
+                            component.__module__
     setattr(pug.all_components, component.__name__, component)
         
 def get_component_manager():

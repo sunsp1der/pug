@@ -184,7 +184,7 @@ quit: if True, quit the current project after opening new one.
         return False        
     if interface and quit:
         wx.CallAfter( PigDirector.quit, False)
-    python_process(project_editor)
+    python_process(project_editor, no_record=True)
     return True
 
 

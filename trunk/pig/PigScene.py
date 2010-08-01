@@ -386,7 +386,10 @@ Start the scene running. Called after enter() and before state changes
             nodes = self.nodes.keys()
             for node in nodes:
                 if _DEBUG: print "   Delete Node:",node
-                node.delete()
+                try:
+                    node.delete()
+                except:
+                    pass
             self._key_up_dict = {}
             self._key_down_dict = {}
             self._tickfunc = None
@@ -396,7 +399,10 @@ Start the scene running. Called after enter() and before state changes
             self._collision_callback_dict = None
             self._collision_handlers = None
             for info in self.k_info:
-                self.unregister_key( info)
+                try:
+                    self.unregister_key( info)
+                except:
+                    pass
             self.k_info = []
             self.exitted = True
         else:

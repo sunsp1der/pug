@@ -40,6 +40,10 @@ callbackfunc: the callback function. It will receive:
         except:
             pass
         
+    def clear_callbacks(self):
+        for attr, list in self.__callbackDict.iteritems():
+            self.__callbackDict[attr] = []
+        
     def __setattr__(self, attr, value):
         BaseObject.__setattr__(self, attr, value)
         try:
@@ -55,6 +59,7 @@ callbackfunc: the callback function. It will receive:
         # don't know why this try is necessary, but I get an exception without
         # it
         try:
+            self.clear_callbacks()
             BaseObject.__del__(self)
         except:
             pass

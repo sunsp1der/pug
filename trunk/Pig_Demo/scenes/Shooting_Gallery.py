@@ -3,15 +3,14 @@ from objects.Bullet import Bullet
 from objects.ExplodeParticle import ExplodeParticle
 from objects.Launcher import Launcher
 from objects.Target import Target
+from objects.cannon import cannon
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
-from pug.all_components import Utility_Keys, Key_Drive_Controls, Key_Spawn,\
-    Value_Tracker_Text
+from pug.all_components import Utility_Keys, Value_Tracker_Text
 ### End import autocode ###
 
 ### Shooting_Gallery autocode ###
 class Shooting_Gallery(PigScene):
-    started = True
     def __init__(self, *args, **kwargs):
         PigScene.__init__(self, *args, **kwargs)
         self.components.add( Utility_Keys(
@@ -35,19 +34,7 @@ class Shooting_Gallery(PigScene):
         launcher_instance_2.position = (43.0, 175.0)
         launcher_instance_2.rotation = 90.0
 
-        cannon = PigSprite(gname='cannon')
-        cannon.image = 'art\\pug.png'
-        cannon.layer = 'Background'
-        cannon.position = (400.0, 514.0)
-        cannon.opacity = 0.5
-        cannon.components.add( Key_Drive_Controls(
-                forward_key=None,
-                backward_key=None) )
-        cannon.components.add( Key_Spawn(
-                spawn_object='Bullet',
-                sound='sound\\snap.wav',
-                spawn_offset=(0, -1),
-                max_spawns_in_scene=1) )
+        cannon_instance = cannon()
 
         pigsprite_instance = PigSprite()
         pigsprite_instance.layer = 'Background'
