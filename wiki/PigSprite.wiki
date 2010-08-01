@@ -16,7 +16,9 @@ def on_collision(self, toSprite, fromSprite, toGroup, fromGroup):
         toSprite: the sprite that collided (usually same as self)
         fromSprite: the sprite we collided with
         toGroup: toSprite's group that set off the collision
-        fromGroup: fromSprite's group that set off the collision"""def on_delete(self): 
+        fromGroup: fromSprite's group that set off the collision"""
+
+def on_delete(self): 
     "called when PigSprite is actually being deleted."
 
 def on_destroy(self): 
