@@ -1,6 +1,4 @@
 #summary Description of the PigSprite object
-== PigSprite ==
-
 PigSprite is the base sprite object for the Pig system. 
 
 === Callbacks ===
