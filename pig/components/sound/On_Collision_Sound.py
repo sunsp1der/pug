@@ -19,6 +19,7 @@ class On_Collision_Sound( Collision_Callback):
         ] + Collision_Callback._field_list 
     
     sound = None
+    sound_object = None
 
     @component_method
     def on_added_to_scene(self, scene):
@@ -29,6 +30,6 @@ class On_Collision_Sound( Collision_Callback):
     def on_collision(self, toSprite, fromSprite, toGroup, fromGroup):
         "Play the sound when object collides"
         self.sound_object.play()
-        
+                
 register_component( On_Collision_Sound)
     

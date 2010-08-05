@@ -17,6 +17,7 @@ class On_Destroy_Sound( Component):
         ]
     
     sound = None
+    sound_object = None
     
     @component_method
     def on_added_to_scene(self, scene):

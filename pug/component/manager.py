@@ -39,10 +39,13 @@ module: pug.all_components.
     _globalComponentManager.componentList.append(component)
     _globalComponentManager.lastUpdate = time()
     old_component = getattr(pug.all_components, component.__name__, None)
-    if old_component and old_component.__module__ != component.__module__ and\
-                        not ignore_duplicates:
-        print "Duplicate component name: ",component.__name__,"overwritten by",\
-                            component.__module__
+    if old_component:
+        if old_component.__module__ != component.__module__:
+            if not ignore_duplicates:
+                print "Duplicate component name: ",component.__name__,\
+                            "overwritten by", component.__module__
+        else:
+            _globalComponentManager.componentList.remove(old_component)
     setattr(pug.all_components, component.__name__, component)
         
 def get_component_manager():

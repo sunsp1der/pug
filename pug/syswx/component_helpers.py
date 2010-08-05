@@ -97,6 +97,17 @@ class ComponentList(wx.combo.ComboCtrl):
         popup = ListCtrlComboPopup()
         self.listCtrl = popup
         self.SetPopupControl(popup)
+        self.Bind(wx.EVT_KEY_DOWN, self.OnKey)
+
+    def OnKey(self, ev):
+        if ev.GetKeyCode() == wx.WXK_TAB:
+            if ev.ShiftDown():
+                self.Navigate(False)
+            else:
+                self.Navigate() 
+            self.SetValue(self.GetValue())
+        else:
+            ev.Skip()   
 
     def get_object(self):
         return self.__object
@@ -220,7 +231,8 @@ object: the object that is being viewed. Used to define what components are
 """
         # process the available components
         types = {}
-        componentList = get_component_list()
+        from pug.all_components.util import get_all_components
+        componentList = get_all_components()
         if componentList:
             for idx in range(len(componentList)-1,-1,-1):
                 component = componentList[idx]

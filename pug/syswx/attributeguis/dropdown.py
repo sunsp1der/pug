@@ -84,6 +84,7 @@ For kwargs optional arguments, see the Base attribute GUI
                 self.control.Navigate(False)
             else:
                 self.control.Navigate() 
+            self.control.SetValue(self.control.GetValue())                
         else:
             ev.Skip()   
          

@@ -10,6 +10,7 @@ doesn't have as many features/accessors as the combo.ComboCtrl"""
     def __init__(self):
         self.PostCreate(wx.PreListBox())
         wx.combo.ComboPopup.__init__(self)
+        self.didSelect = True
         
     def Create(self, parent):
         wx.ListBox.Create(self, parent, style=wx.LB_SINGLE)
@@ -58,10 +59,15 @@ doesn't have as many features/accessors as the combo.ComboCtrl"""
     
     def OnPopup(self):
         self.didSelect = False
+        self.originalSelection = self.GetSelection()
         if self.popupCallback:
             self.popupCallback(self)
         if self.selected:
             self.list.EnsureVisible(self.selected)
+        
+    def OnDismiss(self):
+        if not self.didSelect:
+            self.SelectItem(self.originalSelection)
     
     def SetPopupCallback(self, callback):
         """SetPopupCallback( callback)
