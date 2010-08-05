@@ -16,7 +16,7 @@ from Opioid2D.public.Node import Node
 
 import pug
 import pug.component
-from pug.util import kill_subprocesses, get_package_classes
+from pug.util import kill_subprocesses, get_package_classes, start_file
 from pug.component.pugview import _dataPugview, _dataMethodPugview
 from pug.syswx.util import show_exception_dialog, cache_default_view
 from pug.syswx.component_browser import ComponentBrowseFrame
@@ -210,6 +210,8 @@ settingsObj: an object similar to the one below... if it is missing any default
 #                        "Open a new tab to view selected objects"],
                  ["Edit Python File\tCtrl+E", edit_project_file,
                         "Edit a python code file."],
+                 ["Open Project Folder\tCtrl+O", self.open_project_folder,
+                        "Open the current project's root folder"],
                  ["Raise Windows\tCtrl+W", app.raise_all_frames,
                         "Raise all PUG Windows to top"],
                  ["Quit\tCtrl+Q", self.quit]])
@@ -254,6 +256,9 @@ settingsObj: an object similar to the one below... if it is missing any default
     def on_drop_files(self, x, y, filenames):
         # pass to util function
         return on_drop_files( x, y, filenames)
+            
+    def open_project_folder(self):
+        return start_file(get_project_path())
             
     def quit(self, query=True):
         """quit( query=True)
@@ -480,7 +485,10 @@ event: a wx.Event
                        "Save Working Scene Before Quit?",
                        'Project Frame Closed', 
             wx.YES_NO | wx.CANCEL | wx.YES_DEFAULT | wx.ICON_QUESTION)
-        wx.GetApp().projectFrame.RequestUserAttention()
+        try:
+            wx.GetApp().projectFrame.RequestUserAttention()
+        except:
+            pass
         answer = dlg.ShowModal() 
         if answer == wx.ID_YES:
             self.stop_scene()

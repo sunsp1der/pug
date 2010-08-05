@@ -1,6 +1,8 @@
 from Opioid2D import Mouse
 from Opioid2D.public.Node import Node
 
+from pug.component import register_component
+
 from pig.components import Face_Object
 
 class Mouse_Face( Face_Object):
@@ -26,5 +28,4 @@ Turn the object toward position. If None, use mouse position."""
             position = Mouse.position
         Face_Object.check_facing(self, position)
                 
-from pug.component import register_component
 register_component( Mouse_Face)

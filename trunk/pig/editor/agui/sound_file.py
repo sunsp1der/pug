@@ -2,7 +2,8 @@ from pug import Filename
 
 class SoundFile( Filename):
     def __init__(self, attribute, window, aguidata={}, **kw):
-        aguidata['wildcards'] = "wav file (*.wav)|*.wav" 
+        aguidata['wildcards'] = "wav file (*.wav)|*.wav" \
+                   "|ogg file (*.ogg)|*.ogg|" 
 #                   "mp3 file (*.mp3)|*.mp3|" \
 #                   "midi files (*.mid)|*.mid|" \
 #                   "All files (*.*)|*.*"

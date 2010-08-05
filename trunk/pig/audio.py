@@ -6,6 +6,13 @@ SoundDict = {}
 
 class NoneSound:
     def play(self): pass
+    def stop(self): pass
+    def fadeout(self): pass
+    def set_volume(self): pass
+    def get_volume(self): pass
+    def get_num_channels(self): pass
+    def get_length(self): pass
+    def get_buffer(self): pass
 
 def get_sound( filename, tag=""):
     """get_sound( filename, tag="")->pygame.mixer.Sound object
