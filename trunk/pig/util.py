@@ -15,23 +15,13 @@ import pug.component
 from pug.util import get_package_classes, find_classes_in_module
 
 from pig.PigDirector import PigDirector
+from pig.gamedata import *
 
 projectPath = os.getcwd()
 _revertScene = None
 
-#if os.name == "nt":
-os.environ['SDL_VIDEODRIVER'] = "windib"
-
-GameData = pug.CallbackObject( gname='GameData')
-def create_gamedata(**kw):
-    global GameData
-    GameData.clear_callbacks()
-    GameData = pug.CallbackObject( gname='GameData')
-    for attr, data in kw.iteritems():
-        setattr(GameData, attr, data)
-def get_gamedata():
-    return GameData
-create_gamedata()
+if os.name == "nt":
+    os.environ['SDL_VIDEODRIVER'] = "windib"
 
 def skip_deprecated_warnings():
     """skip_deprecated_warnings()
@@ -80,7 +70,7 @@ def start_scene():
     Opioid2D.Director.scene.state = None
     # give the Director a second to pull it together
     while PigDirector.scene.state:
-        sleep(0.1)
+        sleep(0.05)
     PigDirector.scene.start()    
     
 def save_project_settings( projectSettings):

@@ -1,7 +1,7 @@
 "Value_Tracker_Text.py"
 from Opioid2D.public.Node import Node
 
-from pug import Filename, Text
+from pug import Text
 from pug.component import *
 
 from pig.components import Textbox
@@ -25,18 +25,18 @@ class Value_Tracker_Text(Textbox):
             ]
     _field_list += Textbox._font_fields
     #defaults
-    __default = '000'
-    __prefix = 'Score: '
+    _default = '000'
+    _prefix = 'Score: '
     value_name = 'score'
     decimal_places = 0
         
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self, scene, start_value=0):
         """Set score to zero unless otherwise set"""
         gamedata = get_gamedata()
         gamedata.register_callback( self.value_name, self.on_value_change)
         if getattr(gamedata, self.value_name, None) is None:
-            setattr( gamedata, self.value_name, 0)
+            setattr( gamedata, self.value_name, start_value)
             
     @component_method
     def on_destroy(self):
@@ -63,17 +63,17 @@ class Value_Tracker_Text(Textbox):
         Textbox.set_text( self, text)
         
     def set_default(self, default):
-        self.__default = default
+        self._default = default
         self.set_text()
     def get_default(self):
-        return self.__default
+        return self._default
     default = property(get_default, set_default)
     
     def set_prefix(self, prefix):
-        self.__prefix = prefix
+        self._prefix = prefix
         self.set_text()
     def get_prefix(self):
-        return self.__prefix
+        return self._prefix
     prefix = property(get_prefix, set_prefix)            
                 
         

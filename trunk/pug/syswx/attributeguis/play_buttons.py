@@ -31,6 +31,7 @@ aguidata: {
 For kwargs arguments, see the Base attribute GUI
 """
     playbutton = None
+    pausebutton = None
     
     def __init__(self, attribute, window, aguidata ={}, **kwargs):
         #widgets
@@ -103,6 +104,11 @@ For kwargs arguments, see the Base attribute GUI
                 button = buttons.ThemedGenBitmapToggleButton(control, -1, None,
                                                    size=WX_BUTTON_SIZE)
                 self.playbutton = button
+            elif item == 'pause':
+                button = buttons.ThemedGenBitmapToggleButton(control, -1, None,
+                                                   size=WX_BUTTON_SIZE)
+                self.pausebutton = button
+                button.Enable(False)
             else:
                 button = buttons.ThemedGenBitmapButton(control, -1, None,
                                                    size=WX_BUTTON_SIZE)
@@ -134,10 +140,15 @@ For kwargs arguments, see the Base attribute GUI
             button = event.GetEventObject()
             retvalue = self.functionDict[button]()
             if button == self.playbutton and retvalue == True:
-                button.Enable(False)
+                self.playbutton.Enable(False)
+                if self.pausebutton:
+                    self.pausebutton.Enable(True)
             if button.type == 'stop':
-                self.playbutton.Enable(True)
-                self.playbutton.SetValue(False)
+                if self.playbutton:
+                    self.playbutton.Enable(True)
+                    self.playbutton.SetValue(False)
+                if self.pausebutton:
+                    self.pausebutton.Enable(False)
         except:
             show_exception_dialog(self.control)
             try:

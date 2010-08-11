@@ -47,10 +47,6 @@ projectFolder: where file menus start at.  Defaults to current working dir.
     projectFrame = None
     def __init__(self, projectObject=None, projectObjectName='',
                  projectName='PUG', projectFolder = "", redirect=False ):
-        #wx.PySimpleApp.__init__(self)
-        wx.App.__init__(self, redirect=redirect)
-        #self.SetExitOnFrameDelete(False)
-        
         # global menus
         self.globalMenuDict = {'__order__':[],'__ids__':{}}
         
@@ -62,9 +58,15 @@ projectFolder: where file menus start at.  Defaults to current working dir.
         # track frames and objects they view { 'frame':obj(id)}
         self.pugFrameDict = weakref.WeakKeyDictionary()
         self.set_project_folder(projectFolder)
-        if projectObject:
-            self.start_project(projectObject, projectObjectName,
-                          projectName, projectFolder)
+        self.args = (projectObject, projectObjectName, projectName, 
+                     projectFolder)
+        wx.App.__init__(self, redirect=redirect)
+        #self.SetExitOnFrameDelete(False)
+    
+    def OnInit(self):
+        if self.args[0]:
+            self.start_project(*self.args)
+        return True
     
     def start_project(self, projectObject=None, projectObjectName='',
                  projectName='PUG', projectFolder = "" ):

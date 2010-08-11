@@ -23,11 +23,12 @@ from pug.syswx.component_browser import ComponentBrowseFrame
 from pug.syswx.pugmdi import PugMDI
 from pug.syswx.drag_drop import FileDropTarget
 
-from pig import PigScene, PigSprite, Director
+from pig import PigScene, PigSprite, Director, PauseState
 from pig.util import *
 from pig.editor.StartScene import StartScene
 from pig.editor import hacks, EditorState, graphicsManager
 from pig.editor.util import *
+from pig.editor.PigApp import PigApp 
  
 _DEBUG = False
 
@@ -112,7 +113,7 @@ settingsObj: an object similar to the one below... if it is missing any default
         # DEFAULT PUG SETTINGS
         class pug_settings():
             initial_scene = "__Working__"
-            rect_Pig_Editor = (520, 80, 500, 670)
+            rect_Pig_Editor = (470, 150, 550, 600)
             rect_opioid_window = (0, 0, 800 , 600)
             save_settings_on_quit = True
 
@@ -619,6 +620,15 @@ doSave: save working copy first
         start_scene()
         return True
     
+    def pause_scene(self):
+        """pause_scene(): pause the current scene"""
+        if self.Director.project_started:
+            if self.Director.paused:
+                self.Director.scene.state.unpause()
+            else:
+                self.Director.scene.set_state(PauseState, 
+                                              self.Director.scene.state) 
+    
     def stop_scene( self, doRevert=True):
         """stop_scene(doRevert=True)
         
@@ -628,6 +638,7 @@ disk.
         if _DEBUG: print "stop_scene"
         if not self.Director.project_started:
             return
+        self.Director.paused = False
         self.scene.stop()
         wait_for_exit_scene()
         create_gamedata()
@@ -730,19 +741,21 @@ Opioid2D, it is safer to call this via add_object.
         
     def test(self, test=None):#, range1=0, range2=100):
         #get_all_objects(Component)
-        from pug.util import test_referrers
-        import gc
-        if test is None:
-            i = 0
-            for item in gc.garbage:
-                print i, gc.garbage[i]
-                i+=1
-        else:
-            pug.frame(gc.garbage[test])
-            x= test_referrers(gc.garbage[test])
-            if x: 
-                print test_referrers(x)
-                pug.frame(x)
+        PigDirector.scene.state = PauseState
+# test for floating garbage
+#        from pug.util import test_referrers
+#        import gc
+#        if test is None:
+#            i = 0
+#            for item in gc.garbage:
+#                print i, gc.garbage[i]
+#                i+=1
+#        else:
+#            pug.frame(gc.garbage[test])
+#            x= test_referrers(gc.garbage[test])
+#            if x: 
+#                print test_referrers(x)
+#                pug.frame(x)
                
 def start_opioid( rect, title, icon, scene):
     #start up opioid with a little pause for threading
@@ -788,6 +801,7 @@ _interfacePugview = {
         ['Project', pug.Label, {'font_size':10}],
         ['Controls', pug.PlayButtons, {'execute':'execute_scene', 
                                        'stop':'stop_scene',
+                                       'pause':'pause_scene',
                                        'rewind':'rewind_scene',
                                        'play':'play_scene',
                                        'doc':'Controls for current scene'}],
@@ -831,7 +845,7 @@ _interfacePugview = {
                 {'label':'   Browse Components'}],
 #        ['Director'],
 #        ['Display'],
-#       ['test', pug.Routine]
+        ['test', pug.Routine]
     ]
 }
 pug.add_pugview('OpioidInterface', _interfacePugview, True)

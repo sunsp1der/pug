@@ -352,7 +352,8 @@ Start the scene running. Called after enter() and before state changes
     def all_nodes_callback(self, callback, *args, **kwargs):
         """Send a callback to all nodes in the scene"""
         if _DEBUG: print "PigScene.all_nodes_callback:",callback,self.nodes.data
-        for node in self.nodes:
+        nodes = self.nodes.copy()
+        for node in nodes:
             try:
                 func = getattr(node, callback)
             except:
@@ -448,7 +449,7 @@ terms of nodes within the layers"""
                         if not node.layer_name:
                             pass
                         else:
-                            raise
+                            pass
                 elif not include_all:
                     continue
                 else:
