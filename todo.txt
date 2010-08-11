@@ -1,9 +1,11 @@
 now:	
-	X sound components upgrade
-	X open folder menu
-	X custom components fix
 	timer
-	health
+		justification for textbox
+	simple game over
+		pause
+		create game over sprite in center
+	combat sys?
+		see powerpack
 	put an example component in Pig_Demo
 		spawner examples
 			custom code example
@@ -28,6 +30,8 @@ bugs:
 
 later: 
 	memory leak!
+	run in single thread...
+		problem picking up arrow keys in opioid window
 	Undo! - save query when changing levels or quitting
 	Separate runtime necessities
 	Resources

@@ -22,6 +22,7 @@ class PigSprite(Sprite, pug.BaseObject):
 Opioid2d Sprite with features for use with pug"""
     __metaclass__ = SpriteMeta
     _image_file = None   
+    _image = None
     _archetype = False
     destroy_blockers = None
     _pug_pugview_class = 'PigSprite'

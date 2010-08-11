@@ -2,10 +2,16 @@
 
 Hack in a few features necessary for the Opioid2D director to work with pug"""
 import threading
+import time
 
 import wx
 
 import Opioid2D
+from Opioid2D.internal.objectmgr import ObjectManager
+from Opioid2D.public.Image import ImageMeta
+from Opioid2D.public.ResourceManager import ResourceManager
+
+old_ticks = now = frames = None
 
 opioid_quit = Opioid2D.Director.quit
 PigDirector = Opioid2D.Director
@@ -44,9 +50,175 @@ def real_quit():
     if not QUITTING:
         opioid_quit()
     QUITTING = True
-    
 
 PigDirector.quit = pig_quit # hack to make opioid quit=pugquit 
 PigDirector.realquit = real_quit
+    
+#hack for running opioid with frame control
+def newrun(initialScene, *args, **kw):
+    """Run the Director mainloop until program exit
+    """
+    self = PigDirector
+    try:
+        # This is a long and ugly function that hasn't been splitted into smaller parts
+        # because of performance considerations.
+        #
+        
+        import pygame
+        pygame.init()
+        from Opioid2D.public.Mouse import Mouse
+        
+        # Bind functions to local names in order to increase performance
+        sleep = time.sleep
+        throttle = pygame.time.Clock()
+        flip = pygame.display.flip
+        get_ticks = pygame.time.get_ticks
+        cD = self._cDirector
+        OM = ObjectManager
+        
+        self._scene = None
+        self.next_scene = None
+        self.next_state = None
+        self.paused = False
+        
+        now = get_ticks()
+        cD.Start(now)
 
+        self.set_scene(initialScene, *args, **kw)
+        
+        self._running = True            
+        start = time.time()
+        frames = 0
+        self.delta = 0
+        ticker = cD.GetTicker()
+        old_ticks = now
+        self.now = now
+        
+        # Preload Image subclasses that have been imported and that
+        # contain the preload flag.
+        for img in ImageMeta.subclasses:
+            if img.preload:
+                ResourceManager.get_image(img)
+                
+        while self._running:
+            # Trigger possible scene change at the beginning of a new frame
+            if self.next_scene is not None:
+                self._change_scene()
+            
+            # Time delta calculation
+            ticks = get_ticks()
+            self.delta = delta = min(ticks-old_ticks, 25) # limit the virtual clock to a max. advance of 25ms per frame
+            old_ticks = ticks
+            self.now = now = now + delta
+            cD.Iterate(now)
+            
+            scene = self._scene
+            cscene = scene._cObj
+            if not self.paused:
+                cscene.Tick()
+            
+            # Event handling
+            ev = pygame.event.get()
+            if scene._gui is not None:
+                scene._gui.tick(ev)
+            scene._handle_events(ev)
+            
+            # Call Scene tick callbacks
+            if scene._tickfunc is not None:
+                scene._tickfunc()
+            if ticker.realTick:
+                if scene._realtickfunc is not None:
+                    scene._realtickfunc()
+            
+            # Manage state change within the scene
+            while self.next_state is not None:
+                s = self.next_state
+                self.next_state = None
+                self.scene._init_state(s)
+            
+            # Update the screen
+            cD.RenderFrame()
+            
+            # render software mouse cursor
+            ms = Mouse._sprite
+            if ms:
+                ms.position = Mouse.position
+                ms._cObj.TraverseFree()
+            
+            flip()
+            
+            # Purge managed C++ objects that have been killed on the C++ side.
+            OM.purge()
+            
+            frames += 1
+            throttle.tick(100) # limit FPS to 100 for lower CPU usage
+        end = time.time()
+    finally:
+        from Opioid2D import _opi2d
+        _opi2d.cleanup()
+    return frames/(end-start)    
 
+PigDirector.run = newrun
+PigDirector.paused = False
+
+def opioid_tick():
+    import pygame
+    from Opioid2D.public.Mouse import Mouse
+    self = Opioid2D.Director
+    throttle = pygame.time.Clock()
+    flip = pygame.display.flip
+    get_ticks = pygame.time.get_ticks
+    cD = self._cDirector
+    OM = ObjectManager
+    ticker = cD.GetTicker()
+    global old_ticks, now, frames
+    # Trigger possible scene change at the beginning of a new frame
+    if self.next_scene is not None:
+        self._change_scene()
+    
+    # Time delta calculation
+    ticks = get_ticks()
+    self.delta = delta = min(ticks-old_ticks, 25) # limit the virtual clock to a max. advance of 25ms per frame
+    old_ticks = ticks
+    self.now = now = now + delta
+    cD.Iterate(now)
+    
+    scene = self._scene
+    cscene = scene._cObj
+    cscene.Tick()
+    
+    # Event handling
+    ev = pygame.event.get()
+    if scene._gui is not None:
+        scene._gui.tick(ev)
+    scene._handle_events(ev)
+    
+    # Call Scene tick callbacks
+    if scene._tickfunc is not None:
+        scene._tickfunc()
+    if ticker.realTick:
+        if scene._realtickfunc is not None:
+            scene._realtickfunc()
+    
+    # Manage state change within the scene
+    while self.next_state is not None:
+        s = self.next_state
+        self.next_state = None
+        self.scene._init_state(s)
+    
+    # Update the screen
+    cD.RenderFrame()
+    
+    # render software mouse cursor
+    ms = Mouse._sprite
+    if ms:
+        ms.position = Mouse.position
+        ms._cObj.TraverseFree()
+    
+    flip()
+    
+    # Purge managed C++ objects that have been killed on the C++ side.
+    OM.purge()
+    
+    frames += 1
+    throttle.tick(100) # limit FPS to 100 for lower CPU usage

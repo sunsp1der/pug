@@ -1,32 +1,51 @@
 ### import autocode ###
+from objects.Bullet import Bullet
+from objects.ExplodeParticle import ExplodeParticle
+from objects.Launcher import Launcher
+from objects.Target import Target
+from objects.cannon import cannon
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
-from pug.all_components import On_Key_Sound_Scene, On_Start_Sound, Textbox
+from pug.all_components import Utility_Keys, Value_Tracker_Text, Timer_Text
 ### End import autocode ###
 
-### testy autocode ###
-class testy(PigScene):
+### Shooting_Gallery autocode ###
+class Shooting_Gallery(PigScene):
     def __init__(self, *args, **kwargs):
         PigScene.__init__(self, *args, **kwargs)
-        self.components.add( On_Key_Sound_Scene(
-                sound='sound\\pickup.wav',
-                fade_out=1) )
-        self.components.add( On_Start_Sound(
-                sound='sound\\snap.wav',
-                fade_out=1) )
+        self.components.add( Utility_Keys(
+                info_F1='scenes\\Shooting_Gallery_Help.txt') )
 
     def on_enter(self):
+        # Archetypes
+        Bullet_archetype = Bullet(gname='Bullet')
+        Bullet_archetype.archetype = True
+
+        ExplodeParticle_archetype = ExplodeParticle(gname='ExplodeParticle')
+        ExplodeParticle_archetype.archetype = True
+
+        Target_archetype = Target(gname='Target')
+        Target_archetype.archetype = True
+
         # Sprites
+        launcher_instance = Launcher()
+        launcher_instance.position = (731.0, 142.0)
+
+        launcher_instance_2 = Launcher()
+        launcher_instance_2.position = (43.0, 175.0)
+        launcher_instance_2.rotation = 90.0
+
+        cannon_instance = cannon()
+
         pigsprite_instance = PigSprite()
         pigsprite_instance.layer = 'Background'
-        pigsprite_instance.position = (400.0, 300.0)
-        pigsprite_instance.components.add( Textbox(
-                text='texeeeee awoioiedoide',
-                max_width=50) )
+        pigsprite_instance.position = (702.0, 542.0)
+        pigsprite_instance.components.add( Value_Tracker_Text() )
 
         pigsprite_instance_2 = PigSprite()
         pigsprite_instance_2.layer = 'Background'
-        pigsprite_instance_2.position = (386.0, 277.0)
-        pigsprite_instance_2.components.add( Textbox(
-                text='texeeeee') )
-### End testy autocode ###
+        pigsprite_instance_2.position = (93.0, 537.0)
+        pigsprite_instance_2.components.add( Timer_Text(
+                start_time=50,
+                end_time=100) )
+### End Shooting_Gallery autocode ###

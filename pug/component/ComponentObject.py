@@ -148,6 +148,10 @@ name. Otherwise search by class."""
             return b
 
     def remove(self, component):
+        try:
+            component.on_removed_from_object()
+        except:
+            pass
         component_list = self.__component_list
         if component not in component_list.get_components():
             return False

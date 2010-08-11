@@ -29,11 +29,11 @@ class Textbox(Component):
             ]
     _field_list += _font_fields
     #defaults
-    __text = 'text'
-    __font_file = None
+    _text = 'text'
+    _font_file = None
     font = None
-    __max_width = None
-    __font_size = 32
+    _max_width = None
+    _font_size = 32
     
     action = None
         
@@ -42,7 +42,7 @@ class Textbox(Component):
         "Set the text to display"
         if text is None:
             text=self.text
-        self.__text = text
+        self._text = text
         image = textbox( self.font, text, self.max_width) 
         if self.owner:
             self.action = (Opioid2D.Delay(0)+ Opioid2D.CallFunc(
@@ -66,43 +66,43 @@ class Textbox(Component):
                 self.action._callbacks = None
 
     def set_font_size(self, font_size):
-        self.__font_size = font_size
+        self._font_size = font_size
         self.set_font_file()
         self.set_text()
     def get_font_size(self):
-        return self.__font_size
+        return self._font_size
     font_size = property(get_font_size, set_font_size)
     
     def set_max_width(self, max_width):
-        self.__max_width = max_width
+        self._max_width = max_width
         self.set_text()
     def get_max_width(self):
-        return self.__max_width
+        return self._max_width
     max_width = property(get_max_width, set_max_width)
        
     @component_method
     def get_text(self):
         "Get the displayed text"
-        return self.__text
+        return self._text
     text = property(get_text, set_text)
     
     def set_font_file(self, font_file=None, font_size=None):
         if font_file is None:
-            font_file = self.__font_file
+            font_file = self._font_file
         else:
-            self.__font_file = font_file
+            self._font_file = font_file
         if font_size is None:
-            font_size = self.__font_size
+            font_size = self._font_size
         else:
-            self.__font_size = font_size
+            self._font_size = font_size
         try:
-            self.font = font.Font(font_file, self.__font_size)
+            self.font = font.Font(font_file, self._font_size)
         except:
             self.font = self.__class__.font
-            self.__font_file = self.__class__.__font_file
+            self._font_file = self.__class__._font_file
         self.set_text()
     def get_font_file(self):
-        return self.__font_file
+        return self._font_file
     font_file = property(get_font_file, set_font_file)
     
     @component_method
@@ -117,20 +117,23 @@ class Textbox(Component):
 
     def on_added_to_object(self):
         self.on_added_to_editor( Opioid2D.Director.scene)
+        
+    def on_removed_from_object(self):
+        self.owner.set_image_file("art\\pug.png")
 
     def __init__(self, *a, **kw):
         if self.__class__.font is None:
             try:
                 defaultfont = os.path.join("art","accid___.ttf")
                 self.__class__.font = font.Font(defaultfont,
-                                                self.__class__.__font_size)
-                self.__class__.__font_file = defaultfont
+                                                self.__class__._font_size)
+                self.__class__._font_file = defaultfont
             except:
                 self.__class__.font = font.Font(None, 
-                                                self.__class__.__font_size)
-                self.__class__.__font_file = None
-        if self.__max_width is None:
-            self.__class__.__max_width = Opioid2D.Display.get_resolution()[0]
+                                                self.__class__._font_size)
+                self.__class__._font_file = None
+        if self._max_width is None:
+            self.__class__._max_width = Opioid2D.Display.get_resolution()[0]
         Component.__init__(self, *a, **kw)
 
 register_component( Textbox)
