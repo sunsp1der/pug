@@ -24,3 +24,6 @@ def on_destroy(self):
 
 def on_first_display(self): 
     "called after on_added_to_scene but before PigSprite is displayed for the first time"
+
+def on_project_start(self):
+    "called when project is started"
