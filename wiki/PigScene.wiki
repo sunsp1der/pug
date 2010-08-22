@@ -9,7 +9,7 @@ def on_enter(self):
     "called when the scene is entered, whether in the editor or not"
 
 def on_start(self):
-    "called when the scene is started (not in editor)"
+    "called when the scene is started"
 
 def on_exit(self): 
     "called when the scene is exitted"
