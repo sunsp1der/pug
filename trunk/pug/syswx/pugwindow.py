@@ -141,9 +141,12 @@ holds multiple PugWindows in tabbed (or other) form.
                     self.update_aguilist_object()
                 else:
                     self.create_aguilist()
-                if not oldobject and hasattr(self.GetParent(),
-                                             'show_all_attributes'):
-                    self.GetParent().show_all_attributes()
+                try:
+                    if not oldobject and hasattr(self.GetParent(), 
+                                                 'show_all_attributes'):
+                        self.GetParent().show_all_attributes()
+                except:
+                    pass
             self.started_viewing( obj)
         self.SetTitle(title)
         if self.IsFrozen():
@@ -455,7 +458,9 @@ Generally, this is called when an attribute gui has changed size.
         if _DEBUG: print "DONE refresh\n"
 
     def help_context(self, event=None):
-        wx.ContextHelp( self)
+        help = wx.ContextHelp( self, False)
+        help.BeginContextHelp() 
+        help.EndContextHelp()
     
     def show_help(self, event=None, object=None, attribute=""):
         customFrame = None

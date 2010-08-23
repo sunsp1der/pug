@@ -8,7 +8,6 @@ from Opioid2D.public.Node import Node
 
 from pug import Filename
 from pug.component import *
-from pug.syswx.util import show_exception_dialog
 
 class Textbox(Component):
     "Create text for this object's image"
@@ -43,12 +42,14 @@ class Textbox(Component):
         if text is None:
             text=self.text
         self._text = text
-        image = textbox( self.font, text, self.max_width) 
+        self.image = textbox( self.font, text, self.max_width) 
         if self.owner:
             self.action = (Opioid2D.Delay(0)+ Opioid2D.CallFunc(
-                                                self.do_set_text, image)).do()
+                                                self.do_set_text)).do()
                 
-    def do_set_text(self, image):
+    def do_set_text(self, image=None):
+        if image==None:
+            image = self.image
         if self.owner: 
             try:
                 self.owner.set_image( image)     

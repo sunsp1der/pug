@@ -2,28 +2,34 @@ from pig.PigState import PigState
 from pig.PigDirector import PigDirector
 
 class PauseState(PigState):
+    """PauseState( next_state=None, unpause_keys=[]): Pauses the game. 
+
+next_state: state to enter when unpaused. 
+unpause_keys: list of keys that cause unpause. [] means any key
+"""
     layers = ["__pause__"]
-    unpause_keys = []
-    def enter(self, nextState=None):
+    
+    def enter(self, next_state=None, unpause_keys=[]):
         PigDirector.paused = True
-        self.nextState=nextState
+        self.next_state=next_state
+        self.unpause_keys = unpause_keys
         
     def exit(self):
         PigDirector.paused = False
         
     def unpause(self):
-        PigDirector.scene.state =  self.nextState
+        PigDirector.scene.state = self.next_state
         
     def handle_keydown(self, ev):
-        if self.unpause_keys ==[] or ev.key in self.unpause_keys:
-            self.unpause()
+        pass
 
     def handle_keyup(self, ev):
-        if self.unpause_keys ==[] or ev.key in self.unpause_keys:
+        if self.unpause_keys == [] or ev.key in self.unpause_keys:
             self.unpause()
             
-    def handle_mousebuttondown(self, event):
+    def handle_mousebuttondown(self, ev):
         pass
     
-    def handle_mousebuttonup(self, event):
-        pass    
+    def handle_mousebuttonup(self, ev):
+        if self.unpause_keys == [] or ev.key in self.unpause_keys:
+            self.unpause()   
