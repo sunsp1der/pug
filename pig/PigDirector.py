@@ -4,7 +4,6 @@ Hack in a few features necessary for the Opioid2D director to work with pug"""
 import threading
 import time
 
-import wx
 
 import Opioid2D
 from Opioid2D.internal.objectmgr import ObjectManager
@@ -29,20 +28,25 @@ query: if True, have the app confirm project closure.
     if not query:
         return real_quit()
     global QUITTING
-    if not wx.GetApp() or \
+    try:
+        import wx
+        if not wx.GetApp() or \
                 not getattr(wx.GetApp().projectObject,'_initialized', False): 
-        real_quit()
-        return
-    if not QUITTING:
-        QUITTING = True
-        app = wx.GetApp()
-        if hasattr(app, '_evt_project_frame_close'):
-            wx.CallAfter(app._evt_project_frame_close, query=query)
-        return 
+            real_quit()
+            return
+        if not QUITTING:
+            QUITTING = True
+            app = wx.GetApp()
+            if hasattr(app, '_evt_project_frame_close'):
+                wx.CallAfter(app._evt_project_frame_close, query=query)
+            return
+    except:
+        real_quit() 
 # set up our special quit
 def real_quit():
     global QUITTING
-    try:       
+    try:
+        import wx       
         wx.GetApp().get_project_object().kill_subprocesses()
         wx.GetApp()._evt_project_frame_close(query=False)
     except:
@@ -54,7 +58,7 @@ def real_quit():
 PigDirector.quit = pig_quit # hack to make opioid quit=pugquit 
 PigDirector.realquit = real_quit
     
-#hack for running opioid with frame control
+#hack for running opioid with pause control
 def newrun(initialScene, *args, **kw):
     """Run the Director mainloop until program exit
     """
@@ -116,26 +120,26 @@ def newrun(initialScene, *args, **kw):
             cscene = scene._cObj
             if not self.paused:
                 cscene.Tick()
-            
+                
+                # Call Scene tick callbacks
+                if scene._tickfunc is not None:
+                    scene._tickfunc()
+                if ticker.realTick:
+                    if scene._realtickfunc is not None:
+                        scene._realtickfunc()
+                
             # Event handling
             ev = pygame.event.get()
             if scene._gui is not None:
                 scene._gui.tick(ev)
             scene._handle_events(ev)
-            
-            # Call Scene tick callbacks
-            if scene._tickfunc is not None:
-                scene._tickfunc()
-            if ticker.realTick:
-                if scene._realtickfunc is not None:
-                    scene._realtickfunc()
-            
+
             # Manage state change within the scene
             while self.next_state is not None:
                 s = self.next_state
                 self.next_state = None
-                self.scene._init_state(s)
-            
+                self.scene._init_state(s)            
+                        
             # Update the screen
             cD.RenderFrame()
             

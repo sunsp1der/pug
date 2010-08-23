@@ -9,7 +9,7 @@ class Target(PigSprite):
     image = 'art\\pug.png'
     layer = 'Background'
     def on_create(self):
-        self.position = (706.0, 266.0)
+        self.position = (708.0, 264.0)
         self.scale = (0.5, 0.5)
         self.tint = (255, 0, 128)
         self.components.add( Collision_Destroy(

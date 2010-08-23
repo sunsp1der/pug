@@ -221,8 +221,7 @@ settingsObj: an object similar to the one below... if it is missing any default
         if not app.get_project_frame():
             frame = PugMDI(
                         [[self, {'objectpath':"Project",'name':"ProjectFrame"}],
-                        [self.scene, {'title':"Scene",'name':"SceneFrame",
-                                'objectpath':self.scene.__class__.__name__}],
+                        [self.scene, {'title':"Scene",'name':"SceneFrame"}],
                         ['selection', {'name':"Selection"}],
                         ],
                     title=''.join(["P.I.G. Editor - ", self.project_name]),
@@ -321,9 +320,7 @@ forceReload: if True, reload all scenes and objects first.
                 time.sleep(0.05)
             time.sleep(0.05)
             wait_for_state(EditorState)
-            sceneFrame = wx.FindWindowByName("SceneFrame")
-            if sceneFrame:
-                sceneFrame.set_object(self.Director.scene, title="Scene")
+            entered_scene()
             wx.GetApp().refresh()
             
     def _get_sceneclass(self):
@@ -709,8 +706,7 @@ Opioid2D, it is safer to call this via add_object.
                 node.set_image("art\\pug.png")
             except:
                 pass
-            node.position = \
-                    Opioid2D.Vector(*Opioid2D.Display.get_view_size()) * 0.5
+            node.position = get_display_center()
             node.layer = "Background"
         # avoid overlapping sprites exactly
         okay_position = False
@@ -741,7 +737,8 @@ Opioid2D, it is safer to call this via add_object.
         
     def test(self, test=None):#, range1=0, range2=100):
         #get_all_objects(Component)
-        PigDirector.scene.state = PauseState
+        gamedata = get_gamedata()
+        gamedata.gameover()
 # test for floating garbage
 #        from pug.util import test_referrers
 #        import gc

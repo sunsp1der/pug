@@ -1,7 +1,5 @@
 import os.path
-from types import StringTypes
-import time
-from weakref import WeakKeyDictionary, proxy
+from weakref import WeakKeyDictionary
 import warnings
 import sys
 import traceback
@@ -17,10 +15,12 @@ from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.code_storage.constants import _INDENT
 from pug.code_storage import add_subclass_storageDict_key
 
-from pig.util import in_rotated_rect, start_project
+from pig.util import in_rotated_rect, entered_scene
 from pig.editor.agui import SceneNodes, SceneLayers
 from pig.editor.util import get_available_layers, save_object, exporter_cleanup
 from pig.keyboard import keys, keymods
+from pig.PigDirector import PigDirector
+from pig.gamedata import create_gamedata
 
 _DEBUG = False     
 
@@ -43,9 +43,6 @@ class PigScene( Opioid2D.Scene, pug.BaseObject):
         pug.BaseObject.__init__(self, gname)   
         if _DEBUG: print "PigScene.__init__ done", self.__class__.__name__ 
         
-    def on_enter(self):
-        pass
-                    
     def register_collision_callback( self, sprite, fn, 
                                      toGroup="colliders",
                                      fromGroup="colliders", 
@@ -298,6 +295,13 @@ key_down. In the future, maybe key_hold.
             Opioid2D.Director.quit()      
                 
     def enter(self):
+        if getattr(PigDirector, 'viewing_in_editor', False) and \
+                getattr(PigDirector, 'start_project', False):
+            # notify scene window
+            try:
+                entered_scene()
+            except:
+                pass
         self.on_enter()
         self.start()
         
@@ -306,26 +310,29 @@ key_down. In the future, maybe key_hold.
 
 Start the scene running. Called after enter() and before state changes
 """
-        if not getattr(Opioid2D.Director, 'project_started', False):
-            if getattr(Opioid2D.Director, 'start_scene', False):
-                for node in self.get_ordered_nodes():
-                    if node.archetype:
-                        node.delete()
-                start_project()
-                self.on_start()
-                self.all_nodes_callback( 'on_added_to_scene', self)
-                self.all_nodes_callback( 'on_first_display')        
+        if getattr(PigDirector, 'start_project', False):
+            for node in self.get_ordered_nodes():
+                if node.archetype:
+                    node.delete()
+            if not getattr(PigDirector, 'project_started', False):
+                PigDirector.project_started = True
+                gamedata = create_gamedata()
+                gamedata.start_sceneclass = self.__class__                   
+                self.on_project_start()
                 self.all_nodes_callback( 'on_project_start')
-            else:
-                # do nothing if we're not starting the game
-                self.all_nodes_callback( 'on_added_to_editor', self)
+            self.on_start()
+            self.all_nodes_callback( 'on_added_to_scene', self)
+            self.all_nodes_callback( 'on_first_display')        
+        elif getattr(PigDirector, 'viewing_in_editor', False):
+            # viewing in editor, not playing
+            self.all_nodes_callback( 'on_added_to_editor', self)
         self.all_nodes_callback( 'on_scene_start', self)             
         self.started = True
         
     def register_node(self, node):        
 #        """register(node): a new node is joining scene. Do callbacks"""
         if _DEBUG: print "PigScene.register_node:",node
-        if getattr(Opioid2D.Director, 'project_started', False):
+        if getattr(PigDirector, 'project_started', False):
             try:
                 func = getattr(node, 'on_added_to_scene')
             except:
@@ -338,7 +345,7 @@ Start the scene running. Called after enter() and before state changes
                 pass
             else:
                 func()
-        elif getattr(Opioid2D.Director, 'editorMode', False):
+        elif getattr(PigDirector, 'editorMode', False):
             try:
                 func = getattr(node, 'on_added_to_editor')
             except:
@@ -365,6 +372,13 @@ Start the scene running. Called after enter() and before state changes
     def on_start(self):
         """Callback hook for when scene starts playing"""
         pass
+
+    def on_enter(self):
+        pass
+    
+    def on_project_start(self):
+        """Callback hook for when project starts with this scene"""
+        pass
     
     def on_exit(self):
         """Callback hook for when scene is exitted"""
@@ -373,7 +387,7 @@ Start the scene running. Called after enter() and before state changes
     def stop(self):
         """Stop a level that is playing"""
         Opioid2D.Director.project_started = False  
-        Opioid2D.Director.start_scene = False                     
+        Opioid2D.Director.start_project = False                     
         self.started = False
         self.exit()
         

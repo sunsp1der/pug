@@ -105,8 +105,12 @@ Special kwargs:
         self.PugFrame = PugFrame
         
     def set_object(self, scene):
-        if self.object and self.object.nodes:
-            self.object.nodes.unregister(self.nodes_changed)
+        try:
+            if self.object and self.object.nodes:
+                self.object.nodes.unregister(self.nodes_changed)
+        except:
+            #object is probably destroyed already
+            pass
         self.object = scene
         self.object.nodes.register(self.nodes_changed)
         self.refresh_tree()
@@ -179,8 +183,13 @@ Special kwargs:
         self.refreshing = True
         
     def refresh_tree(self):
+        try:
+            nodes = self.object.nodes
+        except:
+            #object is probably destroyed
+            self.DeleteAllItems()
+            return
         self.Freeze()
-        nodes = self.object.nodes
         self.DeleteAllItems()
         self.root = self.AddRoot("Invisible Root") # this won't be shown        
 #        self.DeleteChildren(self.root)

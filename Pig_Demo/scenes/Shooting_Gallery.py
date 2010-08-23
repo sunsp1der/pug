@@ -29,6 +29,7 @@ class Shooting_Gallery(PigScene):
 
         # Sprites
         launcher_instance = Launcher()
+        launcher_instance.position = (731.0, 142.0)
 
         launcher_instance_2 = Launcher()
         launcher_instance_2.position = (43.0, 175.0)

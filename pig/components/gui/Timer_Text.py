@@ -24,7 +24,7 @@ class Timer_Text(Value_Tracker_Text):
             ['show_minutes',"Display number of minutes elapsed,"+\
                             "instead of a large number of seconds."]
             ]
-    _field_list += Value_Tracker_Text._font_fields    
+    _field_list += Textbox._font_fields    
 
     value_name = 'timer'
     start_time = 60

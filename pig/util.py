@@ -41,7 +41,13 @@ from_position and to_position in the form (x, y)
     return math.degrees(math.atan2(
                             to_position[0] - from_position[0],
                             from_position[1] - to_position[1]))
+
+def get_display_center():
+    """get_display_center() -> coordinates of center of display"""
+    return Opioid2D.Vector(*Opioid2D.Display.get_view_size()) * 0.5
     
+def get_display_size(): 
+    return Opioid2D.Display.get_view_size()   
 def rotate_point (point, origin, rotation):
     """rotate_point (point, origin, rotation)
     
@@ -65,13 +71,20 @@ rotation: degrees
     return rect.collidepoint( newpoint)      
     
 def start_scene():
-    """Start a scene running"""
-    Opioid2D.Director.start_scene = True
+    """start_scene(): Start a scene running"""
+    Opioid2D.Director.start_project = True
     Opioid2D.Director.scene.state = None
     # give the Director a second to pull it together
     while PigDirector.scene.state:
         sleep(0.05)
     PigDirector.scene.start()    
+
+def entered_scene():
+    """entered_scene(): Try to update editor scene window"""
+    import wx
+    frame = wx.FindWindowByName("SceneFrame")
+    if frame:
+        frame.set_object(PigDirector.scene, title="Scene")
     
 def save_project_settings( projectSettings):
     pug.code_export( projectSettings, "_project_settings.py", True, 
@@ -167,7 +180,7 @@ _project_settings file unless otherwise noted.
     
     set_opioid_window_position( position)
     Opioid2D.Display.init(resolution, units, title, fullscreen, icon)
-    Opioid2D.Director.start_scene = True
+    Opioid2D.Director.start_project = True
     # Import Psyco if available
     try:
         import psyco
@@ -176,11 +189,7 @@ _project_settings file unless otherwise noted.
         pass
     
     Opioid2D.Director.run(initial_scene)
-    
-def start_project():
-    Opioid2D.Director.project_started = True                        
-    
-    
+        
 def set_opioid_window_position( position):    
     if os.name == "nt":
         loc = (position[0]+5, position[1]+28)

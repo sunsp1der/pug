@@ -1,15 +1,22 @@
 now:	
+X	pausestate
+X	simple game over
+X		create game over sprite in center
+X	and recreate gamedata	
+X	make sure editor knows when scene is changed
+X		scene_nodes gets confused when scene changed in editor
+	bug: scene change causes spawned object count to break
+	put mousedown and mouseup in keys 
 	timer
 		justification for textbox
-	simple game over
-		pause
-		create game over sprite in center
 	combat sys?
 		see powerpack
 	put an example component in Pig_Demo
 		spawner examples
 			custom code example
 		component that adds components example
+			add_each then delete self
+			ability to do it in editor
 	release mouse button3? test on freeschoolcomp
 	create zip tarball exe?
 

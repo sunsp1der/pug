@@ -148,6 +148,7 @@ For kwargs arguments, see the Base attribute GUI
                     self.playbutton.Enable(True)
                     self.playbutton.SetValue(False)
                 if self.pausebutton:
+                    self.pausebutton.SetValue(False)
                     self.pausebutton.Enable(False)
         except:
             show_exception_dialog(self.control)
