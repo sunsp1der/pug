@@ -1,6 +1,6 @@
 "CallbackObject.py"
 
-from weakref import proxy
+from weakref import WeakKeyDictionary
 
 from pug import BaseObject
 

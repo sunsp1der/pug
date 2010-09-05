@@ -10,7 +10,8 @@ from pig.components.gui.Textbox import Textbox
 from pig.util import get_gamedata
 
 class Timer_Text(Value_Tracker_Text):
-    "Show and update gamedata.timer."
+    """Show and update gamedata.timer. When time is up, owner's on_time_up 
+method will be called."""
     #component_info
     _set = 'pig'
     _type = 'gui'
@@ -18,48 +19,58 @@ class Timer_Text(Value_Tracker_Text):
     # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
             ['prefix',Text,{'doc':'Display this before the time'}],
-            ['start_time',"Starting value of timer, in seconds"],
-            ['end_time',"Ending value of timer, in seconds.\n"+\
+            ['start_value',"Starting value of timer, in seconds"],
+            ['end_value',"Ending value of timer, in seconds.\n"+\
                         "-1 means no end time."],
-            ['show_minutes',"Display number of minutes elapsed,"+\
-                            "instead of a large number of seconds."]
+            ['gameover',"Call gamedata.gameover when time is up"],
+            ['show_minutes',"Display minutes:seconds on timer,\n"+\
+                            "instead of a large number of seconds."],
             ]
     _field_list += Textbox._font_fields    
 
     value_name = 'timer'
-    start_time = 60
-    end_time = 0
-    _show_minutes = True
-    _prefix = 'Time '
+    start_value = 60.0
+    end_value = 0
+    gameover = True
+    _show_minutes = False
+    _prefix = 'Time: '
         
     interval = 0.5
 
     @component_method
+    def on_project_start(self):   
+        "Set the starting value" 
+        gamedata = get_gamedata()
+        setattr( gamedata, self.value_name, float(self.start_value))
+
+    @component_method
     def on_added_to_scene(self, scene):
         """Set score to zero unless otherwise set"""
-        self.start_time = float(self.start_time)
-        Value_Tracker_Text.on_added_to_scene(self, scene, self.start_time)
-        if self.end_time < self.start_time:
+        Value_Tracker_Text.on_added_to_scene(self, scene)
+        if self.end_value < self.start_value:
             self.interval = - abs(self.interval)
         if self.interval:
-            self.timer_tick(0)
+            ( Delay(0) + CallFunc(self.timer_tick, 0)).do()       
             
     @component_method
-    def time_up(self):
-        pass
-        
+    def on_time_up(self):
+        if self.gameover:
+            gamedata = get_gamedata()
+            gamedata.gameover()
+            
     def timer_tick(self, amount=None):
         if amount == None:
             amount = self.interval 
         gamedata = get_gamedata()
-        value = getattr(gamedata, "timer")
-        setattr(gamedata, "timer", 
-                getattr(gamedata, "timer") + amount)
-        if self.end_time >=0:
-            if self.interval < 0 and value <= self.end_time or\
-                        self.interval > 0 and value >= self.end_time:
-                self.time_up()
+        value = gamedata.timer                
+        newval = value + amount
+        if self.end_value >=0:
+            if self.interval < 0 and newval <= self.end_value or\
+                        self.interval > 0 and newval >= self.end_value:
+                gamedata.timer = self.end_value
+                self.owner.do( Delay(0) + CallFunc(self.owner.on_time_up))
                 return
+        gamedata.timer = newval
         if self.interval:
             self.owner.do( Delay(abs(self.interval)) + \
                        CallFunc(self.timer_tick))

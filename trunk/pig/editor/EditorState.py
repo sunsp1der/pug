@@ -4,10 +4,12 @@ import weakref
 import wx
 
 import Opioid2D
+import cOpioid2D as _c
 
-from pig.util import in_rotated_rect
 from pig.PigState import PigState
 
+wx = wx
+Opioid2D = Opioid2D
 _DEBUG = False
 
 class EditorState(PigState):
@@ -16,7 +18,7 @@ class EditorState(PigState):
     def enter(self):
         if _DEBUG: print "EditorState.enter"
         self.interface = wx.GetApp().projectObject
-        from pig.editor import graphicsManager
+        from pig.editor.GraphicsManager import graphicsManager
         self.graphicsManager = graphicsManager
         PigState.enter(self)
         self.graphicsManager.boxDict.clear()
@@ -33,18 +35,23 @@ class EditorState(PigState):
             
     def handle_mousebuttondown(self, event):
         x, y = event.pos
-        node = self.scene.pick(x, y, wx.GetApp().selectedObjectDict)
+        node = self.scene.mouse_manager.pick_selection(x,y,
+                                        wx.GetApp().selectedObjectDict)
         if node is not None:
             self.selectOnUp = weakref.ref(node)
         else:
             wx.CallAfter(self.interface.set_selection,[])
         
     def handle_mousebuttonup(self, event):
-        if self.selectOnUp and self.selectOnUp() and \
-                in_rotated_rect( event.pos, self.selectOnUp().rect, 
-                                 self.selectOnUp().rotation):
-            wx.CallAfter(self.interface.set_selection,[self.selectOnUp()])
-            self.selectOnUp = None
+        try:
+            selected = self.selectOnUp()
+        except:
+            pass
+        else:
+            x,y = selected.get_root_layer().convert_pos(*event.pos)
+            if selected._cObj.Pick(_c.Vec2(x,y)):
+                wx.CallAfter(self.interface.set_selection,[self.selectOnUp()])
+        self.selectOnUp = None
         
     def handle_keydown(self, ev):
         # nudge keys

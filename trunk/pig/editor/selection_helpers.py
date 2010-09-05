@@ -5,7 +5,11 @@ import wx
 
 import Opioid2D
 
+from pig.PigDirector import PigDirector
 from pig.editor.util import get_image_path
+from pig import PigSprite
+
+wx = wx
 
 _line_sprite_file = get_image_path("dot.png")
 _empty_sprite_file = get_image_path("empty.png")
@@ -28,7 +32,7 @@ handles for scaling and rotating.
 
 node: any object containing a 'rect' attribute that is a pygame rect
 """
-        self.graphicsManager = Opioid2D.Director.scene.state.graphicsManager
+        self.graphicsManager = PigDirector.scene.state.graphicsManager
         base = SelectBoxBaseSprite() 
         area = SelectBoxAreaSprite()
         area.attach_to(base)
@@ -47,7 +51,7 @@ node: any object containing a 'rect' attribute that is a pygame rect
             self.start_pulse()
     
     def on_drag_begin(self):
-        layer = Opioid2D.Director.scene.get_layer("__editor__")
+        layer = PigDirector.scene.get_layer("__editor__")
         position = Opioid2D.Mouse.get_position()
         world_position = layer.convert_pos(position[0], position[1])
         node = self.get_node()
@@ -63,13 +67,12 @@ node: any object containing a 'rect' attribute that is a pygame rect
                 return node
         
     def on_drag(self, node):
-        layer = Opioid2D.Director.scene.get_layer("__editor__")
+        layer = PigDirector.scene.get_layer("__editor__")
         position = Opioid2D.Mouse.get_position()
-        self.area.position = (0,0)
         new_position = layer.convert_pos(position[0], position[1])\
                          + self.drag_offset
         node.position = new_position 
-        self.base.set_position(new_position)
+        self.surround_node( node)
         
     def start_pulse(self):
         pulse = Opioid2D.AlphaFade(0.6, 1.5, Opioid2D.PingPongMode)
@@ -83,56 +86,60 @@ node: any object containing a 'rect' attribute that is a pygame rect
             line.delete()
 
     def surround_node(self, node):
-        rect = node.rect
+        hotspot = (node.image._cObj.hotspot.x, node.image._cObj.hotspot.y)
+        rect = node._get_rect()
+        self.area.position[0] = rect.width * (0.5 - hotspot[0])
+        self.area.position[1] = rect.height * (0.5 - hotspot[1])
+        self.base.rotation = node.rotation
+        
+        position = (node.position.x, node.position.y)
+        #position = (rect.center[0]+0.5, rect.center[1]+0.5)
+        self.rect.center = position
+        self.base.position = position
         if self.rect == rect:
             return
         elif self.rect.size != rect.size:
             line = self.lines['left']
-            line.position = (rect.width * -0.5 - 1, 0.5)
+            line.position = self.area.position + (rect.width * -0.5 - 1, 0.5)
             line.scale = (1,rect.height+2)
             
             line = self.lines['right']
-            line.position = (rect.width * 0.5 + 1, 0.5)
+            line.position = self.area.position + (rect.width * 0.5 + 1, 0.5)
             line.scale = (1,rect.height+2)
             
             line = self.lines['top']
-            line.position = (0, rect.height * -0.5 - 1)
+            line.position = self.area.position + (0, rect.height * -0.5 - 1)
             line.scale = (rect.width + 3, 1)
             
             line = self.lines['bottom']
-            line.position = (0, rect.height * 0.5 + 1)
+            line.position = self.area.position + (0, rect.height * 0.5 + 1)
             line.scale = (rect.width + 1, 1)
             self.rect.size = rect.size
             self.area.scale = (rect.width, rect.height)
-        self.set_position((rect.center[0]+0.5,rect.center[1]+0.5))
-        self.base.rotation = node.rotation
-
-    def set_position(self, position):
-        self.rect.center = position
-        self.base.position = position
         
-class SelectBoxLineSprite( Opioid2D.gui.GUISprite):
-    image = _line_sprite_file
+class SelectBoxBaseSprite( PigSprite):
     layer = "__editor__"
+    auto_scene_register = False
 
-class SelectBoxBaseSprite( Opioid2D.Sprite):
-    layer = "__editor__"
+class SelectBoxLineSprite( SelectBoxBaseSprite):
+    image = _line_sprite_file
     
-class SelectBoxAreaSprite( Opioid2D.gui.GUISprite):
+class SelectBoxAreaSprite( SelectBoxLineSprite):
+    #image = _line_sprite_file; alpha = 0.5 # visible for testing
     image = _empty_sprite_file
-    layer = "__editor__"
     draggable = True
     dragging = False
     def on_create(self):
-        self.graphicsManager = Opioid2D.Director.scene.state.graphicsManager
+        self.graphicsManager = PigDirector.scene.state.graphicsManager
+        self.mouse_register("single")
         
     def on_drag_begin(self):
         self.box.on_drag_begin()
-        Opioid2D.Director.scene.state.selectOnUp = None
+        PigDirector.scene.state.selectOnUp = None
         self.dragging = True
 
     def on_drag_end(self):
         self.dragging = False
-        Opioid2D.Director.scene.state.selectOnUp = None
+        PigDirector.scene.state.selectOnUp = None
         self.graphicsManager.update_selection_boxes()
         wx.CallAfter(wx.GetApp().selection_refresh)

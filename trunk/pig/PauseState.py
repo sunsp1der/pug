@@ -31,5 +31,5 @@ unpause_keys: list of keys that cause unpause. [] means any key
         pass
     
     def handle_mousebuttonup(self, ev):
-        if self.unpause_keys == [] or ev.key in self.unpause_keys:
+        if self.unpause_keys == [] or "MOUSEUP" in self.unpause_keys:
             self.unpause()   

@@ -23,10 +23,11 @@ from pug.syswx.component_browser import ComponentBrowseFrame
 from pug.syswx.pugmdi import PugMDI
 from pug.syswx.drag_drop import FileDropTarget
 
-from pig import PigScene, PigSprite, Director, PauseState
+from pig import PigScene, PigSprite, PigDirector, PauseState
 from pig.util import *
 from pig.editor.StartScene import StartScene
-from pig.editor import hacks, EditorState, graphicsManager
+from pig.editor import hacks, EditorState
+from pig.editor.GraphicsManager import graphicsManager
 from pig.editor.util import *
 from pig.editor.PigApp import PigApp 
  
@@ -66,7 +67,7 @@ scene: the scene to load initially
             self.project_name = self.project_settings.title 
 
         self.Display = Opioid2D.Display
-        self.Director = Director   
+        self.Director = PigDirector   
         self.Director.editorMode = True
                 
         thread.start_new_thread(start_opioid, 
@@ -635,7 +636,7 @@ disk.
         if _DEBUG: print "stop_scene"
         if not self.Director.project_started:
             return
-        self.Director.paused = False
+        wait_for_state(None)
         self.scene.stop()
         wait_for_exit_scene()
         create_gamedata()

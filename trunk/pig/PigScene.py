@@ -15,17 +15,19 @@ from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.code_storage.constants import _INDENT
 from pug.code_storage import add_subclass_storageDict_key
 
-from pig.util import in_rotated_rect, entered_scene
+from pig.util import entered_scene
 from pig.editor.agui import SceneNodes, SceneLayers
 from pig.editor.util import get_available_layers, save_object, exporter_cleanup
 from pig.keyboard import keys, keymods
 from pig.PigDirector import PigDirector
 from pig.gamedata import create_gamedata
+from pig.PigMouseManager import PigMouseManager
 
 _DEBUG = False     
 
 class PigScene( Opioid2D.Scene, pug.BaseObject):
     """PigScene - Opioid2d Scene with features for use with pug"""
+    mouse_manager = None
     __node_num = 0
     started = False
     exitted = False
@@ -177,7 +179,7 @@ key_dict: the key_dict to use
         fn_list = dict.get(( mod, key), [])
         for fn_info in fn_list:
             fn_info[0](*fn_info[1],**fn_info[2])
-    
+
     def register_key_down(self, *args, **kwargs):
         """register_key_down(key, fn, *args, **kwargs)
     
@@ -283,6 +285,7 @@ key_down. In the future, maybe key_hold.
     def escape(self):
         if getattr(Opioid2D.Director, 'viewing_in_editor', False):
             import wx
+            wx = wx
             wx.CallAfter(wx.GetApp().projectObject.stop_scene)
         else:
             Opioid2D.Director.quit()
@@ -290,11 +293,13 @@ key_down. In the future, maybe key_hold.
     def handle_quit(self, ev):
         try:
             import wx
+            wx = wx
             wx.CallAfter(wx.GetApp()._evt_project_frame_close)
         except:
             Opioid2D.Director.quit()      
                 
     def enter(self):
+        self.mouse_manager = PigMouseManager()
         if getattr(PigDirector, 'viewing_in_editor', False) and \
                 getattr(PigDirector, 'start_project', False):
             # notify scene window
@@ -481,52 +486,7 @@ terms of nodes within the layers"""
             for num in nodenums:
                 nodelist.append(ordered_nodes[num])
         return nodelist
-
-    def pick_all(self, x, y):
-        """pick_all(x,y)
-
-Get all nodes whose rects overlap (x,y)
-"""
-        nodelist = self.get_ordered_nodes()
-        picklist = []
-        for node in nodelist:
-            if in_rotated_rect( (x,y), node.rect, node.rotation):
-                picklist.append(node)
-        return picklist
-
-    def pick(self, x, y, selectedObjectDict={}):
-        """pick(x, y, selectedObjectDict={})->return a node to select at x,y
-        
-x,y: coordinates
-selectedObjectDict: a list of selected objects. If possible, pick will return an 
-    object at x,y that is NOT in the list.
-"""
-        picklist = self.pick_all(x, y)
-        if not len(picklist):
-            return None
-        if len(picklist) == 1 or not selectedObjectDict:
-            return picklist[0]
-        start_node = None
-        selected_list = []
-        for selected_node in selectedObjectDict:
-            selected_list.append(selected_node)
-            if not start_node and selected_node in picklist:
-                start_node = selected_node
-        if start_node:
-            start_idx = picklist.index(start_node)
-            idx = start_idx + 1
-            while idx != start_idx:
-                if idx >= len(picklist):
-                    idx = 0
-                try_node = picklist[idx]
-                if try_node in selected_list:
-                    idx = idx + 1
-                    continue
-                else:
-                    return try_node
-        else:
-            return picklist[0]
-
+            
     def update_node(self, node, command=None):
         """update_node(node, command=None)
         
@@ -575,6 +535,7 @@ If scene is a working scene, return
 """
         if getattr(Opioid2D.Director, 'viewing_in_editor', False):
             import wx
+            wx = wx
             interface = wx.GetApp().get_project_object()
             filename = interface.commit_scene()
             if not filename or Opioid2D.Director.scene.__class__ == PigScene:
@@ -714,7 +675,8 @@ If scene is a working scene, return
             'dummy_creator': '_create_dummy',
             'skip_attributes': ['_nodes','_groups','scene_layers','layers',
                                 '_PigScene__node_num', '_key_down_dict', 
-                                '_key_up_dict','started','k_info']
+                                '_key_up_dict','started','k_info',
+                                'mouse_manager']
              }   
     add_subclass_storageDict_key(_codeStorageDict, pug.BaseObject)
 

@@ -18,6 +18,7 @@ class Value_Tracker_Text(Textbox):
             ['prefix',Text,{
                 'doc':'Display this before the value'}],
             ['value_name',Text,{'doc':'Name of gamedata attribute to track'}],
+            ['start_value',"Value when project starts"],
             ['decimal_places',"If value is a number, show this\n"+\
                                 "many decimal places"],
             ['default',Text,{'doc:':'Text to display in editor\n'+\
@@ -29,14 +30,20 @@ class Value_Tracker_Text(Textbox):
     _prefix = 'Score: '
     value_name = 'score'
     decimal_places = 0
+    start_value = 0
         
     @component_method
-    def on_added_to_scene(self, scene, start_value=0):
+    def on_project_start(self):   
+        "Set the starting value" 
+        gamedata = get_gamedata()
+        setattr( gamedata, self.value_name, self.start_value)
+        
+    @component_method
+    def on_added_to_scene(self, scene):
         """Set score to zero unless otherwise set"""
         gamedata = get_gamedata()
         gamedata.register_callback( self.value_name, self.on_value_change)
-        if getattr(gamedata, self.value_name, None) is None:
-            setattr( gamedata, self.value_name, start_value)
+        self.set_text()
             
     @component_method
     def on_destroy(self):

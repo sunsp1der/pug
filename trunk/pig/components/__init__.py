@@ -16,6 +16,7 @@ from pig.components.collision.Join_Collision_Group import Join_Collision_Group
 from pig.components.collision.Collision_Destroy import Collision_Destroy
 from pig.components.controls.Mouse_Follow import Mouse_Follow
 from pig.components.controls.Mouse_Face import Mouse_Face
+from pig.components.controls.Mouse_Click_Destroy import Mouse_Click_Destroy
 from pig.components.controls.Key_Spawn import Key_Spawn
 from pig.components.controls.Key_Direction_Controls \
                             import Key_Direction_Controls
