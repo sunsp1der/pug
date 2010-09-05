@@ -1,41 +1,29 @@
-now:	
-X	pausestate
-X	simple game over
-X		create game over sprite in center
-X	and recreate gamedata	
-X	make sure editor knows when scene is changed
-X		scene_nodes gets confused when scene changed in editor
-	bug: scene change causes spawned object count to break
-	put mousedown and mouseup in keys 
-	timer
-		justification for textbox
+now:
+
 	combat sys?
 		see powerpack
 	put an example component in Pig_Demo
 		spawner examples
 			custom code example
-		component that adds components example
-			add_each then delete self
-			ability to do it in editor
 	release mouse button3? test on freeschoolcomp
 	create zip tarball exe?
 
 bugs: 
-	started=True got into scene attributes somehow
-	keydirection controls no fire up and to the left - keyboard bug!
 	spawn location edges crashes editor intermittent
 	motion zone component shows no pugview intermittent
 	show menus when object is selected
 	scene tree doesn't show selected object 
 		when obj is first added?
 		when scene is not shown during selection?
-	changing scenes causes bad label in dropdown
-		after save
-	add object after save
 	leftover items in scene graph after deleting both layers
 	crash - selecting an object while changing selectionwin to another view 
 
 later: 
+	multiline textbox
+	component that adds components example
+		add_each then delete self
+		ability to do it in editor
+	make mouse dragging automatically use offset
 	memory leak!
 	run in single thread...
 		problem picking up arrow keys in opioid window
@@ -43,24 +31,21 @@ later:
 	Separate runtime necessities
 	Resources
 	process mouseclicks in canvas within interface, not in opioid thread
-	allow gnamed objects in objects dropdown (e.g. Spawner)
 	allow lists of categories for components... file in multiple places
-	select all text when enter pressed in text widget
 	figure out actual path to python executable
 	option to open component,sprite,scene file. default save is project component file
 	make mouse follow stop properly with 'stop_within'
 	set gname
 		demo of heads watching a ufo
-	undo
-	make sure field is selected when tabbing through controls... even after change
 	figure out some way to make derived classes work better
 		probably option to select base class
 	clone sprites
+		allow gnamed objects in objects dropdown (e.g. Spawner)
 		component copy
 		scene_archetype - in list with object types
 			OR is it a savesprite callback and a component that lets you save
 				it in a scene folder
-	automatically recur into component folders
+	project_pack folder
 
 		appendix components		
 			test components

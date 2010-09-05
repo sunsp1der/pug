@@ -1,6 +1,7 @@
 from inspect import getmro
 
 from Opioid2D import Sprite, CallFunc, Delay
+from Opioid2D.public.gui import GUISprite
 from Opioid2D.public.Sprite import SpriteMeta
 
 import pug
@@ -13,31 +14,84 @@ from pig.PigDirector import PigDirector
 from pig.editor.util import get_available_layers, save_object, \
                                 exporter_cleanup, _fl_art_types
 
-
 _DEBUG = False
 
-class PigSprite(Sprite, pug.BaseObject):
+class PigSprite(GUISprite, pug.BaseObject):
     """PigSprite( img=None, gname='')
     
 Opioid2d Sprite with features for use with pug"""
     __metaclass__ = SpriteMeta
+    _mouse_registered = False # can be "single", "multi", or "click"
     _image_file = None   
     _image = None
     _archetype = False
     destroy_blockers = None
     _pug_pugview_class = 'PigSprite'
     image = ''
+    draggable = False
+    auto_scene_register = True
+    
     def __del__(self):
         pug.BaseObject.__del__(self)
     
-    def __init__(self, img=None, gname='', register=True):
+    def __init__(self, img=None, gname='', register=None):
         pug.BaseObject.__init__(self, gname=gname)
         Sprite._preinit(self, img)
         self.collision_groups = set([])
         self.on_create()
+        if register is None:
+            register = self.auto_scene_register
         if register:
-            self.do_register()
+            self.scene_register()
             
+    def on_create(self):
+        pass
+            
+    def mouse_register(self, type="multi"):
+        """mouse_register(type): register for mouse events
+        
+type: 
+    "single" means get all mouse events, and, if this sprite the top gui sprite, 
+        don't let any other sprites get mouse events
+    "multi" means get all mouse events except 'on_hover', and let other sprites
+        get mouse events
+    "click" means only get drag, release, mousedown and mouseup events, and let 
+        other sprites get mouse events
+"""
+        if self._mouse_registered != type:
+            PigDirector.scene.mouse_manager.register(self, type)
+            self._mouse_registered = type
+
+    def mouse_unregister(self):
+        """mouse_unregister(): unregister for mouse events"""
+        if self._mouse_registered is not False:
+            self._mouse_registered = False
+            PigDirector.scene.mouse_manager.unregister(self)
+
+    def on_collision(self, toSprite=None, fromSprite=None, toGroup=None, 
+                     fromGroup=None, *a, **kw):
+        """on_collision( toSprite, fromSprite, fromGroup, spriteGroup)
+        
+All arguments default to None.
+toSprite: sprite that collided. Usually same as 'self' but included to match 
+    Pig's callback system.
+fromSprite: sprite we collided with
+toGroup: group of this sprite that triggered this callback. This is useful
+    when a sprite belongs to multiple groups
+fromGroup: group of the sprite we collided with
+Additional arguments are allowed, but will be ignored.
+
+Callback for when object collides in gameplay.
+This method is meant to work with the PigScene.register_collision_callback 
+system. It does nothing in the base class, but is meant for overriding or for
+stacking with pug.components.
+"""
+        pass
+
+    def on_destroy(self):
+        """on_destroy(): callback for when object is destroyed in gameplay"""
+        pass
+    
     def join_collision_group(self, group):
         "join_collision_group(group): join_group, add to self.collision_groups"
         self.collision_groups.add(group)
@@ -125,25 +179,6 @@ if TF is "True" set archetype to True, but don't create default name
                       pug.BaseObject._del_gname,
                       "An easily accessed global name for this object")
 
-    def on_collision(self, toSprite=None, fromSprite=None, toGroup=None, 
-                     fromGroup=None, *a, **kw):
-        """on_collision( toSprite, fromSprite, fromGroup, spriteGroup)
-        
-All arguments default to None.
-toSprite: sprite that collided. Usually same as 'self' but included to match 
-    Pig's callback system.
-fromSprite: sprite we collided with
-toGroup: group of this sprite that triggered this callback. This is useful
-    when a sprite belongs to multiple groups
-fromGroup: group of the sprite we collided with
-Additional arguments are allowed, but will be ignored.
-
-This method is meant to work with the PigScene.register_collision_callback 
-system. It does nothing in the base class, but is meant for overriding or for
-stacking with pug.components.
-"""
-        pass
-
     def destroy(self):
         """destroy(): set sprite up for deletion, but allow option to block
         
@@ -156,15 +191,14 @@ called. When all blocks have been removed, 'delete' will be called.
 
 In general, it is a good idea to use PigSprite.destroy rather than 
 PigSprite.delete whenever the PigSprite is being removed by gameplay effects."""
-        self.on_destroy()
-        
-    def on_destroy(self):
-        """on_destroy(): callback for when object is destroyed in gameplay"""
         if _DEBUG:
-            print 'PigSprite.on_destroy',self, self.destroy_blockers.data
+            print 'PigSprite.destroy',self, self.destroy_blockers.data
+        self.on_destroy()
+        if self._mouse_registered :
+            self.mouse_unregister()
         if not self.destroy_blockers:
             self.delete()
-
+        
     def block_destroy(self, blocker, block=True, blockData=None):
         """block_destroy( blocker, block=True, blockData=None)
         
@@ -196,6 +230,8 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
             self.delete()        
 
     def delete(self):
+        if self._mouse_registered :
+            self.mouse_unregister()
         PigDirector.scene.update_node(self, "Delete") # register self with scene                
         Sprite.delete(self)
         
@@ -215,8 +251,8 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
     
     tint = property(get_tint, set_tint, doc="The color tint of the sprite")
     
-    def do_register(self):
-        "do_register(): register with the PigScene"
+    def scene_register(self):
+        "scene_register(): register with the PigScene"
         PigDirector.scene.register_node(self)        
 
     # layer_name property
@@ -329,7 +365,9 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
     _codeStorageDict = {
             'skip_attributes': ['_actions', '_image_file', 'image_file','color',
                                 'layer_name','_init_image','_init_layer',
-                                'register', 'destroy_blockers', '_archetype'], 
+                                'register', 'destroy_blockers', '_archetype',
+                                'draggable', 'auto_scene_register', 
+                                '_mouse_registered'], 
             'instance_attributes': ['*'],
             'instance_only_attributes':['gname'],
             'init_method':'on_create',

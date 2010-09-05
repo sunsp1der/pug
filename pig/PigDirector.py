@@ -30,6 +30,7 @@ query: if True, have the app confirm project closure.
     global QUITTING
     try:
         import wx
+        wx = wx
         if not wx.GetApp() or \
                 not getattr(wx.GetApp().projectObject,'_initialized', False): 
             real_quit()
@@ -46,7 +47,8 @@ query: if True, have the app confirm project closure.
 def real_quit():
     global QUITTING
     try:
-        import wx       
+        import wx     
+        wx = wx  
         wx.GetApp().get_project_object().kill_subprocesses()
         wx.GetApp()._evt_project_frame_close(query=False)
     except:
@@ -130,8 +132,8 @@ def newrun(initialScene, *args, **kw):
                 
             # Event handling
             ev = pygame.event.get()
-            if scene._gui is not None:
-                scene._gui.tick(ev)
+            if scene.mouse_manager is not None:
+                scene.mouse_manager.tick(ev)
             scene._handle_events(ev)
 
             # Manage state change within the scene
@@ -193,8 +195,8 @@ def opioid_tick():
     
     # Event handling
     ev = pygame.event.get()
-    if scene._gui is not None:
-        scene._gui.tick(ev)
+    if scene.mouse_manager is not None:
+        scene.mouse_manager.tick(ev)
     scene._handle_events(ev)
     
     # Call Scene tick callbacks

@@ -166,7 +166,7 @@ class Spawner(Component):
                 obj.acceleration.direction += rotation
             if self.add_velocity:
                 obj.velocity += velocity
-            obj.do_register() # wait to activate object until start data set
+            obj.scene_register() # wait to activate object until start data set
             if self.owner_callback and hasattr(owner, self.owner_callback):
                 getattr(owner,'callback')(obj, self)
             if self.obj_callback and hasattr(obj, self.obj_callback):

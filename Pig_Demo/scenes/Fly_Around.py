@@ -16,7 +16,8 @@ class Fly_Around(PigScene):
         self.components.add( Utility_Keys(
                 info_F1='scenes\\Fly_Around_Help.txt') )
         self.components.add( On_Start_Sound(
-                sound='sound\\snap.wav') )
+                sound='sound\\snap.wav',
+                loops=0) )
 
     layers = ['Background', 'walls']
     def on_enter(self):
@@ -45,6 +46,7 @@ class Fly_Around(PigScene):
         pigsprite_instance.components.add( Key_Spawn(
                 key=1001,
                 spawn_object='Bullet',
+                sound='sound\\snap.wav',
                 spawn_offset=(0, -1),
                 max_spawns_in_scene=1) )
         pigsprite_instance.components.add( Collision_Destroy(

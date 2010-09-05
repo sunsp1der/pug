@@ -21,6 +21,7 @@ class Textbox(Component):
                               'wildcards':"truetype font (*.ttf)|*.ttf"}],
             ['font_size','The point size of the font'],
             ['max_width','The maximum text width in pixels'],
+            ['hotspot','Relative coordinates of image hotspot. (0-1,0-1)']
             ]
     # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
@@ -28,12 +29,13 @@ class Textbox(Component):
             ]
     _field_list += _font_fields
     #defaults
+    _hotspot = (0,0)
     _text = 'text'
     _font_file = None
-    font = None
     _max_width = None
     _font_size = 32
     
+    font = None
     action = None
         
     @component_method
@@ -42,14 +44,15 @@ class Textbox(Component):
         if text is None:
             text=self.text
         self._text = text
-        self.image = textbox( self.font, text, self.max_width) 
-        if self.owner:
-            self.action = (Opioid2D.Delay(0)+ Opioid2D.CallFunc(
+        self.action = (Opioid2D.Delay(0)+ Opioid2D.CallFunc(
                                                 self.do_set_text)).do()
                 
     def do_set_text(self, image=None):
         if image==None:
-            image = self.image
+            image = Opioid2D.ResourceManager._create_image(
+                        Opioid2D.Bitmap(
+                            textbox( self.font, self._text, self.max_width)),
+                            self.hotspot)
         if self.owner: 
             try:
                 self.owner.set_image( image)     
@@ -81,6 +84,13 @@ class Textbox(Component):
         return self._max_width
     max_width = property(get_max_width, set_max_width)
        
+    def set_hotspot(self, hotspot):
+        self._hotspot = hotspot
+        self.set_text()
+    def get_hotspot(self):
+        return self._hotspot
+    hotspot = property(get_hotspot, set_hotspot)
+
     @component_method
     def get_text(self):
         "Get the displayed text"
@@ -103,7 +113,7 @@ class Textbox(Component):
             self._font_file = self.__class__._font_file
         self.set_text()
     def get_font_file(self):
-        return self._font_file
+        return self._font_files
     font_file = property(get_font_file, set_font_file)
     
     @component_method

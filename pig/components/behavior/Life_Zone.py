@@ -1,8 +1,11 @@
 import math
+
 from Opioid2D.public.Node import Node
 import Opioid2D
 
 from pug.component import *
+
+from pig.PigDirector import PigDirector
 
 class Life_Zone(Component):
     """Object is deleted if it leaves the given zone."""
@@ -71,7 +74,7 @@ class Life_Zone(Component):
         args = (self.x, self.y, self.width, self.height, 
                        self.xx, self.yy, self.radius, self.direction, self.arc)
         group = self.zone_groups.get(args)
-        if not group:
+        if not group or group not in PigDirector.scene._groups:
             if self.group_name:
                 group = str(self.group_name)
             else:
