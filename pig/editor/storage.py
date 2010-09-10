@@ -35,7 +35,6 @@ parentWindow: the parent window of name dialog. If not provided, the
     if not name:
         if obj.archetype:
             name = obj.gname
-            basename = name
         else:
             if obj.gname:
                 name = obj.gname+"Class"
@@ -43,7 +42,6 @@ parentWindow: the parent window of name dialog. If not provided, the
                 name = "MyClass"
         if not name:
             name = obj.__class__.__name__
-            basename = name
         if parentWindow == None:
             parentWindow = wx.GetActiveWindow()
         objName = ''
@@ -55,6 +53,7 @@ parentWindow: the parent window of name dialog. If not provided, the
                 name = ''.join(['My',name])
                 break
         default = make_valid_attr_name(name)
+        basename = name
         dlg = wx.TextEntryDialog( parentWindow, 
                                   "Enter the object's class/file name", 
                                   "Save Object", default)

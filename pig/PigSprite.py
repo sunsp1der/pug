@@ -160,7 +160,7 @@ if TF is "True" set archetype to True, but don't create default name
         # the following line had problems on windows:
         #     Sprite.set_image(self,image)
         # HACK: putting a Delay before the set_image fixes the problem...
-#        if getattr(PigDirector, 'project_started', False):
+#        if getattr(PigDirector, 'game_started', False):
 #        else:
 #            (Delay(0) + CallFunc(Sprite.set_image, self, image)).do()
         # HACK: but it slows down animations ALOT. wtf with this?!

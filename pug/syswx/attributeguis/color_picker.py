@@ -1,6 +1,7 @@
 """Color picker attribute gui"""
 
 import wx
+wx=wx
 from pug.syswx.wxconstants import *
 from pug.syswx.attributeguis.base import Base
 
@@ -23,7 +24,7 @@ For more aguidata optional arguments, see the Base attribute GUI
         control.SetSizer(sizer)
         
         style = 0
-        if aguidata.get('text_control', False):
+        if aguidata.get('text_control', True):
             style = style | wx.CLRP_USE_TEXTCTRL
         if aguidata.get('show_label', False):
             style = style | wx.CLRP_SHOW_LABEL

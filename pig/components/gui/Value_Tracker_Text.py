@@ -33,7 +33,7 @@ class Value_Tracker_Text(Textbox):
     start_value = 0
         
     @component_method
-    def on_project_start(self):   
+    def on_game_start(self):   
         "Set the starting value" 
         gamedata = get_gamedata()
         setattr( gamedata, self.value_name, self.start_value)
@@ -42,6 +42,10 @@ class Value_Tracker_Text(Textbox):
     def on_added_to_scene(self, scene):
         """Set score to zero unless otherwise set"""
         gamedata = get_gamedata()
+        try:
+            getattr(gamedata, self.value_name)
+        except:
+            setattr( gamedata, self.value_name, self.start_value)            
         gamedata.register_callback( self.value_name, self.on_value_change)
         self.set_text()
             

@@ -26,6 +26,8 @@ aguidata: dictionary of special agui information. Can be customized for specific
         'background_color': for label_widget and control_widget call 
             'SetBackgroundColor' with this value
         'growable': if true, this allows the control to grow vertically
+        'agui_info_dict': a dict that will be filled with:
+                            'agui':the actual agui created
 control_widget: the widget used for input, usually defined by derived classes. 
 label_widget: widget used for label. For compatibility, this control should have
     a textCtrl member that contains the main piece of text.
@@ -143,7 +145,11 @@ all controls.
                             
         # context help
         self.setup_context_help(self.label, window)
-        self.setup_context_help(self.control, window)        
+        self.setup_context_help(self.control, window)
+        
+        #info
+        if aguidata.has_key('agui_info_dict'):
+            aguidata['agui_info_dict']['agui'] = self        
             
     def set_control_value(self, value):
         """set the value of the attribute - defined by derivative classes"""

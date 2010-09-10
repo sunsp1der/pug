@@ -1,6 +1,7 @@
 """A version of wx.TextCtrl that operates the pug way"""
 
 import wx
+wx=wx
 
 from pug.constants import FORMAT_FLOATS
 from pug.syswx.wxconstants import *

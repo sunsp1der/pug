@@ -5,6 +5,7 @@ import sys
 import traceback
 
 from pygame.locals import KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP
+from pygame.key import get_pressed
 
 import Opioid2D
 from Opioid2D.internal.objectmgr import ObjectManager
@@ -34,6 +35,7 @@ class PigScene( Opioid2D.Scene, pug.BaseObject):
     _pug_pugview_class = 'PigScene'
     layers = ['Background']
     k_info = []
+    keys_pressed = None # efficiency for key register double-check
     def __init__(self, gname=''):
         if _DEBUG: print "do PigScene.__init__",self
         self._key_down_dict = {}
@@ -183,12 +185,23 @@ key_dict: the key_dict to use
     def register_key_down(self, *args, **kwargs):
         """register_key_down(key, fn, *args, **kwargs)
     
-Register a function to execute when a given key is pressed.
+Register a function to execute when a given key is pressed. If the key is being
+pressed when this is registered, the function will be executed immediately
+unless the kwarg _do_immediate is set to False.
 key: can be either a KEY_ constant from pig.keyboard or a tuple in the form 
     (KEYMOD_ constant, KEY_ constant)
 fn: the function to call when the keypress occurs
 *args, **kwargs: arguments to fn    
 """
+        # if key is already down, perform function
+        if kwargs.pop('_do_immediate', True):
+            try:
+                pressed = get_pressed()[args[0]]
+            except:
+                pass
+            else:
+                if pressed:
+                    args[1](*args[2:],**kwargs)
         return self._register_key( self._key_down_dict, *args, **kwargs)
         
     def register_key_up(self, *args, **kwargs):
@@ -319,12 +332,12 @@ Start the scene running. Called after enter() and before state changes
             for node in self.get_ordered_nodes():
                 if node.archetype:
                     node.delete()
-            if not getattr(PigDirector, 'project_started', False):
-                PigDirector.project_started = True
+            if not getattr(PigDirector, 'game_started', False):
+                PigDirector.game_started = True
                 gamedata = create_gamedata()
                 gamedata.start_sceneclass = self.__class__                   
-                self.on_project_start()
-                self.all_nodes_callback( 'on_project_start')
+                self.on_game_start()
+                self.all_nodes_callback( 'on_game_start')
             self.on_start()
             self.all_nodes_callback( 'on_added_to_scene', self)
             self.all_nodes_callback( 'on_first_display')        
@@ -337,7 +350,7 @@ Start the scene running. Called after enter() and before state changes
     def register_node(self, node):        
 #        """register(node): a new node is joining scene. Do callbacks"""
         if _DEBUG: print "PigScene.register_node:",node
-        if getattr(PigDirector, 'project_started', False):
+        if getattr(PigDirector, 'game_started', False):
             try:
                 func = getattr(node, 'on_added_to_scene')
             except:
@@ -381,7 +394,7 @@ Start the scene running. Called after enter() and before state changes
     def on_enter(self):
         pass
     
-    def on_project_start(self):
+    def on_game_start(self):
         """Callback hook for when project starts with this scene"""
         pass
     
@@ -391,7 +404,7 @@ Start the scene running. Called after enter() and before state changes
     
     def stop(self):
         """Stop a level that is playing"""
-        Opioid2D.Director.project_started = False  
+        Opioid2D.Director.game_started = False  
         Opioid2D.Director.start_project = False                     
         self.started = False
         self.exit()

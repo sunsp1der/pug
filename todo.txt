@@ -1,7 +1,5 @@
 now:
-
-	combat sys?
-		see powerpack
+	check save not in basename but whether class is from that file
 	put an example component in Pig_Demo
 		spawner examples
 			custom code example
@@ -19,6 +17,7 @@ bugs:
 	crash - selecting an object while changing selectionwin to another view 
 
 later: 
+	hotspots
 	multiline textbox
 	component that adds components example
 		add_each then delete self
@@ -30,6 +29,7 @@ later:
 	Undo! - save query when changing levels or quitting
 	Separate runtime necessities
 	Resources
+	pug should have way to specify correct values
 	process mouseclicks in canvas within interface, not in opioid thread
 	allow lists of categories for components... file in multiple places
 	figure out actual path to python executable
@@ -46,69 +46,7 @@ later:
 			OR is it a savesprite callback and a component that lets you save
 				it in a scene folder
 	project_pack folder
-
-		appendix components		
-			test components
-				Face_Motion
-					Shooting_Gallery via Explode_Particle		
-				Face_Object
-				Forward_Motion
-				Life_Zone
-					Shooting_Gallery via Bullet			
-				Motion_Zone
-					Fly_Around
-				Random_Motion
-					Shooting_Gallery via Explode_Particle		
-					Shooting_Gallery via Target					
-				Self_Destruct
-					Shooting_Gallery via Explode_Particle		
-				Set_Motion
-					Shooting_Gallery via Explode_Particle		
-					Shooting_Gallery via Bullet
-				Stop_Motion_On_Destroy
-					Shooting_Gallery via Bullet
-				Collision_Callback
-				Collision_Destroy
-					Shooting_Gallery via Bullet
-					Shooting_Gallery via Target					
-				Join_Group
-				Key_Direction_Controls
-					Fly_Around
-				Key_Drive_Controls
-					Shooting_Gallery
-				Key_Spawn
-					Shooting_Gallery
-				Mouse_Face
-					Fly_Around
-				Mouse_Follow
-				Fade
-					Shooting_Gallery via Target					
-					Shooting_Gallery via Bullet
-				Grow_Shrink
-					Shooting_Gallery via Target					
-					Shooting_Gallery via Explode_Particle		
-					Shooting_Gallery via Bullet
-				On_Start_Sound
-					Fly_Around
-				Utility_Keys
-					Fly_Around
-					Shooting_Gallery
-				On_Key_Sound_Scene
-				Set_Gname
-				On_Collision_Sound
-					Shooting_Gallery via Bullet
-				On_Destroy_Sound
-					Fly_Around
-				On_Key_Sound
-				Spawn_On_Destroy
-					Shooting_Gallery via Target
-					Fly_Around				
-				Spawner
-					Shooting_Gallery via Launcher
 	
-	context button on window frame?
-	default RAW to show __ when there is a different default
-	make checkbox highlight visible
 	#TODO: integer agui (with spinners?)
 		derive from generic
 		range
@@ -128,56 +66,29 @@ later:
 		has_duplicate_of(comp, check_label=True)
 		use gname?
 		find_by_label
-	view a rect from a sprite?
-	sort ignoring capitals? (attributes in puglist)
 	open console window
 	font size for scene class
 	make opioid not respond during modal stuff
-	set_attribute callback for template
-		archetype
-			update scenegraph
-			inquire about name
-		option to cancel
-		intercept at base level?
 	make objects imports absolute
 	warn about duplicate gnames
 	multiple selection
-	easy import for scenes and objects would be nice, too
 	custom menu creation
 		in templates:
 		'menus': {'__order__':[],name1:[]...,name2:[]...}
-	create groups gui for scene	
-	create get_groups function for pugsprite... checks against scene groups
-	kb control in dropdowns
-		enter in dropdowns to apply
-		needs to post event
-	tooltips for component tree
 	validators for pug data
 	function to open browser for tutorial
 	sort component browser
+		by type
+		by package
 	make very simple editor interface... 
 		ctrl-c, ctrl-v, ctrl-x, delete (on scenegraph too... maybe pass off)
 		grid and snap-to
-	add soupascript functionality to pug.base_object
-		^^ indicates gnamed object
-		** indicates python code to eval
-		way to indicate filter?
 	make subobjects work for code storage... move components to end
 	code_storage list ala templates... no functionality in object
-	create example out of opioid bricks
-		write basic tutorial - Using pug as a level builder
 	app = showPugFrame/getPugFrame should return lists
 	log all exceptions that are glossed over by automation
-	file agui
-		allow text entry in 
-		show absolute path in tooltip
 	refactor scene and object dict into utils, only store strings in dropdowns
-	code_storage_exporter.is_exportable
-		check lists recursively
-		check dicts for keys and items
-		keep list of checked stuff... recursive = NO!
 	auto-refresh -- leave the attribute being editted alone
-	project windows... show all frames available
 	particles
 	list agui
 		create accessor object
@@ -205,39 +116,3 @@ useability:
 	list,dictionary,and tuple attribute guis can also work like components
 	make code_export functions and dicts separate from obj's?
 		reason would be to take out of release version
-	
-big needs later... help from outside?:
-	undo/redo system
-	
-Opioid Questions:
-	how to get exception messages
-	closing a vector pug causes crash
-	order of nodes in a given layer is semi-random
-	wait (hourglass) mode for Opioid window - arrow looks funny after change
-	 
-Python Questions:
-	Other ways to load/scan all modules in a folder
-	How to properly wait for another thread to complete something
-	How to register a callback without storing a reference
-	How to keep a view of objects without keeping them alive... ref system?
-
-	talk about ways to separate runtime game code
-		study egg system
-	nice way to register/add components to a project
-		wait for 3k
-	how to doc component attributes
-		use properties, look at class
-	singletons
-		don't need to be marked global
-		could be created at search time
-			
-Wx Questions:
-	don't auto-scroll on scrolledPanel
-		intercept focus event?	
-	how to turn OFF a damn tooltip
-	component add and browse buttons sizeability
-	weird overlap of subobject labels
-	how do I get default values of font_sizes and colors and shit
-	
-import wxversion
-wxversion.select(wxversion.getInstalled()[0])

@@ -1,44 +1,30 @@
 ### import autocode ###
-from objects.Bullet import Bullet
-from objects.ExplodeParticle import ExplodeParticle
-from objects.Launcher import Launcher
+from objects.FlyAroundPlayerClass import FlyAroundPlayerClass
 from objects.Target import Target
-from objects.cannon import cannon
 from pig.PigScene import PigScene
-from pig.PigSprite import PigSprite
-from pug.all_components import Utility_Keys, Value_Tracker_Text
+from pig.components.controls.Mouse_Face import Mouse_Face
+from pug.all_components import On_Damaged_Sound, On_Damage_Sound
 ### End import autocode ###
 
-### Shooting_Gallery autocode ###
-class Shooting_Gallery(PigScene):
-    def __init__(self, *args, **kwargs):
-        PigScene.__init__(self, *args, **kwargs)
-        self.components.add( Utility_Keys(
-                info_F1='scenes\\Shooting_Gallery_Help.txt') )
-
+### MyScene autocode ###
+class MyScene(PigScene):
     def on_enter(self):
         # Archetypes
-        Bullet_archetype = Bullet(gname='Bullet')
-        Bullet_archetype.archetype = True
-
-        ExplodeParticle_archetype = ExplodeParticle(gname='ExplodeParticle')
-        ExplodeParticle_archetype.archetype = True
-
         Target_archetype = Target(gname='Target')
         Target_archetype.archetype = True
 
         # Sprites
-        launcher_instance = Launcher()
-        launcher_instance.position = (731.0, 142.0)
+        flyaroundplayerclass_instance = FlyAroundPlayerClass()
+        flyaroundplayerclass_instance.position = (255.0, 119.0)
+        flyaroundplayerclass_instance.components.add( On_Damaged_Sound(
+                sound='sound\\snap.wav') )
+        flyaroundplayerclass_instance.components.remove_duplicate_of( Mouse_Face() )
 
-        launcher_instance_2 = Launcher()
-        launcher_instance_2.position = (43.0, 175.0)
-        launcher_instance_2.rotation = 90.0
+        target_instance = Target()
+        target_instance.position = (229.0, 321.0)
+        target_instance.components.remove_duplicate_of( On_Damage_Sound(
+                sound='sound\\snap.wav') )
 
-        cannon_instance = cannon()
-
-        pigsprite_instance = PigSprite()
-        pigsprite_instance.layer = 'Background'
-        pigsprite_instance.position = (627.0, 495.0)
-        pigsprite_instance.components.add( Value_Tracker_Text() )
-### End Shooting_Gallery autocode ###
+        target_instance_2 = Target()
+        target_instance_2.position = (231.0, 410.0)
+### End MyScene autocode ###

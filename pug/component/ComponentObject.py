@@ -163,10 +163,12 @@ name. Otherwise search by class."""
             if component_methods is None:
                 original_method = original_methods[name]
                 if original_method is not None:
-                    setattr(obj, name, original_method)
+                    # fancy rebind to original method... I don't totally get it
+                    setattr(obj, name, original_method.__get__(obj, 
+                                                               obj.__class__))
                 else:
                     delattr(obj, name)
-                del original_methods[name]
+                original_methods.pop(name)
         return True
                 
     def remove_duplicate_of(self, component):
