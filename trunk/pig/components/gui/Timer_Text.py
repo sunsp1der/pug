@@ -36,16 +36,19 @@ method will be called."""
     _prefix = 'Time: '
         
     interval = 0.5
-
-    @component_method
-    def on_project_start(self):   
-        "Set the starting value" 
+    
+    def on_game_start(self):
         gamedata = get_gamedata()
         setattr( gamedata, self.value_name, float(self.start_value))
 
     @component_method
     def on_added_to_scene(self, scene):
-        """Set score to zero unless otherwise set"""
+        """Set starting value"""
+        gamedata = get_gamedata()
+        try:
+            getattr(gamedata, self.value_name)
+        except:
+            setattr( gamedata, self.value_name, float(self.start_value))
         Value_Tracker_Text.on_added_to_scene(self, scene)
         if self.end_value < self.start_value:
             self.interval = - abs(self.interval)
@@ -54,6 +57,7 @@ method will be called."""
             
     @component_method
     def on_time_up(self):
+        """Callback for when timer reaches end_value"""
         if self.gameover:
             gamedata = get_gamedata()
             gamedata.gameover()

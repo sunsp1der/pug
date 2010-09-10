@@ -25,7 +25,8 @@ class Utility_Keys( Component):
     @component_method
     def on_start(self):
         self.k_info = self.owner.register_key_down( (keymods["CTRL"],keys["R"]),
-                                                    self.do_restart)
+                                                    self.do_restart,
+                                                    _do_immediate=False)
         self.k_info = self.owner.register_key_down( keys["F1"],
                                                     self.do_info)
         
@@ -35,7 +36,7 @@ class Utility_Keys( Component):
         
     @component_method
     def do_restart(self):
-        Director.project_started = False
+        Director.game_started = False
         (Delay(0)+CallFunc(Director.set_scene, Director.scene.__class__)).do()
         
         

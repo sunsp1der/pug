@@ -29,10 +29,10 @@ class X2Component(Component):
     def explode3(self, i=3, *a, **kw):#, size, i=3, **kw_args):
         print
         print a, kw        
-        print x
+        print x #@UndefinedVariable
         x = 15
         print "stuff", x
-        print "%s explosion2 %s" % (size, i)
+        print "%s explosion2 %s" % (size, i) #@UndefinedVariable
 
     @component_method
     def explode(self, size, i, *args):
@@ -41,16 +41,16 @@ class X2Component(Component):
     @component_method
     def explode2(self, r, *a):#, size, i=3, **kw_args):
         print
-        print x
+        print x #@UndefinedVariable
         x = 15
         print "stuff", x
-        print "%s explosion2 %s" % (size, i)
+        print "%s explosion2 %s" % (size, i) #@UndefinedVariable
         
 register_component(X2Component)
         
 if __name__ == "__main__":
-    obj = ComponentObject()
-    obj2 = ComponentObject()
+    obj = ComponentObject() #@UndefinedVariable
+    obj2 = ComponentObject() #@UndefinedVariable
 
     xcomp = XComponent()
     obj.components.add(xcomp)

@@ -1,5 +1,6 @@
 import wx
 import wx.combo
+wx=wx
 
 """This class is a popup containing a ListCtrl."""
 
@@ -49,7 +50,8 @@ doesn't have as many features/accessors as the combo.ComboCtrl"""
         return None
     
     def OnSelect(self, event, selected):
-        #if selected != -1:
+        if selected == -1:
+            self.SelectItem(self.originalSelection)
         self.selected = selected
         self.didSelect = True
         self.Dismiss()
@@ -93,6 +95,8 @@ callback(self)
 
     def OnMouseSelect(self, event):
         selected = self.list.HitTest(event.GetPosition())
+        if selected == -1:
+            selected = self.originalSelection
         self.OnSelect(event, selected)    
         
     def SetSelectCallback(self, callback):

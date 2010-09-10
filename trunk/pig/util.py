@@ -82,7 +82,7 @@ def start_scene():
 def entered_scene():
     """entered_scene(): Try to update editor scene window"""
     import wx
-    frame = wx.FindWindowByName("SceneFrame")
+    frame = wx.FindWindowByName("SceneFrame") #@UndefinedVariable
     if frame:
         frame.set_object(PigDirector.scene, title="Scene")
     
@@ -121,7 +121,7 @@ _project_settings file unless otherwise noted.
             projectPath = os.path.dirname(projectPath)
     set_project_path (projectPath)
     try:
-        from _project_settings import project_settings
+        from _project_settings import project_settings #@UnresolvedImport
     except:
         raise ValueError("No scenes have been created yet. Run edit_project.py")
     # settings

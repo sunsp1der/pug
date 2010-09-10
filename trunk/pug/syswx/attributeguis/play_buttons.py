@@ -3,6 +3,7 @@ from inspect import isroutine
 
 import wx
 import wx.lib.buttons as buttons
+wx=wx
 
 from pug.syswx.wxconstants import *
 from pug.syswx.util import show_exception_dialog
@@ -80,7 +81,7 @@ For kwargs arguments, see the Base attribute GUI
         
         buttonOrder = ['rewind', 'play', 'pause', 'stop', 'fast_forward', 
                        'execute']
-        buttonDict = {
+        infoDict = {
                 'rewind':('Rewind', rewind_image),
                 'play':('Play', play_image),
                 'pause':('Pause', pause_image),
@@ -89,9 +90,11 @@ For kwargs arguments, see the Base attribute GUI
                 'execute':('Execute in separate process', execute_image),
                 }
         self.functionDict = {}
+        self.buttonDict = {}
         
         for item in buttonOrder:
-            info = buttonDict[item]
+            info = infoDict[item]
+            self.buttonDict[item] = None
             if not aguidata.has_key(item):
                 continue
             if isroutine(aguidata[item]):
@@ -113,6 +116,7 @@ For kwargs arguments, see the Base attribute GUI
                 button = buttons.ThemedGenBitmapButton(control, -1, None,
                                                    size=WX_BUTTON_SIZE)
             button.type = item
+            self.buttonDict[item] = button
 #            print info[1].Ok(), info[1]
             button.SetBitmapLabel(info[1])
             self.functionDict[button] = func    
@@ -134,22 +138,27 @@ For kwargs arguments, see the Base attribute GUI
         else:
             Base.setup( self, attribute, window, aguidata)        
         
-    def button_press(self, event):  
+    def button_press(self, event=None, button=None):  
         """Call the appropriate function"""
         try:
-            button = event.GetEventObject()
+            if event:
+                button = event.GetEventObject()
+            elif button is None:
+                return
+            else:
+                button = self.buttonDict[button]
             retvalue = self.functionDict[button]()
-            if button == self.playbutton and retvalue == True:
-                self.playbutton.Enable(False)
-                if self.pausebutton:
-                    self.pausebutton.Enable(True)
+            if button.type == 'play' and retvalue == True:
+                button.Enable(False)
+                if self.buttonDict['pause']:
+                    self.buttonDict['pause'].Enable(True)
             if button.type == 'stop':
-                if self.playbutton:
-                    self.playbutton.Enable(True)
-                    self.playbutton.SetValue(False)
-                if self.pausebutton:
-                    self.pausebutton.SetValue(False)
-                    self.pausebutton.Enable(False)
+                if self.buttonDict['play']:
+                    self.buttonDict['play'].Enable(True)
+                    self.buttonDict['play'].SetValue(False)
+                if self.buttonDict['pause']:
+                    self.buttonDict['pause'].SetValue(False)
+                    self.buttonDict['pause'].Enable(False)
         except:
             show_exception_dialog(self.control)
             try:

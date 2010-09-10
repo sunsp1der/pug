@@ -1,3 +1,5 @@
+#@PydevCodeAnalysisIgnore
+
 """
 Implement an observer pattern for attribute access.
 

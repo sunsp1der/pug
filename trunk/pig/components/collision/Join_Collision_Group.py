@@ -14,7 +14,7 @@ class Join_Collision_Group( Component):
     _class_list = [Sprite]
     # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
-            ['group', GroupDropdown, {'doc':"Group to join"}]
+            ['group', GroupDropdown, {'doc':"Collision group to join"}]
             ]
     # defaults
     _group = "colliders"

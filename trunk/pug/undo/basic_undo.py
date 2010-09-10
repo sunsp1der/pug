@@ -1,3 +1,5 @@
+#@PydevCodeAnalysisIgnore
+
 class basic_undomechanism(observer):
     """
     This class provides the basic operations for undoable operations.

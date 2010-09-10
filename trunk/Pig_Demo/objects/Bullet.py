@@ -1,7 +1,7 @@
 ### import autocode ###
 from pig.PigSprite import PigSprite
 from pug.all_components import Set_Motion, Grow_Shrink, On_Collision_Sound,\
-    Life_Zone, Fade, Collision_Destroy, Stop_Motion_On_Destroy
+    Life_Zone, Fade, Stop_Motion_On_Destroy, Deals_Damage
 ### End import autocode ###
 
 ### Bullet autocode ###
@@ -25,8 +25,10 @@ class Bullet(PigSprite):
         self.components.add( Fade(
                 fade_in_secs=0.0,
                 fade_out_secs=0.2) )
-        self.components.add( Collision_Destroy(
+        self.components.add( Stop_Motion_On_Destroy() )
+        self.components.add( Deals_Damage(
+                damage_amount=10.0,
+                destroy_on_collide=True,
                 with_group='target',
                 my_group='bullet') )
-        self.components.add( Stop_Motion_On_Destroy() )
 ### End Bullet autocode ###

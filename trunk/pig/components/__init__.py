@@ -7,6 +7,7 @@ from pig.components.behavior.Life_Zone import Life_Zone
 from pig.components.behavior.Motion_Zone import Motion_Zone
 from pig.components.behavior.Self_Destruct import Self_Destruct
 from pig.components.behavior.Face_Motion import Face_Motion
+from pig.components.behavior.Set_Gname import Set_Gname
 from pig.components.behavior.Set_Motion import Set_Motion
 from pig.components.behavior.Forward_Motion import Forward_Motion
 from pig.components.behavior.Random_Motion import Random_Motion
@@ -24,11 +25,15 @@ from pig.components.controls.Key_Drive_Controls import Key_Drive_Controls
 from pig.components.gui.Textbox import Textbox
 from pig.components.gui.Value_Tracker_Text import Value_Tracker_Text
 from pig.components.gui.Timer_Text import Timer_Text
-from pig.components.gameplay.Set_Gname import Set_Gname
-from pig.components.gameplay.Value_On_Destroy import Value_On_Destroy
+from pig.components.gameplay.Score_On_Destroy import Score_On_Destroy
+from pig.components.gameplay.Takes_Damage import Takes_Damage
+from pig.components.gameplay.Deals_Damage import Deals_Damage
+from pig.components.gameplay.Multiple_Lives import Multiple_Lives
 from pig.components.spawn.Spawner import Spawner
 from pig.components.spawn.Spawn_On_Destroy import Spawn_On_Destroy
 from pig.components.sound.On_Destroy_Sound import On_Destroy_Sound
+from pig.components.sound.On_Damage_Sound import On_Damage_Sound
+from pig.components.sound.On_Damaged_Sound import On_Damaged_Sound
 from pig.components.sound.On_Key_Sound import On_Key_Sound
 from pig.components.sound.On_Collision_Sound import On_Collision_Sound
 from pig.components.scene.Utility_Keys import Utility_Keys

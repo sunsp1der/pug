@@ -29,7 +29,6 @@ from pig.editor.StartScene import StartScene
 from pig.editor import hacks, EditorState
 from pig.editor.GraphicsManager import graphicsManager
 from pig.editor.util import *
-from pig.editor.PigApp import PigApp 
  
 _DEBUG = False
 
@@ -324,13 +323,19 @@ forceReload: if True, reload all scenes and objects first.
             entered_scene()
             wx.GetApp().refresh()
             
+    def _set_sceneclass( self, val):
+        try:
+            button_info_dict['agui'].button_press(button='stop')
+        except:
+            self.stop_scene()
+        self.set_scene(val)            
     def _get_sceneclass(self):
         try:
             scene = self.Director.scene.__class__
         except:
             scene = None
         return scene
-    sceneclass = property(_get_sceneclass, set_scene, 
+    sceneclass = property(_get_sceneclass, _set_sceneclass, 
                      doc="Scene class currently being edited")
     
     def _get_scene(self):
@@ -584,7 +589,7 @@ event: a wx.Event
 
     def rewind_scene(self):
         """rewind_scene(): reset the scene and play it again"""
-        if not self.Director.project_started:
+        if not self.Director.game_started:
             return
         self.stop_scene()
         self.play_scene( False)
@@ -596,7 +601,7 @@ start the current scene playing.
 doSave: save working copy first
 """
         if _DEBUG: print "play_scene"
-        if self.Director.project_started:
+        if self.Director.game_started:
             # don't do anything if game started
             return False
         if doSave:
@@ -620,7 +625,7 @@ doSave: save working copy first
     
     def pause_scene(self):
         """pause_scene(): pause the current scene"""
-        if self.Director.project_started:
+        if self.Director.game_started:
             if self.Director.paused:
                 self.Director.scene.state.unpause()
             else:
@@ -634,7 +639,7 @@ Stop the current scene from playing. if doRevert, Reload original state from
 disk.
 """
         if _DEBUG: print "stop_scene"
-        if not self.Director.project_started:
+        if not self.Director.game_started:
             return
         wait_for_state(None)
         self.scene.stop()
@@ -650,7 +655,7 @@ disk.
 Run the scene being editted in a new process.
 """
         try:
-            if doSave and not self.Director.project_started:
+            if doSave and not self.Director.game_started:
                 saved = self.save_using_working_scene()
                 if not saved:
                     dlg = wx.MessageDialog( wx.GetApp().projectFrame,
@@ -764,7 +769,7 @@ def start_opioid( rect, title, icon, scene):
     Opioid2D.Display.init(rect[2:4], 
                           title=title, 
                           icon=icon)
-    Opioid2D.Director.project_started = False
+    Opioid2D.Director.game_started = False
     Opioid2D.Director.viewing_in_editor = True
     try:
         Opioid2D.Director.run( scene)
@@ -790,6 +795,7 @@ list a tuple ("New Scene", PigScene) for use in the sceneclass dropdown"""
         
 from pig.editor.agui import ObjectsDropdown      
 
+button_info_dict = {}
 _interfacePugview = {
     'size':(350,350),
     'name':'Pig Editor',
@@ -802,7 +808,8 @@ _interfacePugview = {
                                        'pause':'pause_scene',
                                        'rewind':'rewind_scene',
                                        'play':'play_scene',
-                                       'doc':'Controls for current scene'}],
+                                       'doc':'Controls for current scene',
+                                       'agui_info_dict': button_info_dict}],
         [' Current Scene', pug.Label],
         ['sceneclass', pug.Dropdown, 
              {'label':'   Scene',

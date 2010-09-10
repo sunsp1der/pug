@@ -129,7 +129,7 @@ else:
             if returncode is not None and self.kde_version > '3.5.4':
                 return returncode
             else:
-                return os.EX_OK
+                return os.EX_OK #@UndefinedVariable
 
     def detect_desktop_environment():
         '''Checks for known desktop environments

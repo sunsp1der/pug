@@ -10,6 +10,7 @@ from threading import Thread
 from inspect import getsourcefile
 
 import wx
+wx=wx
 
 from pug.util import make_valid_attr_name
 from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary

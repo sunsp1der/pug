@@ -26,12 +26,13 @@ arguments: on_collision( toSprite, fromSprite, toGroup, my_group)"""
     _type = 'collision'
     _class_list = [Sprite]
     # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
-    _field_list = [
+    _collision_list = [
             ['with_group', GroupDropdown, {'doc':"Group to collide with"}],
             ['my_group', GroupDropdown, 
                     {'doc':
                     "The group this object joins and uses for collision tests"}]
             ]
+    _field_list = _collision_list
     # defaults
     _with_group = "colliders"
     _my_group = "colliders"
@@ -39,8 +40,10 @@ arguments: on_collision( toSprite, fromSprite, toGroup, my_group)"""
     @component_method
     def on_added_to_scene(self, scene):
         "Register for object.on_collision callback when object added to scene"
-        self.owner.join_collision_group( self._my_group)
-        PigDirector.scene.register_collision_callback( self.owner, 
+        if self._my_group:
+            self.owner.join_collision_group( self._my_group)
+            if self._with_group:
+                PigDirector.scene.register_collision_callback( self.owner, 
                                                     self.owner.on_collision,
                                                     self.my_group,
                                                     self.with_group,
