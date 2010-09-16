@@ -5,7 +5,7 @@
 To receive any of the callbacks below, you must register the sprite. To register, simply call PigSprite.mouse_register(type). The argument type must contain "multi" (the default), "single", or "click". 
     * "single": get all mouse events, and, if this sprite is the top gui sprite, don't let any other sprites get mouse events
     * "multi": get all mouse events and let other sprites get mouse events
-    * "click": only get drag, release, mousedown and mouseup events, and let other sprites get mouse events
+    * "click": only get press, release, click, and drag events, and let other sprites get mouse events
 
 = Callbacks =
 
