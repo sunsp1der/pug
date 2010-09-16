@@ -28,4 +28,4 @@ def on_first_display(self):
 def on_project_start(self):
     "called when project is started"
 }}}
-There are also a number of [Pigsprite_mouse_events Pigsprite mouse events] that you can register to receive.
+There are also a number of [PigSprite_mouse_events Pigsprite mouse events] that you can register to receive.
