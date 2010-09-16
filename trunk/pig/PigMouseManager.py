@@ -16,9 +16,9 @@ Access this object through scene.mouse_manager. To register an object for mouse
 events, use PigSprite.mouse_register(). 
 """
     def __init__(self):
-        self._multi_elements = set()
-        self._click_elements = set()
-        self._single_elements = set()
+        self._multi_elements = set() # all nodes registered as 'multi'
+        self._click_elements = set() # all nodes registered as 'click'
+        self._single_elements = set() # all nodes registered 
         self._under = []
         self._drag = None
         self._clicking = []
@@ -94,7 +94,7 @@ register at the lower callback level.
         if results:
             results.sort()
             under = [results[-1][2]]
-            under[0].on_hover()
+#            under[0].on_hover()
         else:
             under = []
             for e in self._multi_elements:

@@ -48,16 +48,14 @@ class Key_Spawn( Spawner):
     @component_method
     def on_added_to_scene(self, scene):
         "Set spawn key and setup the spawner"
-        self.k_info = [None,]
-        self.k_info[0] = scene.register_key_down( self.key, self.spawn)
+        self.k_info = scene.register_key_down( self.key, self.spawn)
         self.setup_spawner()        
 
     @component_method
     def on_destroy(self):
         """unregister keys when component is destroyed"""
         scene = PigDirector.scene
-        for info in self.k_info:
-            scene.unregister_key(info)
+        scene.unregister_key(self.k_info)
         self.k_info = []
  
 register_component( Key_Spawn)

@@ -10,6 +10,7 @@ import weakref
 
 import wx
 import wx.combo
+wx=wx
 
 from pug.syswx.list_ctrl_combo_popup import ListCtrlComboPopup
 from pug.component.manager import get_component_list, get_last_component_update
@@ -288,11 +289,11 @@ object: the object that is being viewed. Used to define what components are
 
 class ComponentTreePopup(wx.combo.ComboPopup):
     """Popup control containing a tree"""
-    # overridden ComboPopup methods
-    
+    # overridden ComboPopup methods    
     def Init(self):
         self.value = None
         self.curitem = None
+        self.tooltip = ""
   
     def Create(self, parent):
         self.tree = ComponentTreeCtrl(parent)
@@ -380,6 +381,18 @@ class ComponentTreePopup(wx.combo.ComboPopup):
         if item and flags & wx.TREE_HITTEST_ONITEMLABEL:
             self.tree.SelectItem(item)
             self.curitem = item
+            component = self.tree.GetItemPyData(item)
+            if component is None:
+                doc = ""
+                self.tree.SetToolTipString("")
+                self.tree.SetToolTip(None)
+            else:
+                doc = component.__doc__
+                doc = doc.replace('\n', ' ')                    
+                if self.tooltip != doc:
+                    self.tree.SetToolTipString(doc)
+                    self.tree.GetToolTip().SetDelay(0.5)
+            self.tooltip = doc
         evt.Skip()
         
     def SelectItem(self, item):

@@ -23,29 +23,45 @@ IMPORTANT: This Component only works on objects with a class file.
                         'after being destroyed'],
             ['respawn_time', 
                     'Number of seconds between being destroyed and respawning'],
+            ['do_gameover', 'When lives reach zero, call gamedata.gameover()'],
             ['value_name', 
                     'If this is not blank, number of lives remaining\n'+\
-                    'will be stored in gamedata.<value_name>']
+                    'will be stored in gamedata.<value_name>'],
+            ['spawn_archetype', 'If this is an archetype, it\n'+\
+                                'will spawn when scene starts.']
             ]
     #defaults
-    start_lives = 3
+    spawn_archetype = True
+    start_lives = 2
     respawn_time = 3
     value_name = 'lives'
+    do_gameover = False
     
-    _lives = 0
+    _lives = None
       
     @component_method
     def on_first_display(self):
         "Set up multiple lives"
-        self.lives = int(self.start_lives)
+        if self.lives is None:
+            self.lives = int(self.start_lives)
         
     @component_method
     def on_destroy(self):
-        self.lives -= 1
         if self.lives:
+            self.lives -= 1
             (Delay(self.respawn_time) + CallFunc(do_respawn, 
                                                  self.owner.__class__,
                                                  self.lives)).do()
+        elif self.do_gameover:
+            gamedata = get_gamedata()
+            gamedata.gameover()
+            
+    @component_method
+    def on_delete(self):
+        if self.owner.archetype and self.spawn_archetype:
+            self.on_first_display()
+            (Delay(0) + CallFunc(do_respawn, self.owner.__class__,
+                                             self.lives)).do()            
                                              
     @component_method
     def on_respawn(self):

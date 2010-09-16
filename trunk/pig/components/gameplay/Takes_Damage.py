@@ -5,10 +5,11 @@ from pug.component import *
 from pug import ColorPicker
 
 from pig.components.collision.Join_Collision_Group import Join_Collision_Group
+from pig.util import get_gamedata
 
 class Takes_Damage(Join_Collision_Group):
-    """Set this object to take damage from objects with Deals_Damage that collide
- with it. 
+    """Set this object to take damage from objects with Deals_Damage that
+collide with it. 
 This component gives the base object new callbacks:
     on_take_damage( amount, damager, health): called before object dies
     on_zero_health( amount, damager, health): called if health<=0, after 
@@ -28,6 +29,9 @@ auto_destroy
                                      "color as it's damaged"}],
             ['invincible_time', "After spawning, this object will not\n"+\
                                 "be damaged for this many seconds"],
+            ['value_name', 
+                    'If this is not blank, current health\n'+\
+                    'will be stored in gamedata.<value_name>']                                
             ]
     _field_list += Join_Collision_Group._field_list
     #defaults
@@ -35,15 +39,17 @@ auto_destroy
     auto_destroy = True
     do_damage_tint = True
     damage_tint = ( 255, 0, 0)  
-    invincible_time = 1 
+    invincible_time = 1
+    value_name = ''
     
-    _health = 0
+    _health = None
     invincible = True
       
     @component_method
     def on_first_display(self):
         """Set up health and collisions"""
-        self.health = float(self.start_health)
+        if self.health is None:
+            self.health = float(self.start_health)
         self.start_tint = self.owner.tint
         self.tint_difference = (self.damage_tint[0]-self.start_tint[0],
                                 self.damage_tint[1]-self.start_tint[1],
@@ -79,13 +85,16 @@ auto_destroy
                     self.start_tint[0] + self.tint_difference[0] * tint_amount,
                     self.start_tint[1] + self.tint_difference[1] * tint_amount,
                     self.start_tint[2] + self.tint_difference[2] * tint_amount
-                               )
+                    )
             
     #making these component methods, gives you access at the base object level
     @component_method
     def set_health(self, health):
         "set_health(health): set self._health"
         self._health = health
+        if self.value_name:
+            gamedata = get_gamedata()
+            setattr(gamedata, self.value_name, health)                    
     @component_method
     def get_health(self):
         "get_health()->self._health"
