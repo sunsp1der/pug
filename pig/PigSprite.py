@@ -53,8 +53,7 @@ Opioid2d Sprite with features for use with pug"""
 type: 
     "single" means get all mouse events, and, if this sprite the top gui sprite, 
         don't let any other sprites get mouse events
-    "multi" means get all mouse events except 'on_hover', and let other sprites
-        get mouse events
+    "multi" means get all mouse events and let other sprites get mouse events
     "click" means only get drag, release, mousedown and mouseup events, and let 
         other sprites get mouse events
 """

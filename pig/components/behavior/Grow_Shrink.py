@@ -29,7 +29,7 @@ class Grow_Shrink(Component):
     @component_method
     def on_first_display(self):
         """Start the grow-in"""
-        self.owner.do(CallFunc( self.grow_in))
+        self.grow_in()
             
     def grow_in(self, secs=None, dstscale=None):
         """grow_in(secs=None, dstscale=None)

@@ -6,7 +6,7 @@ from pug.component import register_component
 from pig.components import Face_Object
 
 class Mouse_Face( Face_Object):
-    """Object turns to face the mouse. This is the exactly like the Face_Object 
+    """Object turns to face the mouse. This is exactly like the Face_Object 
 component with the mouse-pointer as the target."""
     #component_info
     _set = 'pig'

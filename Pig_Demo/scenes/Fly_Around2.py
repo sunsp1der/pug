@@ -1,9 +1,11 @@
 ### import autocode ###
-from objects.FlyAroundPlayerClass import FlyAroundPlayerClass
+from objects.FlyAroundPlayer import FlyAroundPlayer
 from objects.SpawnWall import SpawnWall
 from objects.Target import Target
 from pig.PigScene import PigScene
-from pug.all_components import Utility_Keys, On_Start_Sound
+from pig.PigSprite import PigSprite
+from pug.all_components import Utility_Keys, On_Start_Sound,\
+    Value_Tracker_Text
 ### End import autocode ###
 
 ### Fly_Around2 autocode ###
@@ -22,11 +24,31 @@ class Fly_Around2(PigScene):
         Target_archetype = Target(gname='Target')
         Target_archetype.archetype = True
 
+        FlyAroundPlayer_archetype = FlyAroundPlayer(gname='FlyAroundPlayer')
+        FlyAroundPlayer_archetype.archetype = True
+
         SpawnWall_archetype = SpawnWall(gname='SpawnWall')
         SpawnWall_archetype.archetype = True
 
         # Sprites
-        FlyAroundPlayer = FlyAroundPlayerClass(gname='FlyAroundPlayer')
+        pigsprite_instance = PigSprite()
+        pigsprite_instance.layer = 'Background'
+        pigsprite_instance.position = (678.0, 547.0)
+        pigsprite_instance.components.add( Value_Tracker_Text() )
+
+        pigsprite_instance_2 = PigSprite()
+        pigsprite_instance_2.layer = 'Background'
+        pigsprite_instance_2.position = (678.0, 480.0)
+        pigsprite_instance_2.components.add( Value_Tracker_Text(
+                prefix='Health: ',
+                value_name='health') )
+
+        pigsprite_instance_3 = PigSprite()
+        pigsprite_instance_3.layer = 'Background'
+        pigsprite_instance_3.position = (678.0, 513.0)
+        pigsprite_instance_3.components.add( Value_Tracker_Text(
+                prefix='Lives: ',
+                value_name='lives') )
 
         spawnwall_instance = SpawnWall()
         spawnwall_instance.position = (400.0, 595.0)

@@ -4,7 +4,6 @@ from pug.component import component_method, register_component
 
 from Opioid2D.public.Node import Node
 
-from pig.audio import get_sound
 from pig.editor.agui import ObjectsDropdown, SoundFile
 from pig.components import Spawner
 

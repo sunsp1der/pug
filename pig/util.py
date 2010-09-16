@@ -7,6 +7,15 @@ import traceback
 from time import sleep
 from inspect import isclass
 
+# slight hackery
+if os.name == "nt":
+    os.environ['SDL_VIDEODRIVER'] = "windib"
+try:
+    import Numeric #@UnresolvedImport
+except:
+    import numpy.oldnumeric as Numeric
+    sys.modules['Numeric'] = Numeric 
+
 import Opioid2D
 from Opioid2D.public.Node import Node
 
@@ -19,9 +28,6 @@ from pig.gamedata import *
 
 projectPath = os.getcwd()
 _revertScene = None
-
-if os.name == "nt":
-    os.environ['SDL_VIDEODRIVER'] = "windib"
 
 def skip_deprecated_warnings():
     """skip_deprecated_warnings()

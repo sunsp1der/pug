@@ -20,7 +20,7 @@ from pig.util import get_available_scenes, get_available_objects
 from pig.PigDirector import PigDirector
 from pig.editor.EditorState import EditorState
 
-_DEBUG = False
+_DEBUG = True
 
 def save_object(obj, name=None, parentWindow=None):
     """save_object(obj): Export obj as a class to objects folder
@@ -79,7 +79,9 @@ parentWindow: the parent window of name dialog. If not provided, the
                     dlg.SetFocus()      
                     continue                
                 path = os.path.join('objects',''.join([name,'.py']))
-                if name != basename:
+                old_module = obj.__class__.__module__.split('.')
+                if old_module[-2:-1][0] == 'objects' and \
+                        old_module[-1:][0] != name:
                     # verify overwrite
                     try:
                         test = file(path)

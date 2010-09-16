@@ -47,7 +47,7 @@ class Textbox(Component):
         self.action = (Opioid2D.Delay(0)+ Opioid2D.CallFunc(
                                                 self.do_set_text)).do()
                 
-    def do_set_text(self, image=None):
+    def do_set_text(self, image=None, tint=(255,255,255)):
         if image==None:
             image = Opioid2D.ResourceManager._create_image(
                         Opioid2D.Bitmap(

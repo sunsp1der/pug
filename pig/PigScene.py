@@ -264,6 +264,8 @@ key_down. In the future, maybe key_hold.
 info: a tuple of info returned by one of the register_key methods. 
       Contains (keydict, keymod, key, fn, args, kwargs)
 """
+        if info is None:
+            return
         return self._unregister_key( info[0], info[1], info[2], 
                                      *info[3], **info[4])
 

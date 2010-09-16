@@ -22,7 +22,7 @@ method will be called."""
             ['start_value',"Starting value of timer, in seconds"],
             ['end_value',"Ending value of timer, in seconds.\n"+\
                         "-1 means no end time."],
-            ['gameover',"Call gamedata.gameover when time is up"],
+            ['gameover',"Call gamedata.gameover() when time is up"],
             ['show_minutes',"Display minutes:seconds on timer,\n"+\
                             "instead of a large number of seconds."],
             ]

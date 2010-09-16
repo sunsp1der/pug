@@ -1,10 +1,28 @@
 now:
-	check save not in basename but whether class is from that file
+	wall
+		when object collides, check against size of images then move bouncer back
+	animation
+		explosion
+			pseudo-particles = 3-5
+			add to target and flyaroundplayer
+	levelbutton
+	powerup
+		add all non-enabled components to colliding object
+	switch_scene to replace set_scene
+		on_switch_scene callback for fades
+		fadescene
+			disable collisions?
+			stop motion?
+	gameover_scene
+		switch to it after gameover
+		set_gameover_scene
+			scene component
+			fadetime
+			scene
+	list mouse callbacks on wiki
 	put an example component in Pig_Demo
 		spawner examples
 			custom code example
-	release mouse button3? test on freeschoolcomp
-	create zip tarball exe?
 
 bugs: 
 	spawn location edges crashes editor intermittent
