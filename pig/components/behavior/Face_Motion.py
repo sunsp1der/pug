@@ -7,7 +7,6 @@ from pug.component import *
 
 class Face_Motion(Component):
     """Force owner to always face the direction that it's moving.
-        
 Warning: This component uses a tick_action, so it may be slow.
 """
     #component_info

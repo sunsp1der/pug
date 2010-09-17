@@ -86,8 +86,11 @@ node: any object containing a 'rect' attribute that is a pygame rect
             line.delete()
 
     def surround_node(self, node):
-        hotspot = (node.image._cObj.hotspot.x, node.image._cObj.hotspot.y)
-        rect = node._get_rect()
+        try:
+            hotspot = (node.image._cObj.hotspot.x, node.image._cObj.hotspot.y)
+            rect = node._get_rect()
+        except:
+            return
         self.area.position[0] = rect.width * (0.5 - hotspot[0])
         self.area.position[1] = rect.height * (0.5 - hotspot[1])
         self.base.rotation = node.rotation

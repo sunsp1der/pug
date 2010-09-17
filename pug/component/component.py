@@ -65,7 +65,7 @@ enabled: When this is false, the component's component_methods will not
     enabled = True
     
     def __init__(self, owner=None, **kwargs):
-        if self.owner:
+        if owner:
             self.owner = owner
         for attr, val in kwargs.iteritems():
             setattr(self, attr, val)

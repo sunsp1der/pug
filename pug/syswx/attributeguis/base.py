@@ -270,7 +270,7 @@ Try to set the aguis attribute to the value shown in the control
         if attribute_value is None: 
             # attribute type not set
             try:
-                 setattr(self.window.object,self.attribute,control_value)
+                setattr(self.window.object,self.attribute,control_value)
             except:
                 return False
             else:
