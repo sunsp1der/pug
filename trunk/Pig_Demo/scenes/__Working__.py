@@ -1,17 +1,17 @@
 ### import autocode ###
 from objects.Bullet import Bullet
 from objects.ExplodeParticle import ExplodeParticle
+from objects.Explosion import Explosion
 from objects.Launcher import Launcher
-from objects.Target2 import Target2
+from objects.Target import Target
 from objects.cannon import cannon
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
-from pug.all_components import Utility_Keys, Spawner, Takes_Damage,\
-    Value_Tracker_Text
+from pug.all_components import Utility_Keys, Value_Tracker_Text, Timer_Text
 ### End import autocode ###
 
-### Shooting_Gallery2 autocode ###
-class Shooting_Gallery2(PigScene):
+### Shooting_Gallery autocode ###
+class Shooting_Gallery(PigScene):
     def __init__(self, *args, **kwargs):
         PigScene.__init__(self, *args, **kwargs)
         self.components.add( Utility_Keys(
@@ -25,8 +25,11 @@ class Shooting_Gallery2(PigScene):
         ExplodeParticle_archetype = ExplodeParticle(gname='ExplodeParticle')
         ExplodeParticle_archetype.archetype = True
 
-        Target2_archetype = Target2(gname='Target2')
-        Target2_archetype.archetype = True
+        Target_archetype = Target(gname='Target')
+        Target_archetype.archetype = True
+
+        Explosion_archetype = Explosion(gname='Explosion')
+        Explosion_archetype.archetype = True
 
         # Sprites
         launcher_instance = Launcher()
@@ -35,20 +38,16 @@ class Shooting_Gallery2(PigScene):
         launcher_instance_2 = Launcher()
         launcher_instance_2.position = (43.0, 175.0)
         launcher_instance_2.rotation = 90.0
-        launcher_instance_2.components.add( Spawner(
-                spawn_object='Target2',
-                spawn_offset=(0, -1)) )
-        launcher_instance_2.components.remove_duplicate_of( Spawner(
-                spawn_object='Target',
-                spawn_offset=(0, -1)) )
 
         cannon_instance = cannon()
-        cannon_instance.position = (243.0, 179.0)
-        cannon_instance.components.add( Takes_Damage() )
-        cannon_instance.components.add( Takes_Damage() )
 
         pigsprite_instance = PigSprite()
         pigsprite_instance.layer = 'Background'
-        pigsprite_instance.position = (672.0, 540.0)
+        pigsprite_instance.position = (666.0, 537.0)
         pigsprite_instance.components.add( Value_Tracker_Text() )
-### End Shooting_Gallery2 autocode ###
+
+        pigsprite_instance_2 = PigSprite()
+        pigsprite_instance_2.layer = 'Background'
+        pigsprite_instance_2.position = (667.0, 508.0)
+        pigsprite_instance_2.components.add( Timer_Text() )
+### End Shooting_Gallery autocode ###

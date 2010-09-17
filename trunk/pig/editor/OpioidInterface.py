@@ -82,6 +82,10 @@ scene: the scene to load initially
                       projectFolder=get_project_path(),
                       projectObjectName=self.project_name)
         self.Director.realquit()
+        try:
+            wx.GetApp().Exit()
+        except:
+            pass
 
     def create_default_project_settings(self, settingsObj=None):
         """create_default_project_settings(settingsObj=None)->setting data class
@@ -176,9 +180,13 @@ settingsObj: an object similar to the one below... if it is missing any default
         self.reload_scene_list( doReload=True)
         # initial scene
         if initial_scene != 'PigScene' and initial_scene in self.sceneDict:
-            # test initial scene
+            # test initial scene                
             try:
-                test_scene_code( initial_scene)
+                if self.sceneDict[initial_scene].__module__ == \
+                                                        'scenes.__Working__':
+                    test_scene_code( initial_scene, '__Working__')
+                else:
+                    test_scene_code( initial_scene)
             except:
                 key = '*Error loading initial scene ('+initial_scene+')'                
                 code_exceptions[key] = sys.exc_info()
@@ -294,7 +302,10 @@ forceReload: if True, reload all scenes and objects first.
         if oldscene.__class__ != value or forceReload:
             if _DEBUG: print "OpioidInterface.set_scene", value
             try:
-                test_scene_code(value.__name__)
+                if value.__module__ == 'scenes.__Working__':
+                    test_scene_code(value.__name__, '__Working__')
+                else:
+                    test_scene_code(value.__name__)
             except:
                 self.set_scene( PigScene, forceReload=True)
                 wx.GetApp().get_project_frame().refresh()
@@ -774,9 +785,16 @@ def start_opioid( rect, title, icon, scene):
     try:
         Opioid2D.Director.run( scene)
     except ImportError:
-        pass # we're exiting Opioid altogether...
-#        raise
+        # we're exiting Opioid altogether...
+        try:
+            wx.GetApp().Exit()
+        except:
+            pass
     except:
+        try:
+            wx.GetApp().Exit()
+        except:
+            pass
 #        print "start_opioid: gotcha"
         raise
          

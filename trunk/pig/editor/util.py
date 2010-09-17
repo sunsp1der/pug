@@ -24,6 +24,7 @@ def get_image_path(filename):
     return os.path.join (_IMAGEPATH, filename)
 
 # art file extensions in common between wx and opioid/pygame
+# formatted for use with wx imagebrowser
 _fl_art_types =(
             # display, filter
             ("All supported formats", "All"),
@@ -65,7 +66,7 @@ def get_available_layers():
     except:
         return []
         
-def test_scene_code(scenename):
+def test_scene_code(scenename, modulename = None):
     """test_scene_code( scenename)
 
 This method tests a scene's code (including the enter function) without actually
@@ -73,7 +74,10 @@ loading it into view. It is meant to be used in a try clause and will raise the
 exception that caused the scene to fail.    
 
 scenename: name of scene to test
+modulename: name of module to find scene in. Basically for __Working__ only
 """
+    if modulename is None:
+        modulename = scenename
     if _DEBUG: print "test_scene_code 1"
     if scenename == 'PigScene':
         # we'll assume PigScene is okay
@@ -82,11 +86,11 @@ scenename: name of scene to test
         wx.GetApp().get_project_object().reload_object_list()
     else:
         get_available_objects(True)
-    exec('import scenes.' + scenename + ' as reload_module')
+    exec('import scenes.' + modulename + ' as reload_module')
 #    if _DEBUG: print "test_scene_code 2"
     reload(reload_module) #@UndefinedVariable
 #    if _DEBUG: print "test_scene_code 3"
-    exec('from scenes.'+scenename+' import '+scenename+' as scene')
+    exec('from scenes.'+modulename+' import '+scenename+' as scene')
 #    if _DEBUG: print "test_scene_code 4"
     try:
 #        if _DEBUG: print "test_scene_code 5"        

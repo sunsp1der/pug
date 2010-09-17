@@ -63,7 +63,7 @@ class Spawner(Component):
     spawn_offset = (0,0)
     obs_per_spawn = 1
     obs_per_spawn_variance = 0
-    match_scale = True
+    match_scale = False
     add_rotation = True
     add_velocity = False
     total_objects_spawned = -1

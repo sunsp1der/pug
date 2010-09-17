@@ -15,7 +15,8 @@ class Target(PigSprite):
         self.tint = (255, 0, 128)
         self.components.add( Spawn_On_Destroy(
                 spawn_object='ExplodeParticle',
-                obs_per_spawn=15,
+                obs_per_spawn=4,
+                obs_per_spawn_variance=1,
                 add_velocity=True) )
         self.components.add( Fade(
                 fade_in_secs=-1.0,
@@ -40,4 +41,7 @@ class Target(PigSprite):
                 angle_max=30,
                 velocity_min=150,
                 velocity_max=400) )
+        self.components.add( Spawn_On_Destroy(
+                spawn_object='Explosion',
+                add_velocity=True) )
 ### End Target autocode ###

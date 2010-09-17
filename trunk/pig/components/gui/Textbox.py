@@ -42,11 +42,17 @@ class Textbox(Component):
     def set_text(self, text=None):
         "Set the text to display"
         if text is None:
-            text=self.text
-        self._text = text
+            text=self._text
+        else:
+            self._text = text
         self.action = (Opioid2D.Delay(0)+ Opioid2D.CallFunc(
                                                 self.do_set_text)).do()
-                
+    @component_method
+    def get_text(self):
+        "Get the displayed text"
+        return self._text
+    text = property(get_text, set_text)
+                    
     def do_set_text(self, image=None, tint=(255,255,255)):
         if image==None:
             image = Opioid2D.ResourceManager._create_image(
@@ -57,7 +63,7 @@ class Textbox(Component):
             try:
                 self.owner.set_image( image)     
             except:
-                pass
+                self.owner.image_file = "art\\pug.png"
             else:
                 self.owner.image_file = None
 
@@ -91,12 +97,6 @@ class Textbox(Component):
         return self._hotspot
     hotspot = property(get_hotspot, set_hotspot)
 
-    @component_method
-    def get_text(self):
-        "Get the displayed text"
-        return self._text
-    text = property(get_text, set_text)
-    
     def set_font_file(self, font_file=None, font_size=None):
         if font_file is None:
             font_file = self._font_file
@@ -113,7 +113,7 @@ class Textbox(Component):
             self._font_file = self.__class__._font_file
         self.set_text()
     def get_font_file(self):
-        return self._font_files
+        return self._font_file
     font_file = property(get_font_file, set_font_file)
     
     @component_method
