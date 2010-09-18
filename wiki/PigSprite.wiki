@@ -1,5 +1,5 @@
 #summary Description of the PigSprite object
-PigSprite is the base sprite object for the Pig system. 
+PigSprite is the base sprite object for the Pig system.
 
 === Callbacks ===
 
@@ -29,3 +29,7 @@ def on_project_start(self):
     "called when project is started"
 }}}
 There are also a number of [PigSprite_mouse_events Pigsprite mouse events] that you can register to receive.
+
+== Built In Controls ==
+
+A PigScene automatically has two keys registered: Ctrl-Q to quit and escape to pause.
