@@ -23,13 +23,13 @@ class flyer(PigSprite):
         self.components.add( Key_Spawn(
                 key=1001,
                 spawn_object='Bullet',
-                spawn_offset=(0, -1),
+                spawn_offset=(0.5, 0),
                 max_spawns_in_scene=1) )
         self.components.add( Collision_Destroy(
                 with_group='target',
                 my_group='player') )
         self.components.add( On_Destroy_Sound(
-                sound='sound\\snap.wav') )
+                sound='sound\\beep.wav') )
         self.components.add( Spawn_On_Destroy(
                 spawn_object='ExplodeParticle',
                 obs_per_spawn=15,

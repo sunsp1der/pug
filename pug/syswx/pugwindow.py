@@ -20,7 +20,7 @@ from sys import exc_info
 import wx
 import wx.lib.scrolledpanel
 import wx.lib.buttons
-wx=wx
+
 
 from pug.aguilist import create_raw_aguilist, create_pugview_aguilist
 from pug.util import pugSave, pugLoad, get_simple_name, get_code_file, \

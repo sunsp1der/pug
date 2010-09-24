@@ -53,7 +53,7 @@ class On_Key_Sound( Component):
     def stop(self):
         if self.play_channel:
             self.play_channel.fadeout(int(self.fade_out*1000))
-        self.play_channel=0
+        self.play_channel=None
 
     @component_method
     def on_destroy(self):

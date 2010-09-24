@@ -16,6 +16,7 @@ from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.code_storage.constants import _INDENT
 from pug.code_storage import add_subclass_storageDict_key
 
+from pig.PauseState import PauseState
 from pig.util import entered_scene
 from pig.editor.agui import SceneNodes, SceneLayers
 from pig.editor.util import get_available_layers, save_object, exporter_cleanup
@@ -42,7 +43,9 @@ class PigScene( Opioid2D.Scene, pug.BaseObject):
         self._key_up_dict = {}
         self._collision_callback_dict = WeakKeyDictionary()
             # 2D dict by sprite, then (collide-with-Group, this-sprite-Group)
-        self.k_info = [self.register_key_down(keys["ESCAPE"], self.escape)]
+        self.k_info = [self.register_key_up(keys["ESCAPE"], self.keypause),
+                       self.register_key_up((keymods["CTRL"],
+                                               keys["Q"]), self.keyquit)]
         Opioid2D.Scene.__init__(self)
         pug.BaseObject.__init__(self, gname)   
         if _DEBUG: print "PigScene.__init__ done", self.__class__.__name__ 
@@ -297,13 +300,16 @@ key_down. In the future, maybe key_hold.
         else:
             return False
     
-    def escape(self):
+    def keyquit(self):
         if getattr(Opioid2D.Director, 'viewing_in_editor', False):
             import wx
             wx = wx
             wx.CallAfter(wx.GetApp().projectObject.stop_scene)
         else:
             Opioid2D.Director.quit()
+            
+    def keypause(self):
+        self.set_state(PauseState)
             
     def handle_quit(self, ev):
         try:

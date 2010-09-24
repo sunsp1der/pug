@@ -32,7 +32,8 @@ class Spawner(Component):
                     'doc':"The area where objects can be spawned. All\n"+\
                           "locations except 'center' are randomized areas."}],
         ["spawn_offset", 
-         "Spawn location is offset by this much (scaled by owner size)"],
+         "Spawn location is offset by this much (0 to 1, 0 to 1). (0,0) "+\
+         "is top-left, (0.5,0.5) is center, (1,1) is bottom-right etc."],
         ["spawn_delay","Wait this many seconds before beginning to spawn"],
         ["obs_per_spawn","Number of objects created per spawn"],
         ["obs_per_spawn_variance",
@@ -60,7 +61,7 @@ class Spawner(Component):
     spawn_interval_variance = 1.0
     spawn_delay = 0.0
     spawn_location = 'center'
-    spawn_offset = (0,0)
+    spawn_offset = (0.5, 0.5)
     obs_per_spawn = 1
     obs_per_spawn_variance = 0
     match_scale = False
@@ -153,8 +154,8 @@ class Spawner(Component):
             elif location == "left":
                 x_pos = 0
                 y_pos = random.uniform(0, rect.height)
-            x_pos += self.spawn_offset[0] * halfwidth - halfwidth
-            y_pos += self.spawn_offset[1] * halfheight - halfheight
+            x_pos += (self.spawn_offset[0] * 2 - 1) * halfwidth - halfwidth
+            y_pos += (self.spawn_offset[1] * 2 - 1) * halfheight - halfheight
             obj.position = Vector(x_pos, y_pos)
             obj.position.direction += rotation
             obj.position += position

@@ -167,6 +167,13 @@ def newrun(initialScene, *args, **kw):
 PigDirector.run = newrun
 PigDirector.paused = False
 
+def switch_scene_to( new_scene):
+    self = PigDirector
+    self.set_scene( new_scene)
+    
+PigDirector.switch_scene_to = switch_scene_to
+    
+
 def opioid_tick():
     import pygame
     from Opioid2D.public.Mouse import Mouse

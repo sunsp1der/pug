@@ -6,8 +6,8 @@ from Opioid2D.public.Node import Node
 from pug import Filename, Dropdown
 from pug.component import *
 
-class Animate(Component):
-    """This object is an animation. Animations are stored in folders containing
+class Animate_Folder(Component):
+    """This object is an animation. Folder animations are stored as 
 numbered graphics files with the same name as the folder. For example: "frame0",
 "frame1", and "frame2" in a folder called "frame". Note: if you have 10 or more 
 frames, number with zeros, like this: "frame08", "frame09","frame10","frame11"
@@ -23,6 +23,8 @@ frames, number with zeros, like this: "frame08", "frame09","frame10","frame11"
                                 'type':'folder', 'subfolder':'art',
                                 'allow_delete': True, 'message':
                                 'Choose a folder containing animation frames'}],
+            ]
+    _animate_list = [
             ['fps','Frames per second'],
             ['mode',Dropdown,{'doc':'Stop runs through once,\n'+\
                                     'Repeat repeats forward only,\n'+\
@@ -31,9 +33,12 @@ frames, number with zeros, like this: "frame08", "frame09","frame10","frame11"
                                 }],
             ['destroy',
              'Destroy this object when animation completes. Stop mode only.'],
+            ['preload',
+'Loading grid images can be slow, True loads them in at startup time']
             ]
+    _field_list += _animate_list
     #defaults
-    _folder = ""
+    _animation = ""
     fps = 15
     mode = "PingPong"
     destroy = False  
@@ -41,26 +46,26 @@ frames, number with zeros, like this: "frame08", "frame09","frame10","frame11"
     frames = None  
     modes = {"Stop":Opioid2D.StopMode, "Repeat":Opioid2D.RepeatMode,
              "PingPong":Opioid2D.PingPongMode}
-    action = None
-        
-    def set_folder(self, folder):
-        "Set the animation folder"
-        self._folder = folder
-        if not getattr(Opioid2D.Director,"start_project",False):
-            self.action = (Opioid2D.Delay(0)+ Opioid2D.CallFunc(
-                                                self.do_set_folder)).do()
-        else:
-            self.do_set_folder()
+    set_action = None
+    last_frame_info = None
+                        
+    def get_frame_images(self):
+        filename = os.path.split(self.folder)[1]
+        path = os.path.join(self.folder,filename+"*.*")
+        if self.last_frame_info == path:
+            return self.frames
+        frames = Opioid2D.ResourceManager.get_pattern(path)
+        self.last_frame_info = path
+        return frames
     
-    def do_set_folder(self):
+    def do_set_animation(self):
         frames = None
+        self.set_action = None
         if self.folder:
             try:
-                filename = os.path.split(self.folder)[1]
-                path = os.path.join(self.folder,filename+"*.*")
-                frames = Opioid2D.ResourceManager.get_pattern(path)
+                frames = self.get_frame_images()
             except:
-                self._folder = None
+                self._animation = None
                 try:
                     if getattr(Opioid2D.Director,"viewing_in_editor"):
                         import wx
@@ -79,17 +84,31 @@ frames, number with zeros, like this: "frame08", "frame09","frame10","frame11"
             self.frames = None
         if not getattr(Opioid2D.Director,"start_project",False):
             self.show_editor_frame()
-    def get_folder(self):
-        return self._folder
-    folder = property(get_folder, set_folder)
-    
+
+    def set_anim_attr(self, attr, val):
+        setattr(self, attr, val)
+        if not getattr(Opioid2D.Director,"start_project",False):
+            if self.set_action:
+                return
+            self.set_action = (Opioid2D.Delay(0)+ Opioid2D.CallFunc(
+                                                self.do_set_animation)).do()
+        else:
+            self.do_set_animation()
+    def get_anim_attr(self, attr):
+        return getattr(self, attr)
+                    
+    folder = property(lambda s: s.get_anim_attr("_animation"),
+                          lambda s, val: s.set_anim_attr("_animation", val) )
+        
     @component_method            
     def on_delete(self):
         "Deconstruct component"
         #hack
-        if self.action:
-            if self.action._callbacks:
-                self.action._callbacks = None
+        try:
+            if self.set_action and self.set_action._callbacks:
+                self.set_action._callbacks = None
+        except:        
+            pass
             
     def show_editor_frame(self, imagenum=None):
         if self.owner:
@@ -107,7 +126,7 @@ frames, number with zeros, like this: "frame08", "frame09","frame10","frame11"
     
     @component_method
     def on_added_to_scene(self, scene):
-        """Show text when object is added to scene"""
+        """Animate when object is added to scene"""
         if self.frames:
             action = Opioid2D.Animate(self.frames, fps=self.fps, 
                                      mode=self.modes[self.mode])
@@ -118,9 +137,9 @@ frames, number with zeros, like this: "frame08", "frame09","frame10","frame11"
     @component_method
     def on_added_to_editor(self, scene):
         """Show text when object or component is added to editor"""
-        self.set_folder( self.folder)    
+        self.animation = self.folder    
 
     def on_removed_from_object(self):
         self.owner.set_image_file("art\\pug.png")
 
-register_component( Animate)
+register_component( Animate_Folder)

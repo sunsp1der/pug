@@ -22,7 +22,8 @@ class Spawn_On_Destroy( Spawner):
                                               'bottom','left','right'], 
                             'doc':"The area where objects can be spawned"}],
         ["spawn_offset", 
-         "Spawn location is offset by this much (scaled by owner size)"],
+         "Spawn location is offset by this much (0 to 1, 0 to 1). (0,0) "+\
+         "is top-left, (0.5,0.5) is center, (1,1) is bottom-right etc."],
         ["obs_per_spawn","Number of objects created per spawn"],
         ["obs_per_spawn_variance",
                     "obs_per_spawn can vary by this much"],

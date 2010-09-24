@@ -18,9 +18,10 @@ class Bullet(PigSprite):
                 grow_in_secs=0.2,
                 shrink_out_secs=-1.0) )
         self.components.add( On_Collision_Sound(
-                sound='sound\\snap.wav',
+                sound='sound\\beep.wav',
                 with_group='target',
-                my_group='bullet') )
+                my_group='bullet',
+                enabled=False) )
         self.components.add( Life_Zone() )
         self.components.add( Fade(
                 fade_in_secs=0.0,

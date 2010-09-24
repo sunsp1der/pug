@@ -9,7 +9,7 @@ object to be viewed as an argument on creation of the frame."""
 # TODO: send aguilist a specific list of attributes
 
 import wx
-wx=wx
+
 
 from pug.syswx.util import get_icon
 from pug.syswx.wxconstants import *

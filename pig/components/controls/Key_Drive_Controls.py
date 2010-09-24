@@ -36,10 +36,10 @@ class Key_Drive_Controls( Forward_Motion):
     friction = 0.98
     speed = 200
     rotation_speed = 135
-    forward_key = keys["UP"]
-    backward_key = keys["DOWN"]
-    left_key = keys["LEFT"]
-    right_key = keys["RIGHT"]
+    forward_key = keys["I"]
+    backward_key = keys["K"]
+    left_key = keys["J"]
+    right_key = keys["L"]
                 
     acceleration = None # for Forward_Motion
     

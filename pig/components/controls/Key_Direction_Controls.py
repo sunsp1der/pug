@@ -30,10 +30,10 @@ class Key_Direction_Controls( Component):
     x_velocity = 100
     y_velocity = 100
     rotate = True 
-    up_key = keys["UP"]
-    down_key = keys["DOWN"]
-    left_key = keys["LEFT"]
-    right_key = keys["RIGHT"]
+    up_key = keys["I"]
+    down_key = keys["K"]
+    left_key = keys["J"]
+    right_key = keys["L"]
     
                 
     @component_method

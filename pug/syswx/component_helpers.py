@@ -10,7 +10,7 @@ import weakref
 
 import wx
 import wx.combo
-wx=wx
+
 
 from pug.syswx.list_ctrl_combo_popup import ListCtrlComboPopup
 from pug.component.manager import get_component_list, get_last_component_update

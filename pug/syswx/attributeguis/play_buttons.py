@@ -3,7 +3,7 @@ from inspect import isroutine
 
 import wx
 import wx.lib.buttons as buttons
-wx=wx
+
 
 from pug.syswx.wxconstants import *
 from pug.syswx.util import show_exception_dialog
