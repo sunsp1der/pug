@@ -308,14 +308,17 @@ parentWindow: the parent window of name dialog. If not provided, the
         sceneDict = get_available_scenes(True)
         PigDirector.scene.__class__ = sceneDict[sceneName]
         saved = True
+        if _DEBUG: print "util: save_scene_as 8"        
     finally:
+        if _DEBUG: print "util: save_scene_as 9"                
         wx.EndBusyCursor()        
         if PigDirector.scene != oldscene:
             wx.GetApp().set_selection([])
             if _DEBUG: print "util: save_scene_as reset select:", selection        
         wait_for_state(EditorState)
-
+        if _DEBUG: print "util: save_scene_as 10"                
         wx.GetApp().refresh()
+    if _DEBUG: print "util: save_scene_as 11"                
     if saved:
         return fileName
     else:

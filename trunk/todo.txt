@@ -1,13 +1,15 @@
 now:
 
-	default quit ctrl-Q pause esc
-	make sounds more friendly
-	wall
-		when object collides 
-		check against size of images then move bouncer back
 	levelbutton
-	powerup
-		add all non-enabled components to colliding object
+		make sure scene in editor changes  (scenegraph on dragon)
+	component descriptions
+		in current list tooltip
+		only show up to line break in tooltips
+	drag-n-drop animation folder
+	dropdowns stay selected when mouse used to unfocus		
+	textbox bug
+		1)add textbox component
+		2)edit component - graphic changes back
 	gameover_scene
 		switch to it after gameover
 		set_gameover_scene

@@ -14,5 +14,5 @@ class Launcher(PigSprite):
         self.rotation = 270.0
         self.components.add( Spawner(
                 spawn_object='Target',
-                spawn_offset=(0, -1)) )
+                spawn_offset=(0.5, 0)) )
 ### End Launcher autocode ###

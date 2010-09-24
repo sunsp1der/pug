@@ -163,14 +163,13 @@ register at the lower callback level.
 
     def _update_under(self, under):
         if under != self._under:
-            if self._under != []:
-                for element in under:
-                    if element not in self._under:
-                        element.on_enter()
-                    else:
-                        self._under.remove(element)
-                for element in self._under:
-                    element.on_exit()
+            for element in under:
+                if element not in self._under:
+                    element.on_enter()
+                else:
+                    self._under.remove(element)
+            for element in self._under:
+                element.on_exit()
             self._under = under
                     
     def pick_all(self, x, y):

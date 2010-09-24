@@ -1,6 +1,6 @@
 import wx
 import wx.combo
-wx=wx
+
 
 """This class is a popup containing a ListCtrl."""
 

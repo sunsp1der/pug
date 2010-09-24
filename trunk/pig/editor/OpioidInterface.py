@@ -649,16 +649,25 @@ doSave: save working copy first
 Stop the current scene from playing. if doRevert, Reload original state from 
 disk.
 """
+        print "stop_scene 1"
         if _DEBUG: print "stop_scene"
         if not self.Director.game_started:
             return
         wait_for_state(None)
+        print "stop_scene 2"
         self.scene.stop()
+        print "stop_scene 3"        
         wait_for_exit_scene()
+        print "stop_scene 4"        
+        gamedata = get_gamedata()
+        scene = gamedata.start_sceneclass
         create_gamedata()
+        print "stop_scene 5"
         pug.set_default_pugview("Component", _dataPugview)
+        print "stop_scene 6"        
         if doRevert:
-            self.set_scene(self.scene.__class__.__name__, True)
+            self.set_scene(scene.__name__, True)
+        print "stop_scene 7"            
         
     def execute_scene( self, doSave=True):
         """execute_scene()
@@ -812,6 +821,7 @@ list a tuple ("New Scene", PigScene) for use in the sceneclass dropdown"""
     return scenelist    
         
 from pig.editor.agui import ObjectsDropdown      
+from pig.editor.agui import ScenesDropdown      
 
 button_info_dict = {}
 _interfacePugview = {
@@ -829,9 +839,9 @@ _interfacePugview = {
                                        'doc':'Controls for current scene',
                                        'agui_info_dict': button_info_dict}],
         [' Current Scene', pug.Label],
-        ['sceneclass', pug.Dropdown, 
+        ['sceneclass', ScenesDropdown, 
              {'label':'   Scene',
-              'list_generator':_scene_list_generator,
+              'prepend_list':[("New Scene", PigScene)],
               'doc':"Pick a scene to edit"}],
         ['commit_scene', None, {
                                'label':"   Commit Scene", 

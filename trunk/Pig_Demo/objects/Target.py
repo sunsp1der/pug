@@ -35,7 +35,7 @@ class Target(PigSprite):
                 invincible_time=0,
                 group='target') )
         self.components.add( On_Damage_Sound(
-                sound='sound\\snap.wav') )
+                sound='sound\\explosion.wav') )
         self.components.add( Random_Motion(
                 angle_min=-30,
                 angle_max=30,

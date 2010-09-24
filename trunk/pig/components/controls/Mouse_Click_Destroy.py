@@ -24,6 +24,7 @@ class Mouse_Click_Destroy( Component):
 
     @component_method
     def on_added_to_scene(self, scene):
+        "Register object for mouse clicks"
         if self.one_only:
             self.owner.mouse_register("single")
         else:
@@ -31,11 +32,13 @@ class Mouse_Click_Destroy( Component):
         
     @component_method
     def on_click(self):
+        "Destroy when clicked, if self.click is True"
         if self.click:
             self.owner.destroy()
             
     @component_method
     def on_press(self):
+        "Destroy when pressed, if self.click is False"
         if not self.click:
             self.owner.destroy()
                 

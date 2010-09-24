@@ -1,7 +1,7 @@
 """Simple text entry attribute gui"""
 
 import wx
-wx=wx
+
 from pug.syswx.wxconstants import *
 from pug.syswx.agui_text_ctrl import AguiTextCtrl
 from pug.syswx.attributeguis.base import Base

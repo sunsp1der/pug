@@ -3,7 +3,7 @@ from types import StringTypes
 
 import wx
 import wx.lib.buttons as buttons
-wx=wx
+
 
 from pug.constants import *
 from pug.util import get_type_name

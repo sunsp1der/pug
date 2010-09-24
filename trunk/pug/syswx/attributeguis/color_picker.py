@@ -1,7 +1,6 @@
 """Color picker attribute gui"""
 
 import wx
-wx=wx
 from pug.syswx.wxconstants import *
 from pug.syswx.attributeguis.base import Base
 

@@ -15,7 +15,7 @@ class Fly_Around2(PigScene):
         self.components.add( Utility_Keys(
                 info_F1='scenes\\Fly_Around_Help.txt') )
         self.components.add( On_Start_Sound(
-                sound='sound\\snap.wav',
+                sound='sound\\beep.wav',
                 loops=0) )
 
     layers = ['Background', 'walls']
