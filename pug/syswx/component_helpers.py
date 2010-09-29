@@ -91,6 +91,8 @@ to set all instances to recalculate next time tree is exposed.
 #===============================================================================
 
 class ComponentList(wx.combo.ComboCtrl):
+    tooltip = None
+    old_tooltip = ""
     def __init__(self, *args, **kwargs):
         kwargs['style']=wx.CB_READONLY
         wx.combo.ComboCtrl.__init__(self, *args, **kwargs)
@@ -98,8 +100,49 @@ class ComponentList(wx.combo.ComboCtrl):
         popup = ListCtrlComboPopup()
         self.listCtrl = popup
         self.SetPopupControl(popup)
+        self.listCtrl.Bind(wx.EVT_MOTION, self.OnMotion)
         self.Bind(wx.EVT_KEY_DOWN, self.OnKey)
+        #self.listCtrl.Bind(wx.EVT_COMBOBOX_CLOSEUP, self.OnDone)
+        #
+        
+    def OnMotion(self, ev):
+        list = self.listCtrl
+        item = list.HitTest(ev.GetPosition())
+        component = None
+        doc = ""
+        if item != -1:
+            component = list.GetClientData(item)()
+            if component is None:
+                doc = ""
+                list.SetToolTipString("")
+                list.SetToolTip(None)
+            else:
+                # set tooltip to current component docstring 
+                # up to first line break
+                doc = component.__doc__.split('\n\n')[0]
+            if self.tooltip != doc:
+                list.SetToolTipString(doc)
+                list.GetToolTip().SetDelay(0.5)  
+        elif self.tooltip:
+            list.SetToolTipString("")
+            list.SetToolTip(None)
+            doc = ""  
+        self.tooltip = doc     
+        ev.Skip()
 
+    def OnButtonClick(self):
+        self.ShowPopup()
+        self.old_tooltip = self.GetToolTip()
+        if self.old_tooltip:
+            self.old_tooltip = self.old_tooltip.GetTip()
+        self.SetToolTipString("")
+        self.SetToolTip(None)           
+
+    def OnDismissPopup(self):
+        if self.old_tooltip:
+            self.SetToolTipString(self.old_tooltip)
+            self.old_tooltip = ""
+            
     def OnKey(self, ev):
         if ev.GetKeyCode() == wx.WXK_TAB:
             if ev.ShiftDown():
@@ -293,10 +336,10 @@ class ComponentTreePopup(wx.combo.ComboPopup):
     def Init(self):
         self.value = None
         self.curitem = None
-        self.tooltip = ""
   
     def Create(self, parent):
         self.tree = ComponentTreeCtrl(parent)
+        self.tooltip = None
         self.tree.Bind(wx.EVT_MOTION, self.OnMotion)
         self.tree.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)        
         
@@ -312,12 +355,24 @@ class ComponentTreePopup(wx.combo.ComboPopup):
         if self.value is not None:
             return self.tree.GetItemPyData(self.value)
         return None
+    
+    def OnDismiss(self):
+        try:
+            if self.old_tooltip:
+                self.GetCombo().SetToolTipString(self.old_tooltip)
+                self.old_tooltip = ""
+        except:
+            pass
 
     def OnPopup(self):
+        self.old_tooltip = self.GetCombo().GetToolTip()
+        if self.old_tooltip:
+            self.old_tooltip = self.old_tooltip.GetTip()
+        self.GetCombo().SetToolTipString("")
+        self.GetCombo().SetToolTip(None)           
         if self.value:
             self.tree.EnsureVisible(self.value)
             self.tree.SelectItem(self.value)
-
 
     def SetStringValue(self, value):
         # this assumes that item strings are unique...
@@ -377,22 +432,30 @@ class ComponentTreePopup(wx.combo.ComboPopup):
     
     def OnMotion(self, evt):
         # have the selection follow the mouse, like in a real combobox
-        item, flags = self.tree.HitTest(evt.GetPosition())
+        tree = self.tree
+        item, flags = tree.HitTest(evt.GetPosition())
+        component = None
+        doc = ""
         if item and flags & wx.TREE_HITTEST_ONITEMLABEL:
-            self.tree.SelectItem(item)
+            tree.SelectItem(item)
             self.curitem = item
-            component = self.tree.GetItemPyData(item)
+            component = tree.GetItemPyData(item)
             if component is None:
                 doc = ""
-                self.tree.SetToolTipString("")
-                self.tree.SetToolTip(None)
+                tree.SetToolTipString("")
+                tree.SetToolTip(None)
             else:
-                doc = component.__doc__
-                doc = doc.replace('\n', ' ')                    
-                if self.tooltip != doc:
-                    self.tree.SetToolTipString(doc)
-                    self.tree.GetToolTip().SetDelay(0.5)
-            self.tooltip = doc
+                # set tooltip to current component docstring 
+                # up to first line break
+                doc = component.__doc__.split('\n\n')[0]
+            if self.tooltip != doc:
+                tree.SetToolTipString(doc)
+                tree.GetToolTip().SetDelay(0.5)
+        elif self.tooltip:
+            tree.SetToolTipString("")
+            tree.SetToolTip(None)
+            doc = ""
+        self.tooltip = doc
         evt.Skip()
         
     def SelectItem(self, item):

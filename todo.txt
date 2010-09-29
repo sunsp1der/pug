@@ -1,15 +1,8 @@
 now:
-
+	component of 'gname' in title bar
 	levelbutton
-		make sure scene in editor changes  (scenegraph on dragon)
-	component descriptions
-		in current list tooltip
-		only show up to line break in tooltips
+		make sure scene in editor changes (scenegraph on dragon)
 	drag-n-drop animation folder
-	dropdowns stay selected when mouse used to unfocus		
-	textbox bug
-		1)add textbox component
-		2)edit component - graphic changes back
 	gameover_scene
 		switch to it after gameover
 		set_gameover_scene
@@ -38,9 +31,6 @@ bugs:
 later: 
 	hotspots
 	multiline textbox
-	component that adds components example
-		add_each then delete self
-		ability to do it in editor
 	make mouse dragging automatically use offset
 	memory leak!
 	run in single thread...

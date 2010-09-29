@@ -8,12 +8,14 @@ from pig.components.collision.Join_Collision_Group import Join_Collision_Group
 from pig.util import get_gamedata
 
 class Takes_Damage(Join_Collision_Group):
-    """Set this object to take damage from objects with Deals_Damage that
-collide with it. 
+    """Set this object to take damage from objects it collides with, if those
+    objects have the Deals_Damage component.
+
 This component gives the base object new callbacks:
     on_take_damage( amount, damager, health): called before object dies
-    on_zero_health( amount, damager, health): called if health<=0, after 
-auto_destroy
+    on_zero_health( amount, damager, health): called if health<=0, before 
+auto_destroy. If health goes up during this callback, object will not be auto-
+destroyed.
 """
     #component_info
     _set = 'pig'
@@ -72,12 +74,12 @@ auto_destroy
         except AttributeError:
             pass
         if self.health <= 0:
-            if self.auto_destroy:
-                self.owner.destroy()
             try:
                 self.owner.on_zero_health( amount, damager, self.health)
             except AttributeError:
                 pass
+        if self.health<=0 and self.auto_destroy:
+            self.owner.destroy()
         if self.do_damage_tint:
             health = max(0, self.health)
             tint_amount = 1 - health/self.start_health # tint amount
@@ -86,7 +88,7 @@ auto_destroy
                     self.start_tint[1] + self.tint_difference[1] * tint_amount,
                     self.start_tint[2] + self.tint_difference[2] * tint_amount
                     )
-            
+                        
     #making these component methods, gives you access at the base object level
     @component_method
     def set_health(self, health):

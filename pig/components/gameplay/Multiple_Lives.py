@@ -7,11 +7,11 @@ from pig.util import get_gamedata
 
 class Multiple_Lives(Component):
     """This object has multiple lives and will respawn at its starting point
-after being destroyed.
+after being destroyed. IMPORTANT: This Component only works on objects with a 
+class file.
+
 This component gives the base object a new callback:
     on_respawn(): called after object respawns
-
-IMPORTANT: This Component only works on objects with a class file.
 """
     #component_info
     _set = 'pig'

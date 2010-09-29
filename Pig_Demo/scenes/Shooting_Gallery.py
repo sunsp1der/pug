@@ -7,7 +7,8 @@ from objects.Target import Target
 from objects.cannon import cannon
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
-from pug.all_components import Utility_Keys, Value_Tracker_Text, Timer_Text
+from pug.all_components import Utility_Keys, Value_Tracker_Text, Timer_Text,\
+    Textbox
 ### End import autocode ###
 
 ### Shooting_Gallery autocode ###
@@ -50,4 +51,10 @@ class Shooting_Gallery(PigScene):
         pigsprite_instance_2.layer = 'Background'
         pigsprite_instance_2.position = (667.0, 508.0)
         pigsprite_instance_2.components.add( Timer_Text() )
+
+        pigsprite_instance_3 = PigSprite()
+        pigsprite_instance_3.layer = 'Background'
+        pigsprite_instance_3.position = (19.0, 530.0)
+        pigsprite_instance_3.components.add( Textbox(
+                text='Keys: J, L, Space') )
 ### End Shooting_Gallery autocode ###

@@ -66,7 +66,7 @@ register at the lower callback level.
                 
     def get_relative_pos(self, layer):
         if not layer:
-            pass
+            return None
         try:
             return self._pos_dict[layer]
         except:
@@ -82,6 +82,8 @@ register at the lower callback level.
         i = 0
         for e in self._single_elements:
             l = e.get_root_layer()
+            if not l:
+                continue
             wx,wy = self.get_relative_pos(l)
             p = e._cObj.Pick(_c.Vec2(wx,wy))
             p = ObjectManager.c2py(p)
@@ -99,6 +101,8 @@ register at the lower callback level.
             under = []
             for e in self._multi_elements:
                 l = e.get_root_layer()
+                if not l:
+                    continue
                 wx,wy = self.get_relative_pos(l)
                 p = e._cObj.Pick(_c.Vec2(wx,wy))
                 p = ObjectManager.c2py(p)
@@ -114,6 +118,8 @@ register at the lower callback level.
                     element.on_press()
                 for e in self._click_elements:
                     l = e.get_root_layer()
+                    if not l:
+                        continue
                     wx,wy = self.get_relative_pos(l)
                     p = e._cObj.Pick(_c.Vec2(wx,wy))
                     p = ObjectManager.c2py(p)

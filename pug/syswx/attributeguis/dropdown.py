@@ -129,6 +129,7 @@ For kwargs optional arguments, see the Base attribute GUI
         Base.apply( self)
         if self.callback:
             self.callback(self.text, self.data)
+        self.control.SetValue(self.control.GetValue())                            
         
     def item_selected(self, event=None):
         if self.allow_typing and \
@@ -143,7 +144,7 @@ For kwargs optional arguments, see the Base attribute GUI
         if self.callback:
             self.callback(self.text, self.data)
         self.set_tooltip()
-        
+            
     def set_tooltip(self):
         if self.aguidata.get('dropdown_tooltip', False):
             if hasattr(self.data,'__doc__') and self.data.__doc__:

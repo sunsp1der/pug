@@ -68,6 +68,10 @@ doesn't have as many features/accessors as the combo.ComboCtrl"""
             self.list.EnsureVisible(self.selected)
         
     def OnDismiss(self):
+        try:
+            self.GetCombo().OnDismissPopup()
+        except:
+            pass
         if not self.didSelect:
             self.SelectItem(self.originalSelection)
     
@@ -81,7 +85,6 @@ callback(self)
         if not callable(callback) and callback is not None:
             raise ValueError(''.join([str(callback)," not callable"]))
         self.popupCallback = callback  
-    
         
     def DeleteAllItems(self):
         self.list.Clear()

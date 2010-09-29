@@ -66,6 +66,9 @@ class Textbox(Component):
                 self.owner.image_file = "art\\pug.png"
             else:
                 self.owner.image_file = None
+            if getattr(Opioid2D.Director, "viewing_in_editor", False):
+                import wx
+                wx.CallAfter(wx.GetApp().refresh)
 
     @component_method            
     def on_delete(self):
@@ -131,7 +134,10 @@ class Textbox(Component):
         
     def on_removed_from_object(self):
         self.owner.set_image_file("art\\pug.png")
-
+        if getattr(Opioid2D.Director, "viewing_in_editor", False):
+            import wx
+            wx.GetApp().refresh()
+        
     def __init__(self, *a, **kw):
         if self.__class__.font is None:
             try:

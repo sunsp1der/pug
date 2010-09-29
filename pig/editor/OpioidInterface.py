@@ -5,8 +5,8 @@ import os
 import shutil
 import time
 import thread
-import subprocess
 import sys
+import traceback
 
 import wx
 from wx.lib.dialogs import ScrolledMessageDialog
@@ -24,11 +24,16 @@ from pug.syswx.pugmdi import PugMDI
 from pug.syswx.drag_drop import FileDropTarget
 
 from pig import PigScene, PigSprite, PigDirector, PauseState
-from pig.util import *
+from pig.util import fix_project_path, set_project_path, save_project_settings,\
+        entered_scene, start_scene, get_gamedata, create_gamedata, \
+        get_display_center, skip_deprecated_warnings, set_opioid_window_position
 from pig.editor.StartScene import StartScene
 from pig.editor import hacks, EditorState
 from pig.editor.GraphicsManager import graphicsManager
-from pig.editor.util import *
+from pig.editor.util import get_image_path, get_project_path, test_scene_code,\
+        edit_project_file, on_drop_files, close_scene_windows, wait_for_state,\
+        get_available_objects, get_available_scenes, create_new_project,\
+        open_project, save_scene_as, wait_for_exit_scene, python_process
  
 _DEBUG = False
 
@@ -171,7 +176,7 @@ settingsObj: an object similar to the one below... if it is missing any default
                                                             project_settings)
         self.project_settings = project_settings
           
-    cached=[0, 0, 0]      
+    __cached=[0, 0, 0]      
     def _post_init(self):
         app = wx.GetApp()
         app.set_pug_settings( self.pug_settings)
@@ -199,7 +204,7 @@ settingsObj: an object similar to the one below... if it is missing any default
             self.sceneclass = PigScene
         
         # default menus
-        if not self.cached[2]:
+        if not self.__cached[2]:
             app.add_global_menu("Pig",
                 [["New Project", self.new_project, 
                         "Create a new Pig project"],
@@ -224,7 +229,7 @@ settingsObj: an object similar to the one below... if it is missing any default
                  ["Raise Windows\tCtrl+W", app.raise_all_frames,
                         "Raise all PUG Windows to top"],
                  ["Quit\tCtrl+Q", self.quit]])
-            self.cached[2]=True
+            self.__cached[2]=True
         # open MDI frame
         if not app.get_project_frame():
             frame = PugMDI(
@@ -243,13 +248,13 @@ settingsObj: an object similar to the one below... if it is missing any default
         size = frame.GetSize()
         frame.GetNotebook().GetPage(1).SetSize([size[0]/2,size[1]])
         # cache a sprite view for speed on first selection
-        if not self.cached[0]:
+        if not self.__cached[0]:
             dummy = PigSprite( register=False)
             cache_default_view( dummy)
             dummy.delete()
             while dummy in self.Director.scene.nodes:
                 time.sleep(0.1)
-            self.cached[0] = True       
+            self.__cached[0] = True       
         self._initialized = True     
         # Import Psyco if available
         try:
@@ -315,14 +320,15 @@ forceReload: if True, reload all scenes and objects first.
             self.set_selection([])
             close_scene_windows(oldscene)
             self.stop_scene(False)
-            self.Director.scene = value
             # wait for completion
             starttime = time.time()
+            self.Director.scene = value
+            time.sleep(0.1)
             while self.Director.scene.__class__ != value or \
                     self.Director.scene is oldscene:
-                if time.time() - starttime > 5:
+                if time.time() - starttime > 30:
                     dlg = wx.MessageDialog(None,''.join([value.__name__,
-                     ' has taken over 5 seconds to load. \nContinue waiting?']),
+                     ' has taken over 30 seconds to load. \nContinue waiting?']),
                      'Scene Load Time',wx.YES_NO)
                     if dlg.ShowModal() == wx.ID_NO:
                         return
@@ -566,36 +572,53 @@ event: a wx.Event
         """Save the current scene as scenes/__Working__.py"""
         self.use_working_scene = True
         scenename = self.scene.__class__.__name__ 
+        print "s0"
         if scenename in ['PigScene', 'Scene']:
             # this is a new scene that hasn't been saved before
             saved = save_scene_as()
+            print "s1",
             if not saved:
+                print "s2",
                 return False
             else:
+                print "s3",
                 self.sceneDict[self.Director.scene.__class__.__name__] = \
                                                 self.Director.scene.__class__
+                print "s4",
             # we want to save as the new scene name AND as working scene...
         if self._new_scene:
             # hack in user code from original file
+            print "s5",
             self.revert_working_scene()
             self._new_scene = False
-        # save the scene in __working__    
+            print "s6",            
+        # save the scene in __working__
+        print "s7",    
         saved = save_scene_as( self.scene.__class__.__name__, '__Working__.py')
+        print "s8",
         if not saved:
+            print "s9",
             return False
         else:
+            print "s10",
             self.sceneDict[self.Director.scene.__class__.__name__] = \
                                                 self.Director.scene.__class__
+            print "s11",
         wx.GetApp().refresh()
+        print "s12",
         return True            
         
     def commit_scene(self):
         self.stop_scene()
         filename = save_scene_as()
+        print "s13",
         if filename:
+            print "s14",
             self.revert_working_scene()
+            print "s15",
             self.sceneDict[self.Director.scene.__class__.__name__] = \
                                                 self.Director.scene.__class__
+            print "s16",
         return filename
 
     def rewind_scene(self):
@@ -651,8 +674,9 @@ disk.
 """
         print "stop_scene 1"
         if _DEBUG: print "stop_scene"
-        if not self.Director.game_started:
+        if not getattr(self.Director, "game_started", False):
             return
+        print "stop_scene 1.5"
         wait_for_state(None)
         print "stop_scene 2"
         self.scene.stop()

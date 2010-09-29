@@ -27,14 +27,14 @@ arguments: on_collision( toSprite, fromSprite, toGroup, my_group)"""
     _class_list = [Sprite]
     # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _collision_list = [
-            ['with_group', GroupDropdown, {'doc':"Group to collide with"}],
+            ['their_group', GroupDropdown, {'doc':"Group to collide with"}],
             ['my_group', GroupDropdown, 
                     {'doc':
                     "The group this object joins and uses for collision tests"}]
             ]
     _field_list = _collision_list
     # defaults
-    _with_group = "colliders"
+    _their_group = "colliders"
     _my_group = "colliders"
     
     @component_method
@@ -42,11 +42,11 @@ arguments: on_collision( toSprite, fromSprite, toGroup, my_group)"""
         "Register for object.on_collision callback when object added to scene"
         if self._my_group:
             self.owner.join_collision_group( self._my_group)
-            if self._with_group:
+            if self._their_group:
                 PigDirector.scene.register_collision_callback( self.owner, 
                                                     self.owner.on_collision,
                                                     self.my_group,
-                                                    self.with_group,
+                                                    self.their_group,
                                                     ignore_duplicate=True)
         
     @component_method
@@ -62,15 +62,15 @@ arguments: on_collision( toSprite, fromSprite, toGroup, my_group)"""
     def __del__(self):
         "__del__(): when component is deleted, unregister groups from gui"
         if self.ref():
-            unregister_group( (self.ref, "with_group"))        
+            unregister_group( (self.ref, "their_group"))        
             unregister_group( (self.ref, "my_group"))        
         
-    def get_with_group(self):
-        return self._with_group
-    def set_with_group(self, group):
-        register_group( (self.ref, "with_group"), group)        
-        self._with_group = group
-    with_group = property (get_with_group, set_with_group)
+    def get_their_group(self):
+        return self._their_group
+    def set_their_group(self, group):
+        register_group( (self.ref, "their_group"), group)        
+        self._their_group = group
+    their_group = property (get_their_group, set_their_group)
 
     def get_my_group(self):
         return self._my_group

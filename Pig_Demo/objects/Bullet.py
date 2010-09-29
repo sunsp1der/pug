@@ -19,7 +19,7 @@ class Bullet(PigSprite):
                 shrink_out_secs=-1.0) )
         self.components.add( On_Collision_Sound(
                 sound='sound\\beep.wav',
-                with_group='target',
+                their_group='target',
                 my_group='bullet',
                 enabled=False) )
         self.components.add( Life_Zone() )
@@ -30,6 +30,6 @@ class Bullet(PigSprite):
         self.components.add( Deals_Damage(
                 damage_amount=10.0,
                 destroy_on_collide=True,
-                with_group='target',
+                their_group='target',
                 my_group='bullet') )
 ### End Bullet autocode ###

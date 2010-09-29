@@ -1,12 +1,11 @@
 ### import autocode ###
+from objects.FlyAroundPlayer import FlyAroundPlayer
 from objects.SpawnWall import SpawnWall
 from objects.Target import Target
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
-from pig.components.controls.Mouse_Face import Mouse_Face
 from pug.all_components import Utility_Keys, On_Start_Sound,\
-    Key_Direction_Controls, Motion_Zone, Key_Spawn, Collision_Destroy,\
-    On_Destroy_Sound, Spawn_On_Destroy
+    Value_Tracker_Text, Textbox
 ### End import autocode ###
 
 ### Fly_Around autocode ###
@@ -25,40 +24,38 @@ class Fly_Around(PigScene):
         Target_archetype = Target(gname='Target')
         Target_archetype.archetype = True
 
+        FlyAroundPlayer_archetype = FlyAroundPlayer(gname='FlyAroundPlayer')
+        FlyAroundPlayer_archetype.archetype = True
+
         SpawnWall_archetype = SpawnWall(gname='SpawnWall')
         SpawnWall_archetype.archetype = True
 
         # Sprites
         pigsprite_instance = PigSprite()
-        pigsprite_instance.image = 'art\\pug.png'
         pigsprite_instance.layer = 'Background'
-        pigsprite_instance.position = (400.0, 300.0)
-        pigsprite_instance.components.add( Key_Direction_Controls(
-                x_velocity=200,
-                y_velocity=200,
-                rotate=False,
-                up_key=119,
-                down_key=115,
-                left_key=97,
-                right_key=100) )
-        pigsprite_instance.components.add( Motion_Zone() )
-        pigsprite_instance.components.add( Mouse_Face() )
-        pigsprite_instance.components.add( Key_Spawn(
-                key=1001,
-                spawn_object='Bullet',
-                sound='sound\\beep.wav',
-                spawn_offset=(0.5, 0),
-                max_spawns_in_scene=1) )
-        pigsprite_instance.components.add( Collision_Destroy(
-                with_group='target',
-                my_group='player') )
-        pigsprite_instance.components.add( On_Destroy_Sound(
-                sound='sound\\beep.wav') )
-        pigsprite_instance.components.add( Spawn_On_Destroy(
-                spawn_object='ExplodeParticle',
-                obs_per_spawn=15,
-                obs_per_spawn_variance=5,
-                add_velocity=True) )
+        pigsprite_instance.position = (678.0, 547.0)
+        pigsprite_instance.components.add( Value_Tracker_Text() )
+
+        pigsprite_instance_2 = PigSprite()
+        pigsprite_instance_2.layer = 'Background'
+        pigsprite_instance_2.position = (678.0, 480.0)
+        pigsprite_instance_2.components.add( Value_Tracker_Text(
+                prefix='Health: ',
+                value_name='health') )
+
+        pigsprite_instance_3 = PigSprite()
+        pigsprite_instance_3.layer = 'Background'
+        pigsprite_instance_3.position = (678.0, 513.0)
+        pigsprite_instance_3.components.add( Value_Tracker_Text(
+                prefix='Lives: ',
+                value_name='lives') )
+
+        pigsprite_instance_4 = PigSprite()
+        pigsprite_instance_4.layer = 'Background'
+        pigsprite_instance_4.position = (20.0, 503.0)
+        pigsprite_instance_4.components.add( Textbox(
+                text='Keys: W, A, S, D Mouse: Aim, Fire',
+                max_width=220) )
 
         spawnwall_instance = SpawnWall()
         spawnwall_instance.position = (400.0, 595.0)
