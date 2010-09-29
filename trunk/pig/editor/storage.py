@@ -7,6 +7,7 @@ from inspect import getmro
 from copy import copy
 
 import wx
+wx=wx
 
 from Opioid2D.public.Node import Node
 from Opioid2D.public.Vector import VectorReference
@@ -20,7 +21,7 @@ from pig.util import get_available_scenes, get_available_objects
 from pig.PigDirector import PigDirector
 from pig.editor.EditorState import EditorState
 
-_DEBUG = True
+_DEBUG = False
 
 def save_object(obj, name=None, parentWindow=None):
     """save_object(obj): Export obj as a class to objects folder

@@ -3,7 +3,9 @@
 This file contains changes and fixes for Opioid2D that needed to be hacked in.
 """
 import Opioid2D
+from Opioid2D.public.Image import ImageInstance
 from Opioid2D.internal import textures
+import Opioid2D.internal.bitmap_transform as transform
 
 import cOpioid2D as _c
 
@@ -50,3 +52,20 @@ class TextureSheet(object):
         return _c.Image(self._tex, w-border*2, h-border*2, (x+border)/ts, (y+border)/ts, (x+w-border)/ts, (y+h-border)/ts)
 textures.TextureSheet = TextureSheet
 #print "hacked"
+    
+# Grid Image just doesn't work right.
+def _create_image( bmp, hotspot=None, border=1):
+    # skip this first clause...
+#    if bmp.width+border*2 > 512 or bmp.height+border*2 > 512:
+#        img = GridImage(bmp, border=border)
+#    else:
+    self = Opioid2D.ResourceManager
+    if border:
+        bmp = bmp.transform(transform.make_bordered, border)
+    img = self._texmgr.add_image(bmp, border)
+    img = ImageInstance(img)
+    if hotspot:
+        img._cObj.hotspot.set(*hotspot)
+    return img
+
+Opioid2D.ResourceManager._create_image = _create_image

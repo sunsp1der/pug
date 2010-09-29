@@ -16,6 +16,5 @@ class SpawnWall(PigSprite):
                 spawn_interval_variance=2.0,
                 spawn_location='top',
                 obs_per_spawn_variance=1,
-                max_spawns_in_scene=2,
-                match_scale=False) )
+                max_spawns_in_scene=2) )
 ### End SpawnWall autocode ###

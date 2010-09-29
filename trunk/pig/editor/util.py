@@ -268,10 +268,13 @@ def wait_for_state(state):
     "wait_for_state(state): Set scene state then wait until Opioid is ready"
     scene = PigDirector.scene
     oldstate = scene.state
+    print "wfs 1",
     scene.state = state
     timer = 0
+    print "wfs 2",
     while not (scene.state == state or scene.state.__class__ == state) and \
             getattr(oldstate, 'exitted', True):
+        print "wfs 3",        
         if _DEBUG: print "   Waiting for state: ",state
         time.sleep(0.05)         
         timer += 1

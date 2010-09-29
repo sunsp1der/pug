@@ -1,8 +1,7 @@
-import Opioid2D
-
 from pug.component import *
 
 from pig.components.collision.Collision_Callback import Collision_Callback
+from pig.PigDirector import PigDirector
 
 class Stop_Wall( Collision_Callback):
     """Other objects stop when they collides with this object. This component is
@@ -12,7 +11,7 @@ results, sprite graphics colliding with the wall should be circles."""
     @component_method
     def on_collision(self, toSprite, fromSprite, toGroup, fromGroup):
         "Push colliding object out of this sprite's area"
-        delta = Opioid2D.Director.delta * 0.001
+        delta = PigDirector.delta * 0.001
         spritepos = fromSprite.get_position()
         spritev = fromSprite.get_velocity()
         mypos = toSprite.get_position()

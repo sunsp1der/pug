@@ -4,8 +4,8 @@ from pig.PigSprite import PigSprite
 from pug.all_components import Utility_Keys, Scene_Button, Textbox
 ### End import autocode ###
 
-### MyScene autocode ###
-class MyScene(PigScene):
+### MenuScreen autocode ###
+class MenuScreen(PigScene):
     def __init__(self, *args, **kwargs):
         PigScene.__init__(self, *args, **kwargs)
         self.components.add( Utility_Keys() )
@@ -30,4 +30,4 @@ class MyScene(PigScene):
         pigsprite_instance_2.tint = (0, 0, 0)
         pigsprite_instance_2.components.add( Textbox(
                 text='dragon') )
-### End MyScene autocode ###
+### End MenuScreen autocode ###

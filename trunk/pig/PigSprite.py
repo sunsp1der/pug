@@ -287,10 +287,8 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
         # make sure we have our dummy node and cleanup registered
         if exporter_cleanup not in exporter.deleteCallbacks:
             exporter.register_delete_callback( exporter_cleanup)
-        print "sprite_create 1"
         dummy = cls(register=False)
         time.sleep(0.1)
-        print "sprite_create 2"
         return dummy
         
     def _create_object_code(self, storageDict, indentLevel, exporter):

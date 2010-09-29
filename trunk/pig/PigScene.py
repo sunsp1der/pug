@@ -3,6 +3,7 @@ from weakref import WeakKeyDictionary
 import warnings
 import sys
 import traceback
+import time
 
 from pygame.locals import KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP
 from pygame.key import get_pressed
@@ -107,21 +108,20 @@ This method calls back individual sprites that have registered for collision
 callbacks using register_collision_callback
 """        
         collision_dict = self._collision_callback_dict
-        try:
-            callback_list = collision_dict[toSprite][(toGroup, fromGroup)]
-        except:
-            pass
-        else:
-            for callback in callback_list:
-                callback( toSprite, fromSprite, toGroup, fromGroup)
-# WAS THIS UNNECESSARY AFTER ALL!?                
+        callback_dict = collision_dict.get(toSprite, None)
+        if callback_dict is not None:
+            for groups, callbacks in callback_dict.iteritems():
+                if fromSprite in self._groups.get( groups[1]):
+                    for callback in callbacks:
+                        callback( toSprite, fromSprite, groups[0], groups[1])
         # we only get one callback, so check if fromSprite needs a call
         # this is slow and could possibly be improved
-#        if check_reverse:
-#            self.collide_callbacker( fromSprite, toSprite, fromGroup, toGroup, 
-#                                   False)
+        if check_reverse:
+            self.collide_callbacker( fromSprite, toSprite, fromGroup, toGroup, 
+                                   False)
         
-    def unregister_collision_callback(self, sprite, toGroup=None,fromGroup=None): 
+    def unregister_collision_callback(self, sprite, 
+                                      toGroup=None, fromGroup=None): 
         """unregister_collision_callback( sprite, toGroup, fromGroup)
         
 sprite: the sprite to unregister
@@ -581,6 +581,8 @@ If scene is a working scene, return
         if storage_name == 'PigScene' or storage_name == 'Scene':
             raise ValueError(''.join(["Can't over-write ",
                                       storage_name," base class."]))
+        if not storageDict['as_class']:            
+            raise ValueError("Scenes can only be stored as classes.")
         # start with basic export
         base_code = exporter.create_object_code(self, storageDict, indentLevel, 
                                                 True)
@@ -592,101 +594,98 @@ If scene is a working scene, return
 #            custom_code_list += [baseIndent, _INDENT, 'groups = ', 
 #                                 str(self._groups.keys()),
 #                                 '\n']
-        if storageDict['as_class']:            
-            # enter function
-            if self.nodes:
-                # create ordered list of nodes
-                nodes = self.get_ordered_nodes()
-                nodes.reverse() # store them from bottom-most to top-most
-                
-                # store archetypes at top of file
-                archetypes = False
-                for node in nodes:
-                    if not node.archetype:
-                        continue
-                    if not archetypes:
-                        custom_code_list += [baseIndent, _INDENT*2, 
-                                             '# Archetypes\n']
-                        archetypes = True
-                    # this node is a class archetype, figure out a save name
-                    if node.gname:
-                        savename = node.gname
-                    else:
-                        # no gname, so find an available filename
-                        tryname = base_tryname = 'MyObjectClass'
-                        savename = ''
-                        suffix = 1
-                        while not savename:
-                            path = os.path.join('objects',
-                                                ''.join([tryname,'.py']))
-                            try:
-                                file(path)
-                            except:
-                                savename = tryname
-                            else:
-                                suffix+=1
-                                tryname = ''.join([base_tryname, 
-                                                   str(suffix)])
-                        node.gname = savename
-                    archetype_exporter = save_object( node, savename)
-                    if not archetype_exporter or \
-                                            archetype_exporter.errorfilename:
-                        error = ''.join(["PigScene code export failed...",
-                                "unable to save archetype:",
-                                savename, node])
-                        warnings.warn(error)
-                        return
-                    module = __import__('.'.join(['objects',savename]),
-                                       fromlist=[savename])
-                    reload(module)
-                    newclass = getattr(module,savename)
-                    node.__class__ = newclass
-                    nodeStorageDict = exporter.get_custom_storageDict(node)                            
-                    nodeStorageDict['name'] =''.join([savename,'_archetype'])
-                    nodeStorageDict['as_class'] = False # export as object
-                    node_code = exporter.create_object_code(node, 
-                                                            nodeStorageDict, 
-                                                            indentLevel + 2,
-                                                            False)                    
-                    custom_code_list+=[node_code,'\n']
-               
-                # store instances
-                instances = False
-                for node in nodes:
-                    if node.archetype:
-                        continue
-                    if not instances:
-                        custom_code_list += [baseIndent, _INDENT*2, 
-                                             '# Sprites\n']
-                        instances = True
-                    else:
-                        custom_code_list +=['\n',]
-                    nodeStorageDict = exporter.get_custom_storageDict(node)
-                    nodeStorageDict['as_class'] = False # export as object
-                    node_code = exporter.create_object_code(node, 
-                                                            nodeStorageDict, 
-                                                            indentLevel + 2,
-                                                            False)                    
-                    custom_code_list += [node_code]
-            init_code = [baseIndent, _INDENT, 'def on_enter(self):\n']
-            if not custom_code_list:
-                custom_code_list = init_code
-                custom_code_list += [baseIndent, _INDENT*2, 'pass\n']
-            else:
-                custom_code_list = init_code + custom_code_list
-#            custom_code_list += [baseIndent, _INDENT*2, '# Pug auto-start\n']
-#            custom_code_list += [baseIndent, _INDENT * 2, 'self.start()','\n']
-        if base_code.endswith('pass\n') and custom_code_list: 
-            # clean up pass case (for looks)
-            base_code = base_code.splitlines()[0:-1]
-            base_code.append('\n')
-        else:
-            base_code = [base_code +'\n']
+        # enter function
+        if self.nodes:
+            # create ordered list of nodes
+            nodes = self.get_ordered_nodes()
+            nodes.reverse() # store them from bottom-most to top-most
+            
+            # store archetypes at top of file
+            archetypes = False
+            for node in nodes:
+                if not node.archetype:
+                    continue
+                if not archetypes:
+                    custom_code_list += [baseIndent, _INDENT*2, 
+                                         '# Archetypes\n']
+                    archetypes = True
+                # this node is a class archetype, figure out a save name
+                if node.gname:
+                    savename = node.gname
+                else:
+                    # no gname, so find an available filename
+                    tryname = base_tryname = 'MyObjectClass'
+                    savename = ''
+                    suffix = 1
+                    while not savename:
+                        path = os.path.join('objects',
+                                            ''.join([tryname,'.py']))
+                        try:
+                            file(path)
+                        except:
+                            savename = tryname
+                        else:
+                            suffix+=1
+                            tryname = ''.join([base_tryname, 
+                                               str(suffix)])
+                    node.gname = savename
+                archetype_exporter = save_object( node, savename)
+                if not archetype_exporter or \
+                                        archetype_exporter.errorfilename:
+                    error = ''.join(["PigScene code export failed...",
+                            "unable to save archetype:",
+                            savename, node])
+                    warnings.warn(error)
+                    return
+                time.sleep(0.1)
+                module = __import__('.'.join(['objects',savename]),
+                                   fromlist=[savename])
+                reload(module)
+                newclass = getattr(module,savename)
+                node.__class__ = newclass
+                nodeStorageDict = exporter.get_custom_storageDict(node)                            
+                nodeStorageDict['name'] =''.join([savename,'_archetype'])
+                nodeStorageDict['as_class'] = False # export as object
+                node_code = exporter.create_object_code(node, 
+                                                        nodeStorageDict, 
+                                                        indentLevel + 2,
+                                                        False)                    
+                custom_code_list+=[node_code,'\n']
+           
+            # store instances
+            instances = False
+            for node in nodes:
+                if node.archetype:
+                    continue
+                if not instances:
+                    custom_code_list += [baseIndent, _INDENT*2, 
+                                         '# Sprites\n']
+                    instances = True
+                else:
+                    custom_code_list +=['\n',]
+                nodeStorageDict = exporter.get_custom_storageDict(node)
+                nodeStorageDict['as_class'] = False # export as object
+                node_code = exporter.create_object_code(node, 
+                                                        nodeStorageDict, 
+                                                        indentLevel + 2,
+                                                        False)                    
+                custom_code_list += [node_code]
+        #spacing before custom code
+        if custom_code_list:
+            custom_code_list = ['\n']+custom_code_list
         #add layers line
         layers = get_available_layers()
         if layers != ["Background"]:
-            base_code += [baseIndent, _INDENT,'layers = ', str(layers),'\n']
-        code = ''.join(base_code + custom_code_list)
+            layercode = ''.join([baseIndent, _INDENT,'layers = ', str(layers),
+                                '\n'])
+            base_code_lines = base_code.splitlines()
+            base_code = '\n'.join([base_code_lines[0]] + [layercode] +\
+                                  base_code_lines[1:])+'\n'
+        # remove pass in base code if we have custom code
+        if base_code.endswith('pass\n') and custom_code_list: 
+            # clean up pass case (for looks)
+            base_code = '\n'.join(base_code.splitlines()[0:-1])
+        code = ''.join([base_code] + custom_code_list)
         if _DEBUG: print "*******************exit scene save"
         return code
     
@@ -694,6 +693,10 @@ If scene is a working scene, return
             'custom_export_func': _create_object_code,
             'as_class':True,
             'dummy_creator': '_create_dummy',
+            'init_method':'on_enter',
+            'init_method_args':[],
+            'base_init': False,
+            'force_init_def': True,
             'skip_attributes': ['_nodes','_groups','scene_layers','layers',
                                 '_PigScene__node_num', '_key_down_dict', 
                                 '_key_up_dict','started','k_info',

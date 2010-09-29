@@ -28,7 +28,7 @@ class Target(PigSprite):
         self.components.add( Score_On_Destroy() )
         self.components.add( Deals_Damage(
                 damage_amount=50.0,
-                with_group='player',
+                their_group='player',
                 my_group='target') )
         self.components.add( Takes_Damage(
                 start_health=10.0,

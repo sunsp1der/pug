@@ -33,8 +33,6 @@ frames, number with zeros, like this: "frame08", "frame09","frame10","frame11"
                                 }],
             ['destroy',
              'Destroy this object when animation completes. Stop mode only.'],
-            ['preload',
-'Loading grid images can be slow, True loads them in at startup time']
             ]
     _field_list += _animate_list
     #defaults
