@@ -10,6 +10,7 @@ import traceback
 
 import wx
 from wx.lib.dialogs import ScrolledMessageDialog
+wx=wx
 
 import Opioid2D
 from Opioid2D.public.Node import Node
@@ -122,7 +123,7 @@ settingsObj: an object similar to the one below... if it is missing any default
         # DEFAULT PUG SETTINGS
         class pug_settings():
             initial_scene = "__Working__"
-            rect_Pig_Editor = (470, 150, 550, 600)
+            Rect_Pig_Editor = (470, 150, 550, 600)
             rect_opioid_window = (0, 0, 800 , 600)
             save_settings_on_quit = True
 
@@ -284,38 +285,43 @@ query: if True, query the user about saving the current scene first
         """Show scene data in a window"""
         pug.frame(self.scene)
             
-    def set_scene(self, value, forceReload=False):
+    def set_scene(self, value, forceReload=False, doTest=False):
         """set_scene(value, forceReload=False): set the current scene 
 
 value: can be either an actual scene class, or the name of a scene class
 forceReload: if True, reload all scenes and objects first. 
 """
+        print "set_scene 1"
         if forceReload is True:
             self.reload_object_list()
             self.reload_scene_list()
         if value == str(value):
+            print "set_scene 2"
             if self.sceneDict.has_key(value):
                 value = self.sceneDict[value]
             else:
                 if value == "PigScene":
                     value = PigScene
         else:
+            print "set_scene 3"
             if value not in self.sceneDict.values():
                 self.reload_scene_list()
                 value = self.sceneDict.get(value.__name__, value)
         oldscene = self.Director.scene
         if oldscene.__class__ != value or forceReload:
             if _DEBUG: print "OpioidInterface.set_scene", value
-            try:
-                if value.__module__ == 'scenes.__Working__':
-                    test_scene_code(value.__name__, '__Working__')
-                else:
-                    test_scene_code(value.__name__)
-            except:
-                self.set_scene( PigScene, forceReload=True)
-                wx.GetApp().get_project_frame().refresh()
-                show_exception_dialog( prefix='Unable to set scene: ')
-                return
+#            try:
+#                print "set_scene 3.5"
+#                if value.__module__ == 'scenes.__Working__':
+#                    test_scene_code(value.__name__, '__Working__')
+#                else:
+#                    test_scene_code(value.__name__)
+#            except:
+#                print "set_scene 3.6"
+#                self.set_scene( PigScene, forceReload=True)
+#                wx.GetApp().get_project_frame().refresh()
+#                show_exception_dialog( prefix='Unable to set scene: ')
+#                return
             self._new_scene = True
             self.set_selection([])
             close_scene_windows(oldscene)
@@ -324,19 +330,22 @@ forceReload: if True, reload all scenes and objects first.
             starttime = time.time()
             self.Director.scene = value
             time.sleep(0.1)
+            print "set_scene 4"            
             while self.Director.scene.__class__ != value or \
                     self.Director.scene is oldscene:
                 if time.time() - starttime > 30:
                     dlg = wx.MessageDialog(None,''.join([value.__name__,
-                     ' has taken over 30 seconds to load. \nContinue waiting?']),
-                     'Scene Load Time',wx.YES_NO)
+                ' has taken over 30 seconds to load. \nContinue waiting?']),
+                'Scene Load Time',wx.YES_NO)
                     if dlg.ShowModal() == wx.ID_NO:
                         return
                     else:
                         starttime = time.time()
                 time.sleep(0.05)
             time.sleep(0.05)
+            print "set_scene 5"
             wait_for_state(EditorState)
+            print "set_scene 6"
             entered_scene()
             wx.GetApp().refresh()
             
@@ -625,9 +634,12 @@ event: a wx.Event
         """rewind_scene(): reset the scene and play it again"""
         if not self.Director.game_started:
             return
-        self.stop_scene()
-        self.play_scene( False)
-        
+        gamedata = get_gamedata()
+        scene = gamedata.start_sceneclass
+        create_gamedata()
+        self.Director.game_started = False
+        self.Director.switch_scene_to(scene)
+
     def play_scene( self, doSave=True):
         """play_scene(doSave=True)
         
@@ -688,7 +700,7 @@ disk.
         create_gamedata()
         print "stop_scene 5"
         pug.set_default_pugview("Component", _dataPugview)
-        print "stop_scene 6"        
+        print "stop_scene 6", scene.__name__        
         if doRevert:
             self.set_scene(scene.__name__, True)
         print "stop_scene 7"            
@@ -758,24 +770,33 @@ Opioid2D, it is safer to call this via add_object.
                 pass
             node.position = get_display_center()
             node.layer = "Background"
+        #let components do fanciness, then continue
+        (Opioid2D.Delay(0) + Opioid2D.CallFunc(self.do_add_object2, node)).do()
+    
+    def do_add_object2(self, node):
         # avoid overlapping sprites exactly
+        if node.image == None and node.image_file:
+            node.set_image( node.image_file)
         okay_position = False
         nodes = self.Director.scene._get_nodes().keys()
-        nodeloc = [node.rect.left, node.rect.top,
-                   node.rect.width, node.rect.height]
-        while okay_position == False:
-            okay_position = True
-            for obj in nodes:
-                if obj == node:
-                    continue
-                if nodeloc == [obj.rect.left, obj.rect.top, 
-                               obj.rect.width, obj.rect.height]:
-                    nodeloc[0] += 10
-                    nodeloc[1] += 10
-                    okay_position = False
-                    break
-        node.rect.left = nodeloc[0]
-        node.rect.top = nodeloc[1]
+        try:
+            nodeloc = [node.rect.left, node.rect.top,
+                       node.rect.width, node.rect.height]
+            while okay_position == False:
+                okay_position = True
+                for obj in nodes:
+                    if obj == node:
+                        continue
+                    if nodeloc == [obj.rect.left, obj.rect.top, 
+                                   obj.rect.width, obj.rect.height]:
+                        nodeloc[0] += 10
+                        nodeloc[1] += 10
+                        okay_position = False
+                        break
+            node.rect.left = nodeloc[0]
+            node.rect.top = nodeloc[1]
+        except:
+            pass
         # deal with Opioid image idiosyncracies HACK
         if hasattr(node, 'set_image_file') and\
                 hasattr(node, 'get_image_file'):

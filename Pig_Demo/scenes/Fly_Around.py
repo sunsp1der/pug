@@ -10,16 +10,15 @@ from pug.all_components import Utility_Keys, On_Start_Sound,\
 
 ### Fly_Around autocode ###
 class Fly_Around(PigScene):
-    def __init__(self, *args, **kwargs):
-        PigScene.__init__(self, *args, **kwargs)
+    layers = ['Background', 'walls']
+
+    def on_enter(self):
         self.components.add( Utility_Keys(
                 info_F1='scenes\\Fly_Around_Help.txt') )
         self.components.add( On_Start_Sound(
                 sound='sound\\beep.wav',
                 loops=0) )
 
-    layers = ['Background', 'walls']
-    def on_enter(self):
         # Archetypes
         Target_archetype = Target(gname='Target')
         Target_archetype.archetype = True

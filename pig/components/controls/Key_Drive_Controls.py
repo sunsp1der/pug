@@ -6,8 +6,10 @@ from pig.keyboard import *
 from pig.editor.agui import KeyDropdown
 from pig.PigDirector import PigDirector
 from pig.components.behavior.Forward_Motion import Forward_Motion
+from pig.components.controls.Key_Direction_Controls import \
+                                                        Key_Direction_Controls
 
-class Key_Drive_Controls( Forward_Motion):
+class Key_Drive_Controls( Forward_Motion, Key_Direction_Controls):
     """Keys for forward, backward, and rotate left/right"""
     #component_info
     _set = 'pig'
@@ -72,14 +74,10 @@ class Key_Drive_Controls( Forward_Motion):
         
     def change_rotation(self, delta):
         self.owner.rotation_speed += delta
-                
-    @component_method
+        
     def on_destroy(self):
-        """unregister keys when component is destroyed"""
-        scene = PigDirector.scene
-        for info in self.k_info:
-            scene.unregister_key(info)
-        self.k_info = []                
+        Key_Direction_Controls.on_destroy(self)
+        Forward_Motion.on_destroy(self)
                 
 register_component( Key_Drive_Controls)
 

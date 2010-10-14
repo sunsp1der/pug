@@ -41,11 +41,12 @@ destroyed.
     auto_destroy = True
     do_damage_tint = True
     damage_tint = ( 255, 0, 0)  
-    invincible_time = 1
+    invincible_time = 0
     value_name = ''
     
     _health = None
     invincible = True
+    action = None
       
     @component_method
     def on_first_display(self):
@@ -57,8 +58,11 @@ destroyed.
                                 self.damage_tint[1]-self.start_tint[1],
                                 self.damage_tint[2]-self.start_tint[2],
                                 )
-        (Delay(self.invincible_time) + \
+        if self.invincible_time:
+            self.action = (Delay(self.invincible_time) + \
                 CallFunc(self.set_invincible, False)).do()
+        else:
+            self.invincible = False
             
     def set_invincible(self, val):
         self.invincible = val
@@ -80,7 +84,7 @@ destroyed.
                 pass
         if self.health<=0 and self.auto_destroy:
             self.owner.destroy()
-        if self.do_damage_tint:
+        if self.owner and self.do_damage_tint:
             health = max(0, self.health)
             tint_amount = 1 - health/self.start_health # tint amount
             self.owner.tint = (

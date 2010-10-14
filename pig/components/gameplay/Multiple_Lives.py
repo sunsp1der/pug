@@ -4,6 +4,7 @@ from Opioid2D import Delay, CallFunc
 from pug.component import *
 
 from pig.util import get_gamedata
+from pig.PigDirector import PigDirector
 
 class Multiple_Lives(Component):
     """This object has multiple lives and will respawn at its starting point
@@ -32,7 +33,7 @@ This component gives the base object a new callback:
             ]
     #defaults
     spawn_archetype = True
-    start_lives = 2
+    start_lives = 3
     respawn_time = 3
     value_name = 'lives'
     do_gameover = False
@@ -51,17 +52,19 @@ This component gives the base object a new callback:
             self.lives -= 1
             (Delay(self.respawn_time) + CallFunc(do_respawn, 
                                                  self.owner.__class__,
-                                                 self.lives)).do()
+                                                 self.lives,
+                                                 PigDirector.scene)).do()
         elif self.do_gameover:
             gamedata = get_gamedata()
             gamedata.gameover()
             
     @component_method
     def on_delete(self):
-        if self.owner.archetype and self.spawn_archetype:
+        if self.owner.archetype and self.spawn_archetype and \
+                getattr(PigDirector, 'start_project', False):
             self.on_first_display()
             (Delay(0) + CallFunc(do_respawn, self.owner.__class__,
-                                             self.lives)).do()            
+                                self.lives-1, PigDirector.scene)).do()                            
                                              
     @component_method
     def on_respawn(self):
@@ -83,7 +86,10 @@ This component gives the base object a new callback:
     
 # this is in a separate function because the original object with the component
 # has been deleted
-def do_respawn( cls, lives):
+def do_respawn( cls, lives, scene):
+    #check to make sure we're in the same scene
+    if scene != PigDirector.scene:
+        return
     obj = cls()
     obj.set_lives( lives)
 

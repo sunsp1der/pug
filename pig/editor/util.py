@@ -76,6 +76,7 @@ exception that caused the scene to fail.
 scenename: name of scene to test
 modulename: name of module to find scene in. Basically for __Working__ only
 """
+    _DEBUG = True
     if modulename is None:
         modulename = scenename
     if _DEBUG: print "test_scene_code 1"
@@ -87,16 +88,22 @@ modulename: name of module to find scene in. Basically for __Working__ only
     else:
         get_available_objects(True)
     exec('import scenes.' + modulename + ' as reload_module')
-#    if _DEBUG: print "test_scene_code 2"
+    if _DEBUG: print "test_scene_code 2"
     reload(reload_module) #@UndefinedVariable
-#    if _DEBUG: print "test_scene_code 3"
+    if _DEBUG: print "test_scene_code 3"
     exec('from scenes.'+modulename+' import '+scenename+' as scene')
-#    if _DEBUG: print "test_scene_code 4"
+    if _DEBUG: print "test_scene_code 4"
     try:
-#        if _DEBUG: print "test_scene_code 5"        
+        if _DEBUG: print "test_scene_code 5"        
         test = scene() #@UndefinedVariable
+        if _DEBUG: print "test_scene_code 5.1"
+        time.sleep(0.05)
         test.test_scene = True
+        if _DEBUG: print "test_scene_code 5.11"        
         test.enter()
+        if _DEBUG: print "test_scene_code 5.12"        
+        time.sleep(0.05)
+        if _DEBUG: print "test_scene_code 5.13"        
         test.exit()
     except:
         # for some reason, if we don't do the following, images get broken
@@ -270,6 +277,7 @@ def wait_for_state(state):
     oldstate = scene.state
     print "wfs 1",
     scene.state = state
+    time.sleep(0.05)
     timer = 0
     print "wfs 2",
     while not (scene.state == state or scene.state.__class__ == state) and \
@@ -279,8 +287,10 @@ def wait_for_state(state):
         time.sleep(0.05)         
         timer += 1
         if timer > 50:
-            raise ValueError("Pug unable to set scene state")
-    time.sleep(0.05)         
+            raise ValueError("Pug unable to set scene state") 
+                # get next spawn_interval
+    print "Wfs 4"
+    time.sleep(0.05)
     if _DEBUG: print "   State set"
 
 def wait_for_exit_scene():  

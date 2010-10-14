@@ -23,8 +23,7 @@ class Spawner(Component):
         ["spawn_object", ObjectsDropdown, {'component':True,
                                      'doc':"The object class to spawn"}],
         ["sound", SoundFile, {'doc':"Sound to play when a spawn occurs"}],
-        ["spawn_interval",
-                "Seconds between spawns (0 for no automatic spawning)"],
+        ["spawn_interval", "Seconds until next spawn"],
         ["spawn_interval_variance",
                 "spawn_interval can vary this many seconds"],
         ["spawn_location", Dropdown, {'list':['area', 'center', 'edges', 'top',
@@ -47,12 +46,12 @@ class Spawner(Component):
         ["match_scale", "Multiply spawned object's scale by owner's scale"],
         ["add_rotation", "Add owner's rotation to spawned object's rotation"],
         ["add_velocity", "Add owner's velocity to spawned object's velocity"],
-        ["owner_callback", 
-            "\n".join(["Call this method of owner right after a spawn happens.",
-                       "callback( spawned_object, this_component)"])],
-        ["obj_callback", 
-   "\n".join(["Call this method of spawned object right after a spawn happens.",
-                       "callback( this_component)"])],
+#        ["owner_callback", 
+#            "\n".join(["Call this method of owner right after a spawn happens.",
+#                       "callback( spawned_object, this_component)"])],
+#        ["obj_callback", 
+#   "\n".join(["Call this method of spawned object right after a spawn happens.",
+#                       "callback( this_component)"])],
         ]
     # attribute defaults
     spawn_object = None
@@ -96,9 +95,9 @@ class Spawner(Component):
     def start_spawning(self):
         "Start the spawn timer. To skip delay, call check_spawn"
         if self.spawn_interval > 0:
-            self.action = self.owner.do( Delay(self.spawn_delay \
+            self.action = ( Delay(self.spawn_delay \
                    + self.get_next_spawn_wait())\
-                   + CallFunc( self.check_spawn))
+                   + CallFunc( self.check_spawn)).do(self.owner)
     
     @component_method 
     def spawn(self):
@@ -183,23 +182,20 @@ class Spawner(Component):
         return self.spawn_interval + random.uniform(
                                                 -self.spawn_interval_variance, 
                                                 self.spawn_interval_variance)
-        
-    @component_method
-    def on_destroy(self):
-        if self.action:
-            self.action.abort()
-        
+                            
     def check_spawn(self, schedule_next=True):
         """check_spawn(): do a spawn if criteria are met 
         
 This method checks against max_spawns_in_scene and count. Another spawn will be
 scheduled unless total_objects_spawned has been reached. """
+        if not self.owner:
+            return
         if not self.enabled or (self.total_objects_spawned > -1 and \
                 self.spawn_count >= self.total_objects_spawned):
             return None
         if self.spawn_interval > 0 and schedule_next:
-            self.action = self.owner.do( Delay(self.get_next_spawn_wait()) + \
-                                         CallFunc(self.check_spawn))
+            self.action = ( Delay(self.get_next_spawn_wait()) + \
+                                    CallFunc(self.check_spawn)).do(self.owner)
         if self.max_spawns_in_scene < 0 or \
                 len(self.spawned_objects) < self.max_spawns_in_scene:
             return self.spawn()
@@ -208,9 +204,10 @@ scheduled unless total_objects_spawned has been reached. """
     def stop_spawning(self):
         self.action.abort()
     
-    def pop_spawned(self):
-        """pop_spawned(): pop and return a spawned object"""
-        return self.spawned_objects.popitem()[1]
+#    # for testing
+#    def pop_spawned(self):
+#        """pop_spawned(): pop and return a spawned object"""
+#        return self.spawned_objects.popitem()[1]
     
         
 register_component( Spawner)

@@ -4,7 +4,7 @@ from pug.component import *
 
 from pig.util import get_gamedata
 
-class Score_On_Destroy(Component):
+class Value_On_Destroy(Component):
     "When object is destroyed, change a gamedata value"
     #component_info
     _set = 'pig'
@@ -26,4 +26,4 @@ class Score_On_Destroy(Component):
         setattr(gamedata, self.value_name, 
                 getattr(gamedata, self.value_name, 0) + self.amount)
 
-register_component( Score_On_Destroy)
+register_component( Value_On_Destroy)

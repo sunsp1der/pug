@@ -21,7 +21,7 @@ from pug.syswx.SelectionWindow import SelectionWindow
 # TODO: create 'Initializing Pug' window
 # TODO: create a link between project closing and app closing
 
-_RECTPREFIX = 'rect_'
+_RECTPREFIX = 'Rect_'
 _DEBUG = False
 
 class pugApp(wx.App):

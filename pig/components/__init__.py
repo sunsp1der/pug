@@ -30,7 +30,7 @@ from pig.components.gui.Textbox import Textbox
 from pig.components.gui.Value_Tracker_Text import Value_Tracker_Text
 from pig.components.gui.Timer_Text import Timer_Text
 from pig.components.gameplay.Set_Attribute import Set_Attribute
-from pig.components.gameplay.Score_On_Destroy import Score_On_Destroy
+from pig.components.gameplay.Value_On_Destroy import Value_On_Destroy
 from pig.components.gameplay.Takes_Damage import Takes_Damage
 from pig.components.gameplay.Deals_Damage import Deals_Damage
 from pig.components.gameplay.Multiple_Lives import Multiple_Lives

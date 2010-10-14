@@ -17,6 +17,8 @@ class Key_Direction_Controls( Component):
             ['x_velocity', 'Horizontal velocity set by up and down keys'],
             ['y_velocity', 'Vertical velocity set by left and right keys'],
             ['rotate', 'Rotate object to face direction of movement'],
+            ['flip_left', 
+            'Flip object image when moving to the left (good for side view)'], 
             ['up_key', KeyDropdown, 
                 {'doc':"Press this key to set object's upward velocity"}],
             ['down_key', KeyDropdown, 
@@ -30,11 +32,14 @@ class Key_Direction_Controls( Component):
     x_velocity = 100
     y_velocity = 100
     rotate = True 
+    flip_left = False
     up_key = keys["I"]
     down_key = keys["K"]
     left_key = keys["J"]
     right_key = keys["L"]
     
+    lastdir = "right"
+    k_info = []
                 
     @component_method
     def on_added_to_scene(self, scene):
@@ -62,10 +67,22 @@ class Key_Direction_Controls( Component):
         self.owner.velocity += (x_change, y_change)
         if self.rotate and self.owner.velocity.length: 
             self.owner.rotation = self.owner.velocity.direction        
-    
+        if self.flip_left:
+            if self.owner.velocity.x < 0 and self.lastdir == "right":
+                self.lastdir = "left"
+                self.owner.scale.x *= -1
+            elif self.owner.velocity.x > 0 and self.lastdir == "left": 
+                self.lastdir = "right"
+                self.owner.scale.x *= -1
+                
     @component_method
     def on_destroy(self):
         """unregister keys when component is destroyed"""
+        self.on_delete()
+    
+    @component_method
+    def on_delete(self):
+        """unregister keys when component is deleted"""
         scene = PigDirector.scene
         for info in self.k_info:
             scene.unregister_key(info)
