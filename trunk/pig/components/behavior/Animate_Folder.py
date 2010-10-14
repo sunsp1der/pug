@@ -101,12 +101,8 @@ frames, number with zeros, like this: "frame08", "frame09","frame10","frame11"
     @component_method            
     def on_delete(self):
         "Deconstruct component"
-        #hack
-        try:
-            if self.set_action and self.set_action._callbacks:
-                self.set_action._callbacks = None
-        except:        
-            pass
+        if self.set_action:
+            self.set_action.abort()
             
     def show_editor_frame(self, imagenum=None):
         if self.owner:
@@ -132,10 +128,10 @@ frames, number with zeros, like this: "frame08", "frame09","frame10","frame11"
                 action += Opioid2D.CallFunc(self.owner.destroy)
             self.owner.do(action)
         
-    @component_method
-    def on_added_to_editor(self, scene):
-        """Show text when object or component is added to editor"""
-        self.animation = self.folder    
+#    @component_method
+#    def on_added_to_editor(self, scene):
+#        """Show correct frame when object or component is added to editor"""
+#        self.animation = self.folder    
 
     def on_removed_from_object(self):
         self.owner.set_image_file("art\\pug.png")

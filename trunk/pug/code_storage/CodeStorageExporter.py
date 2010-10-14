@@ -13,7 +13,7 @@ from pug.gname import GnamedObject
 from pug.util import make_valid_attr_name, get_type_name
 import pug.all_components as all_components
 
-_DEBUG = False
+_DEBUG = True
 
 class CodeStorageExporter():
     """Object that manages exporting autocode
@@ -711,20 +711,25 @@ there are no attributes to set, this method returns "".
         else:
             # try for a couple seconds to create a dummy object to compare to
             dummy = None
+            if _DEBUG: print "CSE.get_dummy 0"
             try:
                 codeStorageDict = getattr(obj_class, '_codeStorageDict', {})
                 dummyCreator = codeStorageDict.get('dummy_creator')
                 if type(dummyCreator) == str:
                     dummyCreator = getattr(obj_class, dummyCreator)
                 if dummyCreator:
+                    if _DEBUG: print "CSE.get_dummy 1", obj_class, dummyCreator
                     dummy = dummyCreator( self)
                 else:
+                    if _DEBUG: print "CSE.get_dummy 2"
                     dummy = obj_class()
                 starttime = time.time()
                 while dummy is None:
+                    if _DEBUG: print "CSE.get_dummy 3"
                     if time.time() - starttime > 2:
                         break
                     time.sleep(0.01)
+                if _DEBUG: print "CSE.get_dummy 4"                    
             except:
                 if _DEBUG:
                     print "   DUMMY OBJECT CREATE FAILED"

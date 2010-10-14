@@ -31,6 +31,7 @@ Opioid2d Sprite with features for use with pug"""
     image = ''
     draggable = False
     auto_scene_register = True
+    initialized = False
     
     def __del__(self):
         pug.BaseObject.__del__(self)
@@ -44,6 +45,7 @@ Opioid2d Sprite with features for use with pug"""
             register = self.auto_scene_register
         if register:
             self.scene_register()
+        self.initialized = True
             
     def on_create(self):
         pass
@@ -285,10 +287,20 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
     @classmethod
     def _create_dummy(cls, exporter):
         # make sure we have our dummy node and cleanup registered
+        dummy = None
+        print "PigSprite.createdummy 0"
         if exporter_cleanup not in exporter.deleteCallbacks:
             exporter.register_delete_callback( exporter_cleanup)
+        print "PigSprite.createdummy 1", cls
         dummy = cls(register=False)
-        time.sleep(0.1)
+        print "PigSprite.createdummy 2"
+        t = 0     
+        while not dummy.initialized:
+            t = t+1
+            print " PigSprite.createdummy wait", t
+            time.sleep(0.02)
+            if t == 50:
+                return None
         return dummy
         
     def _create_object_code(self, storageDict, indentLevel, exporter):
@@ -431,11 +443,11 @@ _spritePugview = {
 pug.add_pugview('PigSprite', _spritePugview, True)
 ########################################################
 ## reveal this to test PigSprite deletion problems
-#_spritePugview['attributes'].append(['test_referrers'])
-#from pug.util import test_referrers
-#def _test_referrers( self):
-#    test_referrers(self)
-#PigSprite.test_referrers = _test_referrers
+_spritePugview['attributes'].append(['test_referrers'])
+from pug.util import test_referrers
+def _test_referrers( self):
+    test_referrers(self)
+PigSprite.test_referrers = _test_referrers
 ####################################################
 if hasattr(PigSprite,'test'):
     _spritePugview['attributes'].append(['test'])

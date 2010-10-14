@@ -16,6 +16,7 @@ import pug
 from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.code_storage.constants import _INDENT
 from pug.code_storage import add_subclass_storageDict_key
+from pug.util import make_valid_attr_name
 
 from pig.PauseState import PauseState
 from pig.util import entered_scene
@@ -611,7 +612,8 @@ If scene is a working scene, return
                     archetypes = True
                 # this node is a class archetype, figure out a save name
                 if node.gname:
-                    savename = node.gname
+                    savename = make_valid_attr_name(node.gname)
+                    node.gname = savename
                 else:
                     # no gname, so find an available filename
                     tryname = base_tryname = 'MyObjectClass'

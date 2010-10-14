@@ -1,7 +1,7 @@
 ### import autocode ###
 from pig.PigSprite import PigSprite
 from pug.all_components import Spawn_On_Destroy, Fade, Grow_Shrink, Life_Zone,\
-    Score_On_Destroy, Deals_Damage, Takes_Damage, On_Damage_Sound,\
+    Value_On_Destroy, Deals_Damage, Takes_Damage, On_Damage_Sound,\
     Random_Motion
 ### End import autocode ###
 
@@ -25,14 +25,13 @@ class Target(PigSprite):
                 grow_in_secs=0.6,
                 shrink_out_secs=-1.0) )
         self.components.add( Life_Zone() )
-        self.components.add( Score_On_Destroy() )
+        self.components.add( Value_On_Destroy() )
         self.components.add( Deals_Damage(
                 damage_amount=50.0,
                 their_group='player',
                 my_group='target') )
         self.components.add( Takes_Damage(
                 start_health=10.0,
-                invincible_time=0,
                 group='target') )
         self.components.add( On_Damage_Sound(
                 sound='sound\\explosion.wav') )

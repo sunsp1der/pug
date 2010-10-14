@@ -21,7 +21,7 @@ from pig.util import get_available_scenes, get_available_objects
 from pig.PigDirector import PigDirector
 from pig.editor.EditorState import EditorState
 
-_DEBUG = False
+_DEBUG = True
 
 def save_object(obj, name=None, parentWindow=None):
     """save_object(obj): Export obj as a class to objects folder
@@ -30,7 +30,6 @@ name: the name to save the object as. If not provided, a dialog will be opened
 parentWindow: the parent window of name dialog. If not provided, the 
     wx.ActiveWindow will be used
 """
-    basename = None
     if not isinstance(obj, Node):
         raise TypeError('save_object() arg 1 must be a Node')
     if not name:
@@ -38,7 +37,7 @@ parentWindow: the parent window of name dialog. If not provided, the
             name = obj.gname
         else:
             if obj.gname:
-                name = obj.gname+"Class"
+                name = obj.gname
             else:
                 name = "MyClass"
         if not name:
@@ -54,7 +53,6 @@ parentWindow: the parent window of name dialog. If not provided, the
                 name = ''.join(['My',name])
                 break
         default = make_valid_attr_name(name)
-        basename = name
         dlg = wx.TextEntryDialog( parentWindow, 
                                   "Enter the object's class/file name", 
                                   "Save Object", default)
@@ -105,6 +103,7 @@ parentWindow: the parent window of name dialog. If not provided, the
                 return
         dlg.Destroy()
     else:
+        name = make_valid_attr_name(name)
         objName = name
         path = os.path.join('objects',''.join([name,'.py']))
     try:
@@ -124,6 +123,7 @@ parentWindow: the parent window of name dialog. If not provided, the
         if archetype:
             # return archetype status after saving
             obj.archetype = True
+            obj.gname = objName
             if exporter.file_changed:
                 archetype_changed( obj, oldclass, exporter)
         return exporter
