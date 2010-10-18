@@ -154,11 +154,17 @@ def create_new_project(project_path=None):
 def create_pythonpather( path):
     filename = os.path.join( path, '_pythonpather.py')
     pp_file = open( filename, 'w')
-    pp_code = """# This file makes sure adds pig and pug to the search path
+    pp_code = """# This file adds pig and pug to the search path
     
 try:
     import sys
     sys.path.append('""" + os.path.split(pug.__path__[0])[0]+"""')
+except:
+    pass
+try:
+    import os.path
+    path = os.path.split(os.path.split(__file__)[0])[0]
+    sys.path.append(path)    
 except:
     pass
 """

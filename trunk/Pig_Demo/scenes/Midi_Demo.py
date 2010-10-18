@@ -5,8 +5,8 @@ from pug.all_components import Utility_Keys, Midi_Input, Spawn_On_Midi,\
     Midi_Rainbow
 ### End import autocode ###
 
-### MyScene autocode ###
-class MyScene(PigScene):
+### Midi_Demo autocode ###
+class Midi_Demo(PigScene):
     def on_enter(self):
         self.components.add( Utility_Keys() )
         self.components.add( Midi_Input() )
@@ -35,4 +35,4 @@ class MyScene(PigScene):
                 spawn_interval_variance=0.0,
                 obs_per_spawn=2,
                 obs_per_spawn_variance=1) )
-### End MyScene autocode ###
+### End Midi_Demo autocode ###

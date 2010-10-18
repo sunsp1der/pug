@@ -5,3 +5,5 @@ Controls:
 	Aim: mouse
 	Fire: mouse button
 	Restart game: ctrl-R
+	Pause: esc
+	Quit: ctrl-Q

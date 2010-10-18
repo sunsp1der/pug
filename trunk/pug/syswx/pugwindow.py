@@ -21,10 +21,9 @@ import wx
 import wx.lib.scrolledpanel
 import wx.lib.buttons
 
-
 from pug.aguilist import create_raw_aguilist, create_pugview_aguilist
-from pug.util import pugSave, pugLoad, get_simple_name, get_code_file, \
-                        edit_process
+from pug.util import get_simple_name, get_code_file, edit_process
+from pug.storage import pugSave, pugLoad
 from pug.constants import *
 from pug.syswx.helpframe import HelpFrame
 from pug.syswx.wxconstants import *

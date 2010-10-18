@@ -40,7 +40,7 @@ class Key_Spawn( Spawner):
         self.k_info = [0,0]
         self.k_info[0] = scene.register_key_down( self.key, self.check_spawn)
         self.k_info[1] = scene.register_key_up( self.key, self.stop_spawning)
-        self.setup_spawner() 
+        self.setup_spawner()
     
     def check_spawn(self, schedule_next=False):
         self.spawning = True

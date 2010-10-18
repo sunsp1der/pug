@@ -2,7 +2,7 @@
 
 import wx
 import wx.combo
-
+wx=wx
 
 from pug.syswx.list_ctrl_combo_popup import ListCtrlComboPopup
 from pug.syswx.wxconstants import *

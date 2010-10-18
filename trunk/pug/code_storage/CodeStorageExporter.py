@@ -10,10 +10,11 @@ from pug.code_storage.constants import _INDENT, _STORE_UNICODE, _PRETTIFY_FLOATS
 from pug.component import ComponentObject, Component
 from pug.component.ComponentObject import ComponentSet
 from pug.gname import GnamedObject
-from pug.util import make_valid_attr_name, get_type_name
+from pug.util import make_valid_attr_name, get_type_name, prettify_data
 import pug.all_components as all_components
 
-_DEBUG = True
+# setting _DEBUG true without a proper stdout seems to cause problems
+_DEBUG = False
 
 class CodeStorageExporter():
     """Object that manages exporting autocode
@@ -679,17 +680,7 @@ there are no attributes to set, this method returns "".
                 else:
                     #otherwise only store builtins for now
                     continue
-            # random fixes
-            if not _STORE_UNICODE and val is unicode(val):
-                # we convert unicode values to strings just for pretty's sake
-                val = str(val)
-            if repr(val) == '-0.0': 
-                # I don't totally understand why this is possible
-                val = 0.0 
-            if _PRETTIFY_FLOATS and type(val) == float:
-                output = str(val)
-            else:
-                output = repr(val)
+            output = prettify_data(val)
             line = [baseIndent, prefix, attr, ' = ', output, '\n']
             codeList += line
         return ''.join(codeList)

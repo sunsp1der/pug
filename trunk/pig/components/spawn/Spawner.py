@@ -13,7 +13,13 @@ from pig.audio import get_sound
 from pig.editor.agui import ObjectsDropdown, SoundFile
 
 class Spawner(Component):
-    """Owner spawns other objects"""
+    """Owner spawns other objects
+    
+This component gives its owner a new callback:
+    on_spawn( spawned_object, this_component)
+It also gives the spawned object a new callback:
+    on_spawned( this_component)
+"""
     # component_info
     _set = 'pig'
     _type = 'spawn'
@@ -167,10 +173,15 @@ class Spawner(Component):
             if self.add_velocity:
                 obj.velocity += velocity
             obj.scene_register() # wait to activate object until start data set
-            if self.owner_callback and hasattr(owner, self.owner_callback):
-                getattr(owner,'callback')(obj, self)
-            if self.obj_callback and hasattr(obj, self.obj_callback):
-                getattr(obj,'callback')(self)
+            # do callbacks
+            try:
+                self.owner.on_spawn( obj, self)
+            except:
+                pass
+            try:
+                obj.on_spawned( self)
+            except:
+                pass
             self.spawn_count += 1
             spawned_objects.append(obj)
         if spawned_objects and self.sound_object:

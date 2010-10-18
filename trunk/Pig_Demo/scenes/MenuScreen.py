@@ -6,12 +6,11 @@ from pug.all_components import Utility_Keys, Scene_Button, Textbox
 
 ### MenuScreen autocode ###
 class MenuScreen(PigScene):
-    def __init__(self, *args, **kwargs):
-        PigScene.__init__(self, *args, **kwargs)
+    layers = ['Background', 'text']
+
+    def on_enter(self):
         self.components.add( Utility_Keys() )
 
-    layers = ['Background', 'text']
-    def on_enter(self):
         # Sprites
         pigsprite_instance = PigSprite()
         pigsprite_instance.image = 'art\\block.png'

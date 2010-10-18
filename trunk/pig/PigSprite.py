@@ -8,8 +8,8 @@ from Opioid2D.public.Sprite import SpriteMeta
 import pug
 from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.code_storage import add_subclass_storageDict_key
-from pug.code_storage.constants import _INDENT
-from pug.util import make_valid_attr_name, prettify_path
+from pug.code_storage.constants import _INDENT, _PRETTIFY_FLOATS
+from pug.util import make_valid_attr_name, prettify_path, prettify_float
 
 from pig.PigDirector import PigDirector
 from pig.editor.util import get_available_layers, save_object, \
@@ -37,10 +37,16 @@ Opioid2d Sprite with features for use with pug"""
         pug.BaseObject.__del__(self)
     
     def __init__(self, img=None, gname='', register=None):
+        #_DEBUG = True
+        #if _DEBUG: print "PigSprite.__init__ 0"
         pug.BaseObject.__init__(self, gname=gname)
+        #if _DEBUG: print "PigSprite.__init__ 1"
         Sprite._preinit(self, img)
+        #if _DEBUG: print "PigSprite.__init__ 2"        
         self.collision_groups = set([])
+        #if _DEBUG: print "PigSprite.__init__ 3"
         self.on_create()
+        #if _DEBUG: print "PigSprite.__init__ 4"
         if register is None:
             register = self.auto_scene_register
         if register:
@@ -356,7 +362,15 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
             vector = getattr(self, attr)
             if not dummy or \
                     getattr(dummy, attr).radial != getattr(self,attr).radial:
-                custom_attr_code += [prefix, 
+                if _PRETTIFY_FLOATS:
+                    # get rid of long strings of zeros or nines
+                    axes = [prettify_float(vector.x), 
+                            prettify_float(vector.y)]
+                    custom_attr_code += [prefix, 
+                                     attr, ' = (', axes[0],
+                                     ', ', axes[1],')','\n']
+                else:
+                    custom_attr_code += [prefix, 
                                      attr, ' = (', repr(vector.x),
                                      ', ', repr(vector.y),')','\n']
         custom_code += custom_attr_code
