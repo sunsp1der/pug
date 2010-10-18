@@ -348,8 +348,8 @@ Start the scene running. Called after enter() and before state changes
                 gamedata.start_sceneclass = self.__class__
                 self.on_game_start()
                 self.all_nodes_callback( 'on_game_start')
-                self.all_nodes_callback( 'on_added_to_scene', self)
-                self.all_nodes_callback( 'on_first_display')        
+            self.all_nodes_callback( 'on_added_to_scene', self)
+            self.all_nodes_callback( 'on_first_display')                        
             self.on_start()
             self.all_nodes_callback( 'on_scene_start', self)             
         elif getattr(PigDirector, 'viewing_in_editor', False):
@@ -360,7 +360,7 @@ Start the scene running. Called after enter() and before state changes
     def register_node(self, node):        
 #        """register(node): a new node is joining scene. Do callbacks"""
         if _DEBUG: print "PigScene.register_node:",node
-        if getattr(PigDirector, 'game_started', False):
+        if self.started:
             try:
                 func = getattr(node, 'on_added_to_scene')
             except:
