@@ -8,7 +8,7 @@ class Deals_Damage(Collision_Callback):
     """Set this object to deal damage to objects that collide with it, if those
 objects have the Takes_Damage component.
 
-This component gives the base object a new callback:
+This component gives the its owner a new callback:
     on_deal_damage( target, damage_amount): called before damage is dealt. If 
 this returns a value, that value becomes the new damage_amount.
 """

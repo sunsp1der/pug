@@ -1,8 +1,8 @@
 ### import autocode ###
 from pig.PigSprite import PigSprite
-from pig.components.controls.Mouse_Face import Mouse_Face
-from pug.all_components import Key_Direction_Controls, Motion_Zone, Key_Spawn,\
-    On_Destroy_Sound, Spawn_On_Destroy, Fade, Multiple_Lives, Takes_Damage
+from pug.all_components import Key_Direction_Controls, Motion_Zone, Mouse_Face,\
+    Key_Spawn, On_Destroy_Sound, Spawn_On_Destroy, Fade, Multiple_Lives,\
+    Takes_Damage
 ### End import autocode ###
 
 ### FlyAroundPlayer autocode ###

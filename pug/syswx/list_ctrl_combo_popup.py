@@ -1,6 +1,6 @@
 import wx
 import wx.combo
-
+wx=wx
 
 """This class is a popup containing a ListCtrl."""
 
@@ -18,6 +18,7 @@ doesn't have as many features/accessors as the combo.ComboCtrl"""
         self.list = self
         self.Bind(wx.EVT_LEFT_DOWN, self.OnMouseSelect)
         self.Bind(wx.EVT_MOTION, self.OnMotion)
+        self.Bind(wx.EVT_LEAVE_WINDOW, self.LeaveWindow)
         self.selected = -1
         self.selectCallback = None
         self.popupCallback = None
@@ -30,13 +31,17 @@ doesn't have as many features/accessors as the combo.ComboCtrl"""
     def OnMotion(self, event):
         # have the selection follow the mouse, like in a real combobox
         selected = self.list.HitTest(event.GetPosition())
-        if selected != -1 and selected != self.selected:
+        if selected == -1:
+            self.selected = -1
+            self.list.Select(-1)
+        elif selected != self.selected:
             self.selected = selected
             self.list.Select(selected)
         event.Skip()
 
-    def DeselectAll(self):
-        return self.list.DeselectAll()
+    def LeaveWindow(self, event):
+        self.list.DeselectAll()
+        event.Skip()
         
     def GetControl(self):
         return self.list

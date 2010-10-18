@@ -502,6 +502,9 @@ settingsObj: any frame settings members will be replaced
             return frame_settings            
             
     def get_default_pos(self, frame):
+        for testframe in self.pugFrameDict.iterkeys():
+            if frame.Name == testframe.Name:
+                return None
         name = self.getrect_setting_name(frame)
         return getattr(self.settings, name, None)
             

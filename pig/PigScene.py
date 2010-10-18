@@ -186,7 +186,7 @@ key_dict: the key_dict to use
         for fn_info in fn_list:
             fn_info[0](*fn_info[1],**fn_info[2])
 
-    def register_key_down(self, *args, **kwargs):
+    def register_key_down(self, key, fn, *args, **kwargs):
         """register_key_down(key, fn, *args, **kwargs)
     
 Register a function to execute when a given key is pressed. If the key is being
@@ -200,13 +200,14 @@ fn: the function to call when the keypress occurs
         # if key is already down, perform function
         if kwargs.pop('_do_immediate', True):
             try:
-                pressed = get_pressed()[args[0]]
+                pressed = get_pressed()[key]
             except:
                 pass
             else:
                 if pressed:
-                    args[1](*args[2:],**kwargs)
-        return self._register_key( self._key_down_dict, *args, **kwargs)
+                    fn(*args,**kwargs)
+        return self._register_key( self._key_down_dict, key, fn, 
+                                   *args, **kwargs)
         
     def register_key_up(self, *args, **kwargs):
         """register_key_up(key, fn, *args, **kwargs)
@@ -344,16 +345,16 @@ Start the scene running. Called after enter() and before state changes
             if not getattr(PigDirector, 'game_started', False):
                 PigDirector.game_started = True
                 gamedata = create_gamedata()
-                gamedata.start_sceneclass = self.__class__                   
+                gamedata.start_sceneclass = self.__class__
                 self.on_game_start()
                 self.all_nodes_callback( 'on_game_start')
+                self.all_nodes_callback( 'on_added_to_scene', self)
+                self.all_nodes_callback( 'on_first_display')        
             self.on_start()
-            self.all_nodes_callback( 'on_added_to_scene', self)
-            self.all_nodes_callback( 'on_first_display')        
+            self.all_nodes_callback( 'on_scene_start', self)             
         elif getattr(PigDirector, 'viewing_in_editor', False):
             # viewing in editor, not playing
             self.all_nodes_callback( 'on_added_to_editor', self)
-        self.all_nodes_callback( 'on_scene_start', self)             
         self.started = True
         
     def register_node(self, node):        

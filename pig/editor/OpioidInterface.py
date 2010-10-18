@@ -183,6 +183,7 @@ settingsObj: an object similar to the one below... if it is missing any default
         app.set_pug_settings( self.pug_settings)
         code_exceptions = {}
         initial_scene = getattr(self.pug_settings, 'initial_scene', 'PigScene')
+        self.reload_components( doReload=True)
         self.reload_scene_list( doReload=True)
         # initial scene
         if initial_scene != 'PigScene' and initial_scene in self.sceneDict:
@@ -350,10 +351,7 @@ forceReload: if True, reload all scenes and objects first.
             wx.GetApp().refresh()
             
     def _set_sceneclass( self, val):
-        try:
-            button_info_dict['agui'].button_press(button='stop')
-        except:
-            self.stop_scene()
+        self.stop_scene()
         self.set_scene(val)            
     def _get_sceneclass(self):
         try:
@@ -684,6 +682,15 @@ doSave: save working copy first
 Stop the current scene from playing. if doRevert, Reload original state from 
 disk.
 """
+        if not doRevert:
+            self.do_stop_scene(doRevert)
+        else:
+            try:
+                button_info_dict['agui'].button_press(button='stop')
+            except:
+                self.do_stop_scene(doRevert)
+        
+    def do_stop_scene(self, doRevert=True):      
         print "stop_scene 1"
         if _DEBUG: print "stop_scene"
         if not getattr(self.Director, "game_started", False):
@@ -877,7 +884,7 @@ _interfacePugview = {
     'attributes':[ 
         ['Project', pug.Label, {'font_size':10}],
         ['Controls', pug.PlayButtons, {'execute':'execute_scene', 
-                                       'stop':'stop_scene',
+                                       'stop':'do_stop_scene',
                                        'pause':'pause_scene',
                                        'rewind':'rewind_scene',
                                        'play':'play_scene',

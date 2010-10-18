@@ -4,6 +4,7 @@ import gc
 
 import wx
 import wx.lib.buttons as buttons
+wx=wx
 
 from pug.syswx.wxconstants import *
 from pug.syswx.pugbutton import PugButton

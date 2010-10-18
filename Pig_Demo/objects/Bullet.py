@@ -10,7 +10,7 @@ class Bullet(PigSprite):
     layer = 'Background'
     def on_create(self):
         self.position = (316.0, 531.0)
-        self.scale = (0.20000000298023224, 0.20000000298023224)
+        self.scale = (0.2, 0.2)
         self.tint = (33, 210, 23)
         self.components.add( Set_Motion(
                 velocity_y=-500) )

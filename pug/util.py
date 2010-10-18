@@ -2,13 +2,10 @@
 
 from __future__ import with_statement
 import re
-import cPickle
-import copy
 import sys
 import os
 import inspect
 import subprocess
-import signal
 
 from start_file import start_file
 
@@ -222,117 +219,69 @@ like pugframe titles...
         simplename = re.split('\.',objectpath)[-1:][0]           
         if not simplename:
             simplename = objectpath     
-    return simplename                
+    return simplename           
 
-def pugSave(obj, filename):
-    "Use some awesomely raunchy hacks to force obj to save as much as it can"""
-    # use a dummy to avoid changing original
-    dummy = copy.copy(obj)
+def prettify_float( val, precision=4):
+    """prettify_float(val, precision=4)->prettified string
     
-    # awesomely raunchy hack below
-    # pugXDict contains information not normally accessible via __dict__
-    dummy._pugXDict = _create_pugXDict(dummy)
-    
-    if hasattr(obj, '__getstate__'):
-        # use getstate to allow customization ala pickle and copy
-        dummyDict = obj.__getstate__()
-    else:
-        dummyDict = dummy.__dict__
-    
-    # remove unpickleable items from dummy
-    for label, item in obj.__dict__.iteritems():
-        try:
-            s = cPickle.dumps(item)
-        except:
-            del dummyDict[label]
-
-    savefile = open(filename, 'wb')
-    cPickle.dump(dummy, savefile)
-    
-def pugLoad(obj, filename):
-    """Decode pugSave's awesomely raunchy hackery"""
-    loadfile = open(filename, 'rb')
-    # use a dummy so we can just use its dict
-    dummy = cPickle.load(loadfile)
-    dummyDict = dummy.__dict__
-    if hasattr(obj, '__setstate__'):
-        # use setstate to allow customization ala pickle and copy
-        obj.__setstate__(dummyDict)
-        pugXDict = dummyDict.pop('_pugXDict', {})
-    else:
-        pugXDict = dummyDict.pop('_pugXDict', {})
-        obj.__dict__.update(dummyDict)
-        
-    # load the pugXDict that hacks in dir() attributes that might not show up
-    # in __dict__
-    _update_pugXDict(obj, pugXDict)
-
-# I COULD make this recursive and accept a depth value.  Therein lie dragons
-def _create_pugXDict(dummy):
-    """create pugXDict, which contains all pickleable values in dir(dummy)
-this is a bit hacky, but can store some things that a straight pickle can't
+This function rounds floating point numbers and returns a string. Precision is
+the number of digits in a row that have to be either 0 or 9 in order to round.
+For example, if precision is 3, 5.0100004 returns 5.01 and 3.99999942412 returns
+4.0
 """
-    
-    pugXDict = {}
-    dummyDir = dir(dummy)
-    dummyDict = dummy.__dict__
-    # store most pickleable items in dummyDir
-    for attribute in dummyDir:
-        #don't get into object's private business
-        if attribute[0]=='_':
-            continue
-        try:
-            value = getattr(dummy, attribute)
-            # no wasting time on funcs. 
-            if callable(value):
-                continue
-            s = cPickle.dumps(value)
-        except:
-            # hack downward one more level
-            subObject = value
-            subDir = dir(subObject)
-            subDict = {}
-            for subAttribute in subDir:
-                # no private sub-attributes either
-                if subAttribute[0] =='_':
-                    continue
-                try:
-                    subValue = getattr(subObject,subAttribute)
-                    s = cPickle.dumps(subValue)
-                except:
-                    continue
-                subDict[subAttribute] = subValue
-            # prefix hardcore attributes with a 0
-            if not subDict:
-                continue
-            attribute = ''.join(['0',attribute])
-            value = subDict
+    s = str(val)
+    point = s.find('.')
+    if point == -1:
+        return s
+    down = s.find('0'*precision,point)
+    up = s.find('9'*precision, point)
+    if (down < up or up == -1) and down != -1:
+        s = s[:down]
+        if s[down-1] == '.':
+            s += '0'
+        return s
+    elif up != -1:
+        s = s[:up]
+        if s[up-1] == '.':
+            s = s[:-3] + str(int(s[up-2])+1) + '.0'
         else:
-            #no need to get anything that's in the dummyDict AND pickleable 
-            if attribute in dummyDict:
-                continue            
-        pugXDict[attribute] = value
-    return pugXDict
+            s = s[:-1] + str(int(s[up-1])+1)
+        return s
+    return s
+     
+def prettify_data( val, precision=4):
+    """prettify_data( val, precision=4)->prettified string
     
-def _update_pugXDict(obj, pugXDict):    
-    """Hack a pugXDict into obj. See _create_pugXDict for the gorey details"""
-    for attribute in pugXDict:
-        if attribute[0] == '0':
-            subDict = pugXDict[attribute]
-            attribute = attribute[1:]
-            subObject = getattr(obj,attribute)
-            for subAttribute in subDict:
-                subValue = subDict[subAttribute]
-                try: 
-                    setattr(subObject,subAttribute,subValue)
-                except:
-                    continue
+Prettify various data including floats, -0.0 etc."""   
+    from pug.code_storage.constants import _STORE_UNICODE, _PRETTIFY_FLOATS  
+    if not _STORE_UNICODE and val is unicode(val):
+        # we convert unicode values to strings just for pretty's sake
+        val = str(val)
+    if repr(val) == '-0.0': 
+        # I don't totally understand why negative zero is possible
+        val = 0.0 
+    if _PRETTIFY_FLOATS and (type(val) == list or type(val) == tuple):
+        # prettify floats in lists and tuples
+        if type(val) == list:
+            output = "["
+            end = "]"
         else:
-            try:
-                setattr(obj,attribute,pugXDict[attribute])
-            except:
-                continue     
-
+            output = "("
+            end = ")"
+        items = []
+        for item in val:
+            if type(item) == float:
+                items.append( prettify_float(item))
+            else:
+                items.append( repr(item))
+        output += ", ".join(items) + end
+    elif _PRETTIFY_FLOATS and type(val) == float:
+        # prettify floats
+        output = prettify_float(val)
+    else:
+        output = repr(val)
+    return output
+     
 def test_referrers(obj):
     """_test_referrers(obj)
         

@@ -7,6 +7,7 @@ from types import StringTypes as _StringTypes
 from types import MethodType as _MethodType
 
 from pug.code_storage.constants import _INDENT, _STORE_UNICODE, _PRETTIFY_FLOATS
+from pug.util import prettify_data
 
 _DEBUG = False
 
@@ -171,18 +172,7 @@ line breaks between each. To create a single-line argument list, strip out all
             except:
                 store = False
             if store:       
-                #TODO: make function to do this stuff which is duplicated from
-                #     CodeStorageExporter.create_attribute_code         
-                if not _STORE_UNICODE and val is unicode(val):
-                    # we convert unicode values to strings for pretty's sake
-                    val = str(val)
-                if repr(val) == '-0.0': 
-                    # I don't totally understand why this is possible
-                    val = 0.0                     
-                if _PRETTIFY_FLOATS and type(val) == float:
-                    output = str(val)
-                else:
-                    output = repr(val)                    
+                output = prettify_data( val)
                 attribute_code += [''.join([attr, '=', output])]
         joiner = ''.join([',\n',argIndent])
         code = joiner.join(attribute_code)

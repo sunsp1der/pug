@@ -1,23 +1,12 @@
 now:
-	none selected in dropdown when off items
-                if event.key == pygame.K_RETURN:
-                        if fullscreened:
-                                screen = pygame.display.set_mode(screensize, pygame.RESIZABLE)
-                                fullscreened=False
-                        else:
-                                screen = pygame.display.set_mode(screensize,pygame.FULLSCREEN)
-                                fullscreened=True
-                        screenrect=screen.get_rect()
-                        pygame.mouse.set_visible(False)
-
-	
-	round after three zeroes or 3 9s
-	dragon graphic bug
-	component of 'gname' in title bar
-	scenegraph
-		scenegraph loses contact after playing for a while
-		levelbutton make sure scene in editor changes (scenegraph on dragon)
-	
+	scene: midi to keyboard conversion
+	spawn -
+		flower
+		spinner
+		fountain
+		change spawn attribute
+			
+soon:
 	gameover_scene
 		switch to it after gameover
 		set_gameover_scene
@@ -29,17 +18,7 @@ now:
 		fadescene
 			disable collisions?
 			stop motion?
-	put an example component in Pig_Demo
-		spawner examples
-			custom code example
-			
-	midi - JR
-		flower
-		spinner
-		fountain
-		change spawn attribute
-		change spawn graphic
-			
+	put an example of custom code in Pig_Demo
 	grid units
 	drag-n-drop animation folder
 	level on this or that
@@ -65,9 +44,9 @@ bugs:
 	crash - selecting an object while changing selectionwin to another view 
 
 later: 
+	realtime resolution changes
 	hotspots
 	multiline textbox
-	make mouse dragging automatically use offset
 	memory leak!
 	run in single thread...
 		problem picking up arrow keys in opioid window
@@ -77,11 +56,9 @@ later:
 	pug should have way to specify correct values
 	process mouseclicks in canvas within interface, not in opioid thread
 	allow lists of categories for components... file in multiple places
-	figure out actual path to python executable
-	option to open component,sprite,scene file. default save is project component file
+	option to sort by component _set in component browser
+	option to open component file. default save is project component file
 	make mouse follow stop properly with 'stop_within'
-	set gname
-		demo of heads watching a ufo
 	figure out some way to make derived classes work better
 		probably option to select base class
 	clone sprites

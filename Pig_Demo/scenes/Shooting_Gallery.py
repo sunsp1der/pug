@@ -13,11 +13,6 @@ from pug.all_components import Utility_Keys, Value_Tracker_Text, Timer_Text,\
 
 ### Shooting_Gallery autocode ###
 class Shooting_Gallery(PigScene):
-    def __init__(self, *args, **kwargs):
-        PigScene.__init__(self, *args, **kwargs)
-        self.components.add( Utility_Keys(
-                info_F1='scenes\\Shooting_Gallery_Help.txt') )
-
     def on_enter(self):
         # Archetypes
         Bullet_archetype = Bullet(gname='Bullet')
