@@ -4,7 +4,7 @@ import weakref
 
 import wx
 
-from pug.syswx.wxconstants import *
+from pug.syswx.wxconstants import PUGFRAME_ATTRIBUTE_PREFIX, WX_STANDARD_HEIGHT
 from pug.syswx.attributeguis import Base
 from pug.syswx.pugbutton import PugButton
 from pug.syswx.agui_label_sizer import AguiLabelSizer

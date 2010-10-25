@@ -37,7 +37,7 @@ Opioid2d Sprite with features for use with pug"""
         pug.BaseObject.__del__(self)
     
     def __init__(self, img=None, gname='', register=None):
-        #_DEBUG = True
+        #_DEBUG = False #
         #if _DEBUG: print "PigSprite.__init__ 0"
         pug.BaseObject.__init__(self, gname=gname)
         #if _DEBUG: print "PigSprite.__init__ 1"

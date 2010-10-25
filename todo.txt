@@ -1,10 +1,7 @@
 now:
-	scene: midi to keyboard conversion
 	spawn -
-		flower
-		spinner
-		fountain
 		change spawn attribute
+	find cannon -> Cannon
 			
 soon:
 	gameover_scene
@@ -30,7 +27,6 @@ soon:
 	direction flip component (From key_direction_controls)
 	shoot_at component
 	spawn_this_archetype component
-	control w/variance or 'to' option
 	search component book
 
 bugs: 
@@ -51,6 +47,7 @@ later:
 	run in single thread...
 		problem picking up arrow keys in opioid window
 	Undo! - save query when changing levels or quitting
+	control w/variance or 'to' option
 	Separate runtime necessities
 	Resources
 	pug should have way to specify correct values

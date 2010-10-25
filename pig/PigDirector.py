@@ -32,16 +32,19 @@ query: if True, have the app confirm project closure.
         import wx
         wx = wx
         if not wx.GetApp() or \
-                not getattr(wx.GetApp().projectObject,'_initialized', False): 
+                not getattr(wx.GetApp().projectObject,'_initialized', False):
+            print "PigDirector real_quit" 
             real_quit()
             return
         if not QUITTING:
             QUITTING = True
             app = wx.GetApp()
             if hasattr(app, '_evt_project_frame_close'):
+                print "PigDirector _evt_project_frame_close"
                 wx.CallAfter(app._evt_project_frame_close, query=query)
             return
     except:
+        print "PigDirector except real_quit"
         real_quit() 
 # set up our special quit
 def real_quit():
@@ -49,12 +52,17 @@ def real_quit():
     try:
         import wx     
         wx = wx  
+        print "PigDirector.real_quit kill_subprocesses"
         wx.GetApp().get_project_object().kill_subprocesses()
+        print "PigDirector.real_quit _evt_project_frame_close"
         wx.GetApp()._evt_project_frame_close(query=False)
     except:
         pass
     if not QUITTING:
+        print "opioid_quit"
         opioid_quit()
+#        import pygame
+#        pygame.quit()
     QUITTING = True
 
 PigDirector.quit = pig_quit # hack to make opioid quit=pugquit 

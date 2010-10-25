@@ -21,7 +21,7 @@ from pig.util import get_available_scenes, get_available_objects
 from pig.PigDirector import PigDirector
 from pig.editor.EditorState import EditorState
 
-_DEBUG = True
+_DEBUG = False #
 
 def save_object(obj, name=None, parentWindow=None):
     """save_object(obj): Export obj as a class to objects folder
