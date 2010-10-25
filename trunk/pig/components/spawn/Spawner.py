@@ -104,7 +104,7 @@ It also gives the spawned object a new callback:
             self.action = ( Delay(self.spawn_delay \
                    + self.get_next_spawn_wait())\
                    + CallFunc( self.check_spawn)).do(self.owner)
-    
+                   
     @component_method 
     def spawn(self):
         "spawn()->[objects_spawned]: spawn objects"
@@ -132,7 +132,10 @@ It also gives the spawned object a new callback:
                     len(self.spawned_objects) >= self.max_spawns_in_scene:
                 break            
             obj = self.spawn_class( register=False)
-            self.spawned_objects[self.spawn_count] = obj
+            try:
+                self.spawned_objects[self.spawn_count] = obj
+            except:
+                x=0
             x_pos = 0
             y_pos = 0
             location = self.spawn_location
@@ -172,16 +175,12 @@ It also gives the spawned object a new callback:
                 obj.acceleration.direction += rotation
             if self.add_velocity:
                 obj.velocity += velocity
-            obj.scene_register() # wait to activate object until start data set
             # do callbacks
-            try:
+            if hasattr(self.owner, "on_spawn"):
                 self.owner.on_spawn( obj, self)
-            except:
-                pass
-            try:
+            if hasattr(obj, "on_spawned"):
                 obj.on_spawned( self)
-            except:
-                pass
+            obj.scene_register() # wait to activate object until start data set
             self.spawn_count += 1
             spawned_objects.append(obj)
         if spawned_objects and self.sound_object:

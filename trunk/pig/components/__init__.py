@@ -12,7 +12,8 @@ from pig.components.behavior.Face_Motion import Face_Motion
 from pig.components.behavior.Set_Motion import Set_Motion
 from pig.components.behavior.Forward_Motion import Forward_Motion
 from pig.components.behavior.Random_Motion import Random_Motion
-from pig.components.behavior.Stop_Motion_On_Destroy import Stop_Motion_On_Destroy
+from pig.components.behavior.Stop_Motion_On_Destroy \
+                            import Stop_Motion_On_Destroy
 from pig.components.collision.Collision_Callback import Collision_Callback
 from pig.components.collision.Join_Collision_Group import Join_Collision_Group 
 from pig.components.collision.Collision_Destroy import Collision_Destroy
@@ -37,6 +38,7 @@ from pig.components.gameplay.Multiple_Lives import Multiple_Lives
 from pig.components.spawn.Spawner import Spawner
 from pig.components.spawn.Spawn_On_Destroy import Spawn_On_Destroy
 from pig.components.spawn.Spawn_On_Midi import Spawn_On_Midi
+from pig.components.spawn.Spawn_Flower import Spawn_Flower
 from pig.components.sound.On_Create_Sound import On_Create_Sound
 from pig.components.sound.On_Destroy_Sound import On_Destroy_Sound
 from pig.components.sound.On_Damage_Sound import On_Damage_Sound

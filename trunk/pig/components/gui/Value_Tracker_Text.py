@@ -50,7 +50,6 @@ class Value_Tracker_Text(Textbox):
 
     def on_value_change(self, *a, **kw):
         self.set_text()
-        print "********",a,kw
             
     @component_method
     def set_text(self, text=None):

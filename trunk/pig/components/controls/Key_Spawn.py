@@ -37,10 +37,10 @@ class Key_Spawn( Spawner):
     @component_method
     def on_added_to_scene(self, scene):
         "Set spawn key and setup the spawner"
+        self.setup_spawner()
         self.k_info = [0,0]
         self.k_info[0] = scene.register_key_down( self.key, self.check_spawn)
         self.k_info[1] = scene.register_key_up( self.key, self.stop_spawning)
-        self.setup_spawner()
     
     def check_spawn(self, schedule_next=False):
         self.spawning = True

@@ -76,7 +76,7 @@ exception that caused the scene to fail.
 scenename: name of scene to test
 modulename: name of module to find scene in. Basically for __Working__ only
 """
-    _DEBUG = True
+    _DEBUG = False #
     if modulename is None:
         modulename = scenename
     if _DEBUG: print "test_scene_code 1"

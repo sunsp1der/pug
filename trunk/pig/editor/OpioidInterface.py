@@ -87,9 +87,13 @@ scene: the scene to load initially
         pug.App(projectObject=self, 
                       projectFolder=get_project_path(),
                       projectObjectName=self.project_name)
+        print "OpioidInterface done with loop. Director.realquit"
         self.Director.realquit()
         try:
+            print "OpioidInterface: wx.GetApp().Exit()"
             wx.GetApp().Exit()
+            print "OpioidInterface: wx.GetApp().Exit() done"
+            raise SystemExit
         except:
             pass
 
@@ -280,6 +284,7 @@ settingsObj: an object similar to the one below... if it is missing any default
         
 query: if True, query the user about saving the current scene first
 """        
+        print "OpioidInterface.quit: self.Director.quit"
         self.Director.quit( query=query)
         
     def view_scene(self):
@@ -845,6 +850,8 @@ def start_opioid( rect, title, icon, scene):
     Opioid2D.Director.viewing_in_editor = True
     try:
         Opioid2D.Director.run( scene)
+        import pygame
+        pygame.quit()
     except ImportError:
         # we're exiting Opioid altogether...
         try:
