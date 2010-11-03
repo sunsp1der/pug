@@ -1,15 +1,22 @@
-now:
-	spawn -
-		change spawn attribute
-	find cannon -> Cannon
-			
+installer:
+	eliminate need for pythonpather
+	create_demo_project
+	google.code: system requirements = software requirements
+		note BIG PYTHON 2.5!!!
+	update numeric refs to numpy
+
 soon:
-	gameover_scene
-		switch to it after gameover
-		set_gameover_scene
-			scene component
-			fadetime
-			scene
+	component gnames
+	gameover
+		gameover_settings
+			gameover_pause t/f
+			delay before gameover
+		scene
+			switch to it after gameover
+			set_gameover_scene
+				scene component
+				fadetime
+				scene
 	switch_scene to replace set_scene
 		on_switch_scene callback for fades
 		fadescene

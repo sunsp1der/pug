@@ -87,12 +87,12 @@ scene: the scene to load initially
         pug.App(projectObject=self, 
                       projectFolder=get_project_path(),
                       projectObjectName=self.project_name)
-        print "OpioidInterface done with loop. Director.realquit"
+        if _DEBUG: print "OpioidInterface done with loop. Director.realquit"
         self.Director.realquit()
         try:
-            print "OpioidInterface: wx.GetApp().Exit()"
+            if _DEBUG: print "OpioidInterface: wx.GetApp().Exit()"
             wx.GetApp().Exit()
-            print "OpioidInterface: wx.GetApp().Exit() done"
+            if _DEBUG: print "OpioidInterface: wx.GetApp().Exit() done"
             raise SystemExit
         except:
             pass
@@ -297,19 +297,19 @@ query: if True, query the user about saving the current scene first
 value: can be either an actual scene class, or the name of a scene class
 forceReload: if True, reload all scenes and objects first. 
 """
-        print "set_scene 1"
+        if _DEBUG: print "set_scene 1"
         if forceReload is True:
             self.reload_object_list()
             self.reload_scene_list()
         if value == str(value):
-            print "set_scene 2"
+            if _DEBUG: print "set_scene 2"
             if self.sceneDict.has_key(value):
                 value = self.sceneDict[value]
             else:
                 if value == "PigScene":
                     value = PigScene
         else:
-            print "set_scene 3"
+            if _DEBUG: print "set_scene 3"
             if value not in self.sceneDict.values():
                 self.reload_scene_list()
                 value = self.sceneDict.get(value.__name__, value)
@@ -336,7 +336,7 @@ forceReload: if True, reload all scenes and objects first.
             starttime = time.time()
             self.Director.scene = value
             time.sleep(0.1)
-            print "set_scene 4"            
+            if _DEBUG: print "set_scene 4"            
             while self.Director.scene.__class__ != value or \
                     self.Director.scene is oldscene:
                 if time.time() - starttime > 30:
@@ -349,9 +349,9 @@ forceReload: if True, reload all scenes and objects first.
                         starttime = time.time()
                 time.sleep(0.05)
             time.sleep(0.05)
-            print "set_scene 5"
+            if _DEBUG: print "set_scene 5"
             wait_for_state(EditorState)
-            print "set_scene 6"
+            if _DEBUG: print "set_scene 6"
             entered_scene()
             wx.GetApp().refresh()
             
@@ -584,53 +584,53 @@ event: a wx.Event
         """Save the current scene as scenes/__Working__.py"""
         self.use_working_scene = True
         scenename = self.scene.__class__.__name__ 
-        print "s0"
+        if _DEBUG: print "s0"
         if scenename in ['PigScene', 'Scene']:
             # this is a new scene that hasn't been saved before
             saved = save_scene_as()
-            print "s1",
+            if _DEBUG: print "s1",
             if not saved:
-                print "s2",
+                if _DEBUG: print "s2",
                 return False
             else:
-                print "s3",
+                if _DEBUG: print "s3",
                 self.sceneDict[self.Director.scene.__class__.__name__] = \
                                                 self.Director.scene.__class__
-                print "s4",
+                if _DEBUG: print "s4",
             # we want to save as the new scene name AND as working scene...
         if self._new_scene:
             # hack in user code from original file
-            print "s5",
+            if _DEBUG: print "s5",
             self.revert_working_scene()
             self._new_scene = False
-            print "s6",            
+            if _DEBUG: print "s6",            
         # save the scene in __working__
-        print "s7",    
+        if _DEBUG: print "s7",    
         saved = save_scene_as( self.scene.__class__.__name__, '__Working__.py')
-        print "s8",
+        if _DEBUG: print "s8",
         if not saved:
-            print "s9",
+            if _DEBUG: print "s9",
             return False
         else:
-            print "s10",
+            if _DEBUG: print "s10",
             self.sceneDict[self.Director.scene.__class__.__name__] = \
                                                 self.Director.scene.__class__
-            print "s11",
+            if _DEBUG: print "s11",
         wx.GetApp().refresh()
-        print "s12",
+        if _DEBUG: print "s12",
         return True            
         
     def commit_scene(self):
         self.stop_scene()
         filename = save_scene_as()
-        print "s13",
+        if _DEBUG: print "s13",
         if filename:
-            print "s14",
+            if _DEBUG: print "s14",
             self.revert_working_scene()
-            print "s15",
+            if _DEBUG: print "s15",
             self.sceneDict[self.Director.scene.__class__.__name__] = \
                                                 self.Director.scene.__class__
-            print "s16",
+            if _DEBUG: print "s16",
         return filename
 
     def rewind_scene(self):
@@ -696,26 +696,26 @@ disk.
                 self.do_stop_scene(doRevert)
         
     def do_stop_scene(self, doRevert=True):      
-        print "stop_scene 1"
+        if _DEBUG: print "stop_scene 1"
         if _DEBUG: print "stop_scene"
         if not getattr(self.Director, "game_started", False):
             return
-        print "stop_scene 1.5"
+        if _DEBUG: print "stop_scene 1.5"
         wait_for_state(None)
-        print "stop_scene 2"
+        if _DEBUG: print "stop_scene 2"
         self.scene.stop()
-        print "stop_scene 3"        
+        if _DEBUG: print "stop_scene 3"        
         wait_for_exit_scene()
-        print "stop_scene 4"        
+        if _DEBUG: print "stop_scene 4"        
         gamedata = get_gamedata()
         scene = gamedata.start_sceneclass
         create_gamedata()
-        print "stop_scene 5"
+        if _DEBUG: print "stop_scene 5"
         pug.set_default_pugview("Component", _dataPugview)
-        print "stop_scene 6", scene.__name__        
+        if _DEBUG: print "stop_scene 6", scene.__name__        
         if doRevert:
             self.set_scene(scene.__name__, True)
-        print "stop_scene 7"            
+        if _DEBUG: print "stop_scene 7"            
         
     def execute_scene( self, doSave=True):
         """execute_scene()
@@ -768,10 +768,10 @@ Opioid2D, it is safer to call this via add_object.
 """
         try:
             if not issubclass(objectclass, Node):
-                print objectclass, Node
+                if _DEBUG: print objectclass, Node
                 raise TypeError("add_object(): arg 1 must be a subclass of Node")
         except:
-            print objectclass, Node
+            if _DEBUG: print objectclass, Node
             raise
         node = objectclass()
         if objectclass == PigSprite and type(self.scene.state) == EditorState:

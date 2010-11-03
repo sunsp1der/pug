@@ -4,7 +4,7 @@ from objects.ExplodeParticle import ExplodeParticle
 from objects.Explosion import Explosion
 from objects.Launcher import Launcher
 from objects.Target import Target
-from objects.cannon import cannon
+from objects.Cannon import Cannon
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
 from pug.all_components import Utility_Keys, Value_Tracker_Text, Timer_Text,\
@@ -35,7 +35,7 @@ class Shooting_Gallery(PigScene):
         launcher_instance_2.position = (43.0, 175.0)
         launcher_instance_2.rotation = 90.0
 
-        cannon_instance = cannon()
+        Cannon_instance = Cannon()
 
         pigsprite_instance = PigSprite()
         pigsprite_instance.layer = 'Background'

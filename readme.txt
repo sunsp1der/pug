@@ -1,11 +1,11 @@
 To start, run the edit_project.py file in the Pig_Demo folder.
-You MUST use python 2.5 to run it...
+Use python 2.5 to run it...
 
 Documentation available at: http://code.google.com/p/pug/downloads/list
 
 You can contact Ivan DelSol, the author of Pig and this guide, at sunspider@gmail.com. 
 You can also discuss Pig at http://groups.google.com/group/pug_discuss.
-Please report any issues with this Pig or this guide to: http://code.google.com/p/pug/issues/entry.
+Please report any issues with Pig or this guide to: http://code.google.com/p/pug/issues/entry.
 
 System Requirements
 Hardware - Pig requires an OpenGL compatible graphics card

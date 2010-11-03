@@ -3,9 +3,9 @@ from Opioid2D.public.Node import Node
 from pug.component import Component, register_component, component_method
 
 class Spawn_Flower( Component):
-    """When this object spawns another object, multiple copies of that object
-are created at different angles. Use this with other spawn components or objects
-with an on_spawn callback"""
+    """When this object spawns another object, the spawn is repeated at 
+different angles. Use this with other spawn components or objects with an 
+on_spawn callback"""
     #component_info
     _set = 'pig'
     _type = 'spawn'
@@ -26,12 +26,12 @@ with an on_spawn callback"""
     h_symmetry = False
     v_symmetry = False
     
-    multiplying = None
+    flowering = None
         
     @component_method                
     def on_spawn( self, obj, component):
-        if self.multiplying is None:
-            self.multiplying = component
+        if self.flowering is None:
+            self.flowering = component
         else:
             rot = self.rot % 360
             if self.h_symmetry:
@@ -48,7 +48,7 @@ with an on_spawn callback"""
             self.rot += self.rotation
             objects = component.spawn()
             
-        self.multiplying = None
+        self.flowering = None
         self.owner.rotation = self.start_rotation
 
 register_component( Spawn_Flower)
