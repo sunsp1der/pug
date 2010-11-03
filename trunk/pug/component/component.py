@@ -8,10 +8,11 @@ from types import MethodType as _MethodType
 
 from pug.code_storage.constants import _INDENT, _STORE_UNICODE, _PRETTIFY_FLOATS
 from pug.util import prettify_data
+from pug.gname import GnamedObject
 
 _DEBUG = False
 
-class Component(object):
+class Component(GnamedObject):
     """Component( **kwargs)
     
 Pug uses components to add python code to objects at runtime
@@ -68,6 +69,11 @@ enabled: When this is false, the component's component_methods will not
     def __init__(self, owner=None, **kwargs):
         if owner:
             self.owner = owner
+        if 'gname' in kwargs:
+            gname = kwargs.pop('gname')
+            GnamedObject.__init__(self, gname)
+        else:
+            GnamedObject.__init__(self)
         for attr, val in kwargs.iteritems():
             setattr(self, attr, val)
         cls = self.__class__

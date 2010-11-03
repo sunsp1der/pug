@@ -16,6 +16,7 @@ def _create_component_attribute_list( obj):
     for attrinfo in obj._field_list:
         attributes.append(attrinfo)
     attributes.append(['enabled'])
+    attributes.append(['gname',None,{'label':'   name',}])
     if _DEBUG: attributes.append(['test_referrers',pug.Routine,
                                   {'routine':test_referrers}])
     return attributes

@@ -352,10 +352,10 @@ Start the scene running. Called after enter() and before state changes
             self.all_nodes_callback( 'on_first_display')                        
             self.on_start()
             self.all_nodes_callback( 'on_scene_start', self)             
+            self.started = True
         elif getattr(PigDirector, 'viewing_in_editor', False):
             # viewing in editor, not playing
             self.all_nodes_callback( 'on_added_to_editor', self)
-        self.started = True
         
     def register_node(self, node):        
 #        """register(node): a new node is joining scene. Do callbacks"""

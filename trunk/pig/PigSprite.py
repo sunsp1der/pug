@@ -420,7 +420,7 @@ _spritePugview = {
     [
         ['Sprite', pug.Label, {'font_size':10}],
         ['__class__', None, {'label':'   class', 'new_view_button':False}],
-        ['gname'],
+        ['gname', None, {'label':'   name'}],
         ['archetype', 
                 '\n'.join(["Select this to automatically save this sprite",
                            "to the objects folder when the scene is saved.",

@@ -1,7 +1,6 @@
 """PigDirector.py
 
 Hack in a few features necessary for the Opioid2D director to work with pug"""
-import threading
 import time
 
 
@@ -14,6 +13,8 @@ old_ticks = now = frames = None
 
 opioid_quit = Opioid2D.Director.quit
 PigDirector = Opioid2D.Director
+
+_DEBUG = False #
 
 # this presents incorrect scene errors in code
 PigDirector.scene = None
@@ -33,18 +34,18 @@ query: if True, have the app confirm project closure.
         wx = wx
         if not wx.GetApp() or \
                 not getattr(wx.GetApp().projectObject,'_initialized', False):
-            print "PigDirector real_quit" 
+            if _DEBUG: print "PigDirector real_quit" 
             real_quit()
             return
         if not QUITTING:
             QUITTING = True
             app = wx.GetApp()
             if hasattr(app, '_evt_project_frame_close'):
-                print "PigDirector _evt_project_frame_close"
+                if _DEBUG: print "PigDirector _evt_project_frame_close"
                 wx.CallAfter(app._evt_project_frame_close, query=query)
             return
     except:
-        print "PigDirector except real_quit"
+        if _DEBUG: print "PigDirector except real_quit"
         real_quit() 
 # set up our special quit
 def real_quit():
@@ -52,14 +53,14 @@ def real_quit():
     try:
         import wx     
         wx = wx  
-        print "PigDirector.real_quit kill_subprocesses"
+        if _DEBUG: print "PigDirector.real_quit kill_subprocesses"
         wx.GetApp().get_project_object().kill_subprocesses()
-        print "PigDirector.real_quit _evt_project_frame_close"
+        if _DEBUG: print "PigDirector.real_quit _evt_project_frame_close"
         wx.GetApp()._evt_project_frame_close(query=False)
     except:
         pass
     if not QUITTING:
-        print "opioid_quit"
+        if _DEBUG: print "opioid_quit"
         opioid_quit()
 #        import pygame
 #        pygame.quit()
@@ -76,7 +77,6 @@ def newrun(initialScene, *args, **kw):
     try:
         # This is a long and ugly function that hasn't been splitted into smaller parts
         # because of performance considerations.
-        #
         
         import pygame
         pygame.init()

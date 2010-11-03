@@ -7,14 +7,17 @@ import traceback
 from time import sleep
 from inspect import isclass
 
+_DEBUG = True
 # slight hackery
 if os.name == "nt":
     os.environ['SDL_VIDEODRIVER'] = "windib"
 try:
     import Numeric #@UnresolvedImport
+    if _DEBUG: print "using Numeric"
 except:
     import numpy.oldnumeric as Numeric
     sys.modules['Numeric'] = Numeric 
+    if _DEBUG: print "using numpy"
 
 import Opioid2D
 from Opioid2D.public.Node import Node
