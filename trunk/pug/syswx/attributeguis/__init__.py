@@ -21,6 +21,8 @@ from pug.syswx.attributeguis.play_buttons import PlayButtons
 from pug.syswx.attributeguis.gname_dropdown import GnameDropdown
 from pug.syswx.attributeguis.listedit import ListEdit
 from pug.syswx.attributeguis.color_picker import ColorPicker
+from pug.syswx.attributeguis.my_components import MyComponents
+
 #from pug.syswx.attributeguis.font_button import FontButton
  
 # default attribute gui types

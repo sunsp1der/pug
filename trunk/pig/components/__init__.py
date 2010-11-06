@@ -14,6 +14,7 @@ from pig.components.behavior.Forward_Motion import Forward_Motion
 from pig.components.behavior.Random_Motion import Random_Motion
 from pig.components.behavior.Stop_Motion_On_Destroy \
                             import Stop_Motion_On_Destroy
+from pig.components.behavior.Set_Attribute import Set_Attribute                            
 from pig.components.collision.Collision_Callback import Collision_Callback
 from pig.components.collision.Join_Collision_Group import Join_Collision_Group 
 from pig.components.collision.Collision_Destroy import Collision_Destroy
@@ -22,6 +23,9 @@ from pig.components.controls.Mouse_Follow import Mouse_Follow
 from pig.components.controls.Mouse_Face import Mouse_Face
 from pig.components.controls.Mouse_Click_Destroy import Mouse_Click_Destroy
 from pig.components.controls.Key_Spawn import Key_Spawn
+from pig.components.controls.Key_Destroy import Key_Destroy
+from pig.components.controls.Key_Attribute import Key_Attribute
+from pig.components.controls.Key_Component import Key_Component
 from pig.components.controls.Key_Direction_Controls \
                             import Key_Direction_Controls
 from pig.components.controls.Key_Animate_Direction import Key_Animate_Direction
@@ -30,7 +34,7 @@ from pig.components.gui.Scene_Button import Scene_Button
 from pig.components.gui.Textbox import Textbox
 from pig.components.gui.Value_Tracker_Text import Value_Tracker_Text
 from pig.components.gui.Timer_Text import Timer_Text
-from pig.components.gameplay.Set_Attribute import Set_Attribute
+
 from pig.components.gameplay.Value_On_Destroy import Value_On_Destroy
 from pig.components.gameplay.Takes_Damage import Takes_Damage
 from pig.components.gameplay.Deals_Damage import Deals_Damage
@@ -47,5 +51,6 @@ from pig.components.sound.On_Key_Sound import On_Key_Sound
 from pig.components.sound.On_Collision_Sound import On_Collision_Sound
 from pig.components.scene.Utility_Keys import Utility_Keys
 from pig.components.scene.On_Start_Sound import On_Start_Sound
+from pig.components.scene.Scene_Timer import Scene_Timer
 from pig.components.scene.Midi_Input import Midi_Input
 from pig.components.scene.On_Key_Sound_Scene import On_Key_Sound_Scene

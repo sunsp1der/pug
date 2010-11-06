@@ -341,7 +341,7 @@ Note: for this to work on nodes, it must be run BEFORE the scene is changed.
             if _DEBUG: print "close_scene_windows: Componentframe"
             if _DEBUG: print "   frameObj:", frameObj
             if _DEBUG: print "   owner:", frameObj.owner
-            if not frameObj.owner:
+            if not frameObj.owner or frameObj.owner == scene:
                 doclose = True
             else:
                 if isinstance(frameObj.owner, Node):

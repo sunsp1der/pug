@@ -65,9 +65,7 @@ clicked."""
     @component_method
     def on_click(self):
         "Switch scenes"
-        target = None
-        exec("from scenes." + self.target +" import "+self.target+" as target")
-        PigDirector.switch_scene_to( target)
+        PigDirector.switch_scene_to( self.target)
         self.click_sound_object.play()
         
     @component_method

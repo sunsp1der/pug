@@ -1,3 +1,22 @@
+todo:
+	put component gname in current components dropdown
+X	spawned text flashses
+X	midi_input component window not deleted when scene starts
+X	do_typecast option for Generic agui
+X	MyComponent: components on this object agui
+X	gnamed components
+
+	new components:
+X		destroy on key
+X		scene timer
+X		change val on key
+X		change component val on key
+X			return on  release
+		change spawned val
+		change spawned component val
+		midi to key
+			send key_up t/f
+
 installer:
 	eliminate need for pythonpather
 	create_demo_project
@@ -6,7 +25,7 @@ installer:
 	update numeric refs to numpy
 
 soon:
-	component gnames
+	joystick
 	gameover
 		gameover_settings
 			gameover_pause t/f
@@ -37,6 +56,8 @@ soon:
 	search component book
 
 bugs: 
+	bad data being saved in sprites/scenes sometimes
+		archetype creation?
 	spawn location edges crashes editor intermittent
 	motion zone component shows no pugview intermittent
 	show menus when object is selected

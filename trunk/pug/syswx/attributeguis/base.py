@@ -264,37 +264,11 @@ Try to set the aguis attribute to the value shown in the control
 """
         try:
             control_value = self.get_control_value()
-            attribute_value = self.get_attribute_value()
+            setattr(self.window.object, self.attribute, control_value)              
         except:
             return False
-        if attribute_value is None: 
-            # attribute type not set
-            try:
-                setattr(self.window.object,self.attribute,control_value)
-            except:
-                return False
-            else:
-                return True                  
         else:
-            try:
-                if type(attribute_value) == type(1) and \
-                            type(control_value) == type(0.1):
-                    typedValue = control_value 
-                # if we have a basic attribute type, and we're not setting 
-                # to None, typecast our control_value to the attribute 
-                # value's current type
-                elif type(attribute_value) in BASIC_TYPES and \
-                                                    control_value is not None:
-                    typedValue = type(attribute_value)(control_value)
-                else:
-                    # no type-casting for special types... don't want any 
-                    # weird garbage sitting around
-                    typedValue = control_value
-                setattr(self.window.object, self.attribute, typedValue)              
-            except:
-                return False
-            else:
-                return True
+            return True
                 
     def refresh_window(self):
         self.window.refresh()

@@ -78,7 +78,10 @@ doesn't have as many features/accessors as the combo.ComboCtrl"""
         except:
             pass
         if not self.didSelect:
-            self.SelectItem(self.originalSelection)
+            try:
+                self.SelectItem(self.originalSelection)
+            except:
+                pass
     
     def SetPopupCallback(self, callback):
         """SetPopupCallback( callback)
@@ -118,7 +121,10 @@ The callback will be called just after a selection is made.
         
     def GetStringValue(self):
         if self.selected != -1:
-            return self.list.GetString(self.selected)   
+            try:
+                return self.list.GetString(self.selected)
+            except:
+                return ""   
         else:
             return ""
         

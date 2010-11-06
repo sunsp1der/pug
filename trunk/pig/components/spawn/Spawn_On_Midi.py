@@ -1,4 +1,6 @@
 "Spawn_On_Midi.py"
+import colorsys
+
 from Opioid2D.public.Node import Node
 
 from pug.component import component_method, register_component
@@ -9,9 +11,9 @@ from pig.components.controls.Midi_Callback import Midi_Callback
 from pig.PigDirector import PigDirector
 
 class Spawn_On_Midi( Midi_Callback, Spawner):
-    """Owner spawns when Midi key pressed.
-    
-Derived components can use on_midi_event(event) to react to events"""
+    """Owner spawns when Midi key pressed. Spawned objects can be tinted 
+according to note played.
+"""
     # component_info
     _set = 'pig'
     _type = 'spawn'
@@ -20,10 +22,15 @@ Derived components can use on_midi_event(event) to react to events"""
     _field_list = Midi_Callback._field_list
     _field_list += [
         ['rapid_fire', 'Holding down key spawns continuously'],
+        ['note_tint', 'Tint the spawned objects according to on notes'],
+        ['spectrum_range', 'Range of midi keys for one full rainbow'],
+        
         ]
     _field_list += Spawner._field_list
     
     rapid_fire = True
+    note_tint = True
+    spectrum_range = (48, 59)
 
     interval_complete = True  
     
@@ -82,6 +89,21 @@ Derived components can use on_midi_event(event) to react to events"""
         for k in self.k_info:
             scene.unregister_key(k)
         self.k_info = []
+        
+    @component_method
+    def on_spawn(self, obj, component):
+        """Tint spawned objects according to notes held"""
+        if not self.note_tint or not self.on_notes:
+            return
+        total = 0
+        count = 0
+        for notes in self.on_notes.itervalues():
+            total += sum(notes)
+            count += 1.0
+        avg_key = total/count
+        diff = self.spectrum_range[1] - self.spectrum_range[0]
+        hue = ((avg_key - self.spectrum_range[1]) % diff) / float(diff)        
+        obj.color = colorsys.hsv_to_rgb( hue, 1, 1)
  
 register_component( Spawn_On_Midi)
         

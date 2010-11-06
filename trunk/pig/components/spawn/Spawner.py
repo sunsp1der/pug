@@ -200,16 +200,18 @@ This method checks against max_spawns_in_scene and count. Another spawn will be
 scheduled unless total_objects_spawned has been reached. """
         if not self.owner:
             return
-        if not self.enabled or (self.total_objects_spawned > -1 and \
+        if (self.total_objects_spawned > -1 and \
                 self.spawn_count >= self.total_objects_spawned):
-            return None
-        if self.spawn_interval > 0 and schedule_next:
+            return []
+        if not self.enabled or (self.spawn_interval > 0 and schedule_next):
             self.action = ( Delay(self.get_next_spawn_wait()) + \
                                     CallFunc(self.check_spawn)).do(self.owner)
+            if not self.enabled:
+                return []
         if self.max_spawns_in_scene < 0 or \
                 len(self.spawned_objects) < self.max_spawns_in_scene:
             return self.spawn()
-        return None
+        return []
                     
     def stop_spawning(self):
         self.action.abort()
