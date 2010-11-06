@@ -10,7 +10,7 @@ from Opioid2D import RealTickFunc
 from pug.component import *
 
 from pig import PigScene
-from pig.PigDirector import PigDirector
+from pig.keyboard import keys
 
 class Midi_Input( Component):
     """Process input from a midi instrument
@@ -34,19 +34,21 @@ The midistate object contains the following attributes
     # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
             ['input_id', 'The midi input id. -1 uses default.'],
-            ['test_mode', 'If true, prints all midi events to the console'],
+            ['test_mode', 'If True, prints all midi events to the console'],
+            ['track_info', 
+        'If True, track notes, controllers, and instruments in self.midi_state']
             ]
     #defaults
     input_id = -1
     test_mode = False
+    track_info = False
     
     midi_state = None
         
     @component_method
     def on_start(self):
         "Initialize midi input"
-        if not hasattr(self, "instruments"):
-            self.midi_state = midistate()
+        self.midi_state = midistate()
         try:
             pygame.midi.quit()
             pygame.midi.init()
@@ -56,6 +58,12 @@ The midistate object contains the following attributes
                     print "Midi_Input.on_start: No midi device available"
                     self.enabled = False
                     return
+            if self.test_mode:
+                print "Midi_Input Device List:"
+                self.print_device_info()
+                print "Midi_Input using device",self.input_id,"\n   ",
+                self.print_device_info(self.input_id)
+                
         except:
             print "Midi_Input.on_start: Midi input initialization error"
             self.enabled = False
@@ -68,6 +76,24 @@ The midistate object contains the following attributes
             return
         self.tick_action = RealTickFunc(self.get_midi).do()
         
+    def print_device_info( self, id=None):
+        if id is None:
+            ids = range( pygame.midi.get_count() )
+        else:
+            ids = [id]
+        for i in ids:
+            r = pygame.midi.get_device_info(i)
+            (interf, name, input, output, opened) = r
+    
+            in_out = ""
+            if input:
+                in_out = "(input)"
+            if output:
+                in_out = "(output)"
+    
+            print ("%2i: interface :%s:, name :%s:, opened :%s:  %s" %
+                   (i, interf, name, opened, in_out))        
+        
     @component_method        
     def get_midi_state(self):
         return self.midi_state
@@ -78,20 +104,21 @@ The midistate object contains the following attributes
             pygame_events = self.midi_state.midis2events(midi_events, 
                                                          self.input_id)
             for event in pygame_events:
-                self.midi_state.process_event(event)
+                if self.track_info:
+                    self.midi_state.process_event(event)
                 self.do_callbacks( event)
                 if self.test_mode:
                     print event
                     
     def do_callbacks(self, ev):
         dict = self.owner._key_down_dict
-        fn_list = dict.get((0, 1100 + self.input_id), [])
+        fn_list = dict.get((0, keys["MIDI"]), [])
         for fn_info in fn_list:
             fn_info[0](ev,*fn_info[1], **fn_info[2])
                         
 register_component( Midi_Input)
 
-# The following are midi utilities
+# The following is a midi utility object
 class midistate():
     def __init__(self, track_state = True):
         self.instruments = {} # channel: instrument
@@ -141,8 +168,7 @@ class midistate():
         Takes a sequence of midi events and returns list of pygame events.
         """
         evs = []
-        for midi in midis:
-            
+        for midi in midis:            
             ((status,data1,data2,data3),timestamp) = midi
             if status == 0xFF:
                 # pygame doesn't seem to get these, so I didn't decode
@@ -185,3 +211,4 @@ CONTROLLER_CHANGES = {1: "MOD WHEEL",
                       7: "VOLUME",
                       10: "PAN",
                       }
+

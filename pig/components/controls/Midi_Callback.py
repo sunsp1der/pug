@@ -1,6 +1,4 @@
 "Midi_Callback.py"
-import pygame.midi
-
 from Opioid2D.public.Node import Node
 
 from pug.component import *
@@ -17,8 +15,7 @@ Derived components can use this to react to events.
 Event contains raw midi data 'status', 'data1', and 'data2' as well as parsed
 data 'command' and 'channel'. The main commands received are: NOTE_ON, NOTE_OFF,
 CONTROLLER_CHANGE, and PROGRAM_CHANGE.
-You can also check ongoing midi state using scene.get_midi_state() (see 
-Midi_Input for more info)
+This component keeps track of currently on notes in the on_notes set.
 """
     # component_info
     _set = 'pig'
@@ -26,7 +23,6 @@ Midi_Input for more info)
     _class_list = [Node]
     # attributes:   
     _field_list = [
-        ['input_id', 'The midi input id. -1 uses default.'], 
         ['key_range', 'The range of midi keys to respond to'],
         ['channel_range', "The range of midi channels to respond to"],                  
         ]
@@ -41,22 +37,24 @@ Midi_Input for more info)
     def on_scene_start(self, scene):
         "Set spawn key and setup the spawner"
         self.k_info = []
-        if self.input_id == -1:
-            default = pygame.midi.get_default_input_id()
-            if default == -1:
-                print "Midi_Callback: No midi device available"
-                self.enabled = False
-                return
-            key_id =  keys["MIDI_0"] + default
-        else:
-            key_id = keys["MIDI_0"] + self.input_id
-        self.k_info += [scene.register_key_down( key_id, self.midi_event)]
+        self.k_info += [scene.register_key_down( keys["MIDI"], self.midi_event)]
+        self.on_notes = {}
             
     def midi_event(self, event):
         if not event.channel in range(*self.channel_range):
             return
         if not event.data1 in range(*self.key_range):
             return
+        if event.command == "NOTE_ON":
+            try:
+                self.on_notes[event.channel].add(event.data1)
+            except:
+                self.on_notes[event.channel] = set([event.data1])
+        elif event.command == "NOTE_OFF":
+            try:
+                self.on_notes[event.channel].discard(event.data1)
+            except:
+                pass
         self.owner.on_midi_event(event)
         
     @component_method

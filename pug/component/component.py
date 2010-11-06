@@ -163,7 +163,7 @@ line breaks between each. To create a single-line argument list, strip out all
 """
         dummy = self.__class__()
         argIndent = _INDENT * (indentLevel + 2)
-        attributes = []
+        attributes = ['gname']
         for item in self._field_list:
             attributes.append(item[0])
         attributes.append('enabled')

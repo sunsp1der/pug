@@ -1,18 +1,13 @@
 "Key_Spawn.py"
-import pygame.key
-
-from pug import Dropdown
 from pug.component import component_method, register_component
 
 from Opioid2D.public.Node import Node
 
 from pig.keyboard import keys
 from pig.actions import Delay, CallFunc
-from pig.editor.agui import ObjectsDropdown, KeyDropdown, SoundFile
+from pig.editor.agui import KeyDropdown
 from pig.components.spawn.Spawner import Spawner
 from pig.PigDirector import PigDirector
-
-import time
 
 class Key_Spawn( Spawner):
     """Owner spawns other objects when destroyed"""
@@ -28,7 +23,7 @@ class Key_Spawn( Spawner):
     _field_list += Spawner._field_list
     
     key = keys["SPACE"]
-    spawn_interval = 0.2
+    spawn_interval = 0.5
     spawn_interval_variance = 0.0
     rapid_fire = True
     
@@ -38,11 +33,15 @@ class Key_Spawn( Spawner):
     def on_added_to_scene(self, scene):
         "Set spawn key and setup the spawner"
         self.setup_spawner()
+        self.interval_complete = False
         self.k_info = [0,0]
         self.k_info[0] = scene.register_key_down( self.key, self.check_spawn)
         self.k_info[1] = scene.register_key_up( self.key, self.stop_spawning)
+        self.interval_complete = True
     
     def check_spawn(self, schedule_next=False):
+        if not self.enabled:
+            return
         self.spawning = True
         if self.interval_complete:  
             # spawn_interval has completed          

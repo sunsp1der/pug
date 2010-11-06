@@ -176,8 +176,15 @@ PigDirector.run = newrun
 PigDirector.paused = False
 
 def switch_scene_to( new_scene):
+    if not isinstance(new_scene, Opioid2D.Scene):
+        try:
+            exec("from scenes."+ new_scene +" import "+ new_scene +" as target")
+        except:
+            raise
+    else:
+        target = new_scene
     self = PigDirector
-    self.set_scene( new_scene)
+    self.set_scene( target)
     
 PigDirector.switch_scene_to = switch_scene_to
     

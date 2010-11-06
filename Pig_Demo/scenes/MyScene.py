@@ -18,17 +18,13 @@ class MyScene(PigScene):
         pigsprite_instance.image = 'art\\pug.png'
         pigsprite_instance.layer = 'Background'
         pigsprite_instance.position = (405.0, 458.0)
+        pigsprite_instance.components.add( Key_Component(
+                component_name='bloopy') )
         pigsprite_instance.components.add( Key_Spawn(
                 gname='bloopy',
                 spawn_object='dummy') )
         pigsprite_instance.components.add( Set_Attribute(
                 attribute='tint',
-                change_value=(1, 0, 1)) )
+                change_value=(255, 0, 255)) )
         pigsprite_instance.components.add( Key_Attribute() )
-        pigsprite_instance.components.add( Key_Component(
-                component_name='bloopy') )
-### End MyScene autocode ###
-
-        from pug import get_gnamed_object
-
-        print get_gnamed_object('grow1')
+## End MyScene autocode ###

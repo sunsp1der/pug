@@ -3,8 +3,8 @@ from pig.PigSprite import PigSprite
 from pug.all_components import Key_Drive_Controls, Key_Spawn
 ### End import autocode ###
 
-### cannon autocode ###
-class cannon(PigSprite):
+### Cannon autocode ###
+class Cannon(PigSprite):
     image = 'art\\pug.png'
     layer = 'Background'
     def on_create(self):
@@ -18,4 +18,4 @@ class cannon(PigSprite):
                 sound='sound\\beep.wav',
                 spawn_offset=(0.5, 0),
                 max_spawns_in_scene=1) )
-### End cannon autocode ###
+### End Cannon autocode ###

@@ -37,6 +37,8 @@ class Textbox(Component):
     
     font = None
     action = None
+    
+    last_alpha = None
         
     @component_method
     def set_text(self, text=None):
@@ -45,6 +47,10 @@ class Textbox(Component):
             text=self._text
         else:
             self._text = text
+        try:    
+            self.owner.image = None
+        except:
+            pass
         self.action = (Opioid2D.Delay(0)+ Opioid2D.CallFunc(
                                                 self.do_set_text)).do()
     @component_method
@@ -54,6 +60,7 @@ class Textbox(Component):
     text = property(get_text, set_text)
                     
     def do_set_text(self, image=None, tint=(255,255,255)):
+        self.action = None
         if image==None:
             image = Opioid2D.ResourceManager._create_image(
                         Opioid2D.Bitmap(
@@ -75,8 +82,9 @@ class Textbox(Component):
         "Deconstruct component"
         #hack
         if self.action:
+            self.action.abort()
             if self.action._callbacks:
-                self.action._callbacks = None
+                self.action._callbacks = None            
 
     def set_font_size(self, font_size):
         self._font_size = font_size

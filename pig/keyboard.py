@@ -143,7 +143,7 @@ key_list = [
     ("UNDERSCORE",95),
     ("UNDO",322),
     ("UNKNOWN",0),
-    ("MIDI_0",1100),
+    ("MIDI",1100),
     ("MIDI_1",1101),
     ("MIDI_2",1102),
     ("MIDI_3",1103),
