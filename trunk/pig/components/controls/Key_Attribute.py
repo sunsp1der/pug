@@ -34,8 +34,10 @@ class Key_Attribute( Set_Attribute):
     def on_added_to_scene(self, scene):
         "Set spawn key and setup the spawner"
         self.k_info = [0,0]
-        self.k_info[0] = scene.register_key_down( self.key, self.do_change)
-        self.k_info[1] = scene.register_key_up( self.key, self.undo_change)
+        self.k_info[0] = scene.register_key_down( self.key, 
+                                                  self.do_change)
+        self.k_info[1] = scene.register_key_up( self.key, 
+                                                self.undo_change)
             
     def undo_change(self, object=None):
         """undo_change(object=None): undo change defined by component

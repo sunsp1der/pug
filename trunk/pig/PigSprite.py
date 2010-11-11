@@ -26,6 +26,7 @@ Opioid2d Sprite with features for use with pug"""
     _image_file = None   
     _image = None
     _archetype = False
+    destroying = False # in the process of being destroyed
     destroy_blockers = None
     _pug_pugview_class = 'PigSprite'
     image = ''
@@ -168,7 +169,7 @@ if TF is "True" set archetype to True, but don't create default name
         # the following line had problems on windows:
         #     Sprite.set_image(self,image)
         # HACK: putting a Delay before the set_image fixes the problem...
-#        if getattr(PigDirector, 'game_started', False):
+#        if getattr(PigDirector, 'project_started', False):
 #        else:
 #            (Delay(0) + CallFunc(Sprite.set_image, self, image)).do()
         # HACK: but it slows down animations ALOT. wtf with this?!
@@ -201,7 +202,9 @@ In general, it is a good idea to use PigSprite.destroy rather than
 PigSprite.delete whenever the PigSprite is being removed by gameplay effects."""
         if _DEBUG:
             print 'PigSprite.destroy',self, self.destroy_blockers.data
-        self.on_destroy()
+        if not self.destroying:
+            self.on_destroy()
+            self.destroying = True
         if self._mouse_registered :
             self.mouse_unregister()
         if not self.destroy_blockers:
@@ -294,16 +297,16 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
     def _create_dummy(cls, exporter):
         # make sure we have our dummy node and cleanup registered
         dummy = None
-        print "PigSprite.createdummy 0"
+        if _DEBUG: print "PigSprite.createdummy 0"
         if exporter_cleanup not in exporter.deleteCallbacks:
             exporter.register_delete_callback( exporter_cleanup)
-        print "PigSprite.createdummy 1", cls
+        if _DEBUG: print "PigSprite.createdummy 1", cls
         dummy = cls(register=False)
-        print "PigSprite.createdummy 2"
+        if _DEBUG: print "PigSprite.createdummy 2"
         t = 0     
         while not dummy.initialized:
             t = t+1
-            print " PigSprite.createdummy wait", t
+            if _DEBUG: print " PigSprite.createdummy wait", t
             time.sleep(0.02)
             if t == 50:
                 return None

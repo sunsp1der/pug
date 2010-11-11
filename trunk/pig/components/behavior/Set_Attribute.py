@@ -32,7 +32,7 @@ class Set_Attribute(Component):
         
     @component_method
     def on_added_to_scene(self, scene):
-        """Set gname when object is added to scene"""
+        """Set attribute when object is added to scene"""
         self.do_change()
         
     def do_change(self, object=None):
@@ -78,6 +78,7 @@ in derived components.
             return
         if object is None:
             object = self.original_object
+        print self.attribute, self.original_value
         setattr(object, self.attribute, self.original_value)
         self.original_value = None
 register_component( Set_Attribute)

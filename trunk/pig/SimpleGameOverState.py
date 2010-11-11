@@ -62,7 +62,7 @@ unpause_keys: list of keys that cause unpause. [] means any key
     def exit(self):
         from pig.gamedata import get_gamedata
         PigDirector.paused = False
-        PigDirector.game_started = False
+        PigDirector.project_started = False
         if self.restart:
             gamedata = get_gamedata()
             PigDirector.set_scene( gamedata.start_sceneclass)

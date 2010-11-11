@@ -124,7 +124,6 @@ For kwargs optional arguments, see the Base attribute GUI
         addTree.SetMinSize((1,self.addTree.Size[1]))
         editList.SetMinSize((1,self.editList.Size[1]))
         
-        aguidata.setdefault('doc', "")
         kwargs['aguidata'] = aguidata
         kwargs['label_widget'] = label
         kwargs['control_widget'] = control
@@ -147,6 +146,7 @@ For kwargs optional arguments, see the Base attribute GUI
             if isinstance(child, wx.TopLevelWindow):
                 wx.CallAfter( child.Close)
 #        aguidata.setdefault('background_color', self.defaultBackgroundColor)
+        aguidata.setdefault('doc', "")
         aguidata.setdefault('label','   components')
         try:
             resetObject = self.object != window.object

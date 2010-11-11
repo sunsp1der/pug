@@ -111,10 +111,7 @@ The midistate object contains the following attributes
                     print event
                     
     def do_callbacks(self, ev):
-        dict = self.owner._key_down_dict
-        fn_list = dict.get((0, keys["MIDI"]), [])
-        for fn_info in fn_list:
-            fn_info[0](ev,*fn_info[1], **fn_info[2])
+        self.owner.do_key_callbacks( keys["MIDI"], a=(ev,))
                         
 register_component( Midi_Input)
 

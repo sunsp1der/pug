@@ -4,9 +4,9 @@ from Opioid2D.public.Node import Node
 
 from pug.component import register_component, component_method
 
-from pig.components import Spawn_On_Midi
+from pig.components import Midi_Spawn
 
-class Midi_Rainbow( Spawn_On_Midi):
+class Midi_Rainbow( Midi_Spawn):
     """Object spawns on midi key press. Color of spawned object is determined by
 which keys are currently pressed."""
     #component_info
@@ -15,7 +15,7 @@ which keys are currently pressed."""
     _class_list = [Node]
     # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
-            ] + Spawn_On_Midi._field_list
+            ] + Midi_Spawn._field_list
     # defaults
     
     @component_method                

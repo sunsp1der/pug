@@ -6,7 +6,7 @@ import traceback
 import time
 
 from pygame.locals import KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP
-from pygame.key import get_pressed
+from pygame.key import get_pressed, get_mods
 
 import Opioid2D
 from Opioid2D.internal.objectmgr import ObjectManager
@@ -157,6 +157,26 @@ fromGroup: If specified, only collisions with this group will be unregistered.
         """handle_mousebuttonup( ev): ev is a pygame mousebuttonup event""" 
         self.process_keylist( ev)        
         
+
+    def do_key_callbacks(self, key, mod=0, keydict="KEYDOWN", a=None, kw=None):
+        if a is None:
+            a = tuple()
+        if kw is None:
+            kw = {}
+        if type(keydict) != dict:
+            if keydict == "KEYUP":
+                keydict = self._key_up_dict
+            elif keydict == "KEYDOWN":
+                keydict = self._key_down_dict
+            else:
+                raise ValueError("No callback dict named '" + keydict + "'")
+        fn_list = keydict.get((mod, key), [])
+        for fn_info in fn_list: 
+            newa = a + fn_info[1]
+            newkw = fn_info[2].copy()
+            newkw.update(kw)
+            fn_info[0]( *newa, **newkw)
+
     def process_keylist( self, ev):
         """process_keylist( ev): call registered key event callbacks
 
@@ -182,9 +202,7 @@ key_dict: the key_dict to use
                 if ev.mod & modval:
                     mod += modval 
         
-        fn_list = dict.get(( mod, key), [])
-        for fn_info in fn_list:
-            fn_info[0](*fn_info[1],**fn_info[2])
+        self.do_key_callbacks(key, mod, dict)
 
     def register_key_down(self, key, fn, *args, **kwargs):
         """register_key_down(key, fn, *args, **kwargs)
@@ -192,15 +210,29 @@ key_dict: the key_dict to use
 Register a function to execute when a given key is pressed. If the key is being
 pressed when this is registered, the function will be executed immediately
 unless the kwarg _do_immediate is set to False.
-key: can be either a KEY_ constant from pig.keyboard or a tuple in the form 
-    (KEYMOD_ constant, KEY_ constant)
+key: can be either a keys[] constant (or index) from pig.keyboard or a tuple in 
+    the form (keymods[] constant/index, keys[] constant/index)
 fn: the function to call when the keypress occurs
 *args, **kwargs: arguments to fn    
 """
         # if key is already down, perform function
         if kwargs.pop('_do_immediate', True):
             try:
+                if type(key) is tuple:
+                    if type(key[1]) is str:
+                        keymod = keymods[key[1]]
+                    if type(key[0]) is str:
+                        key = keys[key[0]]
+                    else:
+                        key = key[0]
+                if type(key) is str:
+                    key = keys[key]
+                    keymod = 0
                 pressed = get_pressed()[key]
+                mods = get_mods()
+                if pressed and (((keymod is 0) and mods) or \
+                        not(keymod & mods)):
+                    pressed = False
             except:
                 pass
             else:
@@ -221,8 +253,8 @@ Like register_key_down, but when key is released"""
 Unregister a function to execute when a given key is pressed. Returns True if fn
 is found. If no function is specified, unregister that key altogether and return
 True.
-key: can be either a KEY_ constant from pig.keyboard or a tuple in the form 
-    (KEYMOD_ constant, KEY_ constant)
+key: can be either a keys[] constant (or index) from pig.keyboard or a tuple in 
+    the form (keymods[] constant/index, keys[] constant/index)
 fn: the function to call when the keypress occurs
 *args, **kwargs: arguments to fn    
 """
@@ -237,8 +269,8 @@ Like register_key_down, but when key is released"""
     def _register_key( self, keydict, key, fn, *args, **kwargs):
         """register_key( keydict, key, fn, *args, **kwargs)->unregister tuple
 
-key: can be either a KEY_ constant from pig.keyboard or a tuple in the form 
-    (KEYMOD_ constant, KEY_ constant)
+key: can be either a keys[] constant (or index) from pig.keyboard or a tuple in 
+    the form (keymods[] constant/index, keys[] constant/index)
 fn: the fn to be registered
 *args, **kwargs: sent to fn
 
@@ -253,10 +285,16 @@ key_down. In the future, maybe key_hold.
         else:
             try:
                 keymod = key[0]
+                if type(keymod) is not int: 
+                    keymod = keymods[keymod]
                 key = key[1]
+                if type(key) is not int: 
+                    key = keys[key]
             except:
                 # key must just be a keymode
                 keymod = 0
+                if type(key) is not int: 
+                    key = keys[key]
         if keydict.get((keymod, key)) is None:
             keydict[(keymod, key)] = [(fn, args, kwargs)]
         else:
@@ -339,15 +377,16 @@ key_down. In the future, maybe key_hold.
 Start the scene running. Called after enter() and before state changes
 """
         if getattr(PigDirector, 'start_project', False):
+            if not getattr(PigDirector, 'project_started', False):
+                gamedata = create_gamedata()
+                gamedata.start_sceneclass = self.__class__
             for node in self.get_ordered_nodes():
                 if node.archetype:
                     node.delete()
-            if not getattr(PigDirector, 'game_started', False):
-                PigDirector.game_started = True
-                gamedata = create_gamedata()
-                gamedata.start_sceneclass = self.__class__
-                self.on_game_start()
-                self.all_nodes_callback( 'on_game_start')
+            if not getattr(PigDirector, 'project_started', False):
+                self.on_project_start()
+                self.all_nodes_callback( 'on_project_start')
+                PigDirector.project_started = True
             self.all_nodes_callback( 'on_added_to_scene', self)
             self.all_nodes_callback( 'on_first_display')                        
             self.on_start()
@@ -359,7 +398,7 @@ Start the scene running. Called after enter() and before state changes
         
     def register_node(self, node):        
 #        """register(node): a new node is joining scene. Do callbacks"""
-        if _DEBUG: print "PigScene.register_node:",node
+        if _DEBUG: print "PigScene.register_node:",node,self.started
         if self.started:
             try:
                 func = getattr(node, 'on_added_to_scene')
@@ -404,7 +443,7 @@ Start the scene running. Called after enter() and before state changes
     def on_enter(self):
         pass
     
-    def on_game_start(self):
+    def on_project_start(self):
         """Callback hook for when project starts with this scene"""
         pass
     
@@ -414,7 +453,7 @@ Start the scene running. Called after enter() and before state changes
     
     def stop(self):
         """Stop a level that is playing"""
-        Opioid2D.Director.game_started = False  
+        Opioid2D.Director.project_started = False  
         Opioid2D.Director.start_project = False                     
         self.started = False
         self.exit()

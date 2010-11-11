@@ -37,10 +37,6 @@ method will be called."""
         
     interval = 0.5
     
-    def on_game_start(self):
-        gamedata = get_gamedata()
-        setattr( gamedata, self.value_name, float(self.start_value))
-
     @component_method
     def on_added_to_scene(self, scene):
         """Set starting value"""

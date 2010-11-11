@@ -23,6 +23,7 @@ from pig.components.controls.Mouse_Follow import Mouse_Follow
 from pig.components.controls.Mouse_Face import Mouse_Face
 from pig.components.controls.Mouse_Click_Destroy import Mouse_Click_Destroy
 from pig.components.controls.Key_Spawn import Key_Spawn
+from pig.components.controls.Midi_Spawn import Midi_Spawn
 from pig.components.controls.Key_Destroy import Key_Destroy
 from pig.components.controls.Key_Attribute import Key_Attribute
 from pig.components.controls.Key_Component import Key_Component
@@ -41,16 +42,20 @@ from pig.components.gameplay.Deals_Damage import Deals_Damage
 from pig.components.gameplay.Multiple_Lives import Multiple_Lives
 from pig.components.spawn.Spawner import Spawner
 from pig.components.spawn.Spawn_On_Destroy import Spawn_On_Destroy
-from pig.components.spawn.Spawn_On_Midi import Spawn_On_Midi
+
 from pig.components.spawn.Spawn_Flower import Spawn_Flower
+from pig.components.spawn.Spawned_Attribute import Spawned_Attribute
+from pig.components.spawn.Spawned_Component import Spawned_Component
 from pig.components.sound.On_Create_Sound import On_Create_Sound
 from pig.components.sound.On_Destroy_Sound import On_Destroy_Sound
 from pig.components.sound.On_Damage_Sound import On_Damage_Sound
 from pig.components.sound.On_Damaged_Sound import On_Damaged_Sound
 from pig.components.sound.On_Key_Sound import On_Key_Sound
 from pig.components.sound.On_Collision_Sound import On_Collision_Sound
+from pig.components.scene.Midi_To_Key import Midi_To_Key
 from pig.components.scene.Utility_Keys import Utility_Keys
 from pig.components.scene.On_Start_Sound import On_Start_Sound
 from pig.components.scene.Scene_Timer import Scene_Timer
 from pig.components.scene.Midi_Input import Midi_Input
+from pig.components.scene.Joystick_Input import Joystick_Input
 from pig.components.scene.On_Key_Sound_Scene import On_Key_Sound_Scene

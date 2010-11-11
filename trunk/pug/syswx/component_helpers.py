@@ -179,7 +179,10 @@ choose a given component to be selected after refresh.
                 selectComponent=componentList[0]
             for component in componentList:
                 ref = weakref.ref(component)
-                item = self.listCtrl.AddItem(component.__class__.__name__, 
+                label = component.__class__.__name__
+                if component.gname:
+                    label = component.gname + ' (' + label + ')'
+                item = self.listCtrl.AddItem(label, 
                                          ref)
                 if component == selectComponent:
                     retValue = item

@@ -237,17 +237,25 @@ def on_drop_files( x, y, filenames):
             if type[2]:
                 title = "Copy "+type[0]+" into project" 
                 dest = os.path.join(dest, type[0], os.path.split(filename)[1])
-        dlg = wx.MessageDialog( wx.GetApp().get_project_frame(),
-                    "Copy file:\n"+filename+"\nto:\n"+dest+"?\n\n"+\
-                    "If file exists, it will be overwritten.",
-                    title, wx.YES_NO | wx.ICON_QUESTION)
-        wx.GetApp().raise_all_frames()
-        if dlg.ShowModal() == wx.ID_YES:
-            try:
-                shutil.copyfile(filename, dest)
-            except:
-                show_exception_dialog()
-        return [dest]
+        if filename == dest:
+            dlg = wx.MessageDialog( wx.GetApp().get_project_frame(),
+                    "Use 'Reload Files' button if you want to refresh files.",
+                    "Files already in project!", wx.OK)
+            wx.GetApp().raise_all_frames()
+            dlg.ShowModal()
+            return ([])
+        else:
+            dlg = wx.MessageDialog( wx.GetApp().get_project_frame(),
+                        "Copy file:\n"+filename+"\nto:\n"+dest+"?\n\n"+\
+                        "If file exists, it will be overwritten.",
+                        title, wx.YES_NO | wx.ICON_QUESTION)
+            wx.GetApp().raise_all_frames()
+            if dlg.ShowModal() == wx.ID_YES:
+                try:
+                    shutil.copyfile(filename, dest)
+                except:
+                    show_exception_dialog()
+            return [dest]
     else:
         title = "Copy multiple files into project"
         message = ""
@@ -259,6 +267,13 @@ def on_drop_files( x, y, filenames):
             for filename in type[2]:
                 dest = os.path.join(projectPath, type[0], 
                                     os.path.split(filename)[1])
+                if filename == dest:
+                    dlg = wx.MessageDialog( wx.GetApp().get_project_frame(),
+                    "Use 'Reload Files' button if you want to refresh files.",
+                            "Files already in project!", wx.OK)
+                    wx.GetApp().raise_all_frames()
+                    dlg.ShowModal()
+                    return ([])                
                 message += "> "+filename+" to "+dest+"\n"
                 copies += (filename,dest)
             message += "\n"
@@ -281,11 +296,11 @@ def wait_for_state(state):
     "wait_for_state(state): Set scene state then wait until Opioid is ready"
     scene = PigDirector.scene
     oldstate = scene.state
-    print "wfs 1",
+    if _DEBUG: print "wfs 1",
     scene.state = state
     time.sleep(0.05)
     timer = 0
-    print "wfs 2",
+    if _DEBUG: print "wfs 2",
     while not (scene.state == state or scene.state.__class__ == state) and \
             getattr(oldstate, 'exitted', True):
         print "wfs 3",        
@@ -295,7 +310,7 @@ def wait_for_state(state):
         if timer > 50:
             raise ValueError("Pug unable to set scene state") 
                 # get next spawn_interval
-    print "Wfs 4"
+    if _DEBUG: print "Wfs 4"
     time.sleep(0.05)
     if _DEBUG: print "   State set"
 

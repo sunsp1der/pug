@@ -1,10 +1,5 @@
 """Manages drawing and maintaining selections"""
 
-import os.path
-
-import wx
-import Opioid2D
-from Opioid2D import Mouse
 from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 
 from pig.editor import selection_helpers

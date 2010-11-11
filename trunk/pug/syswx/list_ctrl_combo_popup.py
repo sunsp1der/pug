@@ -11,6 +11,7 @@ doesn't have as many features/accessors as the combo.ComboCtrl"""
     def __init__(self):
         self.PostCreate(wx.PreListBox())
         wx.combo.ComboPopup.__init__(self)
+        self.typedText = ''
         self.didSelect = True
         
     def Create(self, parent):
@@ -19,9 +20,59 @@ doesn't have as many features/accessors as the combo.ComboCtrl"""
         self.Bind(wx.EVT_LEFT_DOWN, self.OnMouseSelect)
         self.Bind(wx.EVT_MOTION, self.OnMotion)
         self.Bind(wx.EVT_LEAVE_WINDOW, self.LeaveWindow)
+        self.Bind(wx.EVT_KEY_DOWN, self.OnKey)
         self.selected = -1
         self.selectCallback = None
         self.popupCallback = None
+        
+    def FindPrefix(self, prefix):
+        if prefix:
+            prefix = prefix.lower()
+            length = len(prefix)
+
+            # Changed in 2.5 because ListBox.Number() is no longer supported.
+            # ListBox.GetCount() is now the appropriate way to go.
+            for x in range(self.GetCount()):
+                text = self.GetString(x)
+                text = text.lower()
+
+                if text[:length] == prefix:
+                    return x
+        return -1
+
+    def OnKey(self, evt):
+        key = evt.GetKeyCode()
+        if key >= 32 and key <= 127:
+            self.typedText = self.typedText + chr(key)
+            item = self.FindPrefix(self.typedText)
+
+            if item != -1:
+                self.SetSelection(item)
+        elif key == wx.WXK_BACK or key == wx.WXK_LEFT:
+            # backspace removes one character and backs up
+            if not self.typedText:
+                return
+            self.typedText = self.typedText[:-1]
+            item = self.FindPrefix(self.typedText)
+            if item != -1:
+                self.SetSelection(item)
+        elif key == wx.WXK_UP:
+            item = self.GetSelection()
+            if item > 0:
+                self.SetSelection(item-1)
+        elif key == wx.WXK_DOWN:
+            item = self.GetSelection()
+            try:
+                self.SetSelection(item+1)
+            except:
+                pass
+        elif key == wx.WXK_ESCAPE or key == wx.WXK_TAB:
+            self.Dismiss()
+        elif key == wx.WXK_RETURN:
+            self.OnSelect(None, self.GetSelection())
+        else:
+            self.typedText = ''
+            evt.Skip()
         
     def AddItem(self, text, data=None):
         item = self.Append(text)
@@ -54,13 +105,14 @@ doesn't have as many features/accessors as the combo.ComboCtrl"""
                 self.selected = -1
         return None
     
-    def OnSelect(self, event, selected):
+    def OnSelect(self, event=None, selected=-1):
         if selected == -1:
             self.SelectItem(self.originalSelection)
         self.selected = selected
         self.didSelect = True
         self.Dismiss()
-        event.Skip()
+        if event:
+            event.Skip()
         if self.selectCallback:
             self.selectCallback(event)
     
@@ -148,60 +200,4 @@ The callback will be called just after a selection is made.
             if itemtext == text:
                 return i
         return -1
-    
-#---------------------------------------------------------------------------
 
-# This listbox subclass lets you type the starting letters of what you want to
-# select, and scrolls the list to the match if it is found.
-class FindPrefixListBox(wx.ListBox):
-    def __init__(self, parent, id=-1, pos=wx.DefaultPosition, 
-                 size=wx.DefaultSize, choices=[], style=0, 
-                 validator=wx.DefaultValidator):
-        wx.ListBox.__init__(self, parent, id, pos, size, choices, style, validator)
-        self.typedText = ''
-        self.Bind(wx.EVT_KEY_DOWN, self.OnKey)
-
-
-    def FindPrefix(self, prefix):
-        if prefix:
-            prefix = prefix.lower()
-            length = len(prefix)
-
-            # Changed in 2.5 because ListBox.Number() is no longer supported.
-            # ListBox.GetCount() is now the appropriate way to go.
-            for x in range(self.GetCount()):
-                text = self.GetString(x)
-                text = text.lower()
-
-                if text[:length] == prefix:
-                    return x
-
-        return -1
-
-
-    def OnKey(self, evt):
-        key = evt.GetKeyCode()
-        if key >= 32 and key <= 127:
-            self.typedText = self.typedText + chr(key)
-            item = self.FindPrefix(self.typedText)
-
-            if item != -1:
-                self.SetSelection(item)
-
-        elif key == wx.WXK_BACK:   # backspace removes one character and backs up
-            self.typedText = self.typedText[:-1]
-
-            if not self.typedText:
-                self.SetSelection(0)
-            else:
-                item = self.FindPrefix(self.typedText)
-
-                if item != -1:
-                    self.SetSelection(item)
-        else:
-            self.typedText = ''
-            evt.Skip()
-
-    def OnKeyDown(self, evt):
-        pass
-   

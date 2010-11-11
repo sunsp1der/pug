@@ -41,7 +41,7 @@ class Utility_Keys( Component):
         
     @component_method
     def do_restart(self):
-        #Director.game_started = False
+        #Director.project_started = False
         (Delay(0)+CallFunc(PigDirector.switch_scene_to,
                            PigDirector.scene.__class__)).do()
         
