@@ -4,6 +4,7 @@ import pygame
 # this is the list of all available keys
 # changing the order of this list will change the order in pug dropdowns
 key_list = [
+    (None,None),
     ("UP",273),
     ("DOWN",274),
     ("LEFT",276),
@@ -144,14 +145,14 @@ key_list = [
     ("UNDO",322),
     ("UNKNOWN",0),
     ("MIDI",1100),
-    ("MIDI_1",1101),
-    ("MIDI_2",1102),
-    ("MIDI_3",1103),
-    ("MIDI_4",1104),
-    ("MIDI_5",1105),
-    ("MIDI_6",1106),
-    ("MIDI_7",1107),
-    ("MIDI_8",1108),
+#    ("MIDI_1",1101),
+#    ("MIDI_2",1102),
+#    ("MIDI_3",1103),
+#    ("MIDI_4",1104),
+#    ("MIDI_5",1105),
+#    ("MIDI_6",1106),
+#    ("MIDI_7",1107),
+#    ("MIDI_8",1108),
 #    ("WORLD_0",160),
 #    ("WORLD_1",161),
 #    ("WORLD_10",170),
@@ -252,7 +253,6 @@ key_list = [
 # create constant values and dict
 keys = {}
 for _name, _val in key_list:
-    exec(''.join(["KEY_",_name," = ",repr(_val)]))
     keys[_name] = _val
     
 # list of keymods
@@ -266,6 +266,5 @@ keymod_list = (
 # create constant values and dict
 keymods = {}
 for _name, _val in keymod_list:
-    exec(''.join(["KEYMOD_",_name," = ",repr(_val)]))
     keymods[_name] = _val
 

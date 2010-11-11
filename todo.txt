@@ -1,21 +1,14 @@
 todo:
-	put component gname in current components dropdown
-X	spawned text flashses
-X	midi_input component window not deleted when scene starts
-X	do_typecast option for Generic agui
-X	MyComponent: components on this object agui
-X	gnamed components
 
-	new components:
-X		destroy on key
-X		scene timer
-X		change val on key
-X		change component val on key
-X			return on  release
-		change spawned val
-		change spawned component val
-		midi to key
-			send key_up t/f
+
+	take scene argument out of on_added_to_scene etc.
+	animation options
+		separate move and animation keys
+			animation per key
+		list of frames, tuple of ranges
+	bug for many spawns in user built on_start - editor only
+	add damage tint to fly around
+	joystick_to_keys
 
 installer:
 	eliminate need for pythonpather
@@ -25,7 +18,21 @@ installer:
 	update numeric refs to numpy
 
 soon:
+	'loading' graphic while scene saves, or at least cleanup
+	destroy on gameover
+	option for gameover pause
+	option for gameover timer
+ 	collide_add_component
+ 		disable and name
+ 		add named component to collided object
+ 		on_collide
+ 		spawn
+ 	collide_remove_component
+ 		name
+ 	set_attribute on collide
+ 	set_component attribute on collide
 	joystick
+	try to return to selected object and reopen components
 	gameover
 		gameover_settings
 			gameover_pause t/f

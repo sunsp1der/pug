@@ -4,7 +4,7 @@ This module defines a gamedata object meant for global game information and
 functionality. To create the gamedata object, call the create_gamedata function in this 
 module. 
 A good place to set up info in gamedata is in your first scene's
-on_game_start method.
+on_project_start method.
 """
 
 import pug

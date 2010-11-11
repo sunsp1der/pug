@@ -10,15 +10,15 @@ class FlyAroundPlayer(PigSprite):
     image = 'art\\pug.png'
     layer = 'Background'
     def on_create(self):
-        self.position = (400.0, 300.0)
+        self.position = (405.0, 297.0)
         self.components.add( Key_Direction_Controls(
                 x_velocity=200,
                 y_velocity=200,
                 rotate=False,
-                up_key=119,
-                down_key=115,
-                left_key=97,
-                right_key=100) )
+                up_key='W',
+                down_key='S',
+                left_key='A',
+                right_key='D') )
         self.components.add( Motion_Zone() )
         self.components.add( Mouse_Face() )
         self.components.add( Key_Spawn(

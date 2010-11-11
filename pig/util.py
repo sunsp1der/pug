@@ -7,30 +7,44 @@ import traceback
 from time import sleep
 from inspect import isclass
 
+from pig.gamedata import get_gamedata, create_gamedata
+from pig.pygameWindowInfo_0_1 import PygameWindowInfo
+
 _DEBUG = True
 # slight hackery
-if os.name == "nt":
-    os.environ['SDL_VIDEODRIVER'] = "windib"
+if os.name == 'nt':
+    os.environ['SDL_VIDEODRIVER'] = 'windib'
 try:
     import Numeric #@UnresolvedImport
-    if _DEBUG: print "using Numeric"
+    if _DEBUG: print 'using Numeric'
 except:
     import numpy.oldnumeric as Numeric
     sys.modules['Numeric'] = Numeric 
-    if _DEBUG: print "using numpy"
+    if _DEBUG: print 'using numpy'
 
 import Opioid2D
+from Opioid2D.public.Vector import Vector
 from Opioid2D.public.Node import Node
 
-import pug
 import pug.component
 from pug.util import get_package_classes, find_classes_in_module
 
 from pig.PigDirector import PigDirector
-from pig.gamedata import *
 
 projectPath = os.getcwd()
 _revertScene = None
+
+def get_mouse_position( layer_name=None):
+    """get_mouse_position(layer_name=None)->Mouse position on layer
+
+layer_name: if None, use the top layer
+""" 
+    scene = PigDirector.scene
+    if layer_name is None:
+        layer_name = scene.layers[0] 
+    layer = scene.get_layer(layer_name)
+    position = Opioid2D.Mouse.get_position()
+    return layer.convert_pos(position[0], position[1])
 
 def skip_deprecated_warnings():
     """skip_deprecated_warnings()
@@ -200,8 +214,8 @@ _project_settings file unless otherwise noted.
     Opioid2D.Director.run(initial_scene)
         
 def set_opioid_window_position( position):    
-    if os.name == "nt":
-        loc = (position[0]+5, position[1]+28)
+    if os.name == 'nt':
+        loc = (position[0]+3, position[1]+25)
     else:
         loc = position[0:2]
     os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % loc

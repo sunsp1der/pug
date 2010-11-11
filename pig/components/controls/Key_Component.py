@@ -6,6 +6,7 @@ from pug.component import *
 from pug.gname import get_gnamed_object_list
 
 from pig.components.controls.Key_Attribute import Key_Attribute
+from pig.components.behavior.Set_Attribute import Set_Attribute
 
 class Key_Component( Key_Attribute):
     """Change an attribute of one of owner's components when key is pressed. If
@@ -41,9 +42,9 @@ object: the object to be changed. In this case, the selected component.
                 except:
                     continue
                 if self.owner == owner:
-                    Key_Attribute.do_change(self, object)
+                    Set_Attribute.do_change(self, object)
         else:
-            Key_Attribute.do_change(self, object)
+            Set_Attribute.do_change(self, object)
             
 register_component( Key_Component)
         

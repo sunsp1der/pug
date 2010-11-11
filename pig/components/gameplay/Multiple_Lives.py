@@ -39,13 +39,11 @@ This component gives the base object a new callback:
     do_gameover = False
     
     _lives = None
-      
+    
     @component_method
-    def on_first_display(self):
-        "Set up multiple lives"
-        if self.lives is None:
-            self.lives = int(self.start_lives)
-        
+    def on_project_start(self):
+        self.set_lives( self.start_lives - 1)
+    
     @component_method
     def on_destroy(self):
         if self.lives:
@@ -62,9 +60,8 @@ This component gives the base object a new callback:
     def on_delete(self):
         if self.owner.archetype and self.spawn_archetype and \
                 getattr(PigDirector, 'start_project', False):
-            self.on_first_display()
-            (Delay(0) + CallFunc(do_respawn, self.owner.__class__,
-                                self.lives-1, PigDirector.scene)).do()                            
+            # set up original lives
+            self.owner.__class__()
                                              
     @component_method
     def on_respawn(self):
@@ -81,14 +78,23 @@ This component gives the base object a new callback:
     @component_method
     def get_lives(self):
         "get_lives()->self._lives"
-        return self._lives
+        if self._lives is None:
+            self.set_lives( self.start_lives)
+        if self.value_name:
+            gamedata = get_gamedata()         
+            try:
+                return getattr(gamedata, self.value_name)   
+            except:
+                return None
+        else:
+            return self._lives
     lives = property(get_lives, set_lives, doc = "Current lives") 
     
 # this is in a separate function because the original object with the component
 # has been deleted
-def do_respawn( cls, lives, scene):
+def do_respawn( cls, lives, scene=None):
     #check to make sure we're in the same scene
-    if scene != PigDirector.scene:
+    if scene and scene != PigDirector.scene:
         return
     obj = cls()
     obj.set_lives( lives)

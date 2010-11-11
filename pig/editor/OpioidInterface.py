@@ -27,6 +27,7 @@ from pug.syswx.drag_drop import FileDropTarget
 from pig import PigScene, PigSprite, PigDirector, PauseState
 from pig.util import fix_project_path, set_project_path, save_project_settings,\
         entered_scene, start_scene, get_gamedata, create_gamedata, \
+        PygameWindowInfo, \
         get_display_center, skip_deprecated_warnings, set_opioid_window_position
 from pig.editor.StartScene import StartScene
 from pig.editor import hacks, EditorState
@@ -270,7 +271,7 @@ settingsObj: an object similar to the one below... if it is missing any default
             pass
         
         # create a project file error report at startup
-        self.reload_project_files( errors=code_exceptions)
+        self.reload_project_files( errors=code_exceptions, save_reload=False)
    
     def on_drop_files(self, x, y, filenames):
         # pass to util function
@@ -419,14 +420,21 @@ forceReload: if True, reload all scenes and objects first.
                             doReload=doReload, errors=errors)
         
     def reload_project_files(self, doReload=True, errors=None,
-                             show_dialog=True):
-        """reload_project_files(doReload=True, errors=None, show_dialog=True)
+                             show_dialog=True, save_reload=True):
+        """reload_project_files(doReload=True, errors=None, show_dialog=True, 
+                                reload_scene=True)
 
 doReload: force reload of all files
 errors: dict of errors. Will be filled with file errors. Errors can be provided
     in one of two forms... 1)module: sys.exc_info() or 2)*header: sys.exc_info()
 show_dialog: show a dialog displaying all file errors found
+save_reload: if True, save the working file before reloading project files, then
+    reload the scene when done
 """
+        if save_reload and self.scene.__class__.__name__ not in ['PigScene',
+                                                                 'Scene']:
+            if not self.save_using_working_scene():
+                save_reload = False
         if errors is None:
             errors = {}
         self.reload_components(doReload=doReload, errors=errors)
@@ -461,7 +469,9 @@ show_dialog: show a dialog displaying all file errors found
                             style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER) 
             err.ShowModal()
             err.Destroy()            
- 
+        if save_reload: 
+            Opioid2D.ResourceManager.clear_cache()            
+            self.set_scene(self.scene.__class__.__name__, True)
                     
     def set_selection(self, selectList):
         """set_selection( selectList)
@@ -501,6 +511,12 @@ Callback from PugApp...
             except:
                 show_exception_dialog()
         if getattr(self.pug_settings,'save_settings_on_quit',True):
+            if os.name == 'nt':
+                window_pos = PygameWindowInfo().getWindowPosition()
+                self.pug_settings.rect_opioid_window = (window_pos['left'],
+                                                        window_pos['top'],
+                                    self.pug_settings.rect_opioid_window[2],
+                                    self.pug_settings.rect_opioid_window[3])
             self.save_pug_settings()
         self.Director.realquit()
         time.sleep(1)   
@@ -635,12 +651,12 @@ event: a wx.Event
 
     def rewind_scene(self):
         """rewind_scene(): reset the scene and play it again"""
-        if not self.Director.game_started:
+        if not self.Director.project_started:
             return
         gamedata = get_gamedata()
         scene = gamedata.start_sceneclass
         create_gamedata()
-        self.Director.game_started = False
+        self.Director.project_started = False
         self.Director.switch_scene_to(scene)
 
     def play_scene( self, doSave=True):
@@ -650,7 +666,7 @@ start the current scene playing.
 doSave: save working copy first
 """
         if _DEBUG: print "play_scene"
-        if self.Director.game_started:
+        if self.Director.project_started:
             # don't do anything if game started
             return False
         if doSave:
@@ -674,7 +690,7 @@ doSave: save working copy first
     
     def pause_scene(self):
         """pause_scene(): pause the current scene"""
-        if self.Director.game_started:
+        if self.Director.project_started:
             if self.Director.paused:
                 self.Director.scene.state.unpause()
             else:
@@ -698,7 +714,7 @@ disk.
     def do_stop_scene(self, doRevert=True):      
         if _DEBUG: print "stop_scene 1"
         if _DEBUG: print "stop_scene"
-        if not getattr(self.Director, "game_started", False):
+        if not getattr(self.Director, "project_started", False):
             return
         if _DEBUG: print "stop_scene 1.5"
         wait_for_state(None)
@@ -723,7 +739,7 @@ disk.
 Run the scene being editted in a new process.
 """
         try:
-            if doSave and not self.Director.game_started:
+            if doSave and not self.Director.project_started:
                 saved = self.save_using_working_scene()
                 if not saved:
                     dlg = wx.MessageDialog( wx.GetApp().projectFrame,
@@ -841,12 +857,12 @@ def start_opioid( rect, title, icon, scene):
     #start up opioid with a little pause for threading
     skip_deprecated_warnings()    
     time.sleep(0.1)
-    
+
     set_opioid_window_position(rect[0:2])
     Opioid2D.Display.init(rect[2:4], 
                           title=title, 
                           icon=icon)
-    Opioid2D.Director.game_started = False
+    Opioid2D.Director.project_started = False
     Opioid2D.Director.viewing_in_editor = True
     try:
         Opioid2D.Director.run( scene)
@@ -900,6 +916,7 @@ _interfacePugview = {
         [' Current Scene', pug.Label],
         ['sceneclass', ScenesDropdown, 
              {'label':'   Scene',
+              'sort': False,
               'prepend_list':[("New Scene", PigScene)],
               'doc':"Pick a scene to edit"}],
         ['commit_scene', None, {
@@ -913,6 +930,7 @@ _interfacePugview = {
         [' Objects', pug.Label],
         ['addObjectClass', ObjectsDropdown, 
              {'prepend_list':[("New Sprite", PigSprite)],
+              'sort':False,
               'label':'   Object to add',
               'doc':'Select an object type for the add button below'}],
         ['add_object', None, {'doc':\
@@ -927,7 +945,7 @@ _interfacePugview = {
         [' Utilities', pug.Label],
         ['reload_project_files', None, {'label':'   Reload Files',
                                         'use_defaults':True,
-                    'doc':"Reload all scene, object,\nand component files"}],
+                'doc':"Reload all scene, object, image, and component files"}],
 #        ['reload_scene_list', None, {'label':'   Load Scenes',
 #                                     'use_defaults':True}],
 #        ['reload_object_list', pug.Routine, {'label':'   Load Objects'}],

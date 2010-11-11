@@ -38,8 +38,6 @@ class Textbox(Component):
     font = None
     action = None
     
-    last_alpha = None
-        
     @component_method
     def set_text(self, text=None):
         "Set the text to display"
@@ -47,10 +45,6 @@ class Textbox(Component):
             text=self._text
         else:
             self._text = text
-        try:    
-            self.owner.image = None
-        except:
-            pass
         self.action = (Opioid2D.Delay(0)+ Opioid2D.CallFunc(
                                                 self.do_set_text)).do()
     @component_method
@@ -130,11 +124,19 @@ class Textbox(Component):
     @component_method
     def on_added_to_scene(self, scene):
         """Show text when object is added to scene"""
+        try:    
+            self.owner.image = None
+        except:
+            pass
         self.set_text()
         
     @component_method
     def on_added_to_editor(self, scene):
         """Show text when object or component is added to editor"""
+        try:    
+            self.owner.image = None
+        except:
+            pass
         self.set_text()    
 
     def on_added_to_object(self):

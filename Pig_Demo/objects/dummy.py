@@ -13,4 +13,6 @@ class dummy(PigSprite):
         self.components.add( Textbox() )
         self.components.add( Set_Motion(
                 velocity_y=-200) )
+        self.components.add( Set_Motion(
+                gname='blankmotion') )
 ### End dummy autocode ###

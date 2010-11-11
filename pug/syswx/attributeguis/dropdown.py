@@ -23,6 +23,7 @@ aguidata: {
         converted into the tuple (itemtext, itemdata=object).  Itemtext will be
         item.__name__ if possible... otherwise str(object). When the user makes 
         a selection in the dropdown, the attribute will be set to itemdata 
+    'sort': sort the list. Default is True
     'allow_typing': if True, user can type their own items. if the value typed
          is not in the list, itemdata will be set to itemtext. Default: False.
     'list_generator': as an alternative to the static list, this callable will 
@@ -70,6 +71,7 @@ For kwargs optional arguments, see the Base attribute GUI
             return
         if _DEBUG: print "DropDown.setup attribute:",attribute
         self.callback = aguidata.get('callback',  None)
+        self.sort = aguidata.get('sort', True)
         self.list_generator = aguidata.get('list_generator', None)
         if self.list_generator:
             self.listctrl.SetPopupCallback(self.setup_listctrl)
@@ -80,12 +82,15 @@ For kwargs optional arguments, see the Base attribute GUI
         self.set_control_value(self.get_attribute_value())
 
     def OnKey(self, ev):
-        if ev.GetKeyCode() == wx.WXK_TAB:
+        key = ev.GetKeyCode()
+        if key == wx.WXK_TAB:
             if ev.ShiftDown():
                 self.control.Navigate(False)
             else:
-                self.control.Navigate() 
-            self.control.SetValue(self.control.GetValue())                
+                self.control.Navigate()
+        elif key == wx.WXK_DOWN or key == wx.WXK_RIGHT or key == wx.WXK_SPACE:
+            self.control.ShowPopup()
+            self.listctrl.SetSelection(0)
         else:
             ev.Skip()   
          
@@ -97,17 +102,20 @@ For kwargs optional arguments, see the Base attribute GUI
             list = self.list_generator()
         self.listctrl.DeleteAllItems()
         namedict = {}
+        namelist = []
         for item in list:
             if isinstance(item, tuple):
-                self.listctrl.AddItem( item[0], item[1])
+                namelist.append(item[0])
+                namedict[item[0]] = item[1]
             else:
                 if hasattr(item,'__name__'):
                     name = item.__name__
                 else:
                     name = str(item)
+                namelist.append(name)
                 namedict[name] = item
-        namelist = namedict.keys()
-        namelist.sort()
+        if self.sort:
+            namelist.sort()
         for key in namelist:
             self.listctrl.AddItem( key, namedict[key])
         i = self.listctrl.FindData(selectedData)
@@ -124,7 +132,10 @@ For kwargs optional arguments, see the Base attribute GUI
             self.data = self.control.Value
             self.text = self.control.Value
         elif not self.listctrl.didSelect:
-            self.refresh()
+            try:
+                self.control.SetValue(self.control.GetValue())
+            except:
+                pass
             return
         Base.apply( self)
         if self.callback:

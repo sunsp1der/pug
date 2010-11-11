@@ -33,10 +33,10 @@ class Key_Direction_Controls( Component):
     y_velocity = 100
     rotate = True 
     flip_left = False
-    up_key = keys["I"]
-    down_key = keys["K"]
-    left_key = keys["J"]
-    right_key = keys["L"]
+    up_key = "I"
+    down_key = "K"
+    left_key = "J"
+    right_key = "L"
     
     lastdir = "right"
     k_info = []

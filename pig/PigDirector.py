@@ -176,7 +176,7 @@ PigDirector.run = newrun
 PigDirector.paused = False
 
 def switch_scene_to( new_scene):
-    if not isinstance(new_scene, Opioid2D.Scene):
+    if not issubclass(new_scene, Opioid2D.Scene):
         try:
             exec("from scenes."+ new_scene +" import "+ new_scene +" as target")
         except:

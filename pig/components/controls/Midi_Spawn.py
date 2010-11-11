@@ -1,4 +1,4 @@
-"Spawn_On_Midi.py"
+"Midi_Spawn.py"
 import colorsys
 
 from Opioid2D.public.Node import Node
@@ -10,21 +10,21 @@ from pig.components.spawn.Spawner import Spawner
 from pig.components.controls.Midi_Callback import Midi_Callback
 from pig.PigDirector import PigDirector
 
-class Spawn_On_Midi( Midi_Callback, Spawner):
+class Midi_Spawn( Midi_Callback, Spawner):
     """Owner spawns when Midi key pressed. Spawned objects can be tinted 
 according to note played.
 """
     # component_info
     _set = 'pig'
-    _type = 'spawn'
+    _type = 'controls'
     _class_list = [Node]
     # attributes:   
-    _field_list = Midi_Callback._field_list
+    _field_list = []
+    _field_list += Midi_Callback._field_list
     _field_list += [
         ['rapid_fire', 'Holding down key spawns continuously'],
         ['note_tint', 'Tint the spawned objects according to on notes'],
         ['spectrum_range', 'Range of midi keys for one full rainbow'],
-        
         ]
     _field_list += Spawner._field_list
     
@@ -105,6 +105,6 @@ according to note played.
         hue = ((avg_key - self.spectrum_range[1]) % diff) / float(diff)        
         obj.color = colorsys.hsv_to_rgb( hue, 1, 1)
  
-register_component( Spawn_On_Midi)
+register_component( Midi_Spawn)
         
        

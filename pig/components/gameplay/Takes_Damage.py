@@ -39,7 +39,7 @@ destroyed.
     #defaults
     start_health = 100.0
     auto_destroy = True
-    do_damage_tint = True
+    do_damage_tint = False
     damage_tint = ( 255, 0, 0)  
     invincible_time = 0
     value_name = ''
