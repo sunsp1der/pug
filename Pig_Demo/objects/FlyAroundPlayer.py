@@ -41,6 +41,7 @@ class FlyAroundPlayer(PigSprite):
                 respawn_time=0.5,
                 do_gameover=True) )
         self.components.add( Takes_Damage(
+                do_damage_tint=True,
                 invincible_time=2,
                 value_name='health',
                 group='player') )

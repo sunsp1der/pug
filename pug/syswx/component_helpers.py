@@ -450,7 +450,8 @@ class ComponentTreePopup(wx.combo.ComboPopup):
             else:
                 # set tooltip to current component docstring 
                 # up to first line break
-                doc = component.__doc__.split('\n\n')[0]
+                if doc:
+                    doc = component.__doc__.split('\n\n')[0]
             if self.tooltip != doc:
                 tree.SetToolTipString(doc)
                 tree.GetToolTip().SetDelay(0.5)

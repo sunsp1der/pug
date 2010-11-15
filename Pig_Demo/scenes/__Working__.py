@@ -1,12 +1,17 @@
 ### import autocode ###
+from objects.RedDragon import RedDragon
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
 from pug.all_components import Utility_Keys, Midi_Input, Midi_To_Key,\
-    Midi_Spawn, Spawn_Flower, Textbox, Key_Attribute
+    Midi_Spawn, Spawn_Flower, Textbox, Key_Attribute, Midi_Dancer
 ### End import autocode ###
 
-### Midi_Demo autocode ###
-class Midi_Demo(PigScene):
+from objects.Grower import Grower
+
+### MyScene autocode ###
+class MyScene(PigScene):
+    layers = ['Background', 'Sky']
+
     def on_enter(self):
         self.components.add( Utility_Keys() )
         self.components.add( Midi_Input(
@@ -98,4 +103,23 @@ class Midi_Demo(PigScene):
         pigsprite_instance_7.scale = (0.2, 0.2)
         pigsprite_instance_7.components.add( Key_Attribute(
                 change_value=(1, 1)) )
-### End Midi_Demo autocode ###
+
+        pigsprite_instance_8 = PigSprite()
+        pigsprite_instance_8.layer = 'Background'
+        pigsprite_instance_8.position = (341.0, 379.0)
+        pigsprite_instance_8.components.add( Midi_Dancer(
+                file='art\\dragon.png',
+                grid_width=75,
+                grid_height=70,
+                end_frame=80) )
+
+        reddragon_instance = RedDragon()
+### End MyScene autocode ###
+
+    def on_start(self):
+        print "1"
+        for x in range(0,801,80):
+            for y in range(0,601,60):
+                Grower_instance = Grower(gname='Grower')
+                Grower_instance.position = (x, y)
+        print "2"

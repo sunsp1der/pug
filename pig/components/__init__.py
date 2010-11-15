@@ -58,4 +58,5 @@ from pig.components.scene.On_Start_Sound import On_Start_Sound
 from pig.components.scene.Scene_Timer import Scene_Timer
 from pig.components.scene.Midi_Input import Midi_Input
 from pig.components.scene.Joystick_Input import Joystick_Input
+from pig.components.scene.Joystick_Axis_To_Key import Joystick_Axis_To_Key
 from pig.components.scene.On_Key_Sound_Scene import On_Key_Sound_Scene

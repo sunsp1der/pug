@@ -159,6 +159,14 @@ fromGroup: If specified, only collisions with this group will be unregistered.
         
 
     def do_key_callbacks(self, key, mod=0, keydict="KEYDOWN", a=None, kw=None):
+        """do_key_callbacks(key, mod=0, keydict="KEYDOWN", a=None, kw=None)
+        
+key = key number
+mod = key mod number
+keydict = dictionary of callbacks or "KEYUP" or "KEYDOWN" 
+a = arguments to be prepended to callback arguments
+kw = keyword arguments to update callback arguments
+"""
         if a is None:
             a = tuple()
         if kw is None:
