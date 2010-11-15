@@ -19,24 +19,24 @@ class Key_Direction_Controls( Component):
             ['rotate', 'Rotate object to face direction of movement'],
             ['flip_left', 
             'Flip object image when moving to the left (good for side view)'], 
-            ['up_key', KeyDropdown, 
-                {'doc':"Press this key to set object's upward velocity"}],
-            ['down_key', KeyDropdown, 
-                {'doc':"Press this key to set object's downward velocity"}],
             ['left_key', KeyDropdown, 
                 {'doc':"Press this key to set object's leftward velocity"}],
             ['right_key', KeyDropdown, 
                 {'doc':"Press this key to set object's rightward velocity"}],
+            ['up_key', KeyDropdown, 
+                {'doc':"Press this key to set object's upward velocity"}],
+            ['down_key', KeyDropdown, 
+                {'doc':"Press this key to set object's downward velocity"}],
             ]
     #defaults
     x_velocity = 100
     y_velocity = 100
     rotate = True 
     flip_left = False
-    up_key = "I"
-    down_key = "K"
     left_key = "J"
     right_key = "L"
+    up_key = "I"
+    down_key = "K"
     
     lastdir = "right"
     k_info = []

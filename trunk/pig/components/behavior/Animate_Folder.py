@@ -47,6 +47,16 @@ frames, number with zeros, like this: "frame08", "frame09","frame10","frame11"
     set_action = None
     last_frame_info = None
                         
+    @component_method
+    def on_added_to_scene(self, scene):
+        """Animate when object is added to scene"""
+        if self.frames:
+            action = Opioid2D.Animate(self.frames, fps=self.fps, 
+                                     mode=self.modes[self.mode])
+            if self.destroy:
+                action += Opioid2D.CallFunc(self.owner.destroy)
+            self.owner.do(action)
+        
     def get_frame_images(self):
         filename = os.path.split(self.folder)[1]
         path = os.path.join(self.folder,filename+"*.*")
@@ -118,16 +128,6 @@ frames, number with zeros, like this: "frame08", "frame09","frame10","frame11"
                     return
             self.owner.image_file = "art\\pug.png"
     
-    @component_method
-    def on_added_to_scene(self, scene):
-        """Animate when object is added to scene"""
-        if self.frames:
-            action = Opioid2D.Animate(self.frames, fps=self.fps, 
-                                     mode=self.modes[self.mode])
-            if self.destroy:
-                action += Opioid2D.CallFunc(self.owner.destroy)
-            self.owner.do(action)
-        
 #    @component_method
 #    def on_added_to_editor(self, scene):
 #        """Show correct frame when object or component is added to editor"""

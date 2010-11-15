@@ -1,19 +1,23 @@
 ### import autocode ###
 from objects.Bullet import Bullet
+from objects.Cannon import Cannon
 from objects.ExplodeParticle import ExplodeParticle
 from objects.Explosion import Explosion
 from objects.Launcher import Launcher
 from objects.Target import Target
-from objects.Cannon import Cannon
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
-from pug.all_components import Utility_Keys, Value_Tracker_Text, Timer_Text,\
-    Textbox
+from pug.all_components import Joystick_Input, Joystick_Axis_To_Key,\
+    Value_Tracker_Text, Timer_Text, Textbox
 ### End import autocode ###
 
 ### Shooting_Gallery autocode ###
 class Shooting_Gallery(PigScene):
     def on_enter(self):
+        self.components.add( Joystick_Input(
+                test_mode=True) )
+        self.components.add( Joystick_Axis_To_Key() )
+
         # Archetypes
         Bullet_archetype = Bullet(gname='Bullet')
         Bullet_archetype.archetype = True
@@ -35,7 +39,7 @@ class Shooting_Gallery(PigScene):
         launcher_instance_2.position = (43.0, 175.0)
         launcher_instance_2.rotation = 90.0
 
-        Cannon_instance = Cannon()
+        cannon_instance = Cannon()
 
         pigsprite_instance = PigSprite()
         pigsprite_instance.layer = 'Background'

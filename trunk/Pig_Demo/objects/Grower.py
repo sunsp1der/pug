@@ -1,6 +1,7 @@
 ### import autocode ###
 from pig.PigSprite import PigSprite
 ### End import autocode ###
+
 from pig.util import get_mouse_position, Vector
 from pig.actions import RealTickFunc
 
@@ -11,11 +12,12 @@ class Grower(PigSprite):
     def on_create(self):
         self.position = (400.0, 300.0)
 ### End Grower autocode ###
+
     def on_scene_start(self, scene):
-        RealTickFunc(self.check_mouse).do()
         self.threshold = 100 * 100
         self.scale_multiplier = 3
         self.original_scale = Vector(self.scale.x, self.scale.y)
+        RealTickFunc(self.check_mouse).do()
 
     def check_mouse(self):
         position = get_mouse_position()

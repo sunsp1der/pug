@@ -40,7 +40,7 @@ contain multiple frames.
     _end_frame = 15
     
     action = None
-        
+    
     def get_frame_images(self):
         info = (self.file, self.grid_width, self.grid_height, self._start_frame,
                 self._end_frame)
@@ -62,6 +62,5 @@ contain multiple frames.
                           lambda s, val: s.set_anim_attr("_start_frame", val) )
     end_frame = property(lambda s: s.get_anim_attr("_end_frame"),
                           lambda s, val: s.set_anim_attr("_end_frame", val) )
-        
-
+    
 register_component( Animate_Grid)

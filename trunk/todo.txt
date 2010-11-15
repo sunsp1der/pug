@@ -1,14 +1,11 @@
 todo:
-
-
+	joystick_to_keys
 	take scene argument out of on_added_to_scene etc.
 	animation options
 		separate move and animation keys
 			animation per key
 		list of frames, tuple of ranges
-	bug for many spawns in user built on_start - editor only
-	add damage tint to fly around
-	joystick_to_keys
+x	add damage tint to fly around
 
 installer:
 	eliminate need for pythonpather
@@ -18,6 +15,8 @@ installer:
 	update numeric refs to numpy
 
 soon:
+	increase efficiency of animation reloads by caching source and frames
+		learn to access bitmap component of image
 	'loading' graphic while scene saves, or at least cleanup
 	destroy on gameover
 	option for gameover pause
