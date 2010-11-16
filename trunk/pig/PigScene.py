@@ -237,10 +237,14 @@ fn: the function to call when the keypress occurs
                     key = keys[key]
                     keymod = 0
                 pressed = get_pressed()[key]
-                mods = get_mods()
-                if pressed and (((keymod is 0) and mods) or \
-                        not(keymod & mods)):
-                    pressed = False
+                if pressed:
+                    mods = get_mods()
+                    if keymod is 0:
+                        if mods:
+                            pressed = False
+                    else:
+                        if not (keymod & mods):
+                            pressed = False
             except:
                 pass
             else:
