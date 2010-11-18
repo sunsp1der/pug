@@ -64,8 +64,11 @@ speed: set object's forward velocity or acceleration to this value. Defaults to
     @component_method
     def on_destroy(self):
         "Abort the tick action on destroy"
-        if self.tick_action:
-            self.tick_action.abort()                  
+        try:
+            if self.tick_action:
+                self.tick_action.abort()                  
+        except:
+            pass
 
     def set_motion(self):
         self.speed_vector.direction = self.owner.rotation + self.actual_offset

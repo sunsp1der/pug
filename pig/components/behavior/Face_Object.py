@@ -31,7 +31,7 @@ class Face_Object(Component):
     tick_action = None
     
     @component_method
-    def on_added_to_scene(self):
+    def on_first_display(self):
         """Start facing target when object is added to scene"""
         self.end_action = CallFunc(self.target_reached)
         self.start_facing_target()

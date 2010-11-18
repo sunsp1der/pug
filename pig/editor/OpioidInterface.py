@@ -513,8 +513,9 @@ Callback from PugApp...
         if getattr(self.pug_settings,'save_settings_on_quit',True):
             if os.name == 'nt':
                 window_pos = PygameWindowInfo().getWindowPosition()
-                self.pug_settings.rect_opioid_window = (window_pos['left'],
-                                                        window_pos['top'],
+                self.pug_settings.rect_opioid_window = (
+                                                max(window_pos['left'],0),
+                                                max(window_pos['top'],0),
                                     self.pug_settings.rect_opioid_window[2],
                                     self.pug_settings.rect_opioid_window[3])
             self.save_pug_settings()

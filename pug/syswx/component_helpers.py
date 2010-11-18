@@ -131,6 +131,7 @@ class ComponentList(wx.combo.ComboCtrl):
         ev.Skip()
 
     def OnButtonClick(self):
+        self.refresh_components()
         self.ShowPopup()
         self.old_tooltip = self.GetToolTip()
         if self.old_tooltip:
