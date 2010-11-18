@@ -25,7 +25,7 @@ class Fade(Component):
     fade_out_collisions = False
 
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         """Do fade in if fade_in_secs > 0"""
         self.fade_in()
             

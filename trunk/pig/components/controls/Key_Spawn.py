@@ -30,8 +30,9 @@ class Key_Spawn( Spawner):
     interval_complete = True  
     
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         "Set spawn key and setup the spawner"
+        scene = PigDirector.scene
         self.setup_spawner()
         self.interval_complete = False
         self.k_info = [0,0]

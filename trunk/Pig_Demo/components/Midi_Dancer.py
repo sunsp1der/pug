@@ -24,7 +24,7 @@ class Midi_Dancer(Midi_Callback, Animate_Grid):
     key_start = 0
     
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         self.owner.image = self.frames[0]
     
     @component_method

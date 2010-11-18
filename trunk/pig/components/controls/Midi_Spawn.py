@@ -35,7 +35,7 @@ according to note played.
     interval_complete = True  
     
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         self.setup_spawner()
        
     @component_method     

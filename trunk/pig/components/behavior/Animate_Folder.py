@@ -48,7 +48,7 @@ frames, number with zeros, like this: "frame08", "frame09","frame10","frame11"
     last_frame_info = None
                         
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         """Animate when object is added to scene"""
         if self.frames:
             action = Opioid2D.Animate(self.frames, fps=self.fps, 

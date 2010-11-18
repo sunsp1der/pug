@@ -86,7 +86,7 @@ It also gives the spawned object a new callback:
     action = None # the pending spawn action
 
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         "Start spawn timer when object is added to scene"
         self.setup_spawner()
         self.start_spawning()

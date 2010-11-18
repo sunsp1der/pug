@@ -20,7 +20,7 @@ class Join_Collision_Group( Component):
     _group = "colliders"
 
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         self.owner.join_collision_group( self.group)
         
 ### track all available groups for editor dropdowns

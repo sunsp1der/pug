@@ -33,7 +33,7 @@ Friction is multiplied."""],
     additive = True
         
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         """Set the motion when object is added to scene"""
         self.set_motion()
         

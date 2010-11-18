@@ -24,13 +24,13 @@ from pug.syswx.component_browser import ComponentBrowseFrame
 from pug.syswx.pugmdi import PugMDI
 from pug.syswx.drag_drop import FileDropTarget
 
-from pig import PigScene, PigSprite, PigDirector, PauseState
+from pig import hacks, PigScene, PigSprite, PigDirector, PauseState
 from pig.util import fix_project_path, set_project_path, save_project_settings,\
         entered_scene, start_scene, get_gamedata, create_gamedata, \
         PygameWindowInfo, \
         get_display_center, skip_deprecated_warnings, set_opioid_window_position
 from pig.editor.StartScene import StartScene
-from pig.editor import hacks, EditorState
+from pig.editor import EditorState
 from pig.editor.GraphicsManager import graphicsManager
 from pig.editor.util import get_image_path, get_project_path, test_scene_code,\
         edit_project_file, on_drop_files, close_scene_windows, wait_for_state,\

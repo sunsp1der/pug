@@ -21,11 +21,11 @@ unpause_keys: list of keys that cause unpause. [] means any key
         PigDirector.scene.state = self.next_state
         
     def handle_keydown(self, ev):
-        pass
-
-    def handle_keyup(self, ev):
         if self.unpause_keys == [] or ev.key in self.unpause_keys:
             self.unpause()
+
+    def handle_keyup(self, ev):
+        pass
             
     def handle_mousebuttondown(self, ev):
         pass

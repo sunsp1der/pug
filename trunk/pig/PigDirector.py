@@ -2,7 +2,7 @@
 
 Hack in a few features necessary for the Opioid2D director to work with pug"""
 import time
-
+from inspect import isclass
 
 import Opioid2D
 from Opioid2D.internal.objectmgr import ObjectManager
@@ -176,7 +176,7 @@ PigDirector.run = newrun
 PigDirector.paused = False
 
 def switch_scene_to( new_scene):
-    if not issubclass(new_scene, Opioid2D.Scene):
+    if not isclass(new_scene):
         try:
             exec("from scenes."+ new_scene +" import "+ new_scene +" as target")
         except:

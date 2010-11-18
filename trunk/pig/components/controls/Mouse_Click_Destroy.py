@@ -23,7 +23,7 @@ class Mouse_Click_Destroy( Component):
     one_only = True
 
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         "Register object for mouse clicks"
         if self.one_only:
             self.owner.mouse_register("single")

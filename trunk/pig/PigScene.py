@@ -238,7 +238,7 @@ fn: the function to call when the keypress occurs
                     keymod = 0
                 pressed = get_pressed()[key]
                 if pressed:
-                    mods = get_mods()
+                    mods = get_mods() & ~4096
                     if keymod is 0:
                         if mods:
                             pressed = False
@@ -399,7 +399,7 @@ Start the scene running. Called after enter() and before state changes
                 self.on_project_start()
                 self.all_nodes_callback( 'on_project_start')
                 PigDirector.project_started = True
-            self.all_nodes_callback( 'on_added_to_scene', self)
+            self.all_nodes_callback( 'on_added_to_scene')
             self.all_nodes_callback( 'on_first_display')                        
             self.on_start()
             self.all_nodes_callback( 'on_scene_start', self)             
@@ -417,7 +417,7 @@ Start the scene running. Called after enter() and before state changes
             except:
                 pass
             else:
-                func(self)
+                func()
             try:
                 func = getattr(node,'on_first_display')
             except:

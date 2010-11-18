@@ -48,7 +48,7 @@ class Life_Zone(Component):
     zonetype = Opioid2D.mutators.LifeZone
     
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         """Start timer when object is added to scene"""
         self.owner.do(Opioid2D.CallFunc( self.set_zone))
         

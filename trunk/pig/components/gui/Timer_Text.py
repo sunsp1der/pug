@@ -38,14 +38,14 @@ method will be called."""
     interval = 0.5
     
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         """Set starting value"""
         gamedata = get_gamedata()
         try:
             getattr(gamedata, self.value_name)
         except:
             setattr( gamedata, self.value_name, float(self.start_value))
-        Value_Tracker_Text.on_added_to_scene(self, scene)
+        Value_Tracker_Text.on_added_to_scene(self)
         if self.end_value < self.start_value:
             self.interval = - abs(self.interval)
         if self.interval:

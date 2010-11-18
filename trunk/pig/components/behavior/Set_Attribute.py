@@ -31,7 +31,7 @@ class Set_Attribute(Component):
     original_object = None
         
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         """Set attribute when object is added to scene"""
         self.do_change()
         

@@ -7,6 +7,7 @@ from pug import ImageBrowser, Dropdown
 from pug.component import *
 
 from pig.editor.util import _fl_art_types
+from pig.animation import get_grid_sequence_frames
 from pig.components.behavior.Animate_Folder import Animate_Folder
 
 class Animate_Grid(Animate_Folder):
@@ -28,27 +29,25 @@ contain multiple frames.
             ['grid_height','Height of one grid unit in file'],
             ]
     _frame_list = [
-            ['start_frame','Frame to start on in file'],
-            ['end_frame','Frame to end on in file']
+            ['frame_sequence', 
+                     'List of frame numbers and/or tuples in the ' +\
+                     'range form ([start], stop, [step])'],
             ]
     _field_list = _grid_list + _frame_list
     _field_list += Animate_Folder._animate_list
     #defaults
     _grid_width = 64
     _grid_height = 64
-    _start_frame = 0
-    _end_frame = 15
+    _frame_sequence = [(0,6)]
     
     action = None
     
     def get_frame_images(self):
-        info = (self.file, self.grid_width, self.grid_height, self._start_frame,
-                self._end_frame)
+        info = (self.file, self.grid_width, self.grid_height, 
+                self._frame_sequence)
         if self.last_frame_info == info:
             return self.frames
-        frames = Opioid2D.ResourceManager.get_grid(self.file,
-                    self.grid_width, self.grid_height)\
-                    [self._start_frame:self._end_frame]
+        frames = get_grid_sequence_frames( *info)
         self.last_frame_info = info
         return frames
     
@@ -58,9 +57,7 @@ contain multiple frames.
                           lambda s, val: s.set_anim_attr("_grid_width", val) )
     grid_height = property(lambda s: s.get_anim_attr("_grid_height"),
                           lambda s, val: s.set_anim_attr("_grid_height", val) )
-    start_frame = property(lambda s: s.get_anim_attr("_start_frame"),
-                          lambda s, val: s.set_anim_attr("_start_frame", val) )
-    end_frame = property(lambda s: s.get_anim_attr("_end_frame"),
-                          lambda s, val: s.set_anim_attr("_end_frame", val) )
+    frame_sequence = property(lambda s: s.get_anim_attr("_frame_sequence"),
+                        lambda s, val: s.set_anim_attr("_frame_sequence", val) )
     
 register_component( Animate_Grid)

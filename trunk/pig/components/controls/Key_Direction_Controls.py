@@ -42,8 +42,9 @@ class Key_Direction_Controls( Component):
     k_info = []
                 
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         """Set keys when object is added to scene"""
+        scene = PigDirector.scene
         self.k_info = range(8) #unregister information
         self.k_info[0] = scene.register_key_down( self.down_key, 
                                     self.change_velocity, 0, self.y_velocity)
