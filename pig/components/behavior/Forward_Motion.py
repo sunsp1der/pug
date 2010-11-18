@@ -28,7 +28,7 @@ Warning: This component uses a tick_action, so it may be slow."""
     last_speed = None
     
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         """Start facing target when object is added to scene"""
         self.set_forward_motion()
         

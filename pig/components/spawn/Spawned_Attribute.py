@@ -25,7 +25,7 @@ class Spawned_Attribute( Set_Attribute):
     stripped_name = ""
     
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         "Over-ride Set_Component's auto-set. Just clean up spawner_name."
         # don't do the auto-set from Set_Component
         self.stripped_name = self.spawner_name.strip()

@@ -46,8 +46,9 @@ class Key_Drive_Controls( Forward_Motion, Key_Direction_Controls):
     acceleration = None # for Forward_Motion
     
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         """Set keys when object is added to scene"""
+        scene = PigDirector.scene
         self.k_info = range(8) #unregister information
         self.k_info[0] = scene.register_key_down( self.forward_key, 
                                     self.change_velocity, self.speed)

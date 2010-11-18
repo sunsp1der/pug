@@ -122,7 +122,7 @@ class Textbox(Component):
     font_file = property(get_font_file, set_font_file)
     
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         """Show text when object is added to scene"""
         try:    
             self.owner.image = None

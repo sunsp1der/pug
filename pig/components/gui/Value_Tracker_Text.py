@@ -33,7 +33,7 @@ class Value_Tracker_Text(Textbox):
     start_value = 0
                 
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         """Set score to zero unless otherwise set"""
         gamedata = get_gamedata()
         try:

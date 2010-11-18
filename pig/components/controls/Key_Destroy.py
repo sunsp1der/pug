@@ -27,8 +27,9 @@ class Key_Destroy( Component):
     release = True
     
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         "Set spawn key and setup the spawner"
+        scene = PigDirector.scene
         self.k_info = [0,0]
         if self.press:
             self.k_info[0] = scene.register_key_down( self.key, 

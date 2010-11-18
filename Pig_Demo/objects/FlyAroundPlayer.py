@@ -15,10 +15,10 @@ class FlyAroundPlayer(PigSprite):
                 x_velocity=200,
                 y_velocity=200,
                 rotate=False,
-                up_key='W',
-                down_key='S',
                 left_key='A',
-                right_key='D') )
+                right_key='D',
+                up_key='W',
+                down_key='S') )
         self.components.add( Motion_Zone() )
         self.components.add( Mouse_Face() )
         self.components.add( Key_Spawn(

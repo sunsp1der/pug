@@ -21,7 +21,7 @@ class Mouse_Follow(Component):
     tick_action = None
 
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         """Start following when object is added to scene"""
         self.start_following_mouse()
         

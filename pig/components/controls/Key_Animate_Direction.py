@@ -22,14 +22,30 @@ animation or single images stored in a file that contains multiple frames.
     # separate these to make derived components easier to write
     _field_list = Animate_Grid._grid_list + \
             [['fps','Frames per second'],
-             ['up_frames','(Start,End) frames for up movement'],
-             ['upright_frames','(Start,End) frames for up/right movement'],
-             ['right_frames','(Start,End) frames for right movement'],
-             ['downright_frames','(Start,End) frames for down/right movement'],
-             ['down_frames','(Start,End) frames for down movement'],
-             ['downleft_frames','(Start,End) frames for down/left movement'],
-             ['left_frames','(Start,End) frames for left movement'],
-             ['upleft_frames','(Start,End) frames for up/left movement'],
+             ['up_frames',
+                    'List of frame numbers and/or tuples in the ' +\
+                    'range form ([start], stop, [step])'],
+             ['upright_frames',
+                    'List of frame numbers and/or tuples in the ' +\
+                    'range form ([start], stop, [step])'],
+             ['right_frames',
+                    'List of frame numbers and/or tuples in the ' +\
+                    'range form ([start], stop, [step])'],
+             ['downright_frames',
+                    'List of frame numbers and/or tuples in the ' +\
+                    'range form ([start], stop, [step])'],
+             ['down_frames',
+                    'List of frame numbers and/or tuples in the ' +\
+                    'range form ([start], stop, [step])'],
+             ['downleft_frames',
+                    'List of frame numbers and/or tuples in the ' +\
+                    'range form ([start], stop, [step])'],
+             ['left_frames',
+                    'List of frame numbers and/or tuples in the ' +\
+                    'range form ([start], stop, [step])'],
+             ['upleft_frames',
+                    'List of frame numbers and/or tuples in the ' +\
+                    'range form ([start], stop, [step])'],
              ] + \
             Key_Direction_Controls._field_list 
 
@@ -43,8 +59,8 @@ animation or single images stored in a file that contains multiple frames.
     image_sprite = None 
     
     @component_method            
-    def on_added_to_scene(self, scene):
-        Key_Direction_Controls.on_added_to_scene(self, scene)
+    def on_added_to_scene(self):
+        Key_Direction_Controls.on_added_to_scene(self)
         (Opioid2D.Delay(0) + Opioid2D.CallFunc(self.do_load_frames)).do()
         
     def do_load_frames(self):
@@ -57,11 +73,10 @@ animation or single images stored in a file that contains multiple frames.
                 'down_frames','downleft_frames','left_frames','upleft_frames']
         for dir in dirs:
             try:
-                self._start_frame, self._end_frame = getattr(self, dir)
+                self._frame_sequence = getattr(self, dir)
             except:
                 continue
-            self.framedict.setdefault(( self.file, getattr(self,dir)),
-                                      self.get_frame_images()) 
+            self.framedict[dir] = self.get_frame_images() 
         
     def change_velocity(self, x_change, y_change):
         Key_Direction_Controls.change_velocity(self, x_change, y_change)
@@ -88,7 +103,7 @@ animation or single images stored in a file that contains multiple frames.
         if self.dir == dir or dir == None:
             return
         self.dir = dir
-        self.frames = self.framedict[(self.file, getattr(self,dir))]
+        self.frames = self.framedict[dir]
         try:
             self.anim_action.abort()
         except:
@@ -109,8 +124,7 @@ animation or single images stored in a file that contains multiple frames.
             
                 
     def do_set_animation(self):
-        self._start_frame = self.up_frames[0]
-        self._end_frame = self.up_frames[1]
+        self._frame_sequence = self.up_frames
         Animate_Grid.do_set_animation(self)
 
 register_component( Key_Animate_Direction)

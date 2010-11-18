@@ -20,7 +20,7 @@ class On_Damaged_Sound( Component):
     sound_object = None
     
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         "Get the sound object"
         self.sound_object = get_sound( self.sound)
 

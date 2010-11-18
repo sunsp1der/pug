@@ -1,11 +1,6 @@
 todo:
 	joystick_to_keys
-	take scene argument out of on_added_to_scene etc.
-	animation options
-		separate move and animation keys
-			animation per key
-		list of frames, tuple of ranges
-x	add damage tint to fly around
+
 
 installer:
 	eliminate need for pythonpather

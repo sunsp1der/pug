@@ -36,7 +36,7 @@ class Spawn_On_Destroy( Spawner):
         ]
 
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         "Setup the spawner"
         self.setup_spawner()
 

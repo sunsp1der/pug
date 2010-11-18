@@ -31,8 +31,9 @@ class Key_Attribute( Set_Attribute):
     key_up_undo = True
     
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         "Set spawn key and setup the spawner"
+        scene = PigDirector.scene
         self.k_info = [0,0]
         self.k_info[0] = scene.register_key_down( self.key, 
                                                   self.do_change)

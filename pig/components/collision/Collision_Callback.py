@@ -38,7 +38,7 @@ arguments: on_collision( toSprite, fromSprite, toGroup, my_group)"""
     _my_group = "colliders"
     
     @component_method
-    def on_added_to_scene(self, scene):
+    def on_added_to_scene(self):
         "Register for object.on_collision callback when object added to scene"
         if self._my_group:
             self.owner.join_collision_group( self._my_group)

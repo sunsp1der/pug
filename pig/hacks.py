@@ -68,6 +68,8 @@ def _create_image( bmp, hotspot=None, border=1):
         img._cObj.hotspot.set(*hotspot)
     return img
 
+Opioid2D.ResourceManager._create_image = _create_image
+
 # Hack in the ability to cache grid images
 # To do so, use image = (filename, height, width, frame number)
 def get_image(image, hotspot=None, mode=None, border=None):
@@ -81,14 +83,20 @@ def get_image(image, hotspot=None, mode=None, border=None):
         image = image()
     # begin PIG hack!
     elif isinstance(image, tuple):
-        gridkey = str(image) # (filename, height, width, frame#)
+        gridkey = image # (filename, height, width, frame#)
         image = Image()
-        image.filename = gridkey
+        image.filename = gridkey # str(gridkey)
         try:
             return self.images[image]
         except KeyError:
-            bmp = None
-        
+            frames = self.get_grid( *gridkey[0:3])
+            framenum = 0
+            for img in frames:
+                # cache all frames
+                key = gridkey[0:3] + (framenum,)
+                img.filename = key #str(key)
+                self._set_image( key, img)
+                framenum += 1
     elif not isinstance(image, Image):
         filename = image
         image = Image()
@@ -121,4 +129,25 @@ def get_image(image, hotspot=None, mode=None, border=None):
             img.add_collision_node(*c)            
         return img
 
-Opioid2D.ResourceManager._create_image = _create_image
+Opioid2D.ResourceManager.get_image = get_image
+
+def get_grid(image, width, height, hotspot=None):
+    """Load an image grid and return a list of images
+    """
+    self = Opioid2D.ResourceManager
+    bmp = self._load_bitmap(image)
+    cols = bmp.width // width
+    rows = bmp.height // height
+    result = []
+    framenum = 0
+    for r in range(rows):
+        for c in range(cols):
+            try:
+                result.append(self.images[(image, width, height,framenum )])
+            except KeyError:
+                sb = bmp.get_subbitmap(c*width,r*height,width,height)
+                result.append(self._create_image(sb,hotspot))
+            framenum += 1
+    return result
+
+Opioid2D.ResourceManager.get_grid = get_grid
