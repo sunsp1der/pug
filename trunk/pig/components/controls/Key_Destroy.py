@@ -22,7 +22,7 @@ class Key_Destroy( Component):
         ['release',"Destroy owner when key is released"],                   
         ]
     
-    key = keys["SPACE"]
+    key = "SPACE"
     press = True
     release = True
     

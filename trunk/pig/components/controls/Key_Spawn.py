@@ -3,7 +3,6 @@ from pug.component import component_method, register_component
 
 from Opioid2D.public.Node import Node
 
-from pig.keyboard import keys
 from pig.actions import Delay, CallFunc
 from pig.editor.agui import KeyDropdown
 from pig.components.spawn.Spawner import Spawner
@@ -22,7 +21,7 @@ class Key_Spawn( Spawner):
         ]
     _field_list += Spawner._field_list
     
-    key = keys["SPACE"]
+    key = "SPACE"
     spawn_interval = 0.5
     spawn_interval_variance = 0.0
     rapid_fire = True

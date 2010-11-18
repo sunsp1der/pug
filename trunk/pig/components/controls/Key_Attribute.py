@@ -27,7 +27,7 @@ class Key_Attribute( Set_Attribute):
         ]
     _field_list += Set_Attribute._field_list
     
-    key = keys["SPACE"]
+    key = "SPACE"
     key_up_undo = True
     
     @component_method
