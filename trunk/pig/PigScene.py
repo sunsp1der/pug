@@ -112,7 +112,9 @@ callbacks using register_collision_callback
         callback_dict = collision_dict.get(toSprite, None)
         if callback_dict is not None:
             for groups, callbacks in callback_dict.iteritems():
-                if fromSprite in self._groups.get( groups[1]):
+                
+                if self._groups.get( groups[1]) and \
+                            fromSprite in self._groups.get( groups[1]):
                     for callback in callbacks:
                         callback( toSprite, fromSprite, groups[0], groups[1])
         # we only get one callback, so check if fromSprite needs a call
@@ -406,7 +408,7 @@ Start the scene running. Called after enter() and before state changes
             self.started = True
         elif getattr(PigDirector, 'viewing_in_editor', False):
             # viewing in editor, not playing
-            self.all_nodes_callback( 'on_added_to_editor', self)
+            self.all_nodes_callback( 'on_added_to_editor')
         
     def register_node(self, node):        
 #        """register(node): a new node is joining scene. Do callbacks"""
@@ -430,7 +432,7 @@ Start the scene running. Called after enter() and before state changes
             except:
                 pass
             else:
-                func(self)
+                func()
         self.nodes[node] = self.__node_num
         self.__node_num += 1        
         

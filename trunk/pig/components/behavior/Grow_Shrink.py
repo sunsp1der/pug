@@ -4,8 +4,9 @@ from Opioid2D.public.Node import Node
 from pug.component import *
 
 from pig.PigDirector import PigDirector
+from pig.components import SpriteComponent
 
-class Grow_Shrink(Component):
+class Grow_Shrink(SpriteComponent):
     """Object grows into scene and/or shrinks away when destroyed."""
     #component_info
     _set = 'pig'

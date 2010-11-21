@@ -3,7 +3,9 @@ from Opioid2D.public.Node import Node
 
 from pug.component import *
 
-class Forward_Motion(Component):
+from pig.components import SpriteComponent
+
+class Forward_Motion(SpriteComponent):
     """Apply velocity or acceleration in the direction the object is facing.
     
 Warning: This component uses a tick_action, so it may be slow."""

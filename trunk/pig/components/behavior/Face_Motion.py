@@ -5,7 +5,9 @@ from Opioid2D.public.Node import Node
 
 from pug.component import *
 
-class Face_Motion(Component):
+from pig.components import SpriteComponent
+
+class Face_Motion(SpriteComponent):
     """Force owner to always face the direction that it's moving.
 Warning: This component uses a tick_action, so it may be slow.
 """

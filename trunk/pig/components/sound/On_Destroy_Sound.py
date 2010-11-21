@@ -4,8 +4,9 @@ from pug.component import *
 
 from pig.audio import get_sound
 from pig.editor.agui import SoundFile
+from pig.components import SpriteComponent
 
-class On_Destroy_Sound( Component):
+class On_Destroy_Sound( SpriteComponent):
     """Owner plays a sound when destroyed"""
     # component_info
     _set = 'pig'

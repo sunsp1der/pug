@@ -6,8 +6,9 @@ import Opioid2D
 from pug.component import *
 
 from pig.PigDirector import PigDirector
+from pig.components import SpriteComponent
 
-class Life_Zone(Component):
+class Life_Zone(SpriteComponent):
     """Object is deleted if it leaves the given zone."""
     #component_info
     _set = 'pig'

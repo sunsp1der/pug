@@ -9,7 +9,9 @@ from Opioid2D.public.Node import Node
 from pug import Filename
 from pug.component import *
 
-class Textbox(Component):
+from pig.components import SpriteComponent
+
+class Textbox(SpriteComponent):
     "Create text for this object's image"
     #component_info
     _set = 'pig'
@@ -45,7 +47,8 @@ class Textbox(Component):
             text=self._text
         else:
             self._text = text
-        self.action = (Opioid2D.Delay(0)+ Opioid2D.CallFunc(
+        if not self.action:
+            self.action = (Opioid2D.Delay(0)+ Opioid2D.CallFunc(
                                                 self.do_set_text)).do()
     @component_method
     def get_text(self):
@@ -131,16 +134,9 @@ class Textbox(Component):
         self.set_text()
         
     @component_method
-    def on_added_to_editor(self, scene):
+    def on_added_to_editor(self):
         """Show text when object or component is added to editor"""
-        try:    
-            self.owner.image = None
-        except:
-            pass
-        self.set_text()    
-
-    def on_added_to_object(self):
-        self.on_added_to_editor( Opioid2D.Director.scene)
+        Textbox.on_added_to_scene( self)   
         
     def on_removed_from_object(self):
         self.owner.set_image_file("art\\pug.png")
@@ -150,6 +146,7 @@ class Textbox(Component):
         
     def __init__(self, *a, **kw):
         if self.__class__.font is None:
+            # set up default font
             try:
                 defaultfont = os.path.join("art","accid___.ttf")
                 self.__class__.font = font.Font(defaultfont,

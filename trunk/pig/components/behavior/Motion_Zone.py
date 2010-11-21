@@ -4,9 +4,10 @@ from Opioid2D.public.Node import Node
 import Opioid2D
 
 from pug.component import *
+from pig.components import SpriteComponent
 
 # TODO: need to make this far more robust, preferably with oollision sytem
-class Motion_Zone(Component):
+class Motion_Zone(SpriteComponent):
     """Object cannot move beyond defined zone.
         
 Warning: This component uses a tick_action, so it may be slow."""

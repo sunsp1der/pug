@@ -786,7 +786,8 @@ Opioid2D, it is safer to call this via add_object.
         try:
             if not issubclass(objectclass, Node):
                 if _DEBUG: print objectclass, Node
-                raise TypeError("add_object(): arg 1 must be a subclass of Node")
+                raise TypeError(
+                            "add_object(): arg 1 must be a subclass of Node")
         except:
             if _DEBUG: print objectclass, Node
             raise
@@ -799,11 +800,12 @@ Opioid2D, it is safer to call this via add_object.
                 pass
             node.position = get_display_center()
             node.layer = "Background"
-        #let components do fanciness, then continue
-        (Opioid2D.Delay(0) + Opioid2D.CallFunc(self.do_add_object2, node)).do()
+        # let components do image alterations, then check for node overlap
+        (Opioid2D.Delay(1) + Opioid2D.CallFunc(self.avoid_node_overlap, 
+                                               node)).do()
     
-    def do_add_object2(self, node):
-        # avoid overlapping sprites exactly
+    def avoid_node_overlap(self, node):
+        "avoid_node_overlap(node): avoid overlapping sprites exactly"
         if node.image == None and node.image_file:
             node.set_image( node.image_file)
         okay_position = False
@@ -827,9 +829,9 @@ Opioid2D, it is safer to call this via add_object.
         except:
             pass
         # deal with Opioid image idiosyncracies HACK
-        if hasattr(node, 'set_image_file') and\
-                hasattr(node, 'get_image_file'):
-            node.set_image_file( node.get_image_file())
+        # if hasattr(node, 'set_image_file') and\
+        #        hasattr(node, 'get_image_file'):
+        #    node.set_image_file( node.get_image_file())
         wx.CallAfter(wx.GetApp().set_selection,[node])
         
     def kill_subprocesses(self):

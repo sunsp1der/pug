@@ -1,9 +1,13 @@
 import random
+
 from Opioid2D import Vector
 from Opioid2D.public.Node import Node
+
 from pug.component import *
 
-class Random_Motion(Component):
+from pig.components import SpriteComponent
+
+class Random_Motion(SpriteComponent):
     """Set a random velocity, rotation and spin on the object when it's added to 
 a scene."""
     _set = 'pig'

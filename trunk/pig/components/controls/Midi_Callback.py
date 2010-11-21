@@ -5,10 +5,11 @@ from pug.component import *
 
 from pig.keyboard import keys
 from pig.PigDirector import PigDirector
+from pig.components import SpriteComponent
 
-class Midi_Callback( Component):
+class Midi_Callback( SpriteComponent):
     """Owner receives midi events. Scene must have the Midi_Input component.
-    
+
 This component gives its owner a new callback:
     on_midi_event(event)
 Derived components can use this to react to events.

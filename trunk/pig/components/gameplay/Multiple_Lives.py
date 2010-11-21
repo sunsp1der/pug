@@ -5,8 +5,9 @@ from pug.component import *
 
 from pig.util import get_gamedata
 from pig.PigDirector import PigDirector
+from pig.components import SpriteComponent
 
-class Multiple_Lives(Component):
+class Multiple_Lives(SpriteComponent):
     """This object has multiple lives and will respawn at its starting point
 after being destroyed. IMPORTANT: This Component only works on objects with a 
 class file.

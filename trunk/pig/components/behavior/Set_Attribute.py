@@ -6,7 +6,9 @@ from Opioid2D.public.Node import Node
 from pug import Dropdown, Generic
 from pug.component import *
 
-class Set_Attribute(Component):
+from pig.components import SpriteComponent
+
+class Set_Attribute(SpriteComponent):
     "When owner is added to scene, an attribute is set to a given value."
     #component_info
     _set = 'pig'

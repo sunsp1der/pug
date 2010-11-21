@@ -4,8 +4,9 @@ from Opioid2D import RealTickFunc, Mouse
 from pug.component import *
 
 from pig.util import angle_to
+from pig.components import SpriteComponent
 
-class Mouse_Follow(Component):
+class Mouse_Follow(SpriteComponent):
     """Object follows the mouse pointer"""
     # component_info
     _set = 'pig'
