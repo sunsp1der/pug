@@ -1,5 +1,6 @@
 """Load all components"""
 
+from pig.components.SpriteComponent import SpriteComponent
 from pig.components.behavior.Animate_Folder import Animate_Folder
 from pig.components.behavior.Animate_Grid import Animate_Grid
 from pig.components.behavior.Fade import Fade
@@ -59,4 +60,5 @@ from pig.components.scene.Scene_Timer import Scene_Timer
 from pig.components.scene.Midi_Input import Midi_Input
 from pig.components.scene.Joystick_Input import Joystick_Input
 from pig.components.scene.Joystick_Axis_To_Key import Joystick_Axis_To_Key
+from pig.components.scene.Joystick_Button_To_Key import Joystick_Button_To_Key
 from pig.components.scene.On_Key_Sound_Scene import On_Key_Sound_Scene

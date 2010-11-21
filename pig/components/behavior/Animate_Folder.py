@@ -6,7 +6,9 @@ from Opioid2D.public.Node import Node
 from pug import Filename, Dropdown
 from pug.component import *
 
-class Animate_Folder(Component):
+from pig.components import SpriteComponent
+
+class Animate_Folder(SpriteComponent):
     """This object is an animation. Folder animations are stored as 
 numbered graphics files with the same name as the folder. For example: "frame0",
 "frame1", and "frame2" in a folder called "frame". Note: if you have 10 or more 
@@ -128,11 +130,6 @@ frames, number with zeros, like this: "frame08", "frame09","frame10","frame11"
                     return
             self.owner.image_file = "art\\pug.png"
     
-#    @component_method
-#    def on_added_to_editor(self, scene):
-#        """Show correct frame when object or component is added to editor"""
-#        self.animation = self.folder    
-
     def on_removed_from_object(self):
         self.owner.set_image_file("art\\pug.png")
 

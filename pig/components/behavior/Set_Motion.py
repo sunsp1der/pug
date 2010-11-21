@@ -1,8 +1,11 @@
 from Opioid2D import Vector
 from Opioid2D.public.Node import Node
+
 from pug.component import *
 
-class Set_Motion(Component):
+from pig.components import SpriteComponent
+
+class Set_Motion(SpriteComponent):
     """Set owner's velocity, acceleration, rotation and friction when it's
 added to a scene."""
     _set = 'pig'

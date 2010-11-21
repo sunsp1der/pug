@@ -1,3 +1,5 @@
+from pygame.key import get_pressed
+
 from pug.component import *
 
 from pig import PigScene
@@ -6,7 +8,8 @@ from pig.editor.agui import KeyDropdown
 
 class Joystick_Button_To_Key( Component):
     """Convert joystick button presses to simulate keyboard key presses. This
-component requires the Joystick_Input component.
+component requires the Joystick_Input component. Note that strange effects can
+occur if both the joystick and keyboard are used simultaneously.
 
 To see the events being sent by the joystick, look at the console output of the 
 Joystick_Input component with test_mode set to True.   
@@ -17,6 +20,7 @@ Joystick_Input component with test_mode set to True.
     _class_list = [PigScene]
     # attributes:   
     _field_list = [
+        ['joystick_id',"The joystick's ID number (event info: 'joy')"],                   
         ['button_0', KeyDropdown, 
             {'doc':'Key to simulate when button 0 is pressed'}],
         ['button_1', KeyDropdown, 
@@ -43,69 +47,57 @@ Joystick_Input component with test_mode set to True.
             {'doc':'Key to simulate when button 11 is pressed'}],
         ]
     # defaults
+    joystick_id = 0
     button_0 = "SPACE"
-    button_1 = "SPACE"
-    button_2 = "SPACE"
-    button_3 = "SPACE"
-    button_4 = "SPACE"
-    button_5 = "SPACE"
-    button_6 = "SPACE"
-    button_7 = "SPACE"
-    button_8 = "SPACE"
-    button_9 = "SPACE"
-    button_10 = "SPACE"
-    button_11 = "SPACE"
+    button_1 = None 
+    button_2 = None
+    button_3 = None
+    button_4 = None
+    button_5 = None
+    button_6 = None
+    button_7 = None
+    button_8 = None
+    button_9 = None
+    button_10 = None
+    button_11 = None
+    
+    def __init__( self, *a, **kw):
+        self.downbuttons = {}
+        Component.__init__( self, *a, **kw)
        
     @component_method
     def handle_joybuttondown( self, event):
         if event.joy != self.joystick_id:
             return
-        if event.axis == self.x_axis_id:
-            k = (self.left_key, self.right_key)
-            state = self.x_state
-            self.x_state = event.value
-        elif event.axis == self.y_axis_id:
-            k = (self.up_key, self.down_key)
-            state = self.y_state
-            self.y_state = event.value
-        value = event.value
-        threshold = self.threshold
-        if value < -threshold:
-            self.owner.do_key_callbacks( keys[k[0]])
-            if state > threshold:
-                self.owner.do_key_callbacks( keys[k[1]], keydict = "KEYUP")
-        elif value > threshold:
-            self.owner.do_key_callbacks( keys[k[1]])
-            if state < -threshold:
-                self.owner.do_key_callbacks( keys[k[0]], keydict = "KEYUP")
-        elif state > threshold:
-            self.owner.do_key_callbacks( keys[k[1]], keydict = "KEYUP")
-        elif state < -threshold:
-            self.owner.do_key_callbacks( keys[k[0]], keydict = "KEYUP")
+        key = keys[getattr(self, "button_" + str(event.button))]
+        if key:
+            self.owner.do_key_callbacks( key)
         
+    @component_method
+    def handle_joybuttonup( self, event):
+        if event.joy != self.joystick_id:
+            return
+        key = keys[getattr(self, "button_" + str(event.button))]
+        if key:
+            self.owner.do_key_callbacks( key, keydict="KEYUP")
         
     @component_method
     def register_key_down( self, key, fn, *args, **kwargs):
         "Check axis state when keys are registered"
         # if we don't do this we can get key up messages with no corresponding
         # key down
-        if key in [self.left_key, self.right_key, self.up_key, self.down_key]:
-            stick = self.owner.get_joystick(self.joystick_id)
-            x_axis = stick.get_axis(self.x_axis_id)
-            y_axis = stick.get_axis(self.y_axis_id)
-            threshold = self.threshold
-            if (key == self.left_key and x_axis < -threshold):
-                fn(*args, **kwargs)
-            if key == self.right_key and x_axis > threshold:
-                fn(*args, **kwargs)
-            if key == self.up_key and y_axis < -threshold:
-                fn(*args, **kwargs)
-            if key == self.down_key and y_axis > -threshold:
-                fn(*args, **kwargs)
-                    
-                
-                
-                
+        stick = self.owner.get_joystick(self.joystick_id)
+        if not stick:
+            return        
+        n = 0
+        for button in [self.button_0, self.button_1, self.button_2, 
+                self.button_3, self.button_4, self.button_5, self.button_6, 
+                self.button_7, self.button_8, self.button_9, self.button_10, 
+                self.button_11]:
+            if key == button and stick.get_button( n):
+                fn( *args, **kwargs)
+                return
+            n += 1
     
 register_component( Joystick_Button_To_Key)
     

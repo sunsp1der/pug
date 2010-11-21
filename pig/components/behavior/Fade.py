@@ -4,8 +4,9 @@ from Opioid2D.public.Node import Node
 from pug.component import *
 
 from pig.PigDirector import PigDirector
+from pig.components import SpriteComponent
 
-class Fade(Component):
+class Fade(SpriteComponent):
     """Owner fades in and/or fades out."""
     #component_info
     _set = 'pig'
@@ -25,7 +26,7 @@ class Fade(Component):
     fade_out_collisions = False
 
     @component_method
-    def on_added_to_scene(self):
+    def on_first_display(self):
         """Do fade in if fade_in_secs > 0"""
         self.fade_in()
             

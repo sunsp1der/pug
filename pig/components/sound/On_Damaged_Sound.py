@@ -4,8 +4,9 @@ from pug.component import *
 
 from pig.audio import get_sound
 from pig.editor.agui import SoundFile
+from pig.components import SpriteComponent
 
-class On_Damaged_Sound( Component):
+class On_Damaged_Sound( SpriteComponent):
     """Owner plays a sound when it takes damage"""
     # component_info
     _set = 'pig'

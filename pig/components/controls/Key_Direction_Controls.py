@@ -5,8 +5,9 @@ from pug.component import *
 from pig.keyboard import *
 from pig.editor.agui import KeyDropdown
 from pig.PigDirector import PigDirector
+from pig.components import SpriteComponent
 
-class Key_Direction_Controls( Component):
+class Key_Direction_Controls( SpriteComponent):
     """Control object velocity with keys for up, down, left, right."""
     # component_info
     _set = 'pig'

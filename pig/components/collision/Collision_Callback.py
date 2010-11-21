@@ -15,9 +15,9 @@ from pug.component import *
 from pig.PigDirector import PigDirector
 from pig.editor.agui.group_dropdown import GroupDropdown, register_group, \
         unregister_group
+from pig.components import SpriteComponent
 
-
-class Collision_Callback( Component):
+class Collision_Callback( SpriteComponent):
     """Object's "on_collision" method is called when it collides
     
 arguments: on_collision( toSprite, fromSprite, toGroup, my_group)"""

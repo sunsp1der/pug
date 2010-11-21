@@ -3,7 +3,9 @@ from Opioid2D.public.Node import Node
 
 from pug.component import *
 
-class Self_Destruct(Component):
+from pig.components import SpriteComponent
+
+class Self_Destruct(SpriteComponent):
     """Object self-destructs after a given amount of time."""
     #component_info
     _set = 'pig'

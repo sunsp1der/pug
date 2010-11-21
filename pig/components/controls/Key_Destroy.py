@@ -7,8 +7,9 @@ from pig.editor.agui import KeyDropdown
 from pig.keyboard import keys
 
 from pig.PigDirector import PigDirector
+from pig.components import SpriteComponent
 
-class Key_Destroy( Component):
+class Key_Destroy( SpriteComponent):
     """Owner destroys itself when a key is pressed or released"""
     # component_info
     _set = 'pig'

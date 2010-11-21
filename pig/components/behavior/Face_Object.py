@@ -5,9 +5,10 @@ from Opioid2D.public.Math import angledelta
 from pug import get_gnamed_object, GnameDropdown
 from pug.component import *
 
+from pig.components import SpriteComponent
 from pig.util import angle_to
 
-class Face_Object(Component):
+class Face_Object( SpriteComponent):
     """Object turns to face another object"""
     #component_info
     _set = 'pig'

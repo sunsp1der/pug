@@ -2,8 +2,9 @@ from Opioid2D import Delay, CallFunc
 from Opioid2D.public.Node import Node
 
 from pug.component import *
+from pig.components import SpriteComponent
 
-class Mouse_Click_Destroy( Component):
+class Mouse_Click_Destroy( SpriteComponent):
     """Object is destroyed when user clicks on it with mouse."""
     #component_info
     _set = 'pig'

@@ -2,7 +2,9 @@ from Opioid2D.public.Node import Node
 
 from pug.component import Component, register_component, component_method
 
-class Spawn_Flower( Component):
+from pig.components import SpriteComponent
+
+class Spawn_Flower( SpriteComponent):
     """When this object spawns another object, the spawn is repeated at 
 different angles. Use this with other spawn components or objects with an 
 on_spawn callback"""

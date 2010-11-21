@@ -4,8 +4,9 @@ from pug.component import *
 
 from pig.audio import get_sound
 from pig.editor.agui import SoundFile
+from pig.components import SpriteComponent
 
-class On_Create_Sound( Component):
+class On_Create_Sound( SpriteComponent):
     """Owner plays a sound when it's added to a scene"""
     # component_info
     _set = 'pig'

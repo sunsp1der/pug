@@ -1,5 +1,4 @@
 todo:
-	joystick_to_keys
 
 
 installer:
@@ -10,8 +9,6 @@ installer:
 	update numeric refs to numpy
 
 soon:
-	increase efficiency of animation reloads by caching source and frames
-		learn to access bitmap component of image
 	'loading' graphic while scene saves, or at least cleanup
 	destroy on gameover
 	option for gameover pause

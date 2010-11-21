@@ -119,7 +119,11 @@ class ComponentList(wx.combo.ComboCtrl):
             else:
                 # set tooltip to current component docstring 
                 # up to first line break
-                doc = component.__doc__.split('\n\n')[0]
+                try:
+                    doc = component.__doc__.split('\n\n')[0]
+                    doc = doc.replace('\n',' ')
+                except:
+                    pass
             if self.tooltip != doc:
                 list.SetToolTipString(doc)
                 list.GetToolTip().SetDelay(0.5)  
@@ -451,8 +455,11 @@ class ComponentTreePopup(wx.combo.ComboPopup):
             else:
                 # set tooltip to current component docstring 
                 # up to first line break
-                if doc:
+                try:
                     doc = component.__doc__.split('\n\n')[0]
+                    doc = doc.replace('\n',' ')
+                except:
+                    pass
             if self.tooltip != doc:
                 tree.SetToolTipString(doc)
                 tree.GetToolTip().SetDelay(0.5)

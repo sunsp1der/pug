@@ -8,8 +8,9 @@ from pug.component import *
 from pig.audio import get_sound
 from pig.editor.agui import ScenesDropdown, SoundFile
 from pig.PigDirector import PigDirector
+from pig.components import SpriteComponent
 
-class Scene_Button(Component):
+class Scene_Button(SpriteComponent):
     """Turns object into a button that switches to a different scene when 
 clicked."""
     #component_info

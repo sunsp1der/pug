@@ -63,15 +63,15 @@ Joystick_Input component with test_mode set to True.
         if value < -threshold:
             self.owner.do_key_callbacks( keys[k[0]])
             if state > threshold:
-                self.owner.do_key_callbacks( keys[k[1]], keydict = "KEYUP")
+                self.owner.do_key_callbacks( keys[k[1]], keydict="KEYUP")
         elif value > threshold:
             self.owner.do_key_callbacks( keys[k[1]])
             if state < -threshold:
-                self.owner.do_key_callbacks( keys[k[0]], keydict = "KEYUP")
+                self.owner.do_key_callbacks( keys[k[0]], keydict="KEYUP")
         elif state > threshold:
-            self.owner.do_key_callbacks( keys[k[1]], keydict = "KEYUP")
+            self.owner.do_key_callbacks( keys[k[1]], keydict="KEYUP")
         elif state < -threshold:
-            self.owner.do_key_callbacks( keys[k[0]], keydict = "KEYUP")
+            self.owner.do_key_callbacks( keys[k[0]], keydict="KEYUP")
         
         
     @component_method
@@ -81,6 +81,8 @@ Joystick_Input component with test_mode set to True.
         # key down
         if key in [self.left_key, self.right_key, self.up_key, self.down_key]:
             stick = self.owner.get_joystick(self.joystick_id)
+            if not stick:
+                return
             x_axis = stick.get_axis(self.x_axis_id)
             y_axis = stick.get_axis(self.y_axis_id)
             threshold = self.threshold

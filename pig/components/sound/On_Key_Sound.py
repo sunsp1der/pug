@@ -6,8 +6,9 @@ from pig.editor.agui import KeyDropdown, SoundFile
 from pig.audio import get_sound
 from pig.keyboard import keys
 from pig.PigDirector import PigDirector
+from pig.components import SpriteComponent
 
-class On_Key_Sound( Component):
+class On_Key_Sound( SpriteComponent):
     """Owner plays a sound when key is pressed"""
     # component_info
     _set = 'pig'

@@ -11,8 +11,9 @@ from pug import Dropdown
 from pig.util import get_project_object
 from pig.audio import get_sound
 from pig.editor.agui import ObjectsDropdown, SoundFile
+from pig.components import SpriteComponent
 
-class Spawner(Component):
+class Spawner(SpriteComponent):
     """Owner spawns other objects
     
 This component gives its owner a new callback:

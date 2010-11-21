@@ -1,8 +1,10 @@
-from Opioid2D import Vector
 from Opioid2D.public.Node import Node
+
 from pug.component import *
 
-class Stop_Motion_On_Destroy(Component):
+from pig.components import SpriteComponent
+
+class Stop_Motion_On_Destroy(SpriteComponent):
     """Set owner's velocity, acceleration, and/or rotation to zero when object 
 is destroyed. This is useful when object is still visible but fading out, 
 shrinking out, or etc."""

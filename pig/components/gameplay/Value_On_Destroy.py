@@ -3,8 +3,9 @@ from Opioid2D.public.Node import Node
 from pug.component import *
 
 from pig.util import get_gamedata
+from pig.components import SpriteComponent
 
-class Value_On_Destroy(Component):
+class Value_On_Destroy(SpriteComponent):
     "When object is destroyed, change a gamedata value"
     #component_info
     _set = 'pig'
