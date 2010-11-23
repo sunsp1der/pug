@@ -22,7 +22,7 @@ import wx.lib.scrolledpanel
 import wx.lib.buttons
 
 from pug.aguilist import create_raw_aguilist, create_pugview_aguilist
-from pug.util import get_simple_name, get_code_file, edit_process
+from pug.util import get_simple_name, get_code_file, start_edit_process
 from pug.storage import pugSave, pugLoad
 from pug.constants import *
 from pug.syswx.helpframe import HelpFrame
@@ -553,13 +553,13 @@ Automatically calls on_<setting>(val, event) callback.
             if hasattr(self,callback):
                 getattr(self,callback)(val, event)                
                 
-    def view_source(self, event=None):
-        if hasattr(self.object, '_get_code_file'):
-            file = self.object._get_code_file()
+    def view_source_code(self, event=None):
+        if hasattr(self.object, '_get_source_code'):
+            file = self.object._get_source_code()
         else:
             file = get_code_file(self.object)
         if file:
-            edit_process( file)
+            start_edit_process( file)
             
     def refresh_settings(self):
         for setting in self.settings:
@@ -697,7 +697,7 @@ Automatically calls on_<setting>(val, event) callback.
             return
         parent.AppendSeparator()        
         parent.Append(help="View object's source file", 
-                   id=_TOOL_VIEWSOURCE, text=u'View Source\tCtrl+U')
+                   id=_TOOL_VIEWSOURCE, text=u'View source code\tCtrl+U')
         
 
     def save_object_state(self, event=None):
@@ -819,7 +819,7 @@ Automatically calls on_<setting>(val, event) callback.
         self.Bind(wx.EVT_MENU, self._evt_setting, id=_TOOL_AUTOAPPLY)            
         self.Bind(wx.EVT_MENU, self.apply, id=_TOOL_APPLY)
         self.Bind(wx.EVT_MENU, self.refresh, id=_TOOL_REFRESH) 
-        self.Bind(wx.EVT_MENU, self.view_source, id=_TOOL_VIEWSOURCE) 
+        self.Bind(wx.EVT_MENU, self.view_source_code, id=_TOOL_VIEWSOURCE) 
         #help menu
         self.Bind(wx.EVT_MENU, self.show_help, id=_HELP_INFO)       
         self.Bind(wx.EVT_MENU, self.help_context, id=_HELP_CONTEXT)       

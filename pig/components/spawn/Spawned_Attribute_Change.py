@@ -5,7 +5,7 @@ from pug.component import Component, register_component, component_method
 
 from pig.components.behavior.Set_Attribute import Set_Attribute
 
-class Spawned_Attribute( Set_Attribute):
+class Spawned_Attribute_Change( Set_Attribute):
     """When this object spawns another object, change an attribute on the
     spawned object."""
     #component_info
@@ -22,17 +22,18 @@ class Spawned_Attribute( Set_Attribute):
     # defaults
     spawner_name = ""
     
-    stripped_name = ""
+    _spawner_name = ""
     
     @component_method
     def on_added_to_scene(self):
         "Over-ride Set_Component's auto-set. Just clean up spawner_name."
         # don't do the auto-set from Set_Component
-        self.stripped_name = self.spawner_name.strip()
+        if type(self.spawner_name) is str:
+            self._spawner_name = self.spawner_name.strip()
     
     @component_method                
     def on_spawn( self, obj, component):
-        if not self.stripped_name or self.stripped_name == component.gname:
+        if not self._spawner_name or self._spawner_name == component.gname:
             Set_Attribute.do_change(self, obj)
 
-register_component( Spawned_Attribute)
+register_component( Spawned_Attribute_Change)

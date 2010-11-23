@@ -89,7 +89,7 @@ class EditorState(PigState):
                 app = wx.GetApp()
                 wx.CallAfter(app.raise_all_frames)
                 wx.CallAfter(app.get_object_pugframe(
-                                Opioid2D.Director.scene).pugWindow.view_source)
+                                Opioid2D.Director.scene).pugWindow.view_source_code)
             except:
                 pass
             

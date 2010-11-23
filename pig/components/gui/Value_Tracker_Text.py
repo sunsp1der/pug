@@ -57,9 +57,12 @@ class Value_Tracker_Text(Textbox):
         gamedata = get_gamedata()
         if text is None:
             if getattr(gamedata, self.value_name, None) is None:
+                # gamedata not set up... show default
                 text = self.prefix + self.default
             else:
+                # get gamedata
                 val = getattr(gamedata, self.value_name, self.default)
+                # format output
                 if type(val) == float:
                     val =  ("%."+str(self.decimal_places)+"f") % val
                 else:

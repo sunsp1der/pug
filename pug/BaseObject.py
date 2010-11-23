@@ -21,8 +21,8 @@ plus a few utility functions
         pug.GnamedObject.__del__(self)
         pug.ComponentObject.__del__(self)
         
-    def _get_code_file(self):
-        "_get_code_file(): try to return module filename for external editors"
+    def _get_source_code(self):
+        "_get_source_code(): try to return module filename for external editors"
         return get_code_file(self)
     
     _codeStorageDict = {}

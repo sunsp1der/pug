@@ -12,7 +12,7 @@ import pug
 from pug.component import Component
 from pug.syswx.util import show_exception_dialog
 from pug.syswx.SelectionWindow import SelectionWindow
-from pug.util import python_process, edit_process
+from pug.util import python_process, start_edit_process
 
 from pig.util import get_project_path
 from pig.editor.storage import * # included as a convenience
@@ -50,7 +50,7 @@ def edit_project_file():
     if dlg.ShowModal() == wx.ID_OK:
         file = dlg.GetPath()
         if file:
-            edit_process(file)
+            start_edit_process(file)
         dlg.Destroy()
     os.chdir(cwd) # thanks for automatically changing that, windows
     
@@ -303,7 +303,6 @@ def wait_for_state(state):
     if _DEBUG: print "wfs 2",
     while not (scene.state == state or scene.state.__class__ == state) and \
             getattr(oldstate, 'exitted', True):
-        print "wfs 3",        
         if _DEBUG: print "   Waiting for state: ",state
         time.sleep(0.05)         
         timer += 1

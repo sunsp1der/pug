@@ -9,7 +9,8 @@ import pug
 from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.code_storage import add_subclass_storageDict_key
 from pug.code_storage.constants import _INDENT, _PRETTIFY_FLOATS
-from pug.util import make_valid_attr_name, prettify_path, prettify_float
+from pug.util import make_valid_attr_name, prettify_path, prettify_float,\
+                        start_edit_process
 
 from pig.PigDirector import PigDirector
 from pig.editor.util import get_available_layers, save_object, \
@@ -285,13 +286,17 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
         """Save this object as a class in the project's object folder"""
         save_object( self)
         
-    def _get_code_file(self):
-        "_get_code_file(): return the scene file if this is not a derived class"
+    def _get_source_code(self):
+        "_get_source_code(): return the scene file if this is not a derived class"
         if self.__class__ == PigSprite:
-            return PigDirector.scene._get_code_file()
+            return PigDirector.scene._get_source_code()
         else:
-            return pug.BaseObject._get_code_file(self)   
-    
+            return pug.BaseObject._get_source_code(self)   
+
+    def edit_code(self):
+        "Edit the source file for this object"
+        start_edit_process( self._get_source_code())     
+        
     # code storage customization
     @classmethod
     def _create_dummy(cls, exporter):
@@ -454,17 +459,18 @@ _spritePugview = {
     #        ['acceleration'],
         [' Functions', pug.Label],
         ['delete',"Delete this sprite"],
+        ['edit_code', None, {'label':'   Edit code'}]
     #        ['_delete_test'],
     ]       
  }
 pug.add_pugview('PigSprite', _spritePugview, True)
 ########################################################
 ## reveal this to test PigSprite deletion problems
-_spritePugview['attributes'].append(['test_referrers'])
-from pug.util import test_referrers
-def _test_referrers( self):
-    test_referrers(self)
-PigSprite.test_referrers = _test_referrers
+#_spritePugview['attributes'].append(['test_referrers'])
+#from pug.util import test_referrers
+#def _test_referrers( self):
+#    test_referrers(self)
+#PigSprite.test_referrers = _test_referrers
 ####################################################
 if hasattr(PigSprite,'test'):
     _spritePugview['attributes'].append(['test'])

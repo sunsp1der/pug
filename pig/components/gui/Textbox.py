@@ -23,7 +23,10 @@ class Textbox(SpriteComponent):
                               'wildcards':"truetype font (*.ttf)|*.ttf"}],
             ['font_size','The point size of the font'],
             ['max_width','The maximum text width in pixels'],
-            ['hotspot','Relative coordinates of image hotspot. (0-1,0-1)']
+            ['hotspot','Relative coordinates of image hotspot. (0,0)=top-left,'+
+                        ' (1,1)=bottom-right'],
+            ['cache_images','Cache all text images created. '+
+                            'This is faster but uses more memory.']
             ]
     # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
@@ -36,9 +39,13 @@ class Textbox(SpriteComponent):
     _font_file = None
     _max_width = None
     _font_size = 32
+    cache_images = False
     
     font = None
     action = None
+    
+    # cache created fonts so we don't have to recreate them constantly
+    font_cache = {}
     
     @component_method
     def set_text(self, text=None):
@@ -59,7 +66,20 @@ class Textbox(SpriteComponent):
     def do_set_text(self, image=None, tint=(255,255,255)):
         self.action = None
         if image==None:
-            image = Opioid2D.ResourceManager._create_image(
+            if self.cache_images:
+                fontdata = (self.font, self.text, self.max_width, self.hotspot)
+                try:
+                    # look for cached image with same fontdata
+                    image = Opioid2D.ResourceManager.images[fontdata]
+                except KeyError:
+                    # cache the image with the name fontdata as index
+                    image = Opioid2D.ResourceManager._set_image(
+                                        fontdata, 
+                                        Opioid2D.Bitmap( 
+                                                    textbox( *fontdata[0:3])),
+                                        fontdata[3])
+            else:
+                image = Opioid2D.ResourceManager._create_image(
                         Opioid2D.Bitmap(
                             textbox( self.font, self._text, self.max_width)),
                             self.hotspot)
@@ -99,6 +119,12 @@ class Textbox(SpriteComponent):
     max_width = property(get_max_width, set_max_width)
        
     def set_hotspot(self, hotspot):
+        try:
+            hotspot = tuple(hotspot)
+        except:
+            return
+        if len(hotspot) != 2:
+            return
         self._hotspot = hotspot
         self.set_text()
     def get_hotspot(self):
@@ -114,11 +140,17 @@ class Textbox(SpriteComponent):
             font_size = self._font_size
         else:
             self._font_size = font_size
+        font_info = (font_file, self._font_size)
         try:
-            self.font = font.Font(font_file, self._font_size)
-        except:
-            self.font = self.__class__.font
-            self._font_file = self.__class__._font_file
+            self.font = self.font_cache[font_info]
+        except KeyError:
+            try:
+                self.font = font.Font(*font_info)
+            except:
+                self.font = self.__class__.font
+                self._font_file = self.__class__._font_file
+            else:
+                self.font_cache[font_info] = self.font
         self.set_text()
     def get_font_file(self):
         return self._font_file
@@ -136,7 +168,11 @@ class Textbox(SpriteComponent):
     @component_method
     def on_added_to_editor(self):
         """Show text when object or component is added to editor"""
-        Textbox.on_added_to_scene( self)   
+        Textbox.on_added_to_scene( self) 
+    
+    def on_added_to_object(self):
+        """Show text when component is added to object"""
+        Textbox.on_added_to_scene( self)
         
     def on_removed_from_object(self):
         self.owner.set_image_file("art\\pug.png")

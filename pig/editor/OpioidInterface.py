@@ -76,7 +76,7 @@ scene: the scene to load initially
         self.Director = PigDirector   
         self.Director.editorMode = True
                 
-        thread.start_new_thread(start_opioid, 
+        thread.start_new_thread(self.start_opioid, 
                                           (self.pug_settings.rect_opioid_window,
                                            os.path.split(projectPath)[1],
                                            get_image_path('pug.png'),
@@ -856,34 +856,31 @@ Opioid2D, it is safer to call this via add_object.
 #                print test_referrers(x)
 #                pug.frame(x)
                
-def start_opioid( rect, title, icon, scene):
-    #start up opioid with a little pause for threading
-    skip_deprecated_warnings()    
-    time.sleep(0.1)
-
-    set_opioid_window_position(rect[0:2])
-    Opioid2D.Display.init(rect[2:4], 
-                          title=title, 
-                          icon=icon)
-    Opioid2D.Director.project_started = False
-    Opioid2D.Director.viewing_in_editor = True
-    try:
-        Opioid2D.Director.run( scene)
-        import pygame
-        pygame.quit()
-    except ImportError:
-        # we're exiting Opioid altogether...
+    def start_opioid( self, rect, title, icon, scene):
+        #start up opioid with a little pause for threading
+        skip_deprecated_warnings()    
+        time.sleep(0.1)
+    
+        set_opioid_window_position(rect[0:2])
+        Opioid2D.Display.init(rect[2:4], 
+                              title=title, 
+                              icon=icon)
+        Opioid2D.Director.project_started = False
+        Opioid2D.Director.viewing_in_editor = True
         try:
-            wx.GetApp().Exit()
+            Opioid2D.Director.run( scene)
+            import pygame
+            pygame.quit()
+        except ImportError:
+            # we're exiting Opioid altogether...
+            try:
+                wx.GetApp().Exit()
+            except:
+                pass
         except:
-            pass
-    except:
-        try:
+            show_exception_dialog()
             wx.GetApp().Exit()
-        except:
-            pass
-#        print "start_opioid: gotcha"
-        raise
+            raise
          
 def _scene_list_generator():
     """_scene_list_generator( includeNewScene=True)-> list of scenes + 'New'

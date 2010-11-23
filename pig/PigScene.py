@@ -16,7 +16,7 @@ import pug
 from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.code_storage.constants import _INDENT
 from pug.code_storage import add_subclass_storageDict_key
-from pug.util import make_valid_attr_name
+from pug.util import make_valid_attr_name, start_edit_process
 
 from pig.PauseState import PauseState
 from pig.util import entered_scene
@@ -211,7 +211,6 @@ key_dict: the key_dict to use
             for modval in keymods.itervalues():
                 if ev.mod & modval:
                     mod += modval 
-        
         self.do_key_callbacks(key, mod, dict)
 
     def register_key_down(self, key, fn, *args, **kwargs):
@@ -229,16 +228,18 @@ fn: the function to call when the keypress occurs
         if kwargs.pop('_do_immediate', True):
             try:
                 if type(key) is tuple:
-                    if type(key[1]) is str:
-                        keymod = keymods[key[1]]
                     if type(key[0]) is str:
-                        key = keys[key[0]]
+                        keymod = keymods[key[0]]
                     else:
-                        key = key[0]
+                        keymod = key[0]
+                    if type(key[1]) is str:
+                        thekey = keys[key[1]]
+                    else:
+                        thekey = key[1]
                 if type(key) is str:
-                    key = keys[key]
+                    thekey = keys[key]
                     keymod = 0
-                pressed = get_pressed()[key]
+                pressed = get_pressed()[thekey]
                 if pressed:
                     mods = get_mods() & ~4096
                     if keymod is 0:
@@ -603,8 +604,8 @@ Update the PigScene's node tracking dict for node. Possible commands: 'Delete'
             exporter.register_delete_callback( exporter_cleanup)
         return cls()
     
-    def _get_code_file(self):
-        """_get_code_file(): return scene file with some special circumstances
+    def _get_source_code(self):
+        """_get_source_code(): return scene file with some special circumstances
 
 If scene is unsaved, allow option to save it first. If not saved, return None.
 If scene is a working scene, return 
@@ -622,12 +623,16 @@ If scene is a working scene, return
                 errorDlg.ShowModal()
                 errorDlg.Destroy() 
                 return
-            file = pug.BaseObject._get_code_file(self)
+            file = pug.BaseObject._get_source_code(self)
             if os.path.split(file)[1] == '__Working__.py':
                 file = os.path.join(os.path.split(file)[0], filename)
             return file
         else:
-            return pug.BaseObject._get_code_file(self)           
+            return pug.BaseObject._get_source_code(self)      
+        
+    def edit_code(self):
+        "Edit the source file for this object"
+        start_edit_process( self._get_source_code())     
     
     # code storage customization
     def _create_object_code(self, storageDict, indentLevel, exporter):
@@ -780,13 +785,16 @@ SceneCallbacks.OnCollision = OnCollision
             
 _scenePugview = {
     'name':'PigScene Editor',
-    'skip_menus':['Export'],    
+    'skip_menus':['Export'],   
     'attributes':
     [
         ['Scene', pug.Label, {'font_size':10}],
         ['__class__', None, {'label':'   class', 'new_view_button':False}],        
         ['components'],
         ['scene_layers', SceneLayers],
+        ['edit_code', None, {'label':'   Edit code'}],        
+#        ['   Save Scene', pug.Routine, {'routine':save_scene, 
+#                                        'use_defaults':True}],        
 #        ['scene_groups', SceneGroups],
 #        ['scene_layers', None, {'label':'   layers','read_only':True}],
 #        ['   Save Scene', pug.Routine, {'routine':save_scene, 

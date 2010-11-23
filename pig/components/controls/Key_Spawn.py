@@ -63,7 +63,7 @@ class Key_Spawn( Spawner):
             
     def stop_spawning(self):
         self.spawning = False
-
+        
     @component_method
     def on_destroy(self):
         """unregister keys when component is destroyed"""

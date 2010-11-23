@@ -84,13 +84,10 @@ update all selection boxes.
                     # messed with the dict, so start over
                     self.update_selection_boxes()
                     break
-                rect = node.get_rect()
                 if box.area.dragging:
-                    if box.rect != box.area.rect:
-                        box.on_drag( node)
+                    box.on_drag( node)
                 else:
-                    if box.rect != rect:
-                        box.surround_node( node)
+                    box.surround_node( node)
             return
         except:
             if _DEBUG: 
