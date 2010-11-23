@@ -46,8 +46,10 @@ method will be called."""
         except:
             setattr( gamedata, self.value_name, float(self.start_value))
         Value_Tracker_Text.on_added_to_scene(self)
+        # set up countdown if end is less than start
         if self.end_value < self.start_value:
             self.interval = - abs(self.interval)
+        # if interval is set, start tickin
         if self.interval:
             ( Delay(0) + CallFunc(self.timer_tick, 0)).do()       
             
@@ -67,6 +69,7 @@ method will be called."""
         if self.end_value >=0:
             if self.interval < 0 and newval <= self.end_value or\
                         self.interval > 0 and newval >= self.end_value:
+                # we've reached the end value
                 gamedata.timer = self.end_value
                 self.owner.do( Delay(0) + CallFunc(self.owner.on_time_up))
                 return
@@ -83,15 +86,19 @@ method will be called."""
             val = getattr(gamedata, 'timer', None)
             if self.show_minutes:
                 if val is None:
+                    # no gamedata value, show default
                     text = "00:00"
                 else:
+                    # format value
                     minutes = int(val / 60)
                     seconds = int(val % 60)
                     text = str(minutes) + ':' + str(seconds)
             else:
                 if val is None:
+                    # no gamedata value, show default
                     text = "00"
                 else:
+                    #format value
                     text = "%0.f" % val
             text = self.prefix + text
         Textbox.set_text( self, text)

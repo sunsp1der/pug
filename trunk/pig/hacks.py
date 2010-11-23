@@ -97,6 +97,7 @@ def get_image(image, hotspot=None, mode=None, border=None):
                 img.filename = key #str(key)
                 self._set_image( key, img)
                 framenum += 1
+                
     elif not isinstance(image, Image):
         filename = image
         image = Image()

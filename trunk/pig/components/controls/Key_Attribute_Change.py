@@ -1,4 +1,4 @@
-"Key_Attribute.py"
+"Key_Attribute_Change.py"
 from copy import deepcopy
 
 from Opioid2D.public.Vector import VectorReference
@@ -12,7 +12,7 @@ from pig.editor.agui import KeyDropdown
 from pig.keyboard import keys
 from pig.PigDirector import PigDirector
 
-class Key_Attribute( Set_Attribute):
+class Key_Attribute_Change( Set_Attribute):
     """Change owner's attribute when key is pressed"""
     # component_info
     _set = 'pig'
@@ -58,6 +58,6 @@ in derived components.
             scene.unregister_key(k)
         self.k_info = []
  
-register_component( Key_Attribute)
+register_component( Key_Attribute_Change)
         
        

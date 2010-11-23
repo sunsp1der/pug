@@ -1,5 +1,7 @@
 todo:
-
+	problem with duplicate archetypes on reload_Scene error in scene file
+	component_name and _component_name: propertyize
+		no get_gnamed_object_list: get list of components on object
 
 installer:
 	eliminate need for pythonpather

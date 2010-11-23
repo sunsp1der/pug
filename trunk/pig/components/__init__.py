@@ -26,8 +26,8 @@ from pig.components.controls.Mouse_Click_Destroy import Mouse_Click_Destroy
 from pig.components.controls.Key_Spawn import Key_Spawn
 from pig.components.controls.Midi_Spawn import Midi_Spawn
 from pig.components.controls.Key_Destroy import Key_Destroy
-from pig.components.controls.Key_Attribute import Key_Attribute
-from pig.components.controls.Key_Component import Key_Component
+from pig.components.controls.Key_Attribute_Change import Key_Attribute_Change
+from pig.components.controls.Key_Component_Change import Key_Component_Change
 from pig.components.controls.Key_Direction_Controls \
                             import Key_Direction_Controls
 from pig.components.controls.Key_Animate_Direction import Key_Animate_Direction
@@ -45,8 +45,8 @@ from pig.components.spawn.Spawner import Spawner
 from pig.components.spawn.Spawn_On_Destroy import Spawn_On_Destroy
 
 from pig.components.spawn.Spawn_Flower import Spawn_Flower
-from pig.components.spawn.Spawned_Attribute import Spawned_Attribute
-from pig.components.spawn.Spawned_Component import Spawned_Component
+from pig.components.spawn.Spawned_Attribute_Change import Spawned_Attribute_Change
+from pig.components.spawn.Spawned_Component_Change import Spawned_Component_Change
 from pig.components.sound.On_Create_Sound import On_Create_Sound
 from pig.components.sound.On_Destroy_Sound import On_Destroy_Sound
 from pig.components.sound.On_Damage_Sound import On_Damage_Sound

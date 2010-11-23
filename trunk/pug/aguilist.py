@@ -68,7 +68,7 @@ pugview  = \
     # the programatic path to obj. If fn opens a frame, it should return it.
     
     'no_source': bool
-    # if True, no 'View Source' option will be shown in View menu
+    # if True, no 'View source code' option will be shown in View menu
 }
 import pug
 pug.add_pugview(myClass, pugview)

@@ -2,7 +2,7 @@
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
 from pug.all_components import Utility_Keys, Midi_Input, Midi_To_Key,\
-    Midi_Spawn, Spawn_Flower, Textbox, Key_Attribute
+    Midi_Spawn, Spawn_Flower, Textbox, Key_Attribute_Change
 ### End import autocode ###
 
 ### Midi_Demo autocode ###
@@ -96,6 +96,6 @@ class Midi_Demo(PigScene):
         pigsprite_instance_7.layer = 'Background'
         pigsprite_instance_7.position = (551.0, 120.0)
         pigsprite_instance_7.scale = (0.2, 0.2)
-        pigsprite_instance_7.components.add( Key_Attribute(
+        pigsprite_instance_7.components.add( Key_Attribute_Change(
                 change_value=(1, 1)) )
 ### End Midi_Demo autocode ###

@@ -27,6 +27,7 @@ handles for scaling and rotating.
 """
     rect = None
     drag_offset = (0,0)
+    hotspot = None
     def __init__(self, node = None):
         """__init__( node=None)
 
@@ -75,7 +76,7 @@ node: any object containing a 'rect' attribute that is a pygame rect
         self.surround_node( node)
         
     def start_pulse(self):
-        pulse = Opioid2D.AlphaFade(0.6, 1.5, Opioid2D.PingPongMode)
+        pulse = Opioid2D.AlphaFade(0.2, 1.2, Opioid2D.PingPongMode)
         for sprite in self.lines.itervalues():
             sprite.do(pulse)
             
@@ -91,34 +92,36 @@ node: any object containing a 'rect' attribute that is a pygame rect
             rect = node._get_rect()
         except:
             return
+        if self.rect == rect and self.hotspot == hotspot:
+            return
+        self.hotspot = hotspot
+        self.rect = rect
+        # match hotspot
         self.area.position[0] = rect.width * (0.5 - hotspot[0])
         self.area.position[1] = rect.height * (0.5 - hotspot[1])
+        #match rotation
         self.base.rotation = node.rotation
-        
+        # match positions
         position = (node.position.x, node.position.y)
-        #position = (rect.center[0]+0.5, rect.center[1]+0.5)
         self.rect.center = position
         self.base.position = position
-        if self.rect == rect:
-            return
-        elif self.rect.size != rect.size:
-            line = self.lines['left']
-            line.position = self.area.position + (rect.width * -0.5 - 1, 0.5)
-            line.scale = (1,rect.height+2)
-            
-            line = self.lines['right']
-            line.position = self.area.position + (rect.width * 0.5 + 1, 0.5)
-            line.scale = (1,rect.height+2)
-            
-            line = self.lines['top']
-            line.position = self.area.position + (0, rect.height * -0.5 - 1)
-            line.scale = (rect.width + 3, 1)
-            
-            line = self.lines['bottom']
-            line.position = self.area.position + (0, rect.height * 0.5 + 1)
-            line.scale = (rect.width + 1, 1)
-            self.rect.size = rect.size
-            self.area.scale = (rect.width, rect.height)
+        # match size
+        line = self.lines['left']
+        line.position = self.area.position + (rect.width * -0.5 - 1, 0.5)
+        line.scale = (1,rect.height+2)
+        
+        line = self.lines['right']
+        line.position = self.area.position + (rect.width * 0.5 + 1, 0.5)
+        line.scale = (1,rect.height+2)
+        
+        line = self.lines['top']
+        line.position = self.area.position + (0, rect.height * -0.5 - 1)
+        line.scale = (rect.width + 3, 1)
+        
+        line = self.lines['bottom']
+        line.position = self.area.position + (0, rect.height * 0.5 + 1)
+        line.scale = (rect.width + 1, 1)
+        self.area.scale = (rect.width, rect.height)
         
 class SelectBoxBaseSprite( PigSprite):
     layer = "__editor__"

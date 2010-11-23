@@ -59,8 +59,8 @@ else:
     _default_editor = "idle.py" 
 _default_editor = os.path.join(os.path.split(sys.executable)[0],
                                'Lib','idlelib',_default_editor)
-def edit_process( filename, *args, **kwargs):
-    """edit_process( filename, *args, **kwargs)
+def start_edit_process( filename, *args, **kwargs):
+    """start_edit_process( filename, *args, **kwargs)
     
 Edit filename in editor
 args: arguments to process
