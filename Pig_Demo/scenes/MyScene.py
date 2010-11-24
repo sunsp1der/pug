@@ -1,7 +1,9 @@
 ### import autocode ###
+from objects.dummy import dummy
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
-from pug.all_components import Textbox
+from pug.all_components import Textbox, Set_Component_Attribute,\
+    Key_Component_Change, Spawner, Spawned_Component_Change
 ### End import autocode ###
 
 from objects.Grower import Grower
@@ -12,9 +14,30 @@ class MyScene(PigScene):
         # Sprites
         pigsprite_instance = PigSprite()
         pigsprite_instance.layer = 'Background'
-        pigsprite_instance.position = (400.0, 300.0)
+        pigsprite_instance.position = (277.0, 429.0)
         pigsprite_instance.components.add( Textbox(
-                hotspot=(0, 5)) )
+                gname='text',
+                hotspot=(0, 5),
+                enabled=False) )
+        pigsprite_instance.components.add( Set_Component_Attribute(
+                component_name='text',
+                attribute='text',
+                change_value='False') )
+        pigsprite_instance.components.add( Key_Component_Change(
+                key='A',
+                component_name='text',
+                attribute='font_size',
+                change_value=50) )
+        pigsprite_instance.components.add( Spawner(
+                gname='text',
+                spawn_object='dummy') )
+        pigsprite_instance.components.add( Spawned_Component_Change(
+                spawner_name='text',
+                component_name='text',
+                attribute='text',
+                change_value='yup') )
+
+        dummy_instance = dummy()
 ### End MyScene autocode ###
 
 #

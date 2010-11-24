@@ -10,9 +10,8 @@ class dummy(PigSprite):
     def on_create(self):
         self.position = (626.0, 420.0)
         self.components.add( Self_Destruct() )
-        self.components.add( Textbox() )
-#        self.components.add( Set_Motion(
-#                velocity_y=-200) )
+        self.components.add( Textbox(
+                gname='text') )
         self.components.add( Set_Motion(
                 gname='blankmotion',
                 velocity_y=-10) )

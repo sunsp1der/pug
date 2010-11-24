@@ -24,30 +24,32 @@ doesn't have as many features/accessors as the combo.ComboCtrl"""
         self.selected = -1
         self.selectCallback = None
         self.popupCallback = None
+        self.last_prefix = None
         
     def FindPrefix(self, prefix):
         if prefix:
             prefix = prefix.lower()
-            length = len(prefix)
-
-            # Changed in 2.5 because ListBox.Number() is no longer supported.
-            # ListBox.GetCount() is now the appropriate way to go.
-            for x in range(self.GetCount()):
-                text = self.GetString(x)
-                text = text.lower()
-
-                if text[:length] == prefix:
-                    return x
+            if prefix == self.last_prefix:
+                search = range(self.selected+1, self.GetCount()) + \
+                        range(self.selected)
+            else:
+                search = range(self.GetCount())
+            self.last_prefix = prefix
+            # create a range that starts at currently selected+1, goes to end,
+            # then loops to start
+            for item in search:
+                # lower case version of first character
+                text = self.GetString(item)[0].lower()
+                if text == prefix:
+                    return item
         return -1
 
     def OnKey(self, evt):
         key = evt.GetKeyCode()
         if key >= 32 and key <= 127:
-            self.typedText = self.typedText + chr(key)
-            item = self.FindPrefix(self.typedText)
-
+            item = self.FindPrefix(chr(key))
             if item != -1:
-                self.SetSelection(item)
+                self.SelectItem(item)
         elif key == wx.WXK_BACK or key == wx.WXK_LEFT:
             # backspace removes one character and backs up
             if not self.typedText:
@@ -70,8 +72,8 @@ doesn't have as many features/accessors as the combo.ComboCtrl"""
             self.Dismiss()
         elif key == wx.WXK_RETURN:
             self.OnSelect(None, self.GetSelection())
+            self.GetCombo().SetValue(self.GetStringValue())
         else:
-            self.typedText = ''
             evt.Skip()
         
     def AddItem(self, text, data=None):
@@ -106,11 +108,11 @@ doesn't have as many features/accessors as the combo.ComboCtrl"""
         return None
     
     def OnSelect(self, event=None, selected=-1):
+        self.Dismiss()
         if selected == -1:
             self.SelectItem(self.originalSelection)
         self.selected = selected
         self.didSelect = True
-        self.Dismiss()
         if event:
             event.Skip()
         if self.selectCallback:

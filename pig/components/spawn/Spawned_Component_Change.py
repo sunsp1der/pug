@@ -26,16 +26,12 @@ altered."""
             ]
     _field_list += Set_Attribute._field_list
     # defaults
-    component_name = ""
-    
     _component_name = ""
 
     @component_method
     def on_added_to_scene(self):
         "Clean up names."
         # don't do the auto-set from Set_Component
-        if type(self.component_name) is str:
-            self._component_name = self.component_name.strip()
         Spawned_Attribute_Change.on_added_to_scene(self)
     
     @component_method                
@@ -43,13 +39,17 @@ altered."""
         if not self._component_name:
             return
         if not self._spawner_name or self._spawner_name == component.gname:
-            list = get_gnamed_object_list(self._component_name)
-            for component in list:
-                try:
-                    owner = component.owner
-                except:
+            list = spawn_object.components.get()
+            for spawned_comp in list:
+                if spawned_comp.gname != self._component_name:
                     continue
-                if owner == spawn_object:
-                    Set_Attribute.do_change(self, component)              
+                Set_Attribute.do_change(self, spawned_comp) 
+                    
+    def get_component_name(self):
+        return self._component_name
+    def set_component_name(self, name):
+        self._component_name = name.strip()
+    component_name = property(get_component_name, set_component_name)
+                                 
 
 register_component( Spawned_Component_Change)

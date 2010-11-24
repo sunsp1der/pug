@@ -20,20 +20,23 @@ class Spawned_Attribute_Change( Set_Attribute):
             ]
     _field_list += Set_Attribute._field_list
     # defaults
-    spawner_name = ""
-    
     _spawner_name = ""
     
     @component_method
     def on_added_to_scene(self):
-        "Over-ride Set_Component's auto-set. Just clean up spawner_name."
+        "Over-ride Set_Component's auto-set."
         # don't do the auto-set from Set_Component
-        if type(self.spawner_name) is str:
-            self._spawner_name = self.spawner_name.strip()
+        pass
     
     @component_method                
     def on_spawn( self, obj, component):
         if not self._spawner_name or self._spawner_name == component.gname:
             Set_Attribute.do_change(self, obj)
+            
+    def get_spawner_name(self):
+        return self._spawner_name
+    def set_spawner_name(self, name):
+        self._spawner_name = name.strip()
+    spawner_name = property(get_spawner_name, set_spawner_name)
 
 register_component( Spawned_Attribute_Change)
