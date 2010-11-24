@@ -19,12 +19,14 @@ class Key_Attribute_Change( Set_Attribute):
     _type = 'controls'
     _class_list = [Node]
     # attributes:   
-    _field_list = [
+    _field_list = []
+    _key_list = [
         ['key', KeyDropdown, 
                 {'doc':"The key that triggers owner destroying itself"}],
         ['key_up_undo',
                     "Return attribute to original value when key is released"]                     
         ]
+    _field_list += _key_list
     _field_list += Set_Attribute._field_list
     
     key = "SPACE"
@@ -40,11 +42,8 @@ class Key_Attribute_Change( Set_Attribute):
         self.k_info[1] = scene.register_key_up( self.key, 
                                                 self.undo_change)
             
-    def undo_change(self, object=None):
-        """undo_change(object=None): undo change defined by component
-        
-object: the object to be changed. This allows easy over-riding of this function
-in derived components.
+    def undo_change(self):
+        """undo_change(): undo change defined by component
 """
         if not self.key_up_undo:
             return
