@@ -1,9 +1,9 @@
 from pug.component import *
 
 from pig import PigScene
-from pig.components.sound.On_Key_Sound import On_Key_Sound
+from pig.components.sound.Key_Sound import Key_Sound
 
-class On_Key_Sound_Scene( On_Key_Sound):
+class Key_Sound_Scene( Key_Sound):
     """Scene plays a sound when key is pressed"""
     # component_info
     _set = 'pig'
@@ -21,5 +21,5 @@ class On_Key_Sound_Scene( On_Key_Sound):
         "Unregister key"
         self.unregister_keys()
     
-register_component( On_Key_Sound_Scene)
+register_component( Key_Sound_Scene)
     

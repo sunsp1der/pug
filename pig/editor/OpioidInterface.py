@@ -15,6 +15,9 @@ wx=wx
 import Opioid2D
 from Opioid2D.public.Node import Node
 
+#import wm_ext as canvas # canvas window control extensions 
+from wm_ext.appwnd import AppWnd as canvas_manager
+
 import pug
 import pug.component
 from pug.util import kill_subprocesses, get_package_classes, start_file
@@ -53,6 +56,7 @@ scene: the scene to load initially
     _new_scene = True
     _initialized = False
     _quitting = False
+    canvas = None
     def __init__(self, rootfile, scene=PigScene):
         if _DEBUG: print "OpioidInterface.__init__"
         try:
@@ -75,12 +79,13 @@ scene: the scene to load initially
         self.Display = Opioid2D.Display
         self.Director = PigDirector   
         self.Director.editorMode = True
-                
+        opioid_rect = self.pug_settings.rect_opioid_window # x, y, w, h
         thread.start_new_thread(self.start_opioid, 
-                                          (self.pug_settings.rect_opioid_window,
+                                          (opioid_rect,
                                            os.path.split(projectPath)[1],
                                            get_image_path('pug.png'),
                                            StartScene))
+        
         # wait for scene to load
         while not getattr(self.Director, 'scene', False):
             time.sleep(0.001)
@@ -254,6 +259,17 @@ settingsObj: an object similar to the one below... if it is missing any default
         frame.GetNotebook().Split(2, wx.LEFT)
         size = frame.GetSize()
         frame.GetNotebook().GetPage(1).SetSize([size[0]/2,size[1]])
+        wx.FindWindowByName("ProjectFrame").Activate()
+        frame._on_raise_all_frames = self.raise_canvas
+        # attach window manager to opioid window
+        opioid_rect = self.pug_settings.rect_opioid_window # x, y, w, h        
+        options = dict(pos=tuple(opioid_rect[0:2]), 
+                       size=tuple(opioid_rect[2:4]),
+                       opengl=True, doublebuff=True, hardware=True)
+        canvas_options = canvas_manager.getDefaultOptions()
+        canvas_options.update(options)
+        self.canvas = canvas_manager( canvas_options)
+
         # cache a sprite view for speed on first selection
         if not self.__cached[0]:
             dummy = PigSprite( register=False)
@@ -272,7 +288,14 @@ settingsObj: an object similar to the one below... if it is missing any default
         
         # create a project file error report at startup
         self.reload_project_files( errors=code_exceptions, save_reload=False)
+        # for some reason, canvas needs to be activated before sound plays
+        wx.CallLater(333,self.canvas.Activate) 
    
+    def raise_canvas( self):
+        if self.canvas.IsIconic():
+            self.canvas.Restore()
+        self.canvas.Activate()
+
     def on_drop_files(self, x, y, filenames):
         # pass to util function
         return on_drop_files( x, y, filenames)
@@ -489,6 +512,8 @@ Callback from PugApp...
         if self.Director.scene.state and \
                         self.Director.scene.state.__class__ == EditorState:
             graphicsManager.on_set_selection(selectedObjectDict)
+        if selectedObjectDict:
+            wx.FindWindowByName("Selection").Activate()
         
     def open_selection_frame(self):
         """Open a pug window for selected object"""
@@ -513,11 +538,15 @@ Callback from PugApp...
         if getattr(self.pug_settings,'save_settings_on_quit',True):
             if os.name == 'nt':
                 window_pos = PygameWindowInfo().getWindowPosition()
-                self.pug_settings.rect_opioid_window = (
-                                                max(window_pos['left'],0),
-                                                max(window_pos['top'],0),
-                                    self.pug_settings.rect_opioid_window[2],
-                                    self.pug_settings.rect_opioid_window[3])
+                self.pug_settings.rect_opioid_window = list( 
+                                            self.canvas.GetWindowPosition() +\
+                                            self.canvas.GetWindowSize())
+
+#                self.pug_settings.rect_opioid_window = (
+#                                                max(window_pos['left'],0),
+#                                                max(window_pos['top'],0),
+#                                    self.pug_settings.rect_opioid_window[2],
+#                                    self.pug_settings.rect_opioid_window[3])
             self.save_pug_settings()
         self.Director.realquit()
         time.sleep(1)   
@@ -536,6 +565,7 @@ event: a wx.Event
                        'Project Frame Closed', 
             wx.YES_NO | wx.CANCEL | wx.YES_DEFAULT | wx.ICON_QUESTION)
         try:
+            wx.GetApp().projectFrame.Raise()
             wx.GetApp().projectFrame.RequestUserAttention()
         except:
             pass
@@ -837,25 +867,14 @@ Opioid2D, it is safer to call this via add_object.
     def kill_subprocesses(self):
         kill_subprocesses()
         
-    def test(self, test=None):#, range1=0, range2=100):
-        #get_all_objects(Component)
-        gamedata = get_gamedata()
-        gamedata.gameover()
-# test for floating garbage
-#        from pug.util import test_referrers
-#        import gc
-#        if test is None:
-#            i = 0
-#            for item in gc.garbage:
-#                print i, gc.garbage[i]
-#                i+=1
-#        else:
-#            pug.frame(gc.garbage[test])
-#            x= test_referrers(gc.garbage[test])
-#            if x: 
-#                print test_referrers(x)
-#                pug.frame(x)
-               
+    def _get_source_code(self):
+        app = wx.GetApp()
+        selected = app.get_selection()
+        if selected:                    
+            return selected.popitem()[0]._get_source_code()
+        else:
+            return PigDirector.scene._get_source_code()
+        
     def start_opioid( self, rect, title, icon, scene):
         #start up opioid with a little pause for threading
         skip_deprecated_warnings()    
@@ -881,6 +900,27 @@ Opioid2D, it is safer to call this via add_object.
             show_exception_dialog()
             wx.GetApp().Exit()
             raise
+
+    def test(self):
+        print wx.GetKeyState(wx.WXK_CONTROL)
+# test for gameover
+#        gamedata = get_gamedata()
+#        gamedata.gameover()
+# test for floating garbage
+#        from pug.util import test_referrers
+#        import gc
+#        if test is None:
+#            i = 0
+#            for item in gc.garbage:
+#                print i, gc.garbage[i]
+#                i+=1
+#        else:
+#            pug.frame(gc.garbage[test])
+#            x= test_referrers(gc.garbage[test])
+#            if x: 
+#                print test_referrers(x)
+#                pug.frame(x)
+
          
 def _scene_list_generator():
     """_scene_list_generator( includeNewScene=True)-> list of scenes + 'New'
@@ -903,7 +943,6 @@ _interfacePugview = {
     'size':(350,350),
     'name':'Pig Editor',
     'skip_menus':['Export'],    
-    'no_source':True,
     'attributes':[ 
         ['Project', pug.Label, {'font_size':10}],
         ['Controls', pug.PlayButtons, {'execute':'execute_scene', 
@@ -953,6 +992,7 @@ _interfacePugview = {
 #                {'label':'   View Selection'}],
         ['browse_components', None, 
                 {'label':'   Browse Components'}],
+#        ['canvas', pug.ObjectButtons],
 #        ['Director'],
 #        ['Display'],
         ['test', pug.Routine]

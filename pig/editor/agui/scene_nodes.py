@@ -22,21 +22,25 @@ For other kwargs arguments, see the Base attribute GUI
     def __init__(self, attribute, window, aguidata={}, **kwargs):
         self.tree = None
         # control
-        control = NodeTreeListCtrl(window.object, parent=window)
+        control = wx.Panel(window)
+        sizer = wx.BoxSizer()
+        control.SetSizer(sizer)
+        self.list = NodeTreeListCtrl(window.object, parent=control)
+        control.SetMinSize( (self.list.get_full_width()+10, -1))
+        sizer.Add( self.list, 1, wx.EXPAND)
         #control.SetMinSize((control.get_full_width(), -1))
         kwargs['control_widget'] = control
         Base.__init__(self, attribute, window, aguidata, **kwargs)
         
     def setup(self, attribute, window, aguidata={}):
         aguidata.setdefault('control_only',True)
-        self.control.set_object( window.object)
-        self.control.SetMinSize( (self.control.get_full_width() + 5, -1))
+        self.list.set_object( window.object)
         Base.setup( self, attribute, window, aguidata)
         
     def tree_view(self, event=None):
         app = wx.GetApp()        
         if wx.GetKeyState(wx.WXK_CONTROL) or \
-                    not app.show_object_pugframe(self.window.object.nodes):
+                    not app.show_object_frame(self.window.object.nodes):
             name = self.window.shortPath
             if not name:
                 name = self.window.Title
@@ -59,7 +63,7 @@ class NodeTreeFrame( wx.Frame):
         sizer.Add(self.tree, 1, wx.EXPAND)
         self.SetClientSize((self.tree.get_full_width(), self.Size[1]))
         app = wx.GetApp()
-        app.pugframe_viewing( self, scene.nodes)           
+        app.frame_viewing( self, scene.nodes)           
             
 class NodeTreeListCtrl( TreeListCtrl):
     """NodeTreeListCtrl( TreeListCtrl)
@@ -172,7 +176,7 @@ Special kwargs:
                 node = node()
             if node:
                 app = wx.GetApp()
-                if not app.show_object_pugframe(node) or \
+                if not app.show_object_frame(node) or \
                         wx.GetKeyState(wx.WXK_CONTROL):
                     self.PugFrame(node)
  

@@ -40,6 +40,7 @@ It also gives the spawned object a new callback:
         ["spawn_offset", 
          "Spawn location is offset by this much (0 to 1, 0 to 1). (0,0) "+\
          "is top-left, (0.5,0.5) is center, (1,1) is bottom-right etc."],
+        ["spawn_angle", "Angle to add to spawned object's rotation"],
         ["spawn_delay","Wait this many seconds before beginning to spawn"],
         ["obs_per_spawn","Number of objects created per spawn"],
         ["obs_per_spawn_variance",
@@ -67,6 +68,7 @@ It also gives the spawned object a new callback:
     spawn_interval_variance = 1.0
     spawn_delay = 0.0
     spawn_location = 'center'
+    spawn_angle = 0
     spawn_offset = (0.5, 0.5)
     obs_per_spawn = 1
     obs_per_spawn_variance = 0
@@ -170,6 +172,9 @@ It also gives the spawned object a new callback:
             obj.position += position
             if self.match_scale:
                 obj.scale = obj.scale * scale
+            obj.rotation += self.spawn_angle
+            obj.velocity.direction += self.spawn_angle
+            obj.acceleration.direction += self.spawn_angle
             if self.add_rotation:
                 obj.rotation += rotation
                 obj.velocity.direction += rotation

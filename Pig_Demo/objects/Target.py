@@ -36,10 +36,9 @@ class Target(PigSprite):
         self.components.add( On_Damage_Sound(
                 sound='sound\\explosion.wav') )
         self.components.add( Random_Motion(
-                angle_min=-30,
-                angle_max=30,
-                velocity_min=150,
-                velocity_max=400) )
+                angle_variance=30,
+                velocity=300,
+                velocity_variance=100) )
         self.components.add( Spawn_On_Destroy(
                 spawn_object='Explosion',
                 add_velocity=True) )

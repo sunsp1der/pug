@@ -30,7 +30,7 @@ This function will create a pugApp(wx.App) if one does not exist.
         newApp = True
         from pug import App
         app = App()
-    if wx.GetKeyState(wx.WXK_CONTROL) or not app.show_object_pugframe(obj):
+    if wx.GetKeyState(wx.WXK_CONTROL) or not app.show_object_frame(obj):
         retvalue = PugFrame(obj, *args, **kwargs)
     else:
         retvalue = None
@@ -121,12 +121,6 @@ Set the object that this frame's pugWindow is viewing
     def get_object(self):
         return self.pugWindow.objectRef()
     
-    def on_show_object(self, object=None):
-        self.Show()
-        if self.IsIconized():
-            self.Iconize(False)
-        self.Raise()
-        
     def show_all_attributes(self, event=None):
         """Expand the frame's size so that all attributes are visible"""
         newSize = list(self.pugWindow.GetBestSize())

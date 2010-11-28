@@ -15,8 +15,7 @@ on_spawn callback"""
     _class_list = [Node]
     # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
-            ['petals', 'Number of spawn directions.'],
-            ['rotation_range', 'Spawns spread around this many degrees.'],
+            ['petals', 'Number of spawn directions including original.'],
             ['spawner_name', MyComponents, 
                     {'doc':'Name of the spawner component. '+\
                             'If blank, all spawners will be affected.'}],                    
@@ -40,9 +39,10 @@ on_spawn callback"""
             return
         self.start_rotation = self.owner.rotation
         # how much to rotate for each copy
-        rotation = self.rotation_range / float(self.petals)
+        rotation = 360 / float(self.petals)
         # flower the spawn
         for i in range(self.petals - 1):
+            # next rotation
             self.owner.rotation += rotation
             # this component works through recursion... the spawn call below
             # will end up calling this on_spawn function again 

@@ -22,7 +22,7 @@ class FlyAroundPlayer(PigSprite):
         self.components.add( Motion_Zone() )
         self.components.add( Mouse_Face() )
         self.components.add( Key_Spawn(
-                key=1001,
+                key='LEFT_MOUSE',
                 spawn_object='Bullet',
                 sound='sound\\beep.wav',
                 spawn_offset=(0.5, 0),

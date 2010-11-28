@@ -24,7 +24,7 @@ from pig.editor.agui import SceneNodes, SceneLayers
 from pig.editor.util import get_available_layers, save_object, exporter_cleanup
 from pig.keyboard import keys, keymods
 from pig.PigDirector import PigDirector
-from pig.gamedata import create_gamedata
+from pig.gamedata import create_gamedata, get_gamedata
 from pig.PigMouseManager import PigMouseManager
 
 _DEBUG = False     
@@ -628,12 +628,34 @@ If scene is a working scene, return
                 file = os.path.join(os.path.split(file)[0], filename)
             return file
         else:
-            return pug.BaseObject._get_source_code(self)      
+            return pug.BaseObject._get_source_code(self)
         
     def edit_code(self):
         "Edit the source file for this object"
-        start_edit_process( self._get_source_code())     
-    
+        start_edit_process( self._get_source_code())    
+        
+    def _get_shell_info(self):
+        "_get_shell_info()->info for pug's open_shell command"
+        items = {'_Scene':self}
+        nodes = self.nodes
+        indexes = {}
+        for node in nodes:
+            name = node._get_shell_name()
+            if name not in indexes:
+                indexes[name]=1
+            else:
+                indexes[name]+=1
+                name=name+"_"+str(indexes[name])
+            items[name] = node
+        items['_gamedata'] = get_gamedata()
+        locals = items.copy()
+        import pig.actions
+        for action in dir(pig.actions):
+            if action[0] != "_":
+                locals[action]=getattr(pig.actions,action)
+        return dict(rootObject=items,rootLabel="Scene Data",locals=locals,
+                    pugViewKey=self)
+        
     # code storage customization
     def _create_object_code(self, storageDict, indentLevel, exporter):
         if _DEBUG: print "*******************enter scene save"

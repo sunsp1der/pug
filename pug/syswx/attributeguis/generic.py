@@ -37,6 +37,10 @@ For more aguidata optional arguments, see the Base attribute GUI
     def setup(self, attribute, window, aguidata):
         aguidata.setdefault('do_typecast',True)
         Base.setup(self, attribute, window, aguidata)
+        
+    def apply(self, event=None):
+        Base.apply(self, event)
+        self.textEntry.select_all()
                         
     def get_control_value(self):
         return self.textEntry.GetValue()

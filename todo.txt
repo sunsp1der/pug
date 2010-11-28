@@ -1,6 +1,6 @@
 todo:
-
-
+	crust.editor instead of idle!
+ 	
 installer:
 	eliminate need for pythonpather
 	create_demo_project
@@ -9,6 +9,7 @@ installer:
 	update numeric refs to numpy
 
 soon:
+	scaling gui
 	'loading' graphic while scene saves, or at least cleanup
 	destroy on gameover
 	level on group empty
@@ -69,8 +70,14 @@ bugs:
 	crash - selecting an object while changing selectionwin to another view 
 
 later: 
+	scene utility volume controls
+		just ctrl- and ctrl= keys for now
+	component interface
+		better looking tree
+		search
+		make supertooltip info about components
 	realtime resolution changes
-	hotspots
+	hotspots for all sprites
 	multiline textbox
 	memory leak!
 	run in single thread...

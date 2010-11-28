@@ -205,7 +205,7 @@ For kwargs optional arguments, see the Base attribute GUI
         obj = component
         app = wx.GetApp()
         objectpath = ''.join([self.editList.get_text(), ' component of ', path])
-        if wx.GetKeyState(wx.WXK_CONTROL) or not app.show_object_pugframe(obj):
+        if wx.GetKeyState(wx.WXK_CONTROL) or not app.show_object_frame(obj):
             frame = self.pug(obj=obj, parent=None, 
                              objectpath=objectpath, show=False)
             self_rect = self.control.GetTopLevelParent().GetScreenRect()

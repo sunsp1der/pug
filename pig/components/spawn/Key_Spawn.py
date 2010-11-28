@@ -12,7 +12,7 @@ class Key_Spawn( Spawner):
     """Owner spawns other objects when destroyed"""
     # component_info
     _set = 'pig'
-    _type = 'controls'
+    _type = 'spawn'
     _class_list = [Node]
     # attributes:   
     _field_list = [

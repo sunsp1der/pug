@@ -57,7 +57,7 @@ projectFolder: where file menus start at.  Defaults to current working dir.
         self.selectionWatcherDict = weakref.WeakKeyDictionary()        
         
         # track frames and objects they view { 'frame':obj(id)}
-        self.pugFrameDict = weakref.WeakKeyDictionary()
+        self.objFrameDict = weakref.WeakKeyDictionary()
         self.set_project_folder(projectFolder)
         self.args = (projectObject, projectObjectName, projectName, 
                      projectFolder)
@@ -229,64 +229,80 @@ called every second until the object is initialized"""
         except:
             print "Exception during _on_pug_quit"
             print traceback.format_exc()
-        for pugframe in self.pugFrameDict:
-            if pugframe:
+        for pugframe in self.objFrameDict:
+            try:
                 pugframe.Close()
+            except:
+                pass
         self.Exit()
         
-    def pugframe_viewing(self, frame, object):
-        """pugframe_viewing(frame)
+    def frame_viewing(self, frame, object):
+        """frame_viewing(frame)
 
 Notify the app that a PugFrame has opened, so that it can track object views.
 frame: the frame that is being opened
-object: the object being viewed. Alternatively, this can be a string identifying
-    the pugframe.
+object: the object being viewed. This can also be a string identifying the
+    pugframe, or a tuple in the form (ref to main object, additional info...).
+    The tuple form is used for special displays that are not pugframes. They are
+    stored in the Frame's 'pugViewKey' field. 
 """
 #        if self.progressDialog and frame.object == self.projectObject:
 #            self.progressDialog.Destroy()
 #            self.progressDialog = None
         if object is None:
             objList = []
+        elif type(object) is tuple:
+            objList = [object]
         else:
             objList = [id(object)]
-        if _DEBUG: print "app.pugframe_viewing: ",object, objList
-        if self.pugFrameDict.get(frame, False):
-            self.pugFrameDict[frame]+=objList   
+        if _DEBUG: print "app.frame_viewing: ",object, objList
+        if self.objFrameDict.get(frame, False):
+            self.objFrameDict[frame]+=objList   
         else:
-            self.pugFrameDict[frame]= objList
-        if _DEBUG: print "   app.pugframe_viewing complete"
+            self.objFrameDict[frame]= objList
+        if _DEBUG: print "   app.frame_viewing complete"
             
-    def pugframe_stopped_viewing(self, frame, object):
-        if frame in self.pugFrameDict:
-            if id(object) in self.pugFrameDict[frame]:
-                self.pugFrameDict[frame].remove(id(object))
+    def frame_stopped_viewing(self, frame, object):
+        if frame in self.objFrameDict:
+            if id(object) in self.objFrameDict[frame]:
+                self.objFrameDict[frame].remove(id(object))
             
-    def get_object_pugframe(self, object):
-        """get_object_pugframe(object)
+    def get_object_frame(self, object):
+        """get_object_frame(object)
         
 Return the PugFrame currently viewing 'object', or None if not found.
 """
-        searchid = id(object)
-        pugframe = None
-        if _DEBUG: print "app.get_object_pugframe: ",object,searchid,\
-                            "\n Dict:", self.pugFrameDict.data
-        for frame, objlist in self.pugFrameDict.iteritems():
-            if frame and searchid in objlist:
-                pugframe = frame
+        if type(object) is tuple:
+            search = object
+        else:
+            search = id(object)
+        theframe = None
+        if _DEBUG: print "app.get_object_frame: ", object, search,\
+                            "\n Dict:", self.objFrameDict.data
+        for frame, objlist in self.objFrameDict.iteritems():
+            if frame and search in objlist:
+                theframe = frame
                 break
-        return pugframe
+        return theframe
         
-    def show_object_pugframe(self, object):
-        """show_object_pugframe(object)
+    def show_object_frame(self, object):
+        """show_object_frame(object)
         
 Raise the pugframe viewing 'object'. If it exists return the frame... otherwise, 
 return None. If the frame has an 'on_show_object' function, it will be called
-with object as an argument
+with object as an argument. Otherwise it will be de-iconized, raised, and will
+'RequestUserAttention'
 """
-        frame = self.get_object_pugframe(object)
+        frame = self.get_object_frame(object)
         if frame:
             if hasattr(frame, 'on_show_object'):
                 frame.on_show_object(object)
+            else:
+                frame.Show()
+                if frame.IsIconized():
+                    frame.Iconize(False)
+                frame.Raise()
+                frame.RequestUserAttention()
         return frame
     
     def show_selection_frames(self):
@@ -484,8 +500,17 @@ settingsObj: any frame settings members will be replaced
             if not frame.Name or frame.Name == 'frame':
                 continue
             name = self.getrect_setting_name(frame)
+            if frame.IsIconized():
+                icon = True
+                frame.Hide()
+                frame.Iconize(False)
+            else:
+                icon = False
             data = (frame.Position[0], frame.Position[1], 
                     frame.Size[0], frame.Size[1])
+            if icon:
+                frame.Show()
+                frame.Iconize(True)
             setattr(frame_settings, name, data)
         if settingsObj:
             # erase old rects
@@ -502,7 +527,7 @@ settingsObj: any frame settings members will be replaced
             return frame_settings            
             
     def get_default_pos(self, frame):
-        for testframe in self.pugFrameDict.iterkeys():
+        for testframe in self.objFrameDict.iterkeys():
             if frame.Name == testframe.Name:
                 return None
         name = self.getrect_setting_name(frame)
@@ -510,17 +535,21 @@ settingsObj: any frame settings members will be replaced
             
     def raise_all_frames(self):
         windows = wx.GetTopLevelWindows()
-        win = None
+        current_win = None
         for frame in windows:
             if frame.IsActive():
-                win = frame
+                current_win = frame
         for frame in windows:
-            if frame != win and frame.IsShown():
+            if frame != current_win and frame.IsShown():
                 if frame.IsIconized():
                     frame.Iconize(False)
+                if hasattr(frame,"_on_raise_all_frames"):
+                    frame._on_raise_all_frames()
                 frame.Raise()
-        if win:
-            win.Raise()
+        if current_win:
+            if hasattr(current_win,"_on_raise_all_frames"):
+                current_win._on_raise_all_frames()
+            current_win.Raise()
             
     def refresh(self, event=None):
         windows = wx.GetTopLevelWindows()

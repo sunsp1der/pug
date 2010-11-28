@@ -15,8 +15,8 @@ class ExplodeParticle(PigSprite):
         self.scale = (0.3, 0.3)
         self.tint = (255, 0, 0)
         self.components.add( Random_Motion(
-                velocity_min=150,
-                velocity_max=200) )
+                velocity=175,
+                velocity_variance=25) )
         self.components.add( Set_Motion(
                 acceleration_y=200,
                 rotated=False) )

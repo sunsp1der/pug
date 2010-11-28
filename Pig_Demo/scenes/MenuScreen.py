@@ -8,7 +8,7 @@ from pug.all_components import Utility_Keys, Scene_Button, Textbox, Spawner,\
 
 ### MenuScreen autocode ###
 class MenuScreen(PigScene):
-    layers = ['Background', 'text', 'text']
+    layers = ['Background', 'text']
 
     def on_enter(self):
         self.components.add( Utility_Keys() )
@@ -72,10 +72,8 @@ class MenuScreen(PigScene):
                 spawn_interval_variance=0.0,
                 spawn_offset=(0.5, 0.0)) )
         pigsprite_instance_6.components.add( Spawn_Flower(
-                copies=1,
-                rotation=-72) )
-        pigsprite_instance_6.components.add( Spawn_Flower(
-                copies=1) )
+                petals=3,
+                rotation_range=150) )
 
         pigsprite_instance_7 = PigSprite()
         pigsprite_instance_7.layer = 'text'

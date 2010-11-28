@@ -1,6 +1,7 @@
 import traceback
 import sys
 import os
+import weakref
 
 import wx
 from wx.lib.dialogs import ScrolledMessageDialog
@@ -10,6 +11,49 @@ from pug.pugview_manager import get_default_pugview
 import pug.aguilist
 
 _DEBUG = False
+
+def open_shell( rootObject=None, rootLabel=None, locals=None, 
+                clean_pages=True, title='Pug Shell', icon=None,
+                pugViewKey=None):
+    """open_shell(rootObject=None,rootLabel=None,locals=None...
+                    clean_pages=True, title='Pug Shell', icon=None):
+
+rootObject: the root object of shell tree. A dict of objects also works nicely.
+rootLabel: the label for the root object
+locals: the locals available in the shell
+clean_pages: if True, remove the Display, Calltip, and Dispatcher pages
+title: window title
+icon: defaults to pug icon
+pugViewKey: this is the main viewing object for this frame. Used by pug to
+    determine if duplicate shells are being opened. Defaults to rootObject.
+    It will be converted to a tuple: (weakref.ref(pugViewKey),"shell") and
+    stored as the 'pugViewKey' field of the shell frame.
+
+This opens a PyCrust shell for realtime editing of your object. If a shell for
+the given object is already open, it is raised instead unless ctrl is held down.
+Objects can over-ride arguments by returning a dictionary of them from 
+_get_shell_info()
+"""
+    app = wx.GetApp()
+    if pugViewKey is None:
+        pugViewKey = rootObject
+    pug_key = (weakref.ref(pugViewKey),"shell")
+    if app.show_object_frame(pug_key):
+        # we already have a shell open for this object
+        return
+    from wx.py.crust import CrustFrame
+    c = CrustFrame(locals=locals,rootObject=rootObject, rootLabel=rootLabel,
+                   title=title)
+    if clean_pages:
+        c.crust.notebook.RemovePage(4)
+        c.crust.notebook.RemovePage(2)
+        c.crust.notebook.RemovePage(1)
+    if icon is None:
+        icon = get_icon()
+    c.pugViewKey = pug_key
+    c.SetIcon(icon)
+    app.frame_viewing( c, pug_key)
+    c.Show()
 
 class TestEventHandler( wx.EvtHandler):
     def __init__(self, *args, **kwargs):
