@@ -3,28 +3,24 @@ from Opioid2D.public.Node import Node
 from pug.component import *
 
 from pig.audio import get_sound
-from pig.components import Collision_Callback
-from pig.editor.agui import SoundFile 
-import pig.audio
+from pig.components import Collision_Callback, On_Create_Sound
 
-class On_Collision_Sound( Collision_Callback):
+class On_Collision_Sound( Collision_Callback, On_Create_Sound):
     """Owner plays a sound when destroyed"""
     # component_info
     _set = 'pig'
     _type = 'sound'
     _class_list = [Node]
     # attributes:   
-    _field_list = [
-        ["sound", SoundFile, {'doc':"The sound to play"}]
-        ] + Collision_Callback._field_list 
-    
-    sound = None
-    sound_object = None
+    _field_list = []    
+    _field_list += On_Create_Sound._field_list
+    _field_list += Collision_Callback._field_list 
 
     @component_method
     def on_added_to_scene(self):
-        "Get the sound object"
-        self.sound_object = get_sound( self.sound)
+        "Set up the sound object and collision callback"
+        self.setup()
+        Collision_Callback.on_added_to_scene(self)
 
     @component_method
     def on_collision(self, toSprite, fromSprite, toGroup, fromGroup):

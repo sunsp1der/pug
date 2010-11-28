@@ -87,9 +87,27 @@ class EditorState(PigState):
         if ev.key == Opioid2D.K_u and ctrlDown:
             try:
                 app = wx.GetApp()
+                selected = app.get_selection()
+                if selected:                    
+                    wx.CallAfter(app.get_object_frame(
+                        selected.popitem()[0]).pugWindow.view_source_code)
+                else:
+                    wx.CallAfter(app.get_object_frame(
+                        Opioid2D.Director.scene).pugWindow.view_source_code)
                 wx.CallAfter(app.raise_all_frames)
-                wx.CallAfter(app.get_object_pugframe(
-                                Opioid2D.Director.scene).pugWindow.view_source_code)
+            except:
+                pass
+        if ev.key == Opioid2D.K_p and ctrlDown:
+            try:
+                app = wx.GetApp()
+                selected = app.get_selection()
+                if selected:                    
+                    wx.CallAfter(app.get_object_frame(
+                        selected.popitem()[0]).pugWindow.open_shell)
+                else:
+                    wx.CallAfter(app.get_object_frame(
+                        Opioid2D.Director.scene).pugWindow.open_shell)
+                wx.CallAfter(app.raise_all_frames)
             except:
                 pass
             

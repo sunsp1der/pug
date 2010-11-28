@@ -28,7 +28,7 @@ This is a wx.TextCtrl with some special features:
                           style=wx.TE_PROCESS_ENTER)# | wx.TAB_TRAVERSAL)
         self.Bind(wx.EVT_NAVIGATION_KEY, self.select_all)
         self.Bind(wx.EVT_SET_FOCUS, self.select_all)  
-        self.Bind(wx.EVT_TEXT_ENTER, self.select_all) # doesn't work !?     
+        self.Bind(wx.EVT_TEXT_ENTER, self.select_all)      
         self.SetMinSize(wx.Size(-1, WX_STANDARD_HEIGHT))
         self.floatValue = None
         self.lastValue = None

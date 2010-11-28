@@ -2,6 +2,7 @@
 
 import time
 import shutil
+from copy import deepcopy
 
 import wx
 
@@ -210,9 +211,9 @@ _filetypes = [
              ['sound',['wav']],
              ]
 def on_drop_files( x, y, filenames): 
-    types = _filetypes[:]
-    for type in types:
-        type.append([])
+    types = deepcopy(_filetypes) # make a typeinfo list
+    for typeinfo in types:
+        typeinfo.append([]) # make a list to store files associated with types
     unknown = []
     for filename in filenames:
         splitname = filename.rsplit('.',1)
@@ -220,9 +221,9 @@ def on_drop_files( x, y, filenames):
         if len(splitname) == 1:
             unknown.append(filename)
             continue
-        for type in types:
-            if splitname[1].lower() in type[1]:
-                type[2].append(filename)
+        for typeinfo in types:
+            if splitname[1].lower() in typeinfo[1]:
+                typeinfo[2].append(filename)
                 typefound = True
                 break
         if not typefound:
@@ -233,10 +234,11 @@ def on_drop_files( x, y, filenames):
         dest = projectPath
         if unknown:
             return ([])
-        for type in types:
-            if type[2]:
-                title = "Copy "+type[0]+" into project" 
-                dest = os.path.join(dest, type[0], os.path.split(filename)[1])
+        for typeinfo in types:
+            if typeinfo[2]:
+                title = "Copy "+typeinfo[0]+" into project" 
+                dest = os.path.join(dest, typeinfo[0], 
+                                    os.path.split(filename)[1])
         if filename == dest:
             dlg = wx.MessageDialog( wx.GetApp().get_project_frame(),
                     "Use 'Reload Files' button if you want to refresh files.",
@@ -260,12 +262,12 @@ def on_drop_files( x, y, filenames):
         title = "Copy multiple files into project"
         message = ""
         copies = []
-        for type in types:
-            if not type[2]:
+        for typeinfo in types:
+            if not typeinfo[2]:
                 continue
-            message += "Copy "+type[0]+" files:\n\n"
-            for filename in type[2]:
-                dest = os.path.join(projectPath, type[0], 
+            message += "Copy "+typeinfo[0]+" files:\n\n"
+            for filename in typeinfo[2]:
+                dest = os.path.join(projectPath, typeinfo[0], 
                                     os.path.split(filename)[1])
                 if filename == dest:
                     dlg = wx.MessageDialog( wx.GetApp().get_project_frame(),
@@ -332,15 +334,23 @@ Note: for this to work on nodes, it must be run BEFORE the scene is changed.
     if scene == None:
         scene = PigDirector.scene
     app = wx.GetApp()
-    for frame in app.pugFrameDict:
-        if not bool(frame) or isinstance(frame.pugWindow, SelectionWindow):
+    for frame in app.objFrameDict:
+        if hasattr(frame,'pugViewKey'):
+            try:
+                frameObj = frame.pugViewKey[0]()
+            except:
+                continue
+        elif not hasattr(frame,'pugWindow'):
             continue
-        if frame.Name == 'SceneFrame':
-            continue
-        try:
-            frameObj = frame.pugWindow.objectRef()
-        except:
-            continue
+        else:
+            if not bool(frame) or isinstance(frame.pugWindow, SelectionWindow):
+                continue
+            if frame.Name == 'SceneFrame':
+                continue
+            try:
+                frameObj = frame.pugWindow.objectRef()
+            except:
+                continue
         doclose = False
         if frameObj == scene:
             doclose = True

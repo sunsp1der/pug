@@ -1,5 +1,7 @@
 from Opioid2D import Director, Delay, CallFunc
 
+#from pygame import mixer
+
 from pug import Filename
 from pug.component import *
 from pug.util import start_file
@@ -9,7 +11,15 @@ from pig.keyboard import *
 from pig.PigDirector import PigDirector
 
 class Utility_Keys( Component):
-    """Add some basic utility keys to the scene"""
+    """Add some basic utility keys to the scene.
+    
+This adds new functions to the scene:
+do_restart(): restarts scene (not game)
+do_info(filename=None): try to open the filename with default program
+"""
+#volume_up()->current volume: raises volume
+#volume_down()->current volume: lowers volume
+#mute(): mutes sound
     # component_info
     _set = 'pig'
     _type = 'utilities'
@@ -17,30 +27,66 @@ class Utility_Keys( Component):
     # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
             ['restart_ctrl_r', 'If True, ctrl-r restarts scene'],
+#            ['volume_up_ctrl_equal', 'If True, ctrl-= raises volume'],
+#            ['volume_down_ctrl_minus', 'If True, ctrl-- lowers volume'],
+#            ['mute_ctrl_backslash', 'If True, ctrl-\ mutes/unmutes sound']
             ['info_F1', Filename, {'doc':'Open this file if user presses F1'}],
             ]
     #defaults
     restart_ctrl_r = True
+#    volume_up_ctrl_equal = True
+#    volume_down_ctrl_minus = True
+#    mute_ctrl_backslash = True
     info_F1 = None
+    
+    volume = 1.0
+    mute = False
     
     @component_method
     def on_start(self):
+        "Register keys when scene starts"
         if self.restart_ctrl_r:
             self.owner.register_key_down( (keymods["CTRL"],keys["R"]),
                                                     self.do_restart,
                                                     _do_immediate=False)
-        if self.info_F1:
-            self.owner.register_key_down( keys["F1"], self.do_info)
+#        if self.volume_up_ctrl_equal:
+#            self.owner.register_key_down( keys["="], self.volume_up)
+#        if self.volume_down_ctrl_minus:
+#            self.owner.register_key_down( keys["-"], self.volume_down)
+#        if self.info_F1:
+#            self.owner.register_key_down( keys["F1"], self.do_info)
                 
     @component_method
-    def do_info(self):
+    def do_info(self, filename=None):
+        "do_info(filename=None): try to open the filename with default program"
+        if filename is None:
+            filename = self.info_F1
         try:
-            start_file( self.info_F1)
+            start_file( filename)
         except:
             pass
         
+#    @component_method
+#    def volume_up(self):
+#        "volume_up()->current volume: raises volume"
+#        volume += 0.1
+#        if volume > 1.0:
+#            volume = 1.0
+#        for i in range( mixer.get_num_channels)
+#            mixer.
+#    @component_method
+#    def volume_down(self):
+#        "volume_down()->current volume: lowers volume"
+#        pass
+#    
+#    @component_method
+#    def mute(self):
+#        "mute(): mutes sound"
+#        pass
+        
     @component_method
     def do_restart(self):
+        "do_restart(): restart this scene (NOT the game itself)"
         #Director.project_started = False
         (Delay(0)+CallFunc(PigDirector.switch_scene_to,
                            PigDirector.scene.__class__)).do()

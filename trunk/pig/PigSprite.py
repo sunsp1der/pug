@@ -15,6 +15,7 @@ from pug.util import make_valid_attr_name, prettify_path, prettify_float,\
 from pig.PigDirector import PigDirector
 from pig.editor.util import get_available_layers, save_object, \
                                 exporter_cleanup, _fl_art_types
+from pig.gamedata import get_gamedata
 
 _DEBUG = False
 
@@ -284,14 +285,37 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
     
     def save_sprite(self):
         """Save this object as a class in the project's object folder"""
-        save_object( self)
+        if save_object( self):
+            if not self.gname:
+                self.gname = self.__class__.__name__
         
     def _get_source_code(self):
-        "_get_source_code(): return the scene file if this is not a derived class"
+        "_get_source_code()->the scene file if this is not a derived class"
         if self.__class__ == PigSprite:
             return PigDirector.scene._get_source_code()
         else:
-            return pug.BaseObject._get_source_code(self)   
+            return pug.BaseObject._get_source_code(self)
+    
+    def _get_shell_info(self):
+        "_get_shell_info()->info for pug's open_shell command"
+        rootObject = self
+        rootLabel = self._get_shell_name()
+        locals={}
+        import pig.actions
+        for action in dir(pig.actions):
+            if action[0] != "_":
+                locals[action]=getattr(pig.actions,action)
+        locals['_gamedata'] = get_gamedata()
+        locals[rootLabel] = self
+        return dict(rootObject=rootObject,rootLabel=rootLabel,locals=locals)
+        
+    def _get_shell_name(self):
+        if self.gname:
+            return self.gname
+        elif self.__class__.__name__ == "PigSprite":
+            return "Sprite"
+        else:
+            return self.__class__.__name__
 
     def edit_code(self):
         "Edit the source file for this object"
@@ -438,10 +462,12 @@ _spritePugview = {
         [' Components', pug.Label],
         ['components'],
         [' Image', pug.Label],
-        ['image_file', pug.ImageBrowser, {'subfolder':'art', 
+        ['image_file', pug.ImageBrowser, {'label': '   image file',
+                                          'subfolder':'art', 
                                           'filter':_fl_art_types}],
         ['tint', pug.ColorPicker,{'text_control':True}],
-        ['alpha'],
+        ['alpha', pug.FloatSpin,{'range':(0,1), 'digits':1, 
+                                 'adjust_digits':True}],
         [' Spacial', pug.Label],
         ['layer_name', pug.Dropdown, {'list_generator':get_available_layers,
                                       'label':'   layer'}],
@@ -459,7 +485,7 @@ _spritePugview = {
     #        ['acceleration'],
         [' Functions', pug.Label],
         ['delete',"Delete this sprite"],
-        ['edit_code', None, {'label':'   Edit code'}]
+        ['edit_code', None, {'label':'   edit code'}]
     #        ['_delete_test'],
     ]       
  }

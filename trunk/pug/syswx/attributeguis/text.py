@@ -7,10 +7,10 @@ from pug.syswx.attributeguis.base import Base
 class Text (Base):
     """Text attribute GUI is a simple text edit box
     
-Text(attribute, window, **kwargs)
+Text(attribute, window, aguidata, **kwargs)
 attribute: what attribute of window.object is being controlled
 window: the parent pugFrame
-For kwargs optional arguments, see the Base attribute GUI
+For aguidata optional arguments, see the Base attribute GUI
 """
     def __init__(self, attribute, window, aguidata={}, **kwargs):
         control = wx.Panel(window)

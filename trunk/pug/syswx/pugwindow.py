@@ -27,7 +27,7 @@ from pug.storage import pugSave, pugLoad
 from pug.constants import *
 from pug.syswx.helpframe import HelpFrame
 from pug.syswx.wxconstants import *
-from pug.syswx.util import show_exception_dialog, cache_aguilist
+from pug.syswx.util import show_exception_dialog, cache_aguilist, open_shell
 from pug.pugview_manager import get_obj_pugview_info
 from pug.code_storage import code_export
 
@@ -158,13 +158,13 @@ holds multiple PugWindows in tabbed (or other) form.
         
 tell app that our parent isn't viewing the current object"""
         if self.objectRef:
-            wx.GetApp().pugframe_stopped_viewing(self.GetParent(), 
+            wx.GetApp().frame_stopped_viewing(self.GetParent(), 
                                                  self.objectRef())
 
     def started_viewing(self, obj):
         """started-viewing(obj)
 tell app that our parent is viewing obj"""
-        wx.GetApp().pugframe_viewing(self.GetParent(), obj)             
+        wx.GetApp().frame_viewing(self.GetParent(), obj)             
         
     
     def SetTitle(self, title):
@@ -560,6 +560,15 @@ Automatically calls on_<setting>(val, event) callback.
             file = get_code_file(self.object)
         if file:
             start_edit_process( file)
+
+    def open_shell(self, event=None):
+        info = {'rootObject':self.object, 
+                'rootLabel':self.shortPath,
+                'locals':{self.shortPath:self.object}}
+        if hasattr(self.object, '_get_shell_info'):
+            new_info = self.object._get_shell_info()
+            info.update(new_info)        
+        open_shell(**info)
             
     def refresh_settings(self):
         for setting in self.settings:
@@ -692,13 +701,18 @@ Automatically calls on_<setting>(val, event) callback.
                    text=u'Auto-Refresh')        
         self._attach_setting("auto_apply", parent, _TOOL_AUTOAPPLY, True)        
         self._attach_setting("auto_refresh", parent, _TOOL_AUTOREFRESH, False)
-        if type(self._currentView) is type({}) and \
-                            self._currentView.get('no_source', False):
-            return
-        parent.AppendSeparator()        
-        parent.Append(help="View object's source file", 
+        skip_source = not type(self._currentView) is dict and \
+                            self._currentView.get('no_source', False)
+        skip_shell = not type(self._currentView) is dict and \
+                            self._currentView.get('no_shell', False)
+        if not skip_source or not skip_shell:
+            parent.AppendSeparator()
+        if not skip_source:  
+            parent.Append(help="View object's source file", 
                    id=_TOOL_VIEWSOURCE, text=u'View source code\tCtrl+U')
-        
+        if not skip_shell:
+            parent.Append(help="Open a python shell for this object",
+                      id=_TOOL_SHELL, text=u'Open shell\tCtrl+P')      
 
     def save_object_state(self, event=None):
         if self.hasSavedAs.get(event.Id + 1):
@@ -820,6 +834,7 @@ Automatically calls on_<setting>(val, event) callback.
         self.Bind(wx.EVT_MENU, self.apply, id=_TOOL_APPLY)
         self.Bind(wx.EVT_MENU, self.refresh, id=_TOOL_REFRESH) 
         self.Bind(wx.EVT_MENU, self.view_source_code, id=_TOOL_VIEWSOURCE) 
+        self.Bind(wx.EVT_MENU, self.open_shell, id=_TOOL_SHELL) 
         #help menu
         self.Bind(wx.EVT_MENU, self.show_help, id=_HELP_INFO)       
         self.Bind(wx.EVT_MENU, self.help_context, id=_HELP_CONTEXT)       
@@ -829,6 +844,7 @@ _TOOL_APPLY = wx.NewId()
 _TOOL_AUTOREFRESH = wx.NewId()
 _TOOL_REFRESH = wx.NewId()
 _TOOL_VIEWSOURCE = wx.NewId()
+_TOOL_SHELL = wx.NewId()
 _MENU_HIDE1UNDERSCORE = wx.NewId()
 _MENU_HIDE2UNDERSCORE = wx.NewId()
 _MENU_SAVE = wx.NewId()

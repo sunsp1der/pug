@@ -69,6 +69,8 @@ pugview  = \
     
     'no_source': bool
     # if True, no 'View source code' option will be shown in View menu
+    'no_shell': bool
+    # if True, no 'Open shell' option will be shown in View menu
 }
 import pug
 pug.add_pugview(myClass, pugview)

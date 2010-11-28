@@ -107,7 +107,7 @@ size: the button size
                 return None
             obj = self.targetObjectRef()
         app = wx.GetApp()
-        if wx.GetKeyState(wx.WXK_CONTROL) or not app.show_object_pugframe(obj):
+        if wx.GetKeyState(wx.WXK_CONTROL) or not app.show_object_frame(obj):
             return obj
         else:
             return None
