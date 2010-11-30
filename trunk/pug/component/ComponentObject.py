@@ -114,11 +114,13 @@ simply be added. If it's a class, an instance will be created and added.
             pass
         return component
     
-    def get(self, comp=None):
-        """get(comp=None)->list of components of class comp or with name comp
+    def get(self, comp=None, gname=None):
+        """get(comp=None, gname=None)->list of specified components 
         
-If comp is None, return all components. If comp is a string, search by class 
-name. Otherwise search by class."""
+Return a list of components with class==comp (a string of the component name 
+will work also) and gname==gname.
+If comp and gname are both None, return all components on the object.
+"""
         compname = compclass = None
         if type(comp) == str:
             compname = comp
@@ -128,23 +130,31 @@ name. Otherwise search by class."""
             if not issubclass(compclass, Component):
                 raise TypeError(''.join([compclass," is not a component"]))
         components = self.__component_list.get_components()
-        if comp is None:
+        complist = []
+        if comp is None and gname is None:
+            # no component or gname specified. Return all.
             return components[:]
+        elif comp is None:
+            # just check gname
+            for c in components:
+                if gname == c.gname:
+                    complist.append(c)
         else:
-            complist = []
+            # check component class and gname, if provided
             if compclass:
                 for c in components:
-                    if isinstance(c, compclass):
+                    if isinstance(c, compclass) and gname and gname==c.gname:
                         complist.append(c)
-            else:
+            elif compname:
                 for c in components:
-                    if c.__class__.__name__ == compname:
+                    if c.__class__.__name__ == compname and gname \
+                                                        and gname==c.gname:
                         complist.append(c)
-            return complist
+        return complist
 
-    def get_one(self, comp):
+    def get_one(self, comp=None, gname=None):
         "get_one(comp)->First element in list returned by get(comp)"
-        for b in self.get(comp):
+        for b in self.get(comp, gname):
             return b
 
     def remove(self, component):
