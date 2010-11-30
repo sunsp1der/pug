@@ -1,5 +1,37 @@
 todo:
 	crust.editor instead of idle!
+x		file browser of project!
+x		multi-page notebook of files and shells
+x		shell.help() in shell window?
+x		eliminate clear buffer and update namespace menu options
+x		change name to Pug Py Editor
+x		change icon
+		add shell menu option
+		track files being edited
+		track shells
+		open browser to current file
+	shell buttons for scene and sprite
+		button row agui?
+			left align, right align
+			button_info
+				{size:, text:, toggle:, function:, up_function:}
+	fix wm_ext problem when not installed
+	clean up default size of pig editor
+	make face motion component work with actions
+	
+	Ivan DelSol wrote:
+	> There doesn't seem to be a way to get pygame to pass
+	> channels by ID so that I could alter their volumes individually,
+	
+	According to the docs, pygame.mixer.Channel(id) returns
+	a channel object corresponding to the given id. So you
+	could loop over range(pygame.mixer.get_num_channels())
+	to get channel objects for all the channels and call
+	set_volume() on all of them.
+	
+	I agree there ought to be an easier way, though.
+	
+	-- 	
  	
 installer:
 	eliminate need for pythonpather

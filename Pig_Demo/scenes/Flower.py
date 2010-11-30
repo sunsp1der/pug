@@ -1,8 +1,8 @@
 ### import autocode ###
-from objects.Pental import Pental
+from objects.LetterPetal import LetterPetal
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
-from pug.all_components import Fade, Key_Spawn, Spawn_Flower,\
+from pug.all_components import Key_Spawn, Spawn_Flower,\
     Spawned_Component_Change
 ### End import autocode ###
 
@@ -14,9 +14,8 @@ from pug import get_gnamed_object
 class Flower(PigScene):
     def on_enter(self):
         # Archetypes
-        Pental_archetype = Pental(gname='Pental')
-        Pental_archetype.archetype = True
-        Pental_archetype.components.remove_duplicate_of( Fade() )
+        LetterPetal_archetype = LetterPetal(gname='LetterPetal')
+        LetterPetal_archetype.archetype = True
 
         # Sprites
         pigsprite_instance = PigSprite()
@@ -26,7 +25,7 @@ class Flower(PigScene):
         pigsprite_instance.alpha = 0.0
         pigsprite_instance.components.add( Key_Spawn(
                 gname='spawner',
-                spawn_object='Pental',
+                spawn_object='LetterPetal',
                 spawn_interval=0.2) )
         pigsprite_instance.components.add( Spawn_Flower(
                 gname='flower') )
@@ -53,7 +52,8 @@ class Flower(PigScene):
                 self.flower.petals = n
             else:
                 self.key_shifter.change_value = key 
-                self.spawner.on_destroy()
+                self.spawner.on_destroy() # unregister keys
+                #  we know the key, so figure out shift
                 if event.mod & 3:
                     mod = keymods["SHIFT"]
                 else:

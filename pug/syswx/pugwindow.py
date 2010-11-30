@@ -1,4 +1,3 @@
-#Boa:Frame:PugFrame
 """The basic pug display window.
 
 A scrolled panel that holds all the pug aguis. Also creates menus and a toolbar,
@@ -701,9 +700,9 @@ Automatically calls on_<setting>(val, event) callback.
                    text=u'Auto-Refresh')        
         self._attach_setting("auto_apply", parent, _TOOL_AUTOAPPLY, True)        
         self._attach_setting("auto_refresh", parent, _TOOL_AUTOREFRESH, False)
-        skip_source = not type(self._currentView) is dict and \
+        skip_source = type(self._currentView) is dict and \
                             self._currentView.get('no_source', False)
-        skip_shell = not type(self._currentView) is dict and \
+        skip_shell = type(self._currentView) is dict and \
                             self._currentView.get('no_shell', False)
         if not skip_source or not skip_shell:
             parent.AppendSeparator()

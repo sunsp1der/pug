@@ -269,7 +269,7 @@ settingsObj: an object similar to the one below... if it is missing any default
         canvas_options = canvas_manager.getDefaultOptions()
         canvas_options.update(options)
         self.canvas = canvas_manager( canvas_options)
-
+        self.frame = frame
         # cache a sprite view for speed on first selection
         if not self.__cached[0]:
             dummy = PigSprite( register=False)
@@ -486,7 +486,7 @@ save_reload: if True, save the working file before reloading project files, then
                 info = errors[mod]
                 msg += ''.join(traceback.format_exception(*info))
                 msg += '_'*90 + '\n\n'
-            err = ScrolledMessageDialog( wx.GetApp().get_project_frame(),
+            err = ScrolledMessageDialog( self.frame,
                                          msg, 'Project File Errors', 
                                          size=(640, 320), 
                             style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER) 
@@ -517,7 +517,7 @@ Callback from PugApp...
         
     def open_selection_frame(self):
         """Open a pug window for selected object"""
-        wx.GetApp().get_project_frame().open_selection_child()
+        self.frame.open_selection_child()
         
     def nudge(self, vector):
         for obj in wx.GetApp().selectedObjectDict:
@@ -560,13 +560,13 @@ event: a wx.Event
         if self._quitting:
             return
         self._quitting = True 
-        dlg = wx.MessageDialog( wx.GetApp().projectFrame,
+        dlg = wx.MessageDialog( self.frame,
                        "Save Working Scene Before Quit?",
                        'Project Frame Closed', 
             wx.YES_NO | wx.CANCEL | wx.YES_DEFAULT | wx.ICON_QUESTION)
         try:
-            wx.GetApp().projectFrame.Raise()
-            wx.GetApp().projectFrame.RequestUserAttention()
+            self.frame.Raise()
+            self.frame.RequestUserAttention()
         except:
             pass
         answer = dlg.ShowModal() 
@@ -574,7 +574,7 @@ event: a wx.Event
             self.stop_scene()
             saved = self.save_using_working_scene()
             if not saved:
-                dlg = wx.MessageDialog( wx.GetApp().projectFrame,
+                dlg = wx.MessageDialog( self.frame,
                        "The scene failed to save properly.\nShut down anyway?",
                        'Save Failed', 
                        wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
@@ -703,7 +703,7 @@ doSave: save working copy first
         if doSave:
             saved = self.save_using_working_scene()
             if not saved:
-                dlg = wx.MessageDialog( wx.GetApp().projectFrame,
+                dlg = wx.MessageDialog( self.frame,
                        "The scene failed to save properly.\nPlay anyway?",
                        'Save Failed', 
                        wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
@@ -773,7 +773,7 @@ Run the scene being editted in a new process.
             if doSave and not self.Director.project_started:
                 saved = self.save_using_working_scene()
                 if not saved:
-                    dlg = wx.MessageDialog( wx.GetApp().projectFrame,
+                    dlg = wx.MessageDialog( self.frame,
                           "The scene failed to save properly.\nExecute anyway?",
                           'Save Failed', 
                           wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
@@ -902,7 +902,9 @@ Opioid2D, it is safer to call this via add_object.
             raise
 
     def test(self):
-        print wx.GetKeyState(wx.WXK_CONTROL)
+        from pug.syswx.pug_editor_frame import PugEditorFrame
+        editor = PugEditorFrame()
+        editor.Show()
 # test for gameover
 #        gamedata = get_gamedata()
 #        gamedata.gameover()

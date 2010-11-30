@@ -1,4 +1,3 @@
-#Boa:Frame:PugFrame
 """PugFrame: The basic pug display frame
 
 This is generally meant to be created by the pug function. You can send the 
