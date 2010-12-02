@@ -48,7 +48,8 @@ attributes: the gamedata object's attributes will be set by these keywords
 
 This function creates a GameDataObject meant to be used globally by means of the
 get_gamedata function in this module. This is a convenient place to store
-global game data such as score or global game methods like gameover
+global game data such as score or global game methods like gameover. This should
+be recreated each time you start playing a new game.
 """
     global GameData
     GameData.clear_callbacks()
@@ -56,6 +57,8 @@ global game data such as score or global game methods like gameover
     for attr, data in attributes.iteritems():
         setattr(GameData, attr, data)
     return GameData
+
 def get_gamedata():
     return GameData
+
 create_gamedata()

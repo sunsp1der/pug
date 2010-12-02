@@ -902,12 +902,13 @@ Opioid2D, it is safer to call this via add_object.
             raise
 
     def test(self):
-        from pug.syswx.pug_editor_frame import PugEditorFrame
-        editor = PugEditorFrame()
+        from pug.syswx.code_editor_frame import CodeEditorFrame
+        editor = CodeEditorFrame( project_only=True,
+                        components_folder=os.path.join(
+                                            wx.GetApp().get_project_folder(),
+                                            "components"))
         editor.Show()
-# test for gameover
-#        gamedata = get_gamedata()
-#        gamedata.gameover()
+
 # test for floating garbage
 #        from pug.util import test_referrers
 #        import gc

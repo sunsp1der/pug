@@ -42,8 +42,9 @@ module: pug.all_components.
     if old_component:
         if old_component.__module__ != component.__module__:
             if not ignore_duplicates:
-                print "Duplicate component name: ",component.__name__,\
-                            "overwritten by", component.__module__
+                print "Duplicate component name: pug.all_components."+\
+                            component.__name__,\
+                            "replaced with", component.__module__
         else:
             _globalComponentManager.componentList.remove(old_component)
     setattr(pug.all_components, component.__name__, component)
