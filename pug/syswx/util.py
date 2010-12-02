@@ -4,6 +4,7 @@ import os
 import weakref
 
 import wx
+from wx.py.crust import CrustFrame, Crust
 from wx.lib.dialogs import ScrolledMessageDialog
 
 from pug.util import get_image_path
@@ -14,7 +15,7 @@ _DEBUG = False
 
 def open_shell( rootObject=None, rootLabel=None, locals=None, 
                 clean_pages=True, title='Pug Shell', icon=None,
-                pugViewKey=None):
+                pugViewKey=None, parent=None):
     """open_shell(rootObject=None,rootLabel=None,locals=None...
                     clean_pages=True, title='Pug Shell', icon=None):
 
@@ -28,6 +29,8 @@ pugViewKey: this is the main viewing object for this frame. Used by pug to
     determine if duplicate shells are being opened. Defaults to rootObject.
     It will be converted to a tuple: (weakref.ref(pugViewKey),"shell") and
     stored as the 'pugViewKey' field of the shell frame.
+parent: this method will create a control rather than a frame if this is not 
+    None. The argument will be used as the control's parent. Duh.
 
 This opens a PyCrust shell for realtime editing of your object. If a shell for
 the given object is already open, it is raised instead unless ctrl is held down.
@@ -41,19 +44,27 @@ _get_shell_info()
     if app.show_object_frame(pug_key):
         # we already have a shell open for this object
         return
-    from wx.py.crust import CrustFrame
-    c = CrustFrame(locals=locals,rootObject=rootObject, rootLabel=rootLabel,
+    if parent is None:
+        c = CrustFrame(locals=locals,rootObject=rootObject, rootLabel=rootLabel,
                    title=title)
-    if clean_pages:
-        c.crust.notebook.RemovePage(4)
-        c.crust.notebook.RemovePage(2)
-        c.crust.notebook.RemovePage(1)
-    if icon is None:
-        icon = get_icon()
+        if icon is None:
+            icon = get_icon()
+        c.SetIcon(icon)
+        app.frame_viewing( c, pug_key)
+        if clean_pages:
+            c.crust.notebook.RemovePage(4)
+            c.crust.notebook.RemovePage(2)
+            c.crust.notebook.RemovePage(1)
+        c.Show()
+    else:
+        c = Crust(parent=parent, locals=locals, rootObject=rootObject, 
+                  rootLabel=rootLabel)
+        if clean_pages:
+            c.notebook.RemovePage(4)
+            c.notebook.RemovePage(2)
+            c.notebook.RemovePage(1)
     c.pugViewKey = pug_key
-    c.SetIcon(icon)
-    app.frame_viewing( c, pug_key)
-    c.Show()
+    return c
 
 class TestEventHandler( wx.EvtHandler):
     def __init__(self, *args, **kwargs):

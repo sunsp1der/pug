@@ -49,6 +49,8 @@ query: if True, have the app confirm project closure.
         real_quit() 
 # set up our special quit
 def real_quit():
+    from pig import gamedata
+    gamedata.GameData = None
     global QUITTING
     try:
         import wx     
