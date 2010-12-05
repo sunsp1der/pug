@@ -3,23 +3,18 @@ import weakref
 import os
 import traceback
 import time
-# from dummy_threading import Thread
-# import dummy_thread as thread
-# import thread
+
 from threading import Thread
 from inspect import getsourcefile
-
 import wx
-
 
 from pug.util import make_valid_attr_name
 from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.syswx.util import show_exception_dialog
 from pug.syswx.pugframe import PugFrame
 from pug.syswx.SelectionWindow import SelectionWindow
-
-# TODO: create 'Initializing Pug' window
-# TODO: create a link between project closing and app closing
+from pug.syswx.pug_splash import PugSplash
+from pug.syswx.code_editor_frame import CodeEditorFrame
 
 _RECTPREFIX = 'Rect_'
 _DEBUG = False
@@ -41,11 +36,12 @@ projectFolder: where file menus start at.  Defaults to current working dir.
     quitting = False
     busyState = False
     setting_selection = False
-    progressDialog = None
+#    progressDialog = None
     projectObject = None
     initTryCounter = 0
     settings = object()
     projectFrame = None
+    _code_editor = None
     def __init__(self, projectObject=None, projectObjectName='',
                  projectName='PUG', projectFolder = "", redirect=False ):
         # global menus
@@ -65,12 +61,14 @@ projectFolder: where file menus start at.  Defaults to current working dir.
         #self.SetExitOnFrameDelete(False)
     
     def OnInit(self):
+        self.splash = PugSplash() 
+        self.SetTopWindow(self.splash)
         if self.args[0]:
             self.start_project(*self.args)
         return True
     
     def start_project(self, projectObject=None, projectObjectName='',
-                 projectName='PUG', projectFolder = "" ):
+                            projectName='PUG', projectFolder = "" ):
         if projectObjectName == '' and getattr(projectObject,'gname',None):
             self.projectObjectName = projectObject.gname
         else:
@@ -100,19 +98,18 @@ projectFolder: where file menus start at.  Defaults to current working dir.
         self.projectObject = object
         if not object:
             return
-        self.initTryCounter = 1
-        self.initProgressDialog = wx.ProgressDialog("Python Universal GUI",
-                                            'PUG system initializing...',
-                                            parent=None,
-                                            maximum=10)
+#        self.initProgressDialog = wx.ProgressDialog("Python Universal GUI",
+#                                            'PUG system initializing...',
+#                                            parent=None,
+#                                            maximum=10)
 #        self.initProgressDialog.SetSize((400,
 #                                         self.initProgressDialog.GetSize()[1]))
-        self.initProgressDialog.Bind(wx.EVT_CLOSE, self.abort_init)
-        self.initProgressDialog.Update(0)
-        self.initProgressDialog.Raise()
-        self.initProgressDialog.Show()
+#        self.initProgressDialog.Bind(wx.EVT_CLOSE, self.abort_init)
+#        self.initProgressDialog.Update(0)
+#        self.initProgressDialog.Raise()
+#        self.initProgressDialog.Show()
         if object:
-            self.post_init(object)
+            wx.CallAfter(self.post_init,object)
             return
         self.finalize_project_object(object)
         
@@ -121,7 +118,7 @@ projectFolder: where file menus start at.  Defaults to current working dir.
                     
     def abort_init(self, event=None):
         """Close project while trying to set a project object"""
-        self.initProgressDialog.Destroy()
+#        self.initProgressDialog.Destroy()
         self.quit()
         self.Destroy()
     
@@ -140,23 +137,23 @@ called every second until the object is initialized"""
                 # we're only going to do this for 10 tries
                 # then we're gonna guess something's broken
                 self.initTryCounter += 1
-                if self.initProgressDialog:
-                    if error:
-                        msg = error[3].splitlines()[-1]
-                        self.initProgressDialog.Update(self.initTryCounter, msg)
-                        self.initProgressDialog.Fit()
-                    else:
-                        msg = ''.join(['PUG system initializing... tries: ',
-                                   str(self.initTryCounter)])
-                        self.initProgressDialog.Update(self.initTryCounter, msg)
-                    self.initProgressDialog.Raise()
+#                if self.initProgressDialog:
+#                    if error:
+#                        msg = error[3].splitlines()[-1]
+#                        self.initProgressDialog.Update(self.initTryCounter, msg)
+#                        self.initProgressDialog.Fit()
+#                    else:
+#                        msg = ''.join(['PUG system initializing... tries: ',
+#                                   str(self.initTryCounter)])
+#                        self.initProgressDialog.Update(self.initTryCounter, msg)
+#                    self.initProgressDialog.Raise()
                 if self.initTryCounter == 10:
                     self.post_init_failed(error)
                     return
         if not hasattr(object,'_isReady') or object._isReady:        
             msg = 'Opening Project...'
-            self.initProgressDialog.Update(9, msg)
-            self.initProgressDialog.Raise()
+#            self.initProgressDialog.Update(9, msg)
+#            self.initProgressDialog.Raise()
             time.sleep(0.05)
             self.finalize_project_object( object)
         else:
@@ -174,8 +171,9 @@ called every second until the object is initialized"""
                 show_exception_dialog()
             self.set_project_frame(frame)
         self.register_selection_watcher(object)
-        if self.initProgressDialog:
-            self.initProgressDialog.Destroy()
+#        if self.initProgressDialog:
+#            self.initProgressDialog.Destroy()
+        
         self.SetExitOnFrameDelete(True)
         self.projectFrame.Raise()
             
@@ -186,6 +184,29 @@ called every second until the object is initialized"""
         
     def get_project_frame(self):
         return self.projectFrame
+    
+    def get_code_editor(self):
+        """get_code_editor(self)->editor frame
+    
+Creates code_editor_frame or shows the one that's hidden.
+Code editors have open_shell and open_code_file methods.
+"""
+        if self._code_editor:
+            return self._code_editor
+        else:
+            editor = CodeEditorFrame( parent=wx.GetApp().get_project_frame(), 
+                                  project_only=True, 
+                                  components_folder=os.path.join(
+                                            wx.GetApp().get_project_folder(),
+                                            "components"))
+        self._code_editor = editor
+        return editor
+
+    def set_code_editor(self, editor):
+        self.code_editor = editor
+            
+    code_editor = property(get_code_editor, set_code_editor, 
+                           doc="An editor frame for code or shells")
             
     def post_init_failed(self, error):
         try:
@@ -247,7 +268,7 @@ frame: the frame that is being opened
 object: the object being viewed. This can also be a string identifying the
     pugframe, or a tuple in the form (ref to main object, additional info...).
     The tuple form is used for special displays that are not pugframes. They are
-    stored in the Frame's 'pugViewKey' field. 
+    stored in the Frame's 'pug_view_key' field. 
 """
 #        if self.progressDialog and frame.object == self.projectObject:
 #            self.progressDialog.Destroy()
@@ -309,7 +330,7 @@ with object as an argument. Otherwise it will be de-iconized, raised, and will
         return frame
     
     def show_selection_frames(self):
-        """show_selection_frames(object)
+        """show_selection_frames(self)
         
 Raise the apps current selection frames. If any exist, return a list of them.
 Otherwise, return None. 

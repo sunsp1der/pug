@@ -1,7 +1,8 @@
 ### import autocode ###
+from components.Deals_Damage import Deals_Damage
 from pig.PigSprite import PigSprite
 from pug.all_components import Set_Motion, Grow_Shrink, On_Collision_Sound,\
-    Life_Zone, Fade, Stop_Motion_On_Destroy, Deals_Damage
+    Life_Zone, Fade, Stop_Motion_On_Destroy
 ### End import autocode ###
 
 ### Bullet autocode ###

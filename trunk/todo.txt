@@ -13,9 +13,9 @@ x		multi-page notebook of files and shells
 x		shell.help() in shell window?
 x		change name to Pug Py Editor
 x		change icon
-		raise windows=raise pug windows
-		pug menu should be file menu
-		avoid jumpy display at startup... setfocus
+x		raise windows=raise pug windows
+x		pug menu should be file menu
+x		avoid jumpy display at startup... setfocus
         crust.editor instead of idle!
 x			codeeditor quit is pig quit
 x			tree refresh
@@ -26,14 +26,17 @@ x			redirect_components option for redirect
 x			saveall needs to call save on each
 x			components ask folder even for in-proj components
 x			option to undo readonly
-			saveas dialog needs to be fuckin modal
-			open project folder menu item
-			divide window when no browsers are open
-				open browser to current file
-			track files being edited
-			track shells
+x			saveas dialog needs to be fuckin modal
+x			open project folder menu item
+x			divide window when no browsers are open
+x			track files being edited
+x			track shells
+x			change open_code_file and open_shell to use code_editor
+			code on activate check for outside code changes
 			always save editor window location
 			hide instead of destroy
+			stopped_viewing
+			clean up shell look
 	shell buttons for scene and sprite
 		button row agui?
 			left align, right align

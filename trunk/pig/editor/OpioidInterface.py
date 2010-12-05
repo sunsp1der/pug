@@ -103,6 +103,112 @@ scene: the scene to load initially
         except:
             pass
 
+    __cached=[0, 0, 0]      
+    def _post_init(self):
+        app = wx.GetApp()
+        app.set_pug_settings( self.pug_settings)
+        code_exceptions = {}
+        initial_scene = getattr(self.pug_settings, 'initial_scene', 'PigScene')
+        self.reload_components( doReload=True)
+        self.reload_scene_list( doReload=True)
+        # initial scene
+        if initial_scene != 'PigScene' and initial_scene in self.sceneDict:
+            # test initial scene                
+            try:
+                if self.sceneDict[initial_scene].__module__ == \
+                                                        'scenes.__Working__':
+                    test_scene_code( initial_scene, '__Working__')
+                else:
+                    test_scene_code( initial_scene)
+            except:
+                key = '*Error loading initial scene ('+initial_scene+')'                
+                code_exceptions[key] = sys.exc_info()
+                self.sceneclass = PigScene
+            else:
+                self.sceneclass = initial_scene
+                if self.sceneclass.__module__ == 'scenes.__Working__':
+                    self._new_scene = False
+        else:
+            self.sceneclass = PigScene
+        
+        # default menus
+        if not self.__cached[2]:
+            app.add_global_menu("&File",
+                [["New Project", self.new_project, 
+                        "Create a new Pig project"],
+                 ["Open Project", self.open_project,
+                        "Open a Pig project"],
+                 ["*DIVIDER*"],
+                 ["&New Scene\tCtrl+N", [self.set_scene, ("PigScene", True), {}],
+                        "Create a new PigScene"],
+                 ["&Save Working Scene\tCtrl+S", self.save_using_working_scene,
+                        "Save current scene in scenes/__Working__.py"],
+                 ["&Commit Scene\tShift+Ctrl+S", self.commit_scene,
+                        "Commit current scene into scenes folder"],
+                 ["New &Object\tShift+Ctrl+N", self.add_object,
+                        "Add the currently selected add object to the scene"],
+                 ["*DIVIDER*"],
+#                 ["Selection Tab", self.open_selection_frame, 
+#                        "Open a new tab to view selected objects"],
+                 ["&Edit Python File\tCtrl+E", edit_project_file,
+                        "Edit a python code file."],
+                 ["Browse Project &Folder\tCtrl+F", self.open_project_folder,
+                        "Open the project's folder in a browser"],
+                 ["Show All &Windows\tCtrl+W", app.raise_all_frames,
+                        "Show all open Pug Windows"],
+                 ["&Quit\tCtrl+Q", self.quit]])
+            self.__cached[2]=True
+        # open MDI frame
+        if not app.get_project_frame():
+            frame = PugMDI(
+                        [[self, {'objectpath':"Project",'name':"ProjectFrame"}],
+                        [self.scene, {'title':"Scene",'name':"SceneFrame"}],
+                        ['selection', {'name':"Selection"}],
+                        ],
+                    title=''.join(["P.I.G. Editor - ", self.project_name]),
+                    name="Pig Editor", show=False)
+            app.set_project_frame(frame)
+        else:
+            frame = app.get_project_frame()
+        target = FileDropTarget(self)
+        frame.SetDropTarget( target)
+        frame.GetNotebook().Split(2, wx.LEFT)
+        size = frame.GetSize()
+        frame.GetNotebook().GetPage(1).SetSize([size[0]/2,size[1]])
+        wx.FindWindowByName("ProjectFrame").Activate()
+        frame._on_raise_all_frames = self.raise_canvas
+        # attach window manager to opioid window
+        opioid_rect = self.pug_settings.rect_opioid_window # x, y, w, h        
+        options = dict(pos=tuple(opioid_rect[0:2]), 
+                       size=tuple(opioid_rect[2:4]),
+                       opengl=True, doublebuff=True, hardware=True)
+        canvas_options = canvas_manager.getDefaultOptions()
+        canvas_options.update(options)
+        self.canvas = canvas_manager( canvas_options)
+        self.frame = frame
+        # cache a sprite view for speed on first selection
+        if not self.__cached[0]:
+            dummy = PigSprite( register=False)
+            cache_default_view( dummy)
+            dummy.delete()
+            while dummy in self.Director.scene.nodes:
+                time.sleep(0.1)
+            self.__cached[0] = True       
+        self._initialized = True     
+        # Import Psyco if available
+        try:
+            import psyco
+            psyco.full()
+        except ImportError:
+            pass
+        
+        # create a project file error report at startup
+        self.reload_project_files( errors=code_exceptions, save_reload=False)
+        # for some reason, canvas needs to be activated before sound plays
+        wx.CallLater(111,self.canvas.Activate) 
+        wx.CallLater(222,frame.Raise) 
+        wx.CallLater(222,frame.Show) 
+   
     def create_default_project_settings(self, settingsObj=None):
         """create_default_project_settings(settingsObj=None)->setting data class
 
@@ -187,110 +293,6 @@ settingsObj: an object similar to the one below... if it is missing any default
                                                             project_settings)
         self.project_settings = project_settings
           
-    __cached=[0, 0, 0]      
-    def _post_init(self):
-        app = wx.GetApp()
-        app.set_pug_settings( self.pug_settings)
-        code_exceptions = {}
-        initial_scene = getattr(self.pug_settings, 'initial_scene', 'PigScene')
-        self.reload_components( doReload=True)
-        self.reload_scene_list( doReload=True)
-        # initial scene
-        if initial_scene != 'PigScene' and initial_scene in self.sceneDict:
-            # test initial scene                
-            try:
-                if self.sceneDict[initial_scene].__module__ == \
-                                                        'scenes.__Working__':
-                    test_scene_code( initial_scene, '__Working__')
-                else:
-                    test_scene_code( initial_scene)
-            except:
-                key = '*Error loading initial scene ('+initial_scene+')'                
-                code_exceptions[key] = sys.exc_info()
-                self.sceneclass = PigScene
-            else:
-                self.sceneclass = initial_scene
-                if self.sceneclass.__module__ == 'scenes.__Working__':
-                    self._new_scene = False
-        else:
-            self.sceneclass = PigScene
-        
-        # default menus
-        if not self.__cached[2]:
-            app.add_global_menu("Pig",
-                [["New Project", self.new_project, 
-                        "Create a new Pig project"],
-                 ["Open Project", self.open_project,
-                        "Open a Pig project"],
-                 ["*DIVIDER*"],
-                 ["New Scene\tCtrl+N", [self.set_scene, ("PigScene", True), {}],
-                        "Create a new PigScene"],
-                 ["Save Working Scene\tCtrl+S", self.save_using_working_scene,
-                        "Save current scene in scenes/__Working__.py"],
-                 ["Commit Scene\tShift+Ctrl+S", self.commit_scene,
-                        "Commit current scene into scenes folder"],
-                 ["New Object\tShift+Ctrl+N", self.add_object,
-                        "Add the currently selected add object to the scene"],
-                 ["*DIVIDER*"],
-#                 ["Selection Tab", self.open_selection_frame, 
-#                        "Open a new tab to view selected objects"],
-                 ["Edit Python File\tCtrl+E", edit_project_file,
-                        "Edit a python code file."],
-                 ["Open Project Folder\tCtrl+O", self.open_project_folder,
-                        "Open the current project's root folder"],
-                 ["Raise Windows\tCtrl+W", app.raise_all_frames,
-                        "Raise all PUG Windows to top"],
-                 ["Quit\tCtrl+Q", self.quit]])
-            self.__cached[2]=True
-        # open MDI frame
-        if not app.get_project_frame():
-            frame = PugMDI(
-                        [[self, {'objectpath':"Project",'name':"ProjectFrame"}],
-                        [self.scene, {'title':"Scene",'name':"SceneFrame"}],
-                        ['selection', {'name':"Selection"}],
-                        ],
-                    title=''.join(["P.I.G. Editor - ", self.project_name]),
-                    name="Pig Editor")
-            app.set_project_frame(frame)
-        else:
-            frame = app.get_project_frame()
-        target = FileDropTarget(self)
-        frame.SetDropTarget( target)
-        frame.GetNotebook().Split(2, wx.LEFT)
-        size = frame.GetSize()
-        frame.GetNotebook().GetPage(1).SetSize([size[0]/2,size[1]])
-        wx.FindWindowByName("ProjectFrame").Activate()
-        frame._on_raise_all_frames = self.raise_canvas
-        # attach window manager to opioid window
-        opioid_rect = self.pug_settings.rect_opioid_window # x, y, w, h        
-        options = dict(pos=tuple(opioid_rect[0:2]), 
-                       size=tuple(opioid_rect[2:4]),
-                       opengl=True, doublebuff=True, hardware=True)
-        canvas_options = canvas_manager.getDefaultOptions()
-        canvas_options.update(options)
-        self.canvas = canvas_manager( canvas_options)
-        self.frame = frame
-        # cache a sprite view for speed on first selection
-        if not self.__cached[0]:
-            dummy = PigSprite( register=False)
-            cache_default_view( dummy)
-            dummy.delete()
-            while dummy in self.Director.scene.nodes:
-                time.sleep(0.1)
-            self.__cached[0] = True       
-        self._initialized = True     
-        # Import Psyco if available
-        try:
-            import psyco
-            psyco.full()
-        except ImportError:
-            pass
-        
-        # create a project file error report at startup
-        self.reload_project_files( errors=code_exceptions, save_reload=False)
-        # for some reason, canvas needs to be activated before sound plays
-        wx.CallLater(333,self.canvas.Activate) 
-   
     def raise_canvas( self):
         if self.canvas.IsIconic():
             self.canvas.Restore()
@@ -903,8 +905,8 @@ Opioid2D, it is safer to call this via add_object.
 
     def test(self):
         from pug.syswx.code_editor_frame import CodeEditorFrame
-        editor = CodeEditorFrame( project_only=True,
-                        components_folder=os.path.join(
+        editor = CodeEditorFrame( parent=wx.GetApp().get_project_frame(), 
+                project_only=True, components_folder=os.path.join(
                                             wx.GetApp().get_project_folder(),
                                             "components"))
         editor.Show()

@@ -13,4 +13,4 @@ def init_pug():
     interface = OpioidInterface(sys.argv[0])
       
 if __name__ == "__main__":
-    init_pug()  
+    init_pug()

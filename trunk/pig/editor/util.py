@@ -335,9 +335,9 @@ Note: for this to work on nodes, it must be run BEFORE the scene is changed.
         scene = PigDirector.scene
     app = wx.GetApp()
     for frame in app.objFrameDict:
-        if hasattr(frame,'pugViewKey'):
+        if hasattr(frame,'pug_view_key'):
             try:
-                frameObj = frame.pugViewKey[0]()
+                frameObj = frame.pug_view_key[0]()
             except:
                 continue
         elif not hasattr(frame,'pugWindow'):

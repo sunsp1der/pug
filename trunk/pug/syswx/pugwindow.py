@@ -26,7 +26,7 @@ from pug.storage import pugSave, pugLoad
 from pug.constants import *
 from pug.syswx.helpframe import HelpFrame
 from pug.syswx.wxconstants import *
-from pug.syswx.util import show_exception_dialog, cache_aguilist, open_shell
+from pug.syswx.util import show_exception_dialog, cache_aguilist
 from pug.pugview_manager import get_obj_pugview_info
 from pug.code_storage import code_export
 
@@ -232,14 +232,14 @@ To return to object view, call display_aguilist().
             filterUnderscore = 2
         oldpugview = self.pugview
         self.pugview = {}
-        if self._currentView == 'Raw':
+        if self._currentView == '&Raw':
             self.aguilist = create_raw_aguilist(self.object, self, None, 
                                               filterUnderscore)
-        elif self._currentView == 'Raw Data':
+        elif self._currentView == 'Raw &Data':
             self.aguilist = create_raw_aguilist(self.object, self, 
                                               ['Default', 'Objects'],
                                               filterUnderscore)
-        elif self._currentView == 'Raw Methods':
+        elif self._currentView == 'Raw &Methods':
             self.aguilist = create_raw_aguilist(self.object, self,['Routine'],
                                               filterUnderscore)
         else:
@@ -354,9 +354,9 @@ Generally, this is called when an attribute gui has changed size.
         wx.GetApp().append_global_menus(self.menuBar)
         if self.object:
             self._init_viewMenu_Items(self.viewMenu)
-            self.menuBar.Append(self.viewMenu,'View')
-            self.menuBar.Append(self.exportMenu,'Export')
-            self.menuBar.Append(self.helpMenu,'Help')
+            self.menuBar.Append(self.viewMenu,'&View')
+            self.menuBar.Append(self.exportMenu,'&Export')
+            self.menuBar.Append(self.helpMenu,'&Help')
             if isinstance(self._currentView, dict):
                 skipMenus = self._currentView.get('skip_menus',[])
             else:
@@ -558,16 +558,17 @@ Automatically calls on_<setting>(val, event) callback.
         else:
             file = get_code_file(self.object)
         if file:
-            start_edit_process( file)
+            wx.GetApp().code_editor.open_code_file( file)
 
     def open_shell(self, event=None):
+        """This opens a pug_shell for the window's object"""
         info = {'rootObject':self.object, 
                 'rootLabel':self.shortPath,
-                'locals':{self.shortPath:self.object}}
+                 'locals':{self.shortPath:self.object}}
         if hasattr(self.object, '_get_shell_info'):
             new_info = self.object._get_shell_info()
             info.update(new_info)        
-        open_shell(**info)
+        wx.GetApp().code_editor.open_shell(**info)
             
     def refresh_settings(self):
         for setting in self.settings:
@@ -604,31 +605,31 @@ Automatically calls on_<setting>(val, event) callback.
                     
     def _init_helpMenu_Items(self, menu):
         menu.Append(help='View information about this object', id=_HELP_INFO, 
-                    text='Object Info')
+                    text='Object &Info')
         menu.Append(help='Get context help on object attributes', 
-                    id=_HELP_CONTEXT, text='Context Info')
+                    id=_HELP_CONTEXT, text='&Context Info')
                     
     def _init_fileMenu_Items(self, menu):
         menu.Append(help='Save object state as...', id = _MENU_SAVE_AS, 
-                      text = 'Save State As...')
+                      text = 'Save State &As...')
         menu.Append(help='Save object state', id = _MENU_SAVE, 
-                      text = 'Save State')
+                      text = '&Save State')
         menu.Append(help='Load a saved object state', id = _MENU_LOAD, 
-                      text = 'Load State')
+                      text = '&Load State')
         menu.AppendSeparator()
         menu.Append(help='Export object as python class code',
                       id = _MENU_EXPORT_CLASS, 
-                      text='Export class code')
+                      text='Export &class code')
         menu.Append(help='Export object as python class code as ...',
                       id = _MENU_EXPORT_CLASS_AS, 
-                      text='Export class code as ...')
+                      text='E&xport class code as ...')
         menu.AppendSeparator()
         menu.Append(help='Export object as python object code',
                       id = _MENU_EXPORT_OBJECT, 
-                      text='Export object code')
+                      text='Export &object code')
         menu.Append(help='Export object as python object code as ...',
                       id = _MENU_EXPORT_OBJECT_AS, 
-                      text='Export object code as ...')
+                      text='Export o&bject code as ...')
    
     def code_export(self, event=None):
         if self.hasSavedAs.get(event.Id + 1):
@@ -674,10 +675,10 @@ Automatically calls on_<setting>(val, event) callback.
     def _add_PrivateDataMenu_Items(self, parent):
         parent.Append(help='Hide "_" and "__" attributes in raw views',
                    id=_MENU_HIDE1UNDERSCORE, kind=wx.ITEM_CHECK, 
-                   text=u'Hide "_" attributes')
+                   text=u'&Hide "_" attributes')
         parent.Append(help='Hide "__" attributes in raw views', 
                    id=_MENU_HIDE2UNDERSCORE, kind=wx.ITEM_CHECK, 
-                   text=u'Hide "__" attributes')
+                   text=u'H&ide "__" attributes')
         has_settings = self.settings.has_key('hide_1_underscore')
         self._attach_setting("hide_1_underscore", parent, 
                              _MENU_HIDE1UNDERSCORE)
@@ -689,15 +690,15 @@ Automatically calls on_<setting>(val, event) callback.
             
     def _add_StandardView_Items(self, parent):
         parent.Append(help='Apply values to object',
-                      id=_TOOL_APPLY, text=u'Apply\tF6')
+                      id=_TOOL_APPLY, text=u'&Apply\tF6')
         parent.Append(help='Refresh values', 
-                   id=_TOOL_REFRESH, text=u'Refresh\tF5')
+                   id=_TOOL_REFRESH, text=u'&Refresh\tF5')
         parent.Append(id=_TOOL_AUTOAPPLY, kind=wx.ITEM_CHECK, 
             help='When off, only apply changes when Apply is selected',
-            text=u'Auto-Apply')
+            text=u'A&uto-Apply')
         parent.Append(help='Refresh values every 0.25 seconds', 
                    id=_TOOL_AUTOREFRESH, kind=wx.ITEM_CHECK, 
-                   text=u'Auto-Refresh')        
+                   text=u'Au&to-Refresh')        
         self._attach_setting("auto_apply", parent, _TOOL_AUTOAPPLY, True)        
         self._attach_setting("auto_refresh", parent, _TOOL_AUTOREFRESH, False)
         skip_source = type(self._currentView) is dict and \
@@ -707,11 +708,11 @@ Automatically calls on_<setting>(val, event) callback.
         if not skip_source or not skip_shell:
             parent.AppendSeparator()
         if not skip_source:  
-            parent.Append(help="View object's source file", 
-                   id=_TOOL_VIEWSOURCE, text=u'View source code\tCtrl+U')
+            parent.Append(help="&View object's source file", 
+                   id=_TOOL_VIEWSOURCE, text=u'View source &code\tCtrl+U')
         if not skip_shell:
-            parent.Append(help="Open a python shell for this object",
-                      id=_TOOL_SHELL, text=u'Open shell\tCtrl+P')      
+            parent.Append(help="&Open a python shell for this object",
+                      id=_TOOL_SHELL, text=u'Open &shell\tCtrl+P')      
 
     def save_object_state(self, event=None):
         if self.hasSavedAs.get(event.Id + 1):
