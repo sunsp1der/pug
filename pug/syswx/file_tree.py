@@ -7,7 +7,7 @@ class FileTree(wx.TreeCtrl):
     """FileTree(self, parent, id=-1, pos=wx.DefaultPosition, 
                  size=wx.DefaultSize, style=wx.TR_DEFAULT_STYLE, 
                  validator=wx.DefaultValidator, name="", 
-                 rootfolder=None, file_filter=("*.*"))
+                 rootfolder=".", file_filter=("*.*"))
 
 rootfolder: the starting folder. Default to current working folder.
 file_filter: a list of patterns to match filenames against. for example:

@@ -654,7 +654,7 @@ If scene is a working scene, return
             if action[0] != "_":
                 locals[action]=getattr(pig.actions,action)
         return dict(rootObject=items,rootLabel="Scene Data",locals=locals,
-                    pugViewKey=self)
+                    pug_view_key=self)
         
     # code storage customization
     def _create_object_code(self, storageDict, indentLevel, exporter):

@@ -32,7 +32,7 @@ $Id: appwnd.py,v 1.1.1.1 2007/10/21 22:02:04 jfp Exp $
 """
 
 import pygame
-import wm_ext
+from pig.editor import wm_ext
 
 from pygame.locals  import *
 
