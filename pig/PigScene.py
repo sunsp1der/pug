@@ -814,7 +814,7 @@ _scenePugview = {
         ['__class__', None, {'label':'   class', 'new_view_button':False}],        
         ['components'],
         ['scene_layers', SceneLayers],
-        ['edit_code', None, {'label':'   Edit code'}],        
+#        ['edit_code', None, {'label':'   Edit code'}],        
 #        ['   Save Scene', pug.Routine, {'routine':save_scene, 
 #                                        'use_defaults':True}],        
 #        ['scene_groups', SceneGroups],

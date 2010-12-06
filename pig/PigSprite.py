@@ -485,7 +485,7 @@ _spritePugview = {
     #        ['acceleration'],
         [' Functions', pug.Label],
         ['delete',"Delete this sprite"],
-        ['edit_code', None, {'label':'   edit code'}]
+    #    ['edit_code', None, {'label':'   edit code'}]
     #        ['_delete_test'],
     ]       
  }

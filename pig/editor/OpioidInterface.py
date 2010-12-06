@@ -30,7 +30,6 @@ from pug.syswx.drag_drop import FileDropTarget
 from pig import hacks, PigScene, PigSprite, PigDirector, PauseState
 from pig.util import fix_project_path, set_project_path, save_project_settings,\
         entered_scene, start_scene, get_gamedata, create_gamedata, \
-        PygameWindowInfo, \
         get_display_center, skip_deprecated_warnings, set_opioid_window_position
 from pig.editor.StartScene import StartScene
 from pig.editor import EditorState
@@ -240,6 +239,7 @@ settingsObj: an object similar to the one below... if it is missing any default
         class pug_settings():
             initial_scene = "__Working__"
             Rect_Pig_Editor = (470, 150, 550, 600)
+            Rect_Pug_Python_Editor = (0, 100, 869, 600)            
             rect_opioid_window = (0, 0, 800 , 600)
             save_settings_on_quit = True
 
@@ -310,7 +310,7 @@ settingsObj: an object similar to the one below... if it is missing any default
         
 query: if True, query the user about saving the current scene first
 """        
-        print "OpioidInterface.quit: self.Director.quit"
+        if _DEBUG: print "OpioidInterface.quit: self.Director.quit"
         self.Director.quit( query=query)
         
     def view_scene(self):
@@ -529,9 +529,6 @@ Callback from PugApp...
  
     def _on_pug_quit(self):
         if getattr(self.project_settings,'save_settings_on_quit',True):
-#            if '__Working__' in self.Director.scene.__module__:
-#                self.project_settings.initial_scene = '__Working__'
-#            else:
             self.project_settings.initial_scene = self.scene.__class__.__name__
             try:
                 save_project_settings( self.project_settings)
@@ -539,16 +536,10 @@ Callback from PugApp...
                 show_exception_dialog()
         if getattr(self.pug_settings,'save_settings_on_quit',True):
             if os.name == 'nt':
-                window_pos = PygameWindowInfo().getWindowPosition()
-                self.pug_settings.rect_opioid_window = list( 
+                window_pos = self.canvas.GetWindowPosition()
+                self.pug_settings.rect_opioid_window = tuple( 
                                             self.canvas.GetWindowPosition() +\
                                             self.canvas.GetWindowSize())
-
-#                self.pug_settings.rect_opioid_window = (
-#                                                max(window_pos['left'],0),
-#                                                max(window_pos['top'],0),
-#                                    self.pug_settings.rect_opioid_window[2],
-#                                    self.pug_settings.rect_opioid_window[3])
             self.save_pug_settings()
         self.Director.realquit()
         time.sleep(1)   

@@ -32,31 +32,33 @@ x			divide window when no browsers are open
 x			track files being edited
 x			track shells
 x			change open_code_file and open_shell to use code_editor
-			code on activate check for outside code changes
-			always save editor window location
-			hide instead of destroy
-			stopped_viewing
+x			activate tree status bar change
+x			code on activate check for outside code changes
+x				focus event
+x				revert
+x					losing caret
+x			notebook page needs to go to top when called from tree
+x			always save editor window location
+x			hide instead of destroy
+x			stopped_viewing
 			clean up shell look
-	shell buttons for scene and sprite
-		button row agui?
-			left align, right align
-			button_info
-				{size:, text:, toggle:, function:, up_function:}
-	fix wm_ext problem when not installed
-	clean up default size of pig editor
+				intro message
+				locals and tree
+x	fix wm_ext problem when not installed
+x	clean up default size of pig editor
 	make face motion component work with actions
 	
-	Ivan DelSol wrote:
-	> There doesn't seem to be a way to get pygame to pass
-	> channels by ID so that I could alter their volumes individually,
-	
-	According to the docs, pygame.mixer.Channel(id) returns
-	a channel object corresponding to the given id. So you
-	could loop over range(pygame.mixer.get_num_channels())
-	to get channel objects for all the channels and call
-	set_volume() on all of them.
-	
-	I agree there ought to be an easier way, though.
+		Ivan DelSol wrote:
+		> There doesn't seem to be a way to get pygame to pass
+		> channels by ID so that I could alter their volumes individually,
+		
+		According to the docs, pygame.mixer.Channel(id) returns
+		a channel object corresponding to the given id. So you
+		could loop over range(pygame.mixer.get_num_channels())
+		to get channel objects for all the channels and call
+		set_volume() on all of them.
+		
+		I agree there ought to be an easier way, though.
 	
 	-- 	
  	

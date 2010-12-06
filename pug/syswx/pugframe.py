@@ -4,7 +4,6 @@ This is generally meant to be created by the pug function. You can send the
 object to be viewed as an argument on creation of the frame."""
 
 # TODO: provide interface for creating attribute
-# TODO: menu option to go to file where this is defined
 # TODO: send aguilist a specific list of attributes
 
 import wx
@@ -75,7 +74,7 @@ PugFrame(self, obj=None, objectpath="object", title="", show=True, parent=None,
         bar.Bind(wx.EVT_LEFT_DCLICK, self.show_all_attributes)  
         self.setup_window(obj, objectpath, title, name)
         self.Layout()
-        rect = wx.GetApp().get_default_pos( self)
+        rect = wx.GetApp().get_default_rect( self)
         if rect:
             self.SetPosition((rect[0],rect[1]))
             self.SetSize((rect[2],rect[3]))
