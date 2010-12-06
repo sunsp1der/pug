@@ -44,19 +44,19 @@ Pug version of the py editor."""
         self.components_folder = components_folder
         EditorNotebookFrame.__init__(self, parent, id, title, pos,
                              size, style, filename)
+        self.Name = "Pug Python Editor"
+        self.SetRect(wx.GetApp().get_default_rect(self))
         dispatcher.connect(receiver=self._editorChange,
                                signal='EditorChange', sender=self.notebook)
         self.notebook.Bind(wx.EVT_IDLE, self.OnIdle)
-        self.notebook.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, 
-                           self.OnPageChanged, 
-                           id=self.notebook.GetId())        
-        self.notebook.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.PageClose,
-                           id=self.notebook.GetId())
+        self.notebook.Bind(aui.EVT_AUINOTEBOOK_PAGE_CHANGED, 
+                           self.OnPageChanged)       
+        self.notebook.Bind(aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.PageClose)
         self.Bind(wx.EVT_CLOSE, self.OnExit)
         # override default menus
         self._createMenus()
         # setup look
-        self.SetStatusText(title)        
+        self._defaultText = title
         self.SetIcon(get_icon())     
         if browser_root is not None:
             self.browser = FileTree( self.notebook, 
@@ -68,10 +68,12 @@ Pug version of the py editor."""
         
     def _setup(self):
         """_setup() with browser page"""
-        self.notebook = PugEditorNotebook(parent=self,style=aui.AUI_NB_TAB_FLOAT)
+        self.notebook = PugEditorNotebook(parent=self)
 
     def OnIdle(self, event):
         """Event handler for idle time."""
+        if not self.IsShown():
+            return
         self._updateStatus()
         self._updateTabText()
         event.Skip()
@@ -83,7 +85,70 @@ Pug version of the py editor."""
         if hasattr(window,"editor"):
             dispatcher.send(signal='EditorChange', sender=self.notebook,
                             editor=window.editor)
+        else:
+            self.setEditor(None)
         window.SetFocus()
+        event.Skip()
+        
+    def OnEditorFocus(self, event):
+        self.CheckFileChanges(self.notebook.GetSelection())
+        event.Skip()
+        
+    def CheckFileChanges(self, page):
+        try:
+            buffer = self.notebook.GetPage(page).buffer
+        except:
+            return
+        edit_time = os.stat(buffer.doc.filepath).st_mtime
+        if edit_time > buffer.last_edit:
+            buffer.last_edit = edit_time
+            dlg = wx.MessageDialog( self,
+                            "The file '"+buffer.doc.filename+"' has changed.\n"+
+                            "Do you want to replace the editor content "+
+                            "with these changes?",
+                            "File Contents Changed",
+                            wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
+            answer = dlg.ShowModal() 
+            if answer == wx.ID_YES:
+                self.OnFileRevert()
+                
+    def OnFileRevert(self, buffer=None):
+        "OnFileRevert(buffer=None[use current]): revert to saved version"
+        if buffer is None:
+            if self.buffer:
+                buffer = self.buffer
+            else:
+                # nothing to revert
+                return
+            text = buffer.doc.read()
+            buffer.editor.setText(text)
+            buffer.editor.setSavePoint()
+            buffer.editor.window.EnsureCaretVisible()
+
+    def setEditor(self, editor):
+        self.editor = editor
+        if editor:
+            self.buffer = self.editor.buffer
+            self.buffers[self.buffer.id] = self.buffer
+        else:
+            self.buffer = None
+        
+    def _updateStatus(self):
+        """Show current status information."""
+        if self.editor and hasattr(self.editor, 'getStatus'):
+            status = self.editor.getStatus()
+            text = 'File: %s  |  Line: %d  |  Column: %d' % status
+        elif self.notebook.GetPage(self.notebook.GetSelection())==self.browser:
+            text = self.browser.GetPyData(self.browser.GetSelection())
+            if not text:
+                text = "File Browser"
+            else:
+                text = "File Browser - "+text
+        else:
+            text = self.notebook.GetPageText(self.notebook.GetSelection())
+        if text != self._statusText:
+            self.SetStatusText(text)
+            self._statusText = text        
   
     def _updateTabText(self, pagenum=None):
         """Show current buffer display name on all but first tab."""
@@ -109,9 +174,10 @@ Pug version of the py editor."""
             self.notebook.SetPageText(pagenum, name)
 
     def PageClose(self, event):
-        id = event.Int
+        id = event.selection
         if id == 0:
             event.Veto()
+            return
         page = self.notebook.GetPage(id)
         if hasattr(page, "buffer"):
             if page.buffer.hasChanged():
@@ -120,6 +186,8 @@ Pug version of the py editor."""
                     event.Veto()
                     return
             del self.buffers[page.buffer.id]
+        wx.GetApp().frame_stopped_viewing( self, page.pug_view_key)
+        event.Skip()
         
     def on_show_object(self, object):
         "Callback from pug.App"
@@ -153,11 +221,10 @@ other kw args: sent to Crust()
         try:
             pug_key = (weakref.ref(pug_view_key),"shell")
         except:
-            pug_key = None
-        else:
-            if app.show_object_frame(pug_key):
-                # we already have a shell open for this object
-                return None
+            pug_key = (str(pug_view_key),"shell")
+        if app.show_object_frame(pug_key):
+            # we already have a shell open for this object
+            return None
         shell = crust.Crust(self.notebook, locals=locals, rootObject=rootObject, 
                             rootLabel=rootLabel,**kw)
         if clean_tools:
@@ -190,10 +257,12 @@ other kw args: sent to Crust()
         pug_key = (filename, "code")
         if app.show_object_frame(pug_key):
             return
+        if self.IsShown():
+            self.notebook.Freeze()
         buffer = Buffer()
         panel = wx.Panel(parent=self.notebook, id=-1)
         panel.buffer = buffer # track this for ease
-        panel.Bind(wx.EVT_ERASE_BACKGROUND, lambda x: x)        
+#        panel.Bind(wx.EVT_ERASE_BACKGROUND, lambda x: x)        
         editor = Editor(parent=panel)
         panel.editor = editor
         panel.pug_view_key = pug_key
@@ -205,15 +274,11 @@ other kw args: sent to Crust()
         sizer.Layout()
         buffer.addEditor(editor)
         buffer.open(filename)
+        buffer.last_edit = os.stat(filename).st_mtime
         self.setEditor(editor)
         # no duplicate tab labels
-        self.notebook.Freeze()
         tab_label = self.buffer.name
         pages = self.notebook.GetPageCount()
-#        if pages > 1:
-#            self.notebook._curpage = pages - 1
-#        else:
-#            tab = self.notebook.GetActiveTabCtrl()
         for pagenum in range(pages):
             page = self.notebook.GetPage(pagenum)
             if not hasattr(page,"buffer"):
@@ -224,29 +289,21 @@ other kw args: sent to Crust()
                                       self.GetDetailedBufferName(page.buffer))
                 break
         self.notebook.AddPage(page=panel, text=tab_label, select=True)
-#        if pages == 1:
-#            # first editor... do split
-#            self.notebook.Split(0,wx.LEFT)
-#            size = tab.GetSize()
-#            page = self.notebook.GetPage(0)
-#            frame = self.notebook.GetTabFrameFromWindow(page)
-#            pane = self.notebook._mgr.GetAllPanes()[2]
-#            pane.rect[3] = pane.rect[3]/2
-#            #pane.SetSize(50,-1)
-#            tab.SetSize((50,size[1]))
-#            self.notebook._mgr.Update()
-#            import wx.lib.inspection as fred
-#            fred.InspectionTool().Show()
-
-#            frame.GetNotebook().GetPage(1).SetSize([size[0]/2,size[1]])
         if (self.project_only and \
                     app.get_project_folder() not in filename) and not\
                     (self.components_folder and 'components' in \
                      self.buffer.doc.filedir):
             editor.window.SetReadOnly(True)
-        self.notebook.Thaw()
+        wx.CallAfter(panel.SetFocus)
+        panel.editor.window.Bind(wx.EVT_SET_FOCUS, self.OnEditorFocus)
+#        _DEBUG = True
+#        if _DEBUG:
+#            from wx.lib.inspection import InspectionTool as spy
+#            spy().Show()
+        if self.notebook.IsFrozen():
+            self.notebook.Thaw()
         return panel
-
+    
     def OnBrowserDClick(self, event):
         filename = self.browser.GetFilePath()
         if os.path.isfile(filename):
@@ -270,6 +327,8 @@ and path is not inside the project folder"""
             cancel = False
         else:
             cancel = self.bufferSaveAs( buffer)
+        if not cancel:
+            buffer.last_edit = os.stat(buffer.doc.filepath).st_mtime            
         return cancel
 
     def bufferSaveAs(self, buffer=None):
@@ -297,6 +356,8 @@ and path is not inside the project folder"""
             cancel = False
         else:
             cancel = True
+        if not cancel:
+            buffer.last_edit = os.stat(buffer.doc.filepath).st_mtime
         return cancel    
 
     def OnUpdateMenu(self, event):
@@ -363,9 +424,9 @@ and path is not inside the project folder"""
         m.Append(ID_SAVEALL, 'Save A&ll \tCtrl+Shift+S',
                  'Save all files')
         m.AppendSeparator()
-        m.Append(ID_PRINT, '&Print... \tCtrl+P',
-                 'Print file')
-        m.AppendSeparator()
+#        m.Append(ID_PRINT, '&Print... \tCtrl+P',
+#                 'Print file')
+#        m.AppendSeparator()
         m.Append(ID_SHELL, 'Project S&hell \tCtrl+H', 'Open project shell tab')
         m.Append(ID_PROJECTFOLDER, 'Browse Project &Folder \tCtrl+F', 
                  "Open the project's folder in a browser")

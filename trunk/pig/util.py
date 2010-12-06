@@ -8,7 +8,6 @@ from time import sleep
 from inspect import isclass
 
 from pig.gamedata import get_gamedata, create_gamedata
-from pig.pygameWindowInfo_0_1 import PygameWindowInfo
 
 _DEBUG = True
 # slight hackery

@@ -68,7 +68,7 @@ PugMDI(self, objInfoList, title, show, parent)
         bar = self.CreateStatusBar()        
         bar.Bind(wx.EVT_LEFT_DCLICK, self.show_all_attributes)        
         self.Bind(wx.EVT_MENU, self._evt_passmenu)
-        rect = wx.GetApp().get_default_pos( self)
+        rect = wx.GetApp().get_default_rect( self)
         if rect:
             self.SetPosition((rect[0],rect[1]))
             self.SetSize((rect[2],rect[3]))

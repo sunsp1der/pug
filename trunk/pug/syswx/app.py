@@ -283,13 +283,19 @@ object: the object being viewed. This can also be a string identifying the
         if self.objFrameDict.get(frame, False):
             self.objFrameDict[frame]+=objList   
         else:
-            self.objFrameDict[frame]= objList
+            self.objFrameDict[frame]=objList
         if _DEBUG: print "   app.frame_viewing complete"
             
     def frame_stopped_viewing(self, frame, object):
         if frame in self.objFrameDict:
-            if id(object) in self.objFrameDict[frame]:
-                self.objFrameDict[frame].remove(id(object))
+            if object is None:
+                return
+            elif type(object is tuple):
+                if object in self.objFrameDict[frame]:
+                    self.objFrameDict[frame].remove(object)
+            else:
+                if id(object) in self.objFrameDict[frame]:
+                    self.objFrameDict[frame].remove(id(object))
             
     def get_object_frame(self, object):
         """get_object_frame(object)
@@ -509,7 +515,7 @@ settingsObj: a class with values like those created in create_frame_settings.
 """        
         self.settings = settingsObj
             
-    def getrect_setting_name(self, frame):
+    def get_rect_setting_name(self, frame):
         return make_valid_attr_name(''.join([_RECTPREFIX,frame.Name]))
             
     def create_frame_settings(self, settingsObj=None):
@@ -523,7 +529,7 @@ settingsObj: any frame settings members will be replaced
             # setting entry like: framename_rect = (x, y, width, height)
             if not frame.Name or frame.Name == 'frame':
                 continue
-            name = self.getrect_setting_name(frame)
+            name = self.get_rect_setting_name(frame)
             if frame.IsIconized():
                 icon = True
                 frame.Hide()
@@ -540,6 +546,8 @@ settingsObj: any frame settings members will be replaced
             # erase old rects
             keys = settingsObj.__dict__.keys()
             for attr in keys:
+                if attr == "Rect_Pug_Python_Editor":
+                    continue
                 if attr.startswith(_RECTPREFIX):
                     delattr( settingsObj, attr) 
             # add new rects
@@ -550,11 +558,11 @@ settingsObj: any frame settings members will be replaced
         else:
             return frame_settings            
             
-    def get_default_pos(self, frame):
+    def get_default_rect(self, frame):
         for testframe in self.objFrameDict.iterkeys():
             if frame.Name == testframe.Name:
                 return None
-        name = self.getrect_setting_name(frame)
+        name = self.get_rect_setting_name(frame)
         return getattr(self.settings, name, None)
             
     def raise_all_frames(self):
