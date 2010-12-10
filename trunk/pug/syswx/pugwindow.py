@@ -146,7 +146,7 @@ holds multiple PugWindows in tabbed (or other) form.
                         self.GetParent().show_all_attributes()
                 except:
                     pass
-            self.started_viewing( obj)
+            self.started_viewing( self.objectRef)
         self.SetTitle(title)
         if self.IsFrozen():
             self.Thaw()                   
@@ -158,12 +158,12 @@ holds multiple PugWindows in tabbed (or other) form.
 tell app that our parent isn't viewing the current object"""
         if self.objectRef:
             wx.GetApp().frame_stopped_viewing(self.GetParent(), 
-                                                 self.objectRef())
+                                                 self.objectRef)
 
-    def started_viewing(self, obj):
+    def started_viewing(self, objectRef):
         """started-viewing(obj)
 tell app that our parent is viewing obj"""
-        wx.GetApp().frame_viewing(self.GetParent(), obj)             
+        wx.GetApp().frame_started_viewing(self.GetParent(), objectRef)             
         
     
     def SetTitle(self, title):

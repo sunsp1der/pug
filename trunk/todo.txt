@@ -1,65 +1,11 @@
 todo:
-x		bug on editor close
-x			test page close
-x				yes no cancel
-x				event.Veto
-x		eliminate clear buffer and update namespace menu options
-x		menu choices not being updated
-x		add project object shell menu option
-x		make tree that only shows project files
-x		save all
-x		file browser of project!
-x		multi-page notebook of files and shells
-x		shell.help() in shell window?
-x		change name to Pug Py Editor
-x		change icon
-x		raise windows=raise pug windows
-x		pug menu should be file menu
-x		avoid jumpy display at startup... setfocus
-        crust.editor instead of idle!
-x			codeeditor quit is pig quit
-x			tree refresh
-x			set default save of components to proper folder
-x			project_only option for readonly
-x			readonly conflicts with component redirect
-x			redirect_components option for redirect
-x			saveall needs to call save on each
-x			components ask folder even for in-proj components
-x			option to undo readonly
-x			saveas dialog needs to be fuckin modal
-x			open project folder menu item
-x			divide window when no browsers are open
-x			track files being edited
-x			track shells
-x			change open_code_file and open_shell to use code_editor
-x			activate tree status bar change
-x			code on activate check for outside code changes
-x				focus event
-x				revert
-x					losing caret
-x			notebook page needs to go to top when called from tree
-x			always save editor window location
-x			hide instead of destroy
-x			stopped_viewing
-			clean up shell look
-				intro message
-				locals and tree
-x	fix wm_ext problem when not installed
-x	clean up default size of pig editor
-	make face motion component work with actions
-	
-		Ivan DelSol wrote:
-		> There doesn't seem to be a way to get pygame to pass
-		> channels by ID so that I could alter their volumes individually,
-		
-		According to the docs, pygame.mixer.Channel(id) returns
-		a channel object corresponding to the given id. So you
-		could loop over range(pygame.mixer.get_num_channels())
-		to get channel objects for all the channels and call
-		set_volume() on all of them.
-		
-		I agree there ought to be an easier way, though.
-	
+
+ 	master volume controls	
+		derive from sound
+	make alpha +- go to 0 and 1
+	something slow in add_object
+		hotshot
+		profile
 	-- 	
  	
 installer:

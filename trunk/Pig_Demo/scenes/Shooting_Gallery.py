@@ -8,7 +8,8 @@ from objects.Target import Target
 from pig.PigScene import PigScene
 from pig.PigSprite import PigSprite
 from pug.all_components import Joystick_Input, Joystick_Axis_To_Key,\
-    Joystick_Button_To_Key, Value_Tracker_Text, Timer_Text, Textbox
+    Joystick_Button_To_Key, Utility_Keys, Value_Tracker_Text, Timer_Text,\
+    Textbox
 ### End import autocode ###
 
 ### Shooting_Gallery autocode ###
@@ -18,6 +19,7 @@ class Shooting_Gallery(PigScene):
                 test_mode=True) )
         self.components.add( Joystick_Axis_To_Key() )
         self.components.add( Joystick_Button_To_Key() )
+        self.components.add( Utility_Keys() )
 
         # Archetypes
         Bullet_archetype = Bullet(gname='Bullet')

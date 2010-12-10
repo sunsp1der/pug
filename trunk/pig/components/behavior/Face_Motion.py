@@ -6,9 +6,11 @@ from Opioid2D.public.Node import Node
 from pug.component import *
 
 from pig.components import SpriteComponent
+from pig.util import angle_to
 
 class Face_Motion(SpriteComponent):
     """Force owner to always face the direction that it's moving.
+    
 Warning: This component uses a tick_action, so it may be slow.
 """
     #component_info
@@ -22,7 +24,7 @@ Warning: This component uses a tick_action, so it may be slow.
     #defaults
     offset = 0
     #other defaults
-    last_velocity = None
+    last_position = None
     tick_action = None
     
     @component_method
@@ -44,7 +46,12 @@ Warning: This component uses a tick_action, so it may be slow.
 
     def face_motion(self):
         if not self.enabled:
+            self.last_position=None
             return
-        self.owner.rotation = self.owner.velocity.direction
+        if self.last_position and tuple(self.owner.position)\
+                                                        != self.last_position:
+            self.owner.rotation = angle_to( self.last_position,
+                                            self.owner.position)
+        self.last_position = tuple(self.owner.position)
 
 register_component( Face_Motion)

@@ -341,6 +341,18 @@ Note: for this to work on nodes, it must be run BEFORE the scene is changed.
             except:
                 continue
         elif not hasattr(frame,'pugWindow'):
+            # multi-view
+#            for view in app.objFrameDict[frame]:
+#                if type(view) == tuple and view[0]() == scene:
+#                    try:
+#                        frame.close_pug_view(view)
+#                    except:
+#                        pass
+#                elif view == id(scene):
+#                    try:
+#                        frame.close_pug_view(view)
+#                    except:
+#                        pass
             continue
         else:
             if not bool(frame) or isinstance(frame.pugWindow, SelectionWindow):

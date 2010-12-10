@@ -87,7 +87,7 @@ Pug version of the py editor."""
                             editor=window.editor)
         else:
             self.setEditor(None)
-        window.SetFocus()
+#        window.SetFocus()
         event.Skip()
         
     def OnEditorFocus(self, event):
@@ -139,7 +139,11 @@ Pug version of the py editor."""
             status = self.editor.getStatus()
             text = 'File: %s  |  Line: %d  |  Column: %d' % status
         elif self.notebook.GetPage(self.notebook.GetSelection())==self.browser:
-            text = self.browser.GetPyData(self.browser.GetSelection())
+            text = None
+            try:
+                text = self.browser.GetPyData(self.browser.GetSelection())
+            except:
+                pass
             if not text:
                 text = "File Browser"
             else:
@@ -225,15 +229,22 @@ other kw args: sent to Crust()
         if app.show_object_frame(pug_key):
             # we already have a shell open for this object
             return None
+        msg = "The 'obj' variable is always the object selected in the "+\
+                "'Object Info' window."
         shell = crust.Crust(self.notebook, locals=locals, rootObject=rootObject, 
-                            rootLabel=rootLabel,**kw)
+                            rootLabel=rootLabel, intro=msg, **kw)        
+        shell.filling.tree.Bind(wx.EVT_TREE_SEL_CHANGED, 
+                                self.update_shell_tree)
+        wx.CallAfter(shell.filling.tree.SelectItem,
+                     shell.filling.tree.GetRootItem())
         if clean_tools:
             shell.notebook.RemovePage(4)
             shell.notebook.RemovePage(2)
             shell.notebook.RemovePage(1)
+            shell.notebook.SetPageText(0,"Object Info")
         if pug_key:
             shell.pug_view_key = pug_key
-            app.frame_viewing(self, pug_key)
+            app.frame_started_viewing(self, pug_key)
         if rootLabel:
             text = "Shell:"+rootLabel
         else:
@@ -243,6 +254,21 @@ other kw args: sent to Crust()
         wx.CallAfter( shell.editor.SetFocus)
         self.Show()
         return shell
+    
+    def update_shell_tree(self, event):
+        shell = self.notebook.GetPage( self.notebook.GetSelection())
+        item = event.GetItem()
+        shell.shell.interp.locals['obj']=shell.filling.tree.GetPyData(item)
+        event.Skip()
+        
+    def close_pug_view(self, key):
+        for pagenum in range(self.notebook.GetPageCount()):
+            page = self.notebook.GetPage(pagenum)
+            try:
+                if page.pug_view_key == key :
+                    self.notebook.DeletePage(pagenum)
+            except:
+                pass
     
     def open_code_file(self, filename):
         """open_code_file: open filepath for editing"""
@@ -266,7 +292,7 @@ other kw args: sent to Crust()
         editor = Editor(parent=panel)
         panel.editor = editor
         panel.pug_view_key = pug_key
-        app.frame_viewing( self, pug_key)
+        app.frame_started_viewing( self, pug_key)
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(editor.window, 1, wx.EXPAND)
         panel.SetSizer(sizer)
@@ -383,6 +409,14 @@ and path is not inside the project folder"""
         wx.GetApp().get_project_object().quit()
 
     def OnExit(self, event):
+        if self.IsShown():
+            for pagenum in range(self.notebook.GetPageCount()):
+                page = self.notebook.GetPage(pagenum)
+                if hasattr(page, "buffer"):
+                    if page.buffer.hasChanged():
+                        cancel = self.bufferSuggestSave()
+#                        if not cancel:
+#                            self.notebook.DeletePage(pagenum)
         self.Hide()
         if event.CanVeto():
             event.Veto()
