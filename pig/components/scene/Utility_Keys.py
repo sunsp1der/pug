@@ -1,6 +1,6 @@
 from Opioid2D import Director, Delay, CallFunc
 
-#from pygame import mixer
+from pygame import mixer
 
 from pug import Filename
 from pug.component import *
@@ -16,10 +16,11 @@ class Utility_Keys( Component):
 This adds new functions to the scene:
 do_restart(): restarts scene (not game)
 do_info(filename=None): try to open the filename with default program
+volume_up()->current volume: raises volume
+volume_down()->current volume: lowers volume
+set_volume( volume)-> 0-1
+toggle_mute(): mutes/unmutes sound
 """
-#volume_up()->current volume: raises volume
-#volume_down()->current volume: lowers volume
-#mute(): mutes sound
     # component_info
     _set = 'pig'
     _type = 'utilities'
@@ -27,19 +28,19 @@ do_info(filename=None): try to open the filename with default program
     # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
             ['restart_ctrl_r', 'If True, ctrl-r restarts scene'],
-#            ['volume_up_ctrl_equal', 'If True, ctrl-= raises volume'],
-#            ['volume_down_ctrl_minus', 'If True, ctrl-- lowers volume'],
-#            ['mute_ctrl_backslash', 'If True, ctrl-\ mutes/unmutes sound']
+            ['volume_up_ctrl_equal', 'If True, ctrl-= raises volume'],
+            ['volume_down_ctrl_minus', 'If True, ctrl-- lowers volume'],
+            ['mute_ctrl_zero', 'If True, ctrl-zero mutes/unmutes sound'],
             ['info_F1', Filename, {'doc':'Open this file if user presses F1'}],
             ]
     #defaults
     restart_ctrl_r = True
-#    volume_up_ctrl_equal = True
-#    volume_down_ctrl_minus = True
-#    mute_ctrl_backslash = True
+    volume_up_ctrl_equal = True
+    volume_down_ctrl_minus = True
+    mute_ctrl_zero = True
     info_F1 = None
     
-    volume = 1.0
+    old_volume = volume = 1.0
     mute = False
     
     @component_method
@@ -49,12 +50,17 @@ do_info(filename=None): try to open the filename with default program
             self.owner.register_key_down( (keymods["CTRL"],keys["R"]),
                                                     self.do_restart,
                                                     _do_immediate=False)
-#        if self.volume_up_ctrl_equal:
-#            self.owner.register_key_down( keys["="], self.volume_up)
-#        if self.volume_down_ctrl_minus:
-#            self.owner.register_key_down( keys["-"], self.volume_down)
-#        if self.info_F1:
-#            self.owner.register_key_down( keys["F1"], self.do_info)
+        if self.volume_up_ctrl_equal:
+            self.owner.register_key_down( (keymods["CTRL"],keys["EQUALS"]), 
+                                          self.volume_up)
+        if self.volume_down_ctrl_minus:
+            self.owner.register_key_down( (keymods["CTRL"],keys["MINUS"]), 
+                                          self.volume_down)
+        if self.mute_ctrl_zero:
+            self.owner.register_key_down( (keymods["CTRL"],keys["0"]), 
+                                          self.toggle_mute)
+        if self.info_F1:
+            self.owner.register_key_down( keys["F1"], self.do_info)
                 
     @component_method
     def do_info(self, filename=None):
@@ -66,23 +72,42 @@ do_info(filename=None): try to open the filename with default program
         except:
             pass
         
-#    @component_method
-#    def volume_up(self):
-#        "volume_up()->current volume: raises volume"
-#        volume += 0.1
-#        if volume > 1.0:
-#            volume = 1.0
-#        for i in range( mixer.get_num_channels)
-#            mixer.
-#    @component_method
-#    def volume_down(self):
-#        "volume_down()->current volume: lowers volume"
-#        pass
-#    
-#    @component_method
-#    def mute(self):
-#        "mute(): mutes sound"
-#        pass
+    @component_method
+    def set_volume(self, volume=None):
+        "set_volume( volume): sets volume of all channels (0-1)"
+        if volume is None:
+            volume = self.volume
+        else:
+            self.volume = volume
+        for i in range(mixer.get_num_channels()):
+            mixer.Channel(i).set_volume(volume)
+
+    @component_method
+    def volume_up(self):
+        "volume_up()->current volume: raises volume"
+        self.volume += 0.1
+        if self.volume > 1.0:
+            self.volume = 1.0
+        self.set_volume()
+        
+    @component_method
+    def volume_down(self):
+        "volume_down()->current volume: lowers volume"
+        self.volume -= 0.1
+        if self.volume < 0.0:
+            self.volume = 1.0
+        self.set_volume()
+    
+    @component_method
+    def toggle_mute(self):
+        "toggle_mute(): mutes sound"
+        if self.volume:
+            self.old_volume = self.volume
+            self.volume = 0
+            self.set_volume()
+        else:
+            self.volume = self.old_volume
+            self.set_volume()
         
     @component_method
     def do_restart(self):

@@ -260,15 +260,15 @@ Code editors have open_shell and open_code_file methods.
                 pass
         self.Exit()
         
-    def frame_viewing(self, frame, object):
-        """frame_viewing(frame)
+    def frame_started_viewing(self, frame, object):
+        """frame_started_viewing(frame, object)
 
 Notify the app that a PugFrame has opened, so that it can track object views.
 frame: the frame that is being opened
 object: the object being viewed. This can also be a string identifying the
     pugframe, or a tuple in the form (ref to main object, additional info...).
     The tuple form is used for special displays that are not pugframes. They are
-    stored in the Frame's 'pug_view_key' field. 
+    stored in the window's 'pug_view_key' field. 
 """
 #        if self.progressDialog and frame.object == self.projectObject:
 #            self.progressDialog.Destroy()
@@ -279,18 +279,20 @@ object: the object being viewed. This can also be a string identifying the
             objList = [object]
         else:
             objList = [id(object)]
-        if _DEBUG: print "app.frame_viewing: ",object, objList
+        if _DEBUG: print "app.frame_started_viewing: ",object, objList
         if self.objFrameDict.get(frame, False):
             self.objFrameDict[frame]+=objList   
         else:
             self.objFrameDict[frame]=objList
-        if _DEBUG: print "   app.frame_viewing complete"
+        if _DEBUG: print "   app.frame_started_viewing complete"
             
     def frame_stopped_viewing(self, frame, object):
+        if _DEBUG: print "app.frame_stopped_viewing", frame, object
+        if _DEBUG: print "   ",self.objFrameDict.data
         if frame in self.objFrameDict:
             if object is None:
                 return
-            elif type(object is tuple):
+            elif type(object) is tuple:
                 if object in self.objFrameDict[frame]:
                     self.objFrameDict[frame].remove(object)
             else:
@@ -559,9 +561,9 @@ settingsObj: any frame settings members will be replaced
             return frame_settings            
             
     def get_default_rect(self, frame):
-        for testframe in self.objFrameDict.iterkeys():
-            if frame.Name == testframe.Name:
-                return None
+#        for testframe in self.objFrameDict.iterkeys():
+#            if frame.Name == testframe.Name:
+#                return None
         name = self.get_rect_setting_name(frame)
         return getattr(self.settings, name, None)
             

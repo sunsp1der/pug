@@ -63,7 +63,7 @@ class NodeTreeFrame( wx.Frame):
         sizer.Add(self.tree, 1, wx.EXPAND)
         self.SetClientSize((self.tree.get_full_width(), self.Size[1]))
         app = wx.GetApp()
-        app.frame_viewing( self, scene.nodes)           
+        app.frame_started_viewing( self, scene.nodes)           
             
 class NodeTreeListCtrl( TreeListCtrl):
     """NodeTreeListCtrl( TreeListCtrl)
