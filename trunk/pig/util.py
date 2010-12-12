@@ -7,12 +7,7 @@ import traceback
 from time import sleep
 from inspect import isclass
 
-from pig.gamedata import get_gamedata, create_gamedata
-
 _DEBUG = True
-# slight hackery
-if os.name == 'nt':
-    os.environ['SDL_VIDEODRIVER'] = 'windib'
 try:
     import Numeric #@UnresolvedImport
     if _DEBUG: print 'using Numeric'
@@ -21,9 +16,16 @@ except:
     sys.modules['Numeric'] = Numeric 
     if _DEBUG: print 'using numpy'
 
+from pig.gamedata import get_gamedata, create_gamedata
+
+# slight hackery
+if os.name == 'nt':
+    os.environ['SDL_VIDEODRIVER'] = 'windib'
+
 import Opioid2D
 from Opioid2D.public.Vector import Vector
 from Opioid2D.public.Node import Node
+from Opioid2D import Display 
 
 import pug.component
 from pug.util import get_package_classes, find_classes_in_module
@@ -44,6 +46,26 @@ layer_name: if None, use the top layer
     layer = scene.get_layer(layer_name)
     position = Opioid2D.Mouse.get_position()
     return layer.convert_pos(position[0], position[1])
+
+screen_ratio = None
+def units_to_pixels( size):
+    """units_to_pixels(size)->screen size (x,y) converted to pixels"""
+    # some day this should be tracked automatically
+    global screen_ratio
+    if screen_ratio is None:
+        view = Display.get_view_size()
+        res = Display.get_resolution()
+        screen_ratio = (float(view[0])/res[0],float(view[1])/res[1])
+    return (size[0] * screen_ratio[0], size[1] * screen_ratio[1])
+def pixels_to_units( size):
+    """pixels_to_units(size)->screen pixels (x,y) converted to units"""
+    # some day this should be tracked automatically
+    global screen_ratio
+    if screen_ratio is None:
+        view = Display.get_view_size()
+        res = Display.get_resolution()
+        screen_ratio = (float(view[0])/res[0],float(view[1])/res[1])
+    return (size[0] / screen_ratio[0], size[1] / screen_ratio[1])
 
 def skip_deprecated_warnings():
     """skip_deprecated_warnings()
