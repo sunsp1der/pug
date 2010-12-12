@@ -1,12 +1,8 @@
 todo:
-
- 	master volume controls	
-		derive from sound
-	make alpha +- go to 0 and 1
-	something slow in add_object
-		hotshot
-		profile
-	-- 	
+	component view
+	collapsible pane for extended view
+	foldpanelextended for components
+ 	master volume
  	
 installer:
 	eliminate need for pythonpather
