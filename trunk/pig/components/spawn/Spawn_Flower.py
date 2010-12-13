@@ -29,6 +29,7 @@ on_spawn callback"""
         
     @component_method                
     def on_spawn( self, obj, component):
+        "Trigger extra spawns at new angles."
         if self.spawner_name and self.spawner_name != component.gname:
             return 
         if self.flowering is None:

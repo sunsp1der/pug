@@ -22,7 +22,7 @@ def get_icon():
     return wx.Icon( get_image_path('pug.ico'), wx.BITMAP_TYPE_ICO)
 
 def show_exception_dialog( parent=None, prefix='', exc_info=None):
-    """ExceptionDialog(parent=None, prefix='')
+    """ExceptionDialog(parent=None, prefix='', exc_info=None)
 
 show exception info in a dialog
 parent: parent frame
