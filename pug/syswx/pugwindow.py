@@ -36,7 +36,7 @@ _DEBUG = False
 class PugWindow(wx.lib.scrolledpanel.ScrolledPanel):
     """A scrolled window that holds a Python Universal GUI
     
-PugWindow(self, parent, obj=None, objectpath="object", title="", show=True)
+PugWindow( parent, obj=None, objectpath="object", title="", show=True)
     parent: parent window
     obj: the object to view
     title: the frame title. if not provided, set_object will create one
@@ -169,7 +169,7 @@ tell app that our parent is viewing obj"""
     def SetTitle(self, title):
         self.titleBase = title
         parent = self.GetParent()
-        if getattr(parent, 'SetTitle'):
+        if hasattr(parent, 'SetTitle'):
             parent.SetTitle(title)        
 
     def _schedule_object_deleted(self=None, obj=None):

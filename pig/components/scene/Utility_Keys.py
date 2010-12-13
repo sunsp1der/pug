@@ -16,11 +16,11 @@ class Utility_Keys( Component):
 This adds new functions to the scene:
 do_restart(): restarts scene (not game)
 do_info(filename=None): try to open the filename with default program
-volume_up()->current volume: raises volume
-volume_down()->current volume: lowers volume
-set_volume( volume)-> 0-1
-toggle_mute(): mutes/unmutes sound
 """
+#volume_up()->current volume: raises volume
+#volume_down()->current volume: lowers volume
+#set_volume( volume)-> 0-1
+#toggle_mute(): mutes/unmutes sound
     # component_info
     _set = 'pig'
     _type = 'utilities'
@@ -28,9 +28,9 @@ toggle_mute(): mutes/unmutes sound
     # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
             ['restart_ctrl_r', 'If True, ctrl-r restarts scene'],
-            ['volume_up_ctrl_equal', 'If True, ctrl-= raises volume'],
-            ['volume_down_ctrl_minus', 'If True, ctrl-- lowers volume'],
-            ['mute_ctrl_zero', 'If True, ctrl-zero mutes/unmutes sound'],
+#            ['volume_up_ctrl_equal', 'If True, ctrl-= raises volume'],
+#            ['volume_down_ctrl_minus', 'If True, ctrl-- lowers volume'],
+#            ['mute_ctrl_zero', 'If True, ctrl-zero mutes/unmutes sound'],
             ['info_F1', Filename, {'doc':'Open this file if user presses F1'}],
             ]
     #defaults

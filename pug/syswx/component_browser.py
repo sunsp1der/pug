@@ -8,8 +8,50 @@ from pug.syswx.component_helpers import ComponentTreeCtrl
 from pug.syswx.util import get_icon
 from pug.component import component_method
 
-class ComponentBrowseDlg(wx.Dialog):
-    """ComponentBrowseDlg( parent, object=None, start_component=None): 
+class ComponentAddDlg(wx.Dialog):
+    """ComponentAddDlg( parent, object, start_component=None): 
+
+This dialog is used to add components to object
+parent: parent window
+object: object to add to on select. Only show components available to this obj.
+start_component: start with view of this component
+"""
+    def __init__(self, parent, object=None, start_component=None):
+        #HACK - had to use DD_DEFAULT_STYLE to make it sizeable
+        wx.Dialog.__init__(self, parent, style = wx.DD_DEFAULT_STYLE,
+                           title = 'Select A Component To Add')
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        self.SetSizer(sizer)
+        self.SetSize((633, 455))   
+        self.SetIcon(get_icon())             
+        self.component = None
+        
+        buttonSizer = wx.StdDialogButtonSizer()
+        addButton = wx.Button(self,wx.ID_OK,label="Add")
+        cancelButton = wx.Button(self,wx.ID_CANCEL)
+        buttonSizer.AddButton(addButton)
+        buttonSizer.AddButton(cancelButton)
+        buttonSizer.Realize()
+        
+        self.browser = ComponentBrowseWindow(self, object)
+        if start_component:
+            self.browser.select_component(start_component)
+        
+        sizer.Add(self.browser, 1, wx.EXPAND | wx.SOUTH, 10)        
+        sizer.Add(buttonSizer, 0, wx.EXPAND | wx.SOUTH | wx.WEST, 10)
+        addButton.Bind(wx.EVT_BUTTON, self.on_add)
+        self.browser.tree.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.do_add)
+        
+    def do_add(self, event):
+        self.component = self.browser.currentComponent
+        self.EndModal( wx.ID_OK)    
+        
+    def on_add(self, event):
+        self.component = self.browser.currentComponent
+        event.Skip()
+        
+class ComponentPickDlg(wx.Dialog):
+    """ComponentPickDlg( parent, object=None, start_component=None): 
     
 parent: parent window
 object: browse components applicable to this object (None yields ALL)
@@ -21,7 +63,7 @@ start_component: start with view of this component
                            title = 'Select A Component')
         sizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(sizer)
-        self.SetSize((870, 500))   
+        self.SetSize((633,455))   
         self.SetIcon(get_icon())             
         self.component = None
         
@@ -61,68 +103,34 @@ title: the window title
                            title = title)
         sizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(sizer)
-        self.SetSize((870, 450))        
+        self.SetSize((633, 455))        
         self.SetIcon(get_icon())             
         
         self.browser = ComponentBrowseWindow(self, object)
         if start_component:
             self.browser.select_component(start_component)
         
-        sizer.Add(self.browser, 1, wx.EXPAND | wx.SOUTH, 10)        
+        sizer.Add(self.browser, 1, wx.EXPAND | wx.SOUTH, 1)        
                 
-class ComponentBrowseWindow(wx.SplitterWindow):
-    """ComponentBrowseWindow( parent, object)
+class ComponentInfoWin(scrolled.ScrolledPanel):
+    """ComponentInfoWin( parent, ScrolledPanel args...)
+    
+A basic text display of a components features...
+"""                
+    def __init__(self, *a, **kw):
+        kw.setdefault('style',wx.BORDER_SUNKEN)
+        scrolled.ScrolledPanel.__init__( self, *a, **kw)
+        self.infosizer = wx.BoxSizer(wx.VERTICAL)
+        self.SetSizer(self.infosizer)
+        self.SetAutoLayout(1)
 
-parent: parent window
-object: browse components applicable to this object (None yields ALL)
-
-Shows all available components and info about each. A splitter window with a
-tree on the left and info on the right.
-"""
-    def __init__(self, parent, object):
-        wx.SplitterWindow.__init__(self, parent)
-        self.MinSize = (534, 87)
-        tree = ComponentTreeCtrl(self)
-        tree.CreateComponentTree(object)
-        tree.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_sel_changed)
-        self.tree = tree
-        
-        infowin = scrolled.ScrolledPanel(self, style=wx.BORDER_SUNKEN)
-        infosizer = wx.BoxSizer(wx.VERTICAL)
-        infowin.SetSizer(infosizer)
-        infowin.SetAutoLayout(1)
-        self.infosizer = infosizer
-        self.infowin = infowin
-        self.SplitVertically(tree, infowin, 180)
-        self.currentItem = None
-        self.currentComponent = None
-
-    def on_sel_changed(self, evt):
-        """on_sel_changed(): Display component info"""
-        #item = self.tree.GetComponentItemByPosition(evt.GetPosition())
-        item = self.tree.GetSelection()
-        if item and item is not self.currentItem:
-            self.currentItem = item
-            self.currentComponent = self.tree.GetItemPyData(item)
-            if self.currentComponent:
-                self.display_component( self.currentComponent)
-        evt.Skip()
-            
-    def select_component(self, component):
-        item = self.tree.FindItemByData( component) 
-        if item:
-            self.currentItem = item
-            self.currentComponent = component
-            self.tree.SelectItem(item) 
-            self.display_component(component)          
-            
     def display_component(self, component):
         """Create text to describe component"""
         #TODO: this is just an ugly, hacked version. Need a nice display format
         #title
-        self.infowin.Freeze()
         if component is None:
             return
+        self.Freeze()
         self.infosizer.Clear(True)
         textlist = []
         textlist.append(component.__name__)
@@ -146,7 +154,7 @@ tree on the left and info on the right.
             textlist.append('\n')
             textlist+=['Fields:']
             text=''.join(textlist)
-            text = wx.StaticText(self.infowin, -1, text)
+            text = wx.StaticText(self, -1, text)
             self.infosizer.Add(text,0,wx.WEST,5)
             dummy = component()
             for item in component._field_list:
@@ -154,7 +162,7 @@ tree on the left and info on the right.
                 textlist+=['\n',item[0],': (Default=']
                 textlist+=[repr(getattr(dummy, item[0])),')']
                 text=''.join(textlist)
-                text = wx.StaticText(self.infowin, -1, text)
+                text = wx.StaticText(self, -1, text)
                 self.infosizer.Add(text,0,wx.WEST,15)
                 doc = ''
                 if len(item) > 1:
@@ -162,22 +170,65 @@ tree on the left and info on the right.
                         doc = item[1]
                     elif len(item) > 2:
                         doc = item[2].get('doc', '')
-                text = wx.StaticText(self.infowin, -1, doc)
+                text = wx.StaticText(self, -1, doc)
                 self.infosizer.Add(text,0,wx.WEST,35)
-        text = wx.StaticText(self.infowin, -1, '\nMethods:')
+        text = wx.StaticText(self, -1, '\nMethods:')
         self.infosizer.Add(text,0,wx.WEST,5)
         for item in dir(component):
             attr = getattr(component, item)
             if isinstance(attr, component_method):
                 text = ''.join(['\n',item,':'])
-                text = wx.StaticText(self.infowin, -1, text)
+                text = wx.StaticText(self, -1, text)
                 self.infosizer.Add(text,0,wx.WEST,15)
                 if attr.__doc__:
-                    text = wx.StaticText(self.infowin, -1, 
+                    text = wx.StaticText(self, -1, 
                                      attr.__doc__)
                     self.infosizer.Add(text,0,wx.WEST,35)
         self.infosizer.Layout()
         self.infosizer.MinSize = self.infosizer.Size
-        self.infowin.SetupScrolling()
-        if self.infowin.IsFrozen():
-            self.infowin.Thaw()
+        self.SetupScrolling()
+        if self.IsFrozen():
+            self.Thaw()        
+        
+class ComponentBrowseWindow(wx.SplitterWindow):
+    """ComponentBrowseWindow( parent, object)
+
+parent: parent window
+object: browse components applicable to this object (None yields ALL)
+
+Shows all available components and info about each. A splitter window with a
+tree on the left and info on the right.
+"""
+    def __init__(self, parent, object):
+        wx.SplitterWindow.__init__(self, parent)
+        self.MinSize = (534, 87)
+        tree = ComponentTreeCtrl(self)
+        tree.CreateComponentTree(object)
+        tree.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_sel_changed)
+        self.tree = tree
+        
+        infowin = ComponentInfoWin(self)
+        self.infowin = infowin
+        self.SplitVertically(tree, infowin, 180)
+        self.currentItem = None
+        self.currentComponent = None
+
+    def on_sel_changed(self, evt):
+        """on_sel_changed(): Display component info"""
+        #item = self.tree.GetComponentItemByPosition(evt.GetPosition())
+        item = self.tree.GetSelection()
+        if item and item is not self.currentItem:
+            self.currentItem = item
+            self.currentComponent = self.tree.GetItemPyData(item)
+            if self.currentComponent:
+                self.infowin.display_component( self.currentComponent)
+        evt.Skip()
+            
+    def select_component(self, component):
+        item = self.tree.FindItemByData( component) 
+        if item:
+            self.currentItem = item
+            self.currentComponent = component
+            self.tree.SelectItem(item) 
+            self.infowin.display_component(component)          
+    
