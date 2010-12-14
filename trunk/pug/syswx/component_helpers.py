@@ -186,9 +186,8 @@ choose a given component to be selected after refresh.
                 ref = weakref.ref(component)
                 label = component.__class__.__name__
                 if component.gname:
-                    label = component.gname + ' (' + label + ')'
-                item = self.listCtrl.AddItem(label, 
-                                         ref)
+                    label = label + ' (' + component.gname + ')'
+                item = self.listCtrl.AddItem(label, ref)
                 if component == selectComponent:
                     retValue = item
                     self.listCtrl.SelectItem(item)
@@ -229,6 +228,8 @@ Call this when the selected component is removed from the object being viewed.
 ######################################################################
 
 class ComponentTreeCtrl(wx.TreeCtrl):
+    recentList = [] # list of recently chosen components. class level
+    recentListMax = 3
     def __init__(self, parent):
         wx.TreeCtrl.__init__(self,parent, style=wx.TR_HIDE_ROOT
                                 |wx.TR_HAS_BUTTONS
@@ -236,7 +237,7 @@ class ComponentTreeCtrl(wx.TreeCtrl):
                                 |wx.TR_LINES_AT_ROOT
                                 |wx.SIMPLE_BORDER)
         self.SetSpacing(10)
-        self.SetIndent(8)            
+        self.SetIndent(8)          
 
     def AddItem(self, text, data=None, parent=None):
         if not parent:
@@ -250,6 +251,18 @@ class ComponentTreeCtrl(wx.TreeCtrl):
             self.SetItemPyData(item,data)
         return item     
     
+    def AddRecent(self, component):
+        if component in self.recentList:
+            return
+        self.recentList.insert(0, component)
+        while len(self.recentList) > self.recentListMax:
+            self.recentList.pop( self.recentListMax)
+            
+    def ExpandRecent(self):
+        item = self.GetFirstVisibleItem()
+        if self.GetItemText( item) == "~Recent~":
+            self.Expand( item)
+            
     def FindItemByData(self, data, parentItem=None):  
         if parentItem == None:
             parentItem = self.GetRootItem()
@@ -304,6 +317,17 @@ object: the object that is being viewed. Used to define what components are
         # Component's sorted... Now alphabetize
         typeList = types.keys()[:]
         typeList.sort()
+        # Add recent components to top
+        r = "~Recent~"
+        recents = []
+        for component in self.recentList:
+            if not is_valid_component_class(object, component):
+                continue
+            else: 
+                recents += [component]
+        if recents:
+            typeList = [r] + typeList
+            types[r] = recents
         # Recreate tree
         self.DeleteAllItems()
         lastType = [] # we use a list because we're going to split by '/'

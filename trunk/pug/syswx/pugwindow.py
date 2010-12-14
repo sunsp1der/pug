@@ -146,7 +146,7 @@ holds multiple PugWindows in tabbed (or other) form.
                         self.GetParent().show_all_attributes()
                 except:
                     pass
-            self.started_viewing( self.objectRef)
+            self.started_viewing( obj)
         self.SetTitle(title)
         if self.IsFrozen():
             self.Thaw()                   
@@ -232,21 +232,21 @@ To return to object view, call display_aguilist().
             filterUnderscore = 2
         oldpugview = self.pugview
         self.pugview = {}
-        if self._currentView == '&Raw':
+        if self._currentView in ('&Raw', 'Raw'):
             self.aguilist = create_raw_aguilist(self.object, self, None, 
                                               filterUnderscore)
-        elif self._currentView == 'Raw &Data':
+        elif self._currentView == ('Raw &Data', 'Raw Data'):
             self.aguilist = create_raw_aguilist(self.object, self, 
                                               ['Default', 'Objects'],
                                               filterUnderscore)
-        elif self._currentView == 'Raw &Methods':
+        elif self._currentView == ('Raw &Methods', 'Raw Methods'):
             self.aguilist = create_raw_aguilist(self.object, self,['Routine'],
                                               filterUnderscore)
         else:
             pugview = self._currentView
             self.pugview = pugview
             self.aguilist = create_pugview_aguilist(self.object, self, pugview,
-                                                   filterUnderscore=0)
+                                                    filterUnderscore=0)
             self.SetSize(wx.Size(pugview['size'][0], 
                                  pugview['size'][1]))
             if pugview.get('force_persist'):
@@ -470,9 +470,13 @@ Generally, this is called when an attribute gui has changed size.
                 objectPath = self.objectPath
                 pugButton = True
                 retypeButton = False
-                if self.pugview.has_key('info_function'):
-                    customFrame = self.pugview['info_function'](object, 
-                                                            self, objectPath)
+                custom_info = None
+                try: 
+                    custom_info = self.pugview.get_key('info_function')
+                except:
+                    pass
+                if custom_info:
+                    customFrame = custom_info(object, self, objectPath)
             elif (object is None and attribute == ""):    
                 # context help pushed, but no valid context            
                 return

@@ -4,6 +4,7 @@ import weakref
 import wx
 import wx.lib.buttons
 
+from pug.syswx.util import show_exception_dialog
 from pug.syswx.wxconstants import *
 
 # TODO: I think myPugFrame could be removed if I can figure out how to get
@@ -90,14 +91,11 @@ size: the button size
         try:
             obj = self.get_obj()
             if obj:
-                self.PugFrame(obj=obj, objectpath=self._getNewPath())
+                self.PugFrame(parent=wx.GetApp().get_project_frame(),
+                              obj=obj, objectpath=self._getNewPath())
         except:
             wx.EndBusyCursor()
-            retDlg = wx.MessageDialog(self, 'Unable To Open PugFrame',
-                                      'PugFrame Error', 
-                                       wx.ICON_ERROR | wx.OK)
-            retDlg.ShowModal()      
-            retDlg.Destroy()          
+            show_exception_dialog()
 
     def get_obj(self):
         if self.targetObjectFn:

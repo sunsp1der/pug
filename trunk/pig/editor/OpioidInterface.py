@@ -240,7 +240,7 @@ settingsObj: an object similar to the one below... if it is missing any default
             initial_scene = "__Working__"
             Rect_Pig_Editor = (470, 150, 550, 600)
             Rect_Pug_Python_Editor = (0, 100, 869, 600)            
-            rect_opioid_window = (0, 0, 800 , 600)
+            rect_opioid_window = (10, 10, 800 , 600)
             save_settings_on_quit = True
 
         if settingsObj:
@@ -537,7 +537,8 @@ Callback from PugApp...
         if getattr(self.pug_settings,'save_settings_on_quit',True):
             if os.name == 'nt':
                 window_pos = self.canvas.GetWindowPosition()
-                self.pug_settings.rect_opioid_window = tuple( 
+                if not self.canvas.IsIconic():
+                    self.pug_settings.rect_opioid_window = tuple( 
                                             self.canvas.GetWindowPosition() +\
                                             self.canvas.GetWindowSize())
             self.save_pug_settings()
@@ -873,10 +874,10 @@ Opioid2D, it is safer to call this via add_object.
         skip_deprecated_warnings()    
         time.sleep(0.1)
     
-        set_opioid_window_position(rect[0:2])
         Opioid2D.Display.init(rect[2:4], 
                               title=title, 
                               icon=icon)
+        set_opioid_window_position(rect[0:2])
         Opioid2D.Director.project_started = False
         Opioid2D.Director.viewing_in_editor = True
         try:
