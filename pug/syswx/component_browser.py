@@ -36,15 +36,17 @@ start_component: start with view of this component
         self.browser = ComponentBrowseWindow(self, object)
         if start_component:
             self.browser.select_component(start_component)
+        self.browser.tree.ExpandRecent()
         
         sizer.Add(self.browser, 1, wx.EXPAND | wx.SOUTH, 10)        
         sizer.Add(buttonSizer, 0, wx.EXPAND | wx.SOUTH | wx.WEST, 10)
         addButton.Bind(wx.EVT_BUTTON, self.on_add)
-        self.browser.tree.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.do_add)
+        self.browser.tree.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.item_dclicked)
         
-    def do_add(self, event):
+    def item_dclicked(self, event):
         self.component = self.browser.currentComponent
-        self.EndModal( wx.ID_OK)    
+        if self.component:
+            self.EndModal( wx.ID_OK)    
         
     def on_add(self, event):
         self.component = self.browser.currentComponent
@@ -191,27 +193,55 @@ A basic text display of a components features...
             self.Thaw()        
         
 class ComponentBrowseWindow(wx.SplitterWindow):
-    """ComponentBrowseWindow( parent, object)
+    """ComponentBrowseWindow( parent, object=None, show_current=True)
 
 parent: parent window
 object: browse components applicable to this object (None yields ALL)
+show_current: if this is True and object is not None, show a window with 
+    object's current components below the component tree
 
 Shows all available components and info about each. A splitter window with a
 tree on the left and info on the right.
 """
-    def __init__(self, parent, object):
+    def __init__(self, parent, object=None, show_current=True):
         wx.SplitterWindow.__init__(self, parent)
         self.MinSize = (534, 87)
+#        panel = wx.Panel(self)
+#        sizer = wx.BoxSizer(wx.VERTICAL)
+#        panel.SetSizer( sizer)
+        
+        # left
+        #  tree
         tree = ComponentTreeCtrl(self)
         tree.CreateComponentTree(object)
         tree.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_sel_changed)
         self.tree = tree
-        
+#        sizer.Add(tree)#, 4, wx.EXPAND)
+        #  current
+#        if show_current and object is not None:
+#            self.current = wx.ListBox(self, style=wx.LB_SINGLE)
+#            self.current.Bind(wx.EVT_LISTBOX, self.current_click)
+#            self.current.Bind(wx.EVT_LISTBOX_DCLICK, self.current_dclick)
+#            sizer.Add(self.current, 1, wx.EXPAND)
+#            components = object.components.get()    
+#            components.reverse()       
+#            for component in components:
+#                label = component.__class__.__name__
+#                if component.gname:
+#                    label = label + ' (' + component.gname + ')'               
+#                self.current.Insert(label, 0, component)
+        # right
         infowin = ComponentInfoWin(self)
         self.infowin = infowin
         self.SplitVertically(tree, infowin, 180)
         self.currentItem = None
         self.currentComponent = None
+        
+    def current_click(self, evt):
+        print "click"
+
+    def current_dclick(self, evt):
+        print "dclick"
 
     def on_sel_changed(self, evt):
         """on_sel_changed(): Display component info"""

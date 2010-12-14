@@ -101,7 +101,8 @@ PugFrame(self, obj=None, objectpath="object", title="", show=True, parent=None,
         self.pugWindow.apply()
         
     def refresh(self, event=None):
-        self.pugWindow.refresh()
+        if self.pugWindow:
+            self.pugWindow.refresh()
             
     def set_object(self, obj, objectpath="unknown", title=""):
         """set_object(obj, objectpath, title)

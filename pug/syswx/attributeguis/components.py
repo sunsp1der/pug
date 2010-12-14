@@ -119,7 +119,7 @@ For kwargs optional arguments, see the Base attribute GUI
         # keep the pug function around for button pressing
         # don't know if this is the right way to do it
         from pug.syswx.pugframe import PugFrame
-        self.pug = PugFrame
+        self.pugframe = PugFrame
                 
     def setup(self, attribute, window, aguidata):
         for child in self.control.GetChildren():
@@ -156,15 +156,16 @@ For kwargs optional arguments, see the Base attribute GUI
             component = dlg.component
         else:
             component = None
-        dlg.Destroy()
         if component:
             try:
+                dlg.browser.tree.AddRecent(component)
                 instance = self.object.components.add(component)
                 self.editList.component_added(instance)
                 self.window.refresh()
                 self.edit_button_click()
             except:
                 show_exception_dialog()
+        dlg.Destroy()
         
     def remove_button_click(self, event=None):
         component = self.editList.get_selected()
@@ -194,7 +195,8 @@ For kwargs optional arguments, see the Base attribute GUI
         app = wx.GetApp()
         objectpath = ''.join([self.editList.get_text(), ' component of ', path])
         if wx.GetKeyState(wx.WXK_CONTROL) or not app.show_object_frame(obj):
-            frame = self.pug(obj=obj, parent=None, 
+            frame = self.pugframe(obj=obj, 
+                                  parent=wx.GetApp().get_project_frame(), 
                              objectpath=objectpath, show=False)
             self_rect = self.control.GetTopLevelParent().GetScreenRect()
             frame_rect = frame.GetScreenRect()

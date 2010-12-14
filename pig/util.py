@@ -234,12 +234,14 @@ _project_settings file unless otherwise noted.
     
     Opioid2D.Director.run(initial_scene)
         
-def set_opioid_window_position( position):    
-    if os.name == 'nt':
-        loc = (position[0]+3, position[1]+25)
-    else:
-        loc = position[0:2]
-    os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % loc
+def set_opioid_window_position( position): 
+    from pig.editor.wm_ext import EXT_SetWindowPos   
+    EXT_SetWindowPos(*position[0:2])
+#    if os.name == 'nt':
+#        loc = (position[0]+3, position[1]+25)
+#    else:
+#        loc = position[0:2]
+#    os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % loc
     
 def fix_project_path( path):
     """fix_project_path( path)->path after removing Idle editor info"""
