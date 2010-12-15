@@ -1,17 +1,6 @@
 todo:
-x	improve components agui
-x		change add to + icon with dialog
-x		move buttons up to row
-x		dialog
-x			double-click to select
-			show current components
-x			start centered
-x			default size
-x			doubleclick on type
-x			list of recently added
-x				duplicates
-x	edit component showing duplicates and placing in weird place
-x	canvas starts in weird place when settings deleted
+
+	make error not modal...
 	make alpha buttons go to 0
 	dragging divider causes yucky display in main editor window
 	wider list of components on object?

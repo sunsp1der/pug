@@ -57,6 +57,8 @@ projectFolder: where file menus start at.  Defaults to current working dir.
         self.set_project_folder(projectFolder)
         self.args = (projectObject, projectObjectName, projectName, 
                      projectFolder)
+        self.permanent_settings = ["Rect_Pug_Python_Editor", 
+                                   "Rect_Component_Browser"]
         wx.App.__init__(self, redirect=redirect)
         #self.SetExitOnFrameDelete(False)
     
@@ -361,9 +363,9 @@ selection: a list of objects that are currently selected in the project.
 skipObj: this object will not get a callback 
     (convenience to prevent infinite loop)
 
-Set the interface's selectedObjectDict. These objects can be viewed in a PugWindow 
-by calling the open_selection_frame method. Selection is tracked in a set, so 
-duplicates will be automatically eliminated.
+Set the interface's selectedObjectDict. These objects can be viewed in a 
+PugWindow by calling the open_selection_frame method. Selection is tracked in a 
+set, so duplicates will be automatically eliminated.
 """
         if _DEBUG: print "app.set_selection:",selection
         if _DEBUG: print "    old selection:",self.selectedObjectDict.keys()
@@ -548,7 +550,7 @@ settingsObj: any frame settings members will be replaced
             # erase old rects
             keys = settingsObj.__dict__.keys()
             for attr in keys:
-                if attr == "Rect_Pug_Python_Editor":
+                if attr in self.permanent_settings:
                     continue
                 if attr.startswith(_RECTPREFIX):
                     delattr( settingsObj, attr) 
@@ -566,6 +568,12 @@ settingsObj: any frame settings members will be replaced
 #                return None
         name = self.get_rect_setting_name(frame)
         return getattr(self.settings, name, None)
+    
+    def store_default_rect(self, frame):
+        name = self.get_rect_setting_name(frame)
+        data = (frame.Position[0], frame.Position[1], 
+                    frame.Size[0], frame.Size[1])
+        setattr(self.settings, name, data)
             
     def raise_all_frames(self):
         windows = wx.GetTopLevelWindows()
