@@ -151,7 +151,7 @@ For kwargs optional arguments, see the Base attribute GUI
         
     def add_button_click(self, event=None):
         dlg = ComponentAddDlg( None, self.object)
-        dlg.Center()
+        #dlg.Center()
         if dlg.ShowModal() == wx.ID_OK:
             component = dlg.component
         else:

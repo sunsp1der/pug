@@ -230,12 +230,14 @@ Call this when the selected component is removed from the object being viewed.
 class ComponentTreeCtrl(wx.TreeCtrl):
     recentList = [] # list of recently chosen components. class level
     recentListMax = 3
-    def __init__(self, parent):
-        wx.TreeCtrl.__init__(self,parent, style=wx.TR_HIDE_ROOT
-                                |wx.TR_HAS_BUTTONS
-                                |wx.TR_SINGLE
-                                |wx.TR_LINES_AT_ROOT
-                                |wx.SIMPLE_BORDER)
+    def __init__(self, parent, multiple_select=False):
+        style=wx.TR_HIDE_ROOT | wx.TR_HAS_BUTTONS | wx.TR_LINES_AT_ROOT \
+                 | wx.SIMPLE_BORDER
+        if multiple_select:
+            style |= wx.TR_MULTIPLE
+        else:
+            style |= wx.TR_SINGLE                   
+        wx.TreeCtrl.__init__(self, parent, style=style )
         self.SetSpacing(10)
         self.SetIndent(8)          
 
