@@ -94,6 +94,7 @@ PugFrame(self, obj=None, objectpath="object", title="", show=True, parent=None,
         if self.pugWindow:
             if event.Active:
                 self.pugWindow.refresh()
+                self.Refresh()
             elif self.pugWindow.settings.get('auto_apply', False):
                 self.apply()
                 
