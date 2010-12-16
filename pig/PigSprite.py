@@ -467,7 +467,7 @@ _spritePugview = {
                                           'filter':_fl_art_types}],
         ['tint', pug.ColorPicker,{'text_control':True}],
         ['alpha', pug.FloatSpin,{'range':(0,1), 'digits':1, 
-                                 'adjust_digits':True}],
+                                 'adjust_digits':True, 'wait_for_set':False}],
         [' Spacial', pug.Label],
         ['layer_name', pug.Dropdown, {'list_generator':get_available_layers,
                                       'label':'   layer'}],

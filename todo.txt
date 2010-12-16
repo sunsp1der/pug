@@ -1,9 +1,4 @@
 todo:
-
-	make error not modal...
-	make alpha buttons go to 0
-	dragging divider causes yucky display in main editor window
-	wider list of components on object?
  	
 installer:
 	eliminate need for pythonpather

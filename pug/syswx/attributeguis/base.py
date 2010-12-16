@@ -28,6 +28,10 @@ aguidata: dictionary of special agui information. Can be customized for specific
         'growable': if true, this allows the control to grow vertically
         'agui_info_dict': a dict that will be filled with:
                             'agui':the actual agui created
+        'refresh_all': When attribute changes, refresh pug view. Default: True.
+        'wait_for_set': Wait for confirmation when setting attribute. 
+                        Default:True
+        
 control_widget: the widget used for input, usually defined by derived classes. 
 label_widget: widget used for label. For compatibility, this control should have
     a textCtrl member that contains the main piece of text.
@@ -107,6 +111,8 @@ all controls.
                 self.label.Thaw()
             self.label.Show()
         aguidata.setdefault('read_only',False)
+        aguidata.setdefault('refresh_all', True)
+        aguidata.setdefault('wait_for_set', True)
         #label
         if hasattr(self.label, 'textCtrl'):
             labelText = aguidata.get('label', 
@@ -227,23 +233,25 @@ When auto apply is off, skip apply events that were created by the event system
         else:                
             applied = self.set_attribute_value()
         if applied:
-            starttime = time.time()
-            while self.get_attribute_value() != control_value:
-                # sometimes we have to wait a bit for it to take effect
-                # if this takes more than 0.5 seconds, forget it
-                
-                # HACK check for weird float case
-                if type(control_value) == type(0.1):
-                    if type(self.get_attribute_value()) == type(0.1) and \
-                            str(self.get_attribute_value()) == \
-                            str(control_value):
-                        break            
-                time.sleep(0.01)
-                if time.time() - starttime > 0.5: 
-                    applied = False
-                    self.refresh()
-                    break
-            self.refresh_window()        
+            if self.aguidata['wait_for_set']:
+                starttime = time.time()
+                while self.get_attribute_value() != control_value:
+                    # sometimes we have to wait a bit for it to take effect
+                    # if this takes more than 0.5 seconds, forget it
+                    
+                    # HACK check for weird float case
+                    if type(control_value) == type(0.1):
+                        if type(self.get_attribute_value()) == type(0.1) and \
+                                str(self.get_attribute_value()) == \
+                                str(control_value):
+                            break            
+                    time.sleep(0.01)
+                    if time.time() - starttime > 0.5: 
+                        applied = False
+                        self.refresh()
+                        break
+            if self.aguidata['refresh_all']:
+                self.refresh_window()        
             #self.set_control_value(self.get_control_value())          
         else:
             # bad apply... just revert

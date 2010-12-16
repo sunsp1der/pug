@@ -13,6 +13,14 @@ doesn't have as many features/accessors as the combo.ComboCtrl"""
         wx.combo.ComboPopup.__init__(self)
         self.typedText = ''
         self.didSelect = True
+        self.minWidth = 0
+        self.maxHeight = 130
+        
+    def SetMinWidth(self, min):
+        self.minWidth = min
+        
+    def SetMaxHeight(self, max):
+        self.maxHeight = max    
         
     def Create(self, parent):
         wx.ListBox.Create(self, parent, style=wx.LB_SINGLE)
@@ -152,7 +160,7 @@ callback(self)
         self.list.Clear()
         
     def GetAdjustedSize(self, minWidth, prefHeight, maxHeight):
-        return wx.Size(minWidth, min(200,maxHeight))
+        return wx.Size(self.minWidth or minWidth, min(self.maxHeight,maxHeight))
     
     def OnEnter(self, event):
         selected = self.list.GetSelection()

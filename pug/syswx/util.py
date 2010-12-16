@@ -47,8 +47,8 @@ exc_info: if provided, this is the data from sys.exc_info(). If not, use the
                             style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
     # scroll to bottom
     err.Children[0].ShowPosition(len(msg))
-    err.ShowModal()
-    err.Destroy()
+    err.Show()
+    wx.Bell()
     return 
 
 def cache_aguilist( aguilist):

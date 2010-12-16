@@ -98,6 +98,7 @@ class ComponentList(wx.combo.ComboCtrl):
         wx.combo.ComboCtrl.__init__(self, *args, **kwargs)
         self.__object = None
         popup = ListCtrlComboPopup()
+        popup.SetMinWidth(150)
         self.listCtrl = popup
         self.SetPopupControl(popup)
         self.listCtrl.Bind(wx.EVT_MOTION, self.OnMotion)

@@ -1,4 +1,4 @@
-"""components.py - component viewer attribute gui"""
+"""DropdownComponents.py - component viewer attribute gui"""
 
 import gc
 
@@ -15,10 +15,10 @@ from pug.syswx.component_browser import ComponentPickDlg
 
 # TODO: make it fold up everything beneath it
 
-class Components (Base):
-    """Component attribute gui with features for adding, removing, editing
+class DropdownComponents (Base):
+    """Component attribute gui with a dropdown for adding new components.
     
-Components(attribute, window, aguidata, **kwargs)
+DropdownComponents(attribute, window, aguidata, **kwargs)
 attribute: name of component attribute (normally 'components')
 window: the parent pugFrame
 aguidata: {

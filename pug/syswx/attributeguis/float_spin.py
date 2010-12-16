@@ -8,8 +8,11 @@ from pug.syswx.attributeguis.base import Base
 from pug.util import prettify_float
 
 class FloatSpin (Base):
-    """FloatSpin attribute GUI is a box for floating point numbers. It has
-spinner buttons and and min/max values can be set.
+    """FloatSpin attribute GUI is a box with spinners for float numbers. 
+    
+Increment, format, and min/max values can be set. For speed's sake, this agui
+has aguidata['refresh_all'] set to false by default. If you need the entire pug
+view to refresh when the value is changed, set 'refresh_all' to True. 
     
 FloatSpin(attribute, window, aguidata, **kwargs)
 attribute: what attribute of window.object is being controlled
@@ -39,7 +42,8 @@ For more aguidata optional arguments, see the Base attribute GUI
         Base.__init__(self, attribute, window, aguidata, **kwargs)
         
     def setup(self, attribute, window, aguidata):
-        self.floatspin.SetRange( *self.aguidata.get('range',(None,None)))
+        #self.floatspin.SetRange( *self.aguidata.get('range',(None,None)))
+        self.minval, self.maxval = self.aguidata.get('range',(None,None))
         self.floatspin.SetIncrement(self.aguidata.get('increment',0.1))
         self.floatspin.SetFormat(self.aguidata.get('format',"%f"))
         self.floatspin.SetDigits(self.aguidata.get('digits',2))
@@ -49,27 +53,26 @@ For more aguidata optional arguments, see the Base attribute GUI
         return self.floatspin.GetValue()
     
     def enter(self, event):
-        self.apply(event)    
+        self.floatspin.SetValue( float(self.floatspin.GetTextCtrl().GetValue()))
+#        self.apply(event)    
         self.floatspin.GetTextCtrl().SelectAll()
     
     def fix(self, event=None):
         "fix problem with showing out of range values"
-        value = self.floatspin.GetTextCtrl().GetValue()
-        if value < self.floatspin.GetMin():
-            self.floatspin.SetValue(self.floatspin.GetMin())
-        elif value > self.floatspin.GetMax():
-            self.floatspin.SetValue(self.floatspin.GetMax())
+        value = self.floatspin.GetValue()
+        if self.minval is not None and value < self.minval:
+            self.floatspin.SetValue(self.minval)
+        elif self.maxval is not None and value > self.maxval:
+            self.floatspin.SetValue(self.maxval)
     
     def apply(self, event=None):
         self.fix()
         if self.aguidata.get('adjust_digits', False):
             value = self.floatspin.GetValue()
-            if self.floatspin.GetMin() <= value <= self.floatspin.GetMax():
-                # value in range, now check the precision of the value
-                f = prettify_float(value)
-                precision = len(f) - f.find('.') - 1
-                if precision > self.floatspin.GetDigits():
-                    self.floatspin.SetDigits(precision)
+            f = prettify_float(value)
+            precision = len(f) - f.find('.') - 1
+            if precision > self.floatspin.GetDigits():
+                self.floatspin.SetDigits(precision)
         Base.apply(self, event)  
         self.floatspin.GetTextCtrl().SetSelection(0,0)
     
