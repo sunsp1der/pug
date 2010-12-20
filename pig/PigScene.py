@@ -21,7 +21,7 @@ from pug.util import make_valid_attr_name, start_edit_process
 from pig.PauseState import PauseState
 from pig.util import entered_scene
 from pig.editor.agui import SceneNodes, SceneLayers
-from pig.editor.util import get_available_layers, save_object, exporter_cleanup
+from pig.editor.util import get_scene_layers, save_object, exporter_cleanup
 from pig.keyboard import keys, keymods
 from pig.PigDirector import PigDirector
 from pig.gamedata import create_gamedata, get_gamedata
@@ -592,10 +592,10 @@ Update the PigScene's node tracking dict for node. Possible commands: 'Delete'
         nodes[node] = node_num # this call sets off callbacks for nodes gui        
             
     def get_scene_layers(self):
-        return get_available_layers()
+        return get_scene_layers()
 
     scene_layers = property(get_scene_layers, doc=
-            'Utility property for viewing layers without __editor__ layer')
+            "Scene layers excluding hidden ('__') layers")
     
     @classmethod
     def _create_dummy(cls, exporter):
@@ -757,7 +757,7 @@ If scene is a working scene, return
         if custom_code_list:
             custom_code_list = ['\n']+custom_code_list
         #add layers line
-        layers = get_available_layers()
+        layers = get_scene_layers()
         if layers != ["Background"]:
             layercode = ''.join([baseIndent, _INDENT,'layers = ', str(layers),
                                 '\n'])

@@ -16,21 +16,21 @@ Access this object through scene.mouse_manager. To register an object for mouse
 events, use PigSprite.mouse_register(). 
 """
     def __init__(self):
-        self._multi_elements = set() # all nodes registered as 'multi'
-        self._click_elements = set() # all nodes registered as 'click'
-        self._single_elements = set() # all nodes registered 
+        self._multi_objects = set() # all nodes registered as 'multi'
+        self._click_objects = set() # all nodes registered as 'click'
+        self._single_objects = set() # all nodes registered 
         self._under = []
         self._drag = None
         self._clicking = []
         self._pos_dict = {} 
 
-    def register(self, element, type="single"):
-        """register( element, type="single")
+    def register(self, object, type="single"):
+        """register( object, type="single")
         
-element: the sprite to register for mouse events
-type: "single", "multi", or "click". Gui elements check all mouse events. If one is
-under the mouse, no other mouse events will be checked. Game elements check all
-mouse events, but if one is found others are still checked. Click elements only
+object: the sprite to register for mouse events
+type: "single", "multi", or "click". Gui objects check all mouse events. If one is
+under the mouse, no other mouse events will be checked. Game objects check all
+mouse events, but if one is found others are still checked. Click objects only
 check for mouse down and mouse up events. 
 
 Registering can upgrade type from "multi" to "single" or from "click" to "multi" or 
@@ -40,29 +40,29 @@ register at the lower callback level.
         if type not in ['single', 'multi', 'click']:
             raise ValueError("Must register for mouse events as"+\
                              " 'single', 'multi', or 'click'")
-        if (type == "multi" and element._mouse_registered == "single") or \
-                (type == "click" and (element._mouse_registered == "single" or \
-                                      element._mouse_registered == "multi")):
+        if (type == "multi" and object._mouse_registered == "single") or \
+                (type == "click" and (object._mouse_registered == "single" or \
+                                      object._mouse_registered == "multi")):
             # we're already getting those events
             return   
         if type == "single":
-            group = self._single_elements
+            group = self._single_objects
         elif type == "multi":
-            group = self._multi_elements
+            group = self._multi_objects
         elif type == "click":
-            group = self._click_elements
-        (Delay(0) + CallFunc(group.add, element)).do()
-        element._mouse_registered = type
+            group = self._click_objects
+        (Delay(0) + CallFunc(group.add, object)).do()
+        object._mouse_registered = type
             
-    def unregister(self, element):
-        """unregister( element): unregister element from mouse events"""
+    def unregister(self, object):
+        """unregister( object): unregister object from mouse events"""
         try:
-            self._click_elements.remove(element)
+            self._click_objects.remove(object)
         except KeyError:
             try:
-                self._multi_elements.remove(element)
+                self._multi_objects.remove(object)
             except KeyError:
-                self._single_elements.discard(element)
+                self._single_objects.discard(object)
                 
     def get_relative_pos(self, layer):
         if not layer:
@@ -80,16 +80,16 @@ register at the lower callback level.
         scene = PigDirector.get_scene()
         results = []
         i = 0
-        for e in self._single_elements:
+        for e in self._single_objects:
             l = e.get_root_layer()
             if not l:
                 continue
             wx,wy = self.get_relative_pos(l)
             p = e._cObj.Pick(_c.Vec2(wx,wy))
             p = ObjectManager.c2py(p)
-            if self._drag and self._drag._element is p:
+            if self._drag and self._drag._object is p:
                 continue
-            if p and p in self._single_elements:
+            if p and p in self._single_objects:
                 idx = scene.layers.index(l.get_name())
                 results.append((idx,i,p))
                 i += 1
@@ -99,83 +99,86 @@ register at the lower callback level.
 #            under[0].on_hover()
         else:
             under = []
-            for e in self._multi_elements:
+            for e in self._multi_objects:
                 l = e.get_root_layer()
                 if not l:
                     continue
                 wx,wy = self.get_relative_pos(l)
                 p = e._cObj.Pick(_c.Vec2(wx,wy))
                 p = ObjectManager.c2py(p)
-                if self._drag and self._drag._element is p:
+                if self._drag and self._drag._object is p:
                     continue
-                if p and p in self._multi_elements:
+                if p and p in self._multi_objects:
                     under.append(p)
         self._update_under(under)
         for ev in evs:
             if ev.type == pygame.MOUSEBUTTONDOWN:
                 self._clicking = under
-                for element in under:
-                    element.on_press()
-                for e in self._click_elements:
+                for object in under:
+                    object.on_press()
+                for e in self._click_objects:
                     l = e.get_root_layer()
                     if not l:
                         continue
                     wx,wy = self.get_relative_pos(l)
                     p = e._cObj.Pick(_c.Vec2(wx,wy))
                     p = ObjectManager.c2py(p)
-                    if p and p in self._click_elements:
+                    if p and p in self._click_objects:
                         self._clicking.append(p)
                         p.on_press()
             elif ev.type == pygame.MOUSEBUTTONUP:
                 if self._drag is not None:
                     self._drag._update_pos(mx,my)
-                    self._drag._element.on_drag_end()
-                    self._drag._element.on_release()                  
+                    self._drag._object.on_drag_end()
+                    self._drag._object.on_release()                  
                     self._drag = None
                     self._clicking = []
                 elif self._clicking != []:
-                    for element in self._clicking:
-                        if element in self._under:
-                            element.on_click()
+                    for object in self._clicking:
+                        if object in self._under:
+                            object.on_click()
                     self._clicking = []
-                for element in self._under:
-                    element.on_release()
+                for object in self._under:
+                    object.on_release()
             elif ev.type == pygame.MOUSEMOTION and self._clicking != []:
                 dragger = None
                 if len(self._clicking) > 1:
                     results = []
                     i = 0
-                    for element in self._clicking:
-                        if not element.draggable:
+                    for object in self._clicking:
+                        if not object.draggable:
                             continue
                         idx = scene.layers.index(
-                                                element.get_root_layer().get_name())
-                        results.append((idx, i, element))
+                                            object.get_root_layer().get_name())
+                        results.append((idx, i, object))
                     results.sort()
                     dragger = results[-1][2]
                 elif self._clicking[0].draggable:
                     dragger = self._clicking[0] 
                 if self._drag is None and dragger is not None:
-                    self._drag = Drag(dragger,(wx,wy))
-                    dragger.on_drag_begin()
-                    try:    
-                        self._under.remove(dragger)
-                    except:
-                        pass
+                    l = dragger.get_root_layer()
+                    if l: 
+                        wx,wy = self.get_relative_pos(l)
+                        self._drag = Drag(dragger,(wx,wy))
+                        dragger.on_drag_begin()
+                        try:    
+                            self._under.remove(dragger)
+                        except:
+                            pass
                     self._clicking = []
         if self._drag is not None:
-            self._drag._element.on_drag()
+            self._drag._object.on_drag()
             self._drag._update_pos(mx,my)
 
     def _update_under(self, under):
         if under != self._under:
-            for element in under:
-                if element not in self._under:
-                    element.on_enter()
+            for object in under:
+                if object not in self._under:
+                    object.on_enter()
                 else:
-                    self._under.remove(element)
-            for element in self._under:
-                element.on_exit()
+                    self._under.remove(object)
+            for object in self._under:
+                object.on_exit()
             self._under = under
                     
     def pick_all(self, x, y):
@@ -226,16 +229,16 @@ selectedObjectDict: a list of selected objects. If possible, pick will return an
             return picklist[0]
     
 class Drag(object):
-    def __init__(self, element, xy):
+    def __init__(self, object, xy):
         self.start_pos = xy
         self.prev_pos = xy
-        self._element = element
+        self._object = object
         
     def _update_pos(self, x, y):
         wx,wy = PigDirector.scene.mouse_manager.get_relative_pos(
-                                                self._element.get_root_layer())
+                                                self._object.get_root_layer())
         ox,oy = self.prev_pos
         dx = wx-ox
         dy = wy-oy
-        self._element.position += (dx,dy)
+        self._object.position += (dx,dy)
         self.prev_pos = wx,wy

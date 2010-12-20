@@ -5,16 +5,13 @@ import wx
 
 from pug.constants import FORMAT_FLOATS
 from pug.syswx.wxconstants import *
-
-# TODO: deals with tab stuff
-# TODO: doesn't apply when has focus
-# TODO: select all on get focus
+from pug.util import prettify_data
 
 class AguiTextCtrl(wx.TextCtrl):
-    """AguiTextEdit(parent, formatFloats=None)
+    """AguiTextEdit(parent, format=FORMAT_FLOATS)
     
 This is a wx.TextCtrl with some special features:
-    Stores the true float value, but rounds display if formatFloats is True. If 
+    Stores the true float value, but rounds display if format is True. If 
         formatFloats is None, it looks at pug.constants.FORMAT_FLOATS 
     GetValue: 
         returns eval(TextCtrl.GetValue()), or the text if that doesn't work
@@ -22,7 +19,7 @@ This is a wx.TextCtrl with some special features:
     SetValue:
         None displays '#None#'
 """
-    def __init__(self, parent, formatFloats=None):
+    def __init__(self, parent, format=None):
         wx.TextCtrl.__init__(self, parent, 
                           size=wx.Size(30, WX_STANDARD_HEIGHT), 
                           style=wx.TE_PROCESS_ENTER)# | wx.TAB_TRAVERSAL)
@@ -30,9 +27,9 @@ This is a wx.TextCtrl with some special features:
         self.Bind(wx.EVT_SET_FOCUS, self.select_all)  
         self.Bind(wx.EVT_TEXT_ENTER, self.select_all)      
         self.SetMinSize(wx.Size(-1, WX_STANDARD_HEIGHT))
-        self.floatValue = None
+        self.realValue = None
         self.lastValue = None
-        self.formatFloats = formatFloats
+        self.format = format
         
     def select_all(self, event=None):
         wx.CallAfter(self.SelectAll)
@@ -40,8 +37,8 @@ This is a wx.TextCtrl with some special features:
             event.Skip()
         
     def GetValue(self):
-        if self.floatValue and wx.TextCtrl.GetValue(self)==self.lastValue:
-            val = self.floatValue
+        if self.realValue and wx.TextCtrl.GetValue(self)==self.lastValue:
+            val = self.realValue
         else:
             value = wx.TextCtrl.GetValue(self)
             try:
@@ -54,21 +51,17 @@ This is a wx.TextCtrl with some special features:
         return val
 
     def format_value(self, value):
-        do_format = self.formatFloats
+        do_format = self.format
         if do_format is None:
             do_format = FORMAT_FLOATS
-        if type(value) == float and do_format: # float formating
-            self.floatValue = value
-            f = "%.3f" % value
-            if f[-2:] == '00':
-                f = f[:-2]
-            elif f[-1:] == '0':
-                f = f[:-1]
+        if do_format: # float formating
+            self.realValue = value
+            f = prettify_data(value)
             self.lastValue = str(f)
             display = f
 #            self.SetToolTipString(str(value))
         else:
-            self.floatValue = None
+            self.realValue = None
             if value is None:
                 value = "#None#"
             display = str(value)

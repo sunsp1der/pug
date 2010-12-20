@@ -47,6 +47,9 @@ layer_name: if None, use the top layer
     position = Opioid2D.Mouse.get_position()
     return layer.convert_pos(position[0], position[1])
 
+def set_mouse_cursor( file):
+    Opioid2D.Mouse.cursor = file
+
 screen_ratio = None
 def units_to_pixels( size):
     """units_to_pixels(size)->screen size (x,y) converted to pixels"""

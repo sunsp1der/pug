@@ -13,8 +13,9 @@ Opioid2D = Opioid2D
 _DEBUG = False
 
 class EditorState(PigState):
-    layers = ["__editor__",]
+    layers = ["__editor1__","__editor2__"]
     selectOnUp = None
+    selection_scaling = False
     def enter(self):
         if _DEBUG: print "EditorState.enter"
         self.interface = wx.GetApp().projectObject
@@ -34,6 +35,9 @@ class EditorState(PigState):
         PigState.exit(self)
             
     def handle_mousebuttondown(self, event):
+        # nothing if we're scaling
+        if self.selection_scaling:
+            return
         x, y = event.pos
         node = self.scene.mouse_manager.pick_selection(x,y,
                                         wx.GetApp().selectedObjectDict)
