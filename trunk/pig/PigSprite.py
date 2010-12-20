@@ -13,7 +13,7 @@ from pug.util import make_valid_attr_name, prettify_path, prettify_float,\
                         start_edit_process
 
 from pig.PigDirector import PigDirector
-from pig.editor.util import get_available_layers, save_object, \
+from pig.editor.util import get_scene_layers, save_object, \
                                 exporter_cleanup, _fl_art_types
 from pig.gamedata import get_gamedata
 
@@ -469,7 +469,7 @@ _spritePugview = {
         ['alpha', pug.FloatSpin,{'range':(0,1), 'digits':1, 
                                  'adjust_digits':True, 'wait_for_set':False}],
         [' Spacial', pug.Label],
-        ['layer_name', pug.Dropdown, {'list_generator':get_available_layers,
+        ['layer_name', pug.Dropdown, {'list_generator':get_scene_layers,
                                       'label':'   layer'}],
         ['position'],
         ['rotation'],

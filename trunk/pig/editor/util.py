@@ -56,13 +56,13 @@ def edit_project_file():
     os.chdir(cwd) # thanks for automatically changing that, windows
     
 
-def get_available_layers():
-    """get_available_layers() -> list of available layers in Director"""
+def get_scene_layers():
+    """get_scene_layers() -> list of layers that don't start with '__'"""
     try:
-        # hide '__editor__' layer
         layers = PigDirector.scene.layers[:]
-        while '__editor__' in layers:
-            layers.remove('__editor__')
+        for layer in PigDirector.scene.layers:
+            if layer[:2]=='__':
+                layers.remove(layer)
         return layers        
     except:
         return []

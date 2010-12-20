@@ -1,4 +1,15 @@
 todo:
+	screen position not saving right
+	multiple layers of selection. not save layers startswith __
+x	prettify agui_text_ctrl display
+	rotating, scaling knobs
+x		draggable squares attached to corners and edges
+x			sharing an edge, not overlapping
+		ctrl- to rotate
+		shift- to size proportional
+		ctrl-shift to rotate in 45 deg increments
+		mouse cursor
+	center pug antenna
  	
 installer:
 	eliminate need for pythonpather
@@ -26,7 +37,6 @@ soon:
  		name
  	set_attribute on collide
  	set_component attribute on collide
-	joystick
 	try to return to selected object and reopen components
 	gameover
 		gameover_settings
