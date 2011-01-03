@@ -35,6 +35,15 @@ from pig.PigDirector import PigDirector
 projectPath = os.getcwd()
 _revertScene = None
 
+def is_shift_down():
+    return Opioid2D.Keyboard.is_pressed(Opioid2D.K_RSHIFT) or \
+            Opioid2D.Keyboard.is_pressed(Opioid2D.K_LSHIFT)
+
+def is_ctrl_down():
+    return Opioid2D.Keyboard.is_pressed(Opioid2D.K_RCTRL) or \
+            Opioid2D.Keyboard.is_pressed(Opioid2D.K_LCTRL)
+           
+
 def get_mouse_position( layer_name=None):
     """get_mouse_position(layer_name=None)->Mouse position on layer
 

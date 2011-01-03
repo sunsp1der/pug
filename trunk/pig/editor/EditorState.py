@@ -7,6 +7,7 @@ import Opioid2D
 import cOpioid2D as _c
 
 from pig.PigState import PigState
+from pig.util import is_shift_down, is_ctrl_down
 
 wx = wx
 Opioid2D = Opioid2D
@@ -15,7 +16,7 @@ _DEBUG = False
 class EditorState(PigState):
     layers = ["__editor1__","__editor2__"]
     selectOnUp = None
-    selection_scaling = False
+    mouse_locked_by = False
     def enter(self):
         if _DEBUG: print "EditorState.enter"
         self.interface = wx.GetApp().projectObject
@@ -36,7 +37,7 @@ class EditorState(PigState):
             
     def handle_mousebuttondown(self, event):
         # nothing if we're scaling
-        if self.selection_scaling:
+        if self.mouse_locked_by:
             return
         x, y = event.pos
         node = self.scene.mouse_manager.pick_selection(x,y,
@@ -60,10 +61,8 @@ class EditorState(PigState):
     def handle_keydown(self, ev):
         # nudge keys
         nudge = 1
-        shiftDown = Opioid2D.Keyboard.is_pressed(Opioid2D.K_RSHIFT) or \
-                    Opioid2D.Keyboard.is_pressed(Opioid2D.K_LSHIFT)
-        ctrlDown = Opioid2D.Keyboard.is_pressed(Opioid2D.K_RCTRL) or \
-                    Opioid2D.Keyboard.is_pressed(Opioid2D.K_LCTRL)
+        shiftDown = is_shift_down()
+        ctrlDown = is_ctrl_down()
         if shiftDown:
             nudge = nudge * 10
         if ctrlDown:

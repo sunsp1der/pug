@@ -221,8 +221,8 @@ like pugframe titles...
             simplename = objectpath     
     return simplename           
 
-def prettify_float( val, precision=4):
-    """prettify_float(val, precision=4)->prettified string
+def prettify_float( val, precision=3):
+    """prettify_float(val, precision=3)->prettified string
     
 This function rounds floating point numbers and returns a string. Precision is
 the number of digits in a row that have to be either 0 or 9 in order to round.
@@ -249,8 +249,8 @@ For example, if precision is 3, 5.0100004 returns 5.01 and 3.99999942412 returns
         return s
     return s
      
-def prettify_data( val, precision=4):
-    """prettify_data( val, precision=4)->prettified string
+def prettify_data( val, precision=3):
+    """prettify_data( val, precision=3)->prettified string
     
 Prettify various data including floats, -0.0 etc."""   
     from pug.code_storage.constants import _STORE_UNICODE, _PRETTIFY_FLOATS  
@@ -271,13 +271,13 @@ Prettify various data including floats, -0.0 etc."""
         items = []
         for item in val:
             if type(item) == float:
-                items.append( prettify_float(item))
+                items.append( prettify_float(item, precision))
             else:
                 items.append( repr(item))
         output += ", ".join(items) + end
     elif _PRETTIFY_FLOATS and type(val) == float:
         # prettify floats
-        output = prettify_float(val)
+        output = prettify_float(val, precision)
     else:
         output = repr(val)
     return output
