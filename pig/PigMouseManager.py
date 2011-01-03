@@ -167,8 +167,8 @@ register at the lower callback level.
                             pass
                     self._clicking = []
         if self._drag is not None:
-            self._drag._object.on_drag()
             self._drag._update_pos(mx,my)
+            self._drag._object.on_drag()
 
     def _update_under(self, under):
         if under != self._under:

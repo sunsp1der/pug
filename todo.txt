@@ -1,14 +1,17 @@
 todo:
+	component selector
+	editor not popping up when already up
 	screen position not saving right
 	multiple layers of selection. not save layers startswith __
 x	prettify agui_text_ctrl display
 	rotating, scaling knobs
 x		draggable squares attached to corners and edges
 x			sharing an edge, not overlapping
-		ctrl- to rotate
-		shift- to size proportional
-		ctrl-shift to rotate in 45 deg increments
-		mouse cursor
+x		ctrl- to rotate
+x		shift- to size proportional
+x		ctrl-shift to rotate in 15 deg increments
+		mouse cursors
+	change size when changing immages
 	center pug antenna
  	
 installer:
@@ -20,7 +23,6 @@ installer:
 
 soon:
  	master volume
-	scaling gui
 	'loading' graphic while scene saves, or at least cleanup
 	destroy on gameover
 	level on group empty
