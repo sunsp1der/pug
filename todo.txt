@@ -1,18 +1,11 @@
 todo:
+	run main is broken
 	component selector
 	editor not popping up when already up
 	screen position not saving right
-	multiple layers of selection. not save layers startswith __
-x	prettify agui_text_ctrl display
-	rotating, scaling knobs
-x		draggable squares attached to corners and edges
-x			sharing an edge, not overlapping
-x		ctrl- to rotate
-x		shift- to size proportional
-x		ctrl-shift to rotate in 15 deg increments
-		mouse cursors
 	change size when changing immages
 	center pug antenna
+	change Images folder to images
  	
 installer:
 	eliminate need for pythonpather
