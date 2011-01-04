@@ -28,7 +28,8 @@ def on_first_display(self):
 def on_project_start(self):
     "called when project is started"
 }}}
-[PigSprite_mouse_events MOUSE CALLBACKS]: There are also a number of [PigSprite_mouse_events mouse event callbacks] that you can register to receive.
+== Mouse Callbacks ==
+There are also a number of [PigSprite_mouse_events mouse event callbacks] that you can register to receive.
 
 == Built In Controls ==
 
