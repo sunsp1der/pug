@@ -3,6 +3,8 @@ import weakref
 
 import wx
 
+import pygame.key
+
 import Opioid2D
 import cOpioid2D as _c
 
@@ -34,9 +36,20 @@ class EditorState(PigState):
 #        wx.CallAfter(wx.GetApp().set_selection,[])
         if _DEBUG: print "EditorState.exit complete"
         PigState.exit(self)
-            
+
+    def handle_activeevent(self, event):
+        # skip mouse down event when just gaining focus
+        if event.state == 6:
+            self.skip_mouse_down = True
+                        
     def handle_mousebuttondown(self, event):
-        # nothing if we're scaling
+        # skip if not focused
+        print self.skip_mouse_down, pygame.key.get_focused()
+
+        if self.skip_mouse_down:
+            self.skip_mouse_down = False
+            return
+        # nothing if the mouse is locked
         if self.mouse_locked_by:
             return
         x, y = event.pos

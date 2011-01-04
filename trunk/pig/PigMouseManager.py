@@ -180,6 +180,9 @@ register at the lower callback level.
             for object in self._under:
                 object.on_exit()
             self._under = under
+            
+    def is_under(self, obj):
+        return obj in self._under
                     
     def pick_all(self, x, y):
         """pick_all(x,y)

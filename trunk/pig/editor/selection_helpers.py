@@ -2,6 +2,7 @@ from weakref import proxy
 from math import sin, cos, radians
 
 from pygame import Rect
+import pygame.key
 
 import wx
 
@@ -282,6 +283,7 @@ class SelectBoxHandleSprite( SelectBoxBaseSprite):
     draggable = True
     dragging = False
     color = (0.7,0.75,0.8,1)
+    tick_action = None
     def on_create(self):
         self.scale = (_HANDLE_SIZE, _HANDLE_SIZE)
         self.state = PigDirector.scene.state.graphicsManager
@@ -291,6 +293,30 @@ class SelectBoxHandleSprite( SelectBoxBaseSprite):
     def on_press(self):
         PigDirector.scene.state.mouse_locked_by = self
         
+    def on_enter(self):
+        if not PigDirector.scene.state.mouse_locked_by and \
+                    pygame.key.get_focused():
+            self.tick_action = Opioid2D.TickFunc( self.test_cursor).do()
+    
+    def test_cursor(self):
+        if self.dragging:
+            return
+        if is_ctrl_down():
+            #TODO: ctrl can't be tested when window doesn't have focus:(
+            Mouse.cursor = Opioid2D.ResourceManager.get_image( 
+                                            get_image_path("rotate.png"),
+                                            (0.28,0.16))
+        else:
+            Mouse.cursor = Opioid2D.ResourceManager.get_image( 
+                                            get_image_path("scale.png"),
+                                            (0,0))
+            
+    def on_exit(self):
+        if not self.dragging and not PigDirector.scene.state.mouse_locked_by:
+            if self.tick_action:
+                self.tick_action.abort()
+            Mouse.cursor = Opioid2D.HWCursor.arrow
+                
     def on_drag_begin(self):
         PigDirector.scene.state.selectOnUp = None
         self.dragging = True
@@ -308,6 +334,9 @@ class SelectBoxHandleSprite( SelectBoxBaseSprite):
         self.graphicsManager.update_selection_boxes()
         wx.CallAfter(wx.GetApp().selection_refresh)
         self.dragfunc = None
+        if self.tick_action:
+            self.tick_action.abort()
+        Mouse.cursor = Opioid2D.HWCursor.arrow
 
     def on_drag(self):
         self.dragfunc( self)
