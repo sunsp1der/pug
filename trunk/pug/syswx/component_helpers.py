@@ -233,15 +233,15 @@ class ComponentTreeCtrl(wx.TreeCtrl):
     recentListMax = 3
     def __init__(self, parent, multiple_select=False):
         style=wx.TR_HIDE_ROOT | wx.TR_HAS_BUTTONS | wx.TR_LINES_AT_ROOT \
-                 | wx.SIMPLE_BORDER
+                 | wx.SIMPLE_BORDER | wx.TR_TWIST_BUTTONS
         if multiple_select:
             style |= wx.TR_MULTIPLE
         else:
             style |= wx.TR_SINGLE                   
         wx.TreeCtrl.__init__(self, parent, style=style )
         self.SetSpacing(10)
-        self.SetIndent(8)          
-
+        self.SetIndent(8)
+    
     def AddItem(self, text, data=None, parent=None):
         if not parent:
             root = self.GetRootItem()
