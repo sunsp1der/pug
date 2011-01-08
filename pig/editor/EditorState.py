@@ -19,6 +19,7 @@ class EditorState(PigState):
     layers = ["__editor1__","__editor2__"]
     selectOnUp = None
     mouse_locked_by = False
+    skip_mouse_down = False
     def enter(self):
         if _DEBUG: print "EditorState.enter"
         self.interface = wx.GetApp().projectObject
@@ -44,8 +45,6 @@ class EditorState(PigState):
                         
     def handle_mousebuttondown(self, event):
         # skip if not focused
-        print self.skip_mouse_down, pygame.key.get_focused()
-
         if self.skip_mouse_down:
             self.skip_mouse_down = False
             return

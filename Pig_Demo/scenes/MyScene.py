@@ -8,9 +8,8 @@ class MyScene(PigScene):
     def on_enter(self):
         # Sprites
         pigsprite_instance = PigSprite()
-        pigsprite_instance.image = 'art\\pug.png'
+        pigsprite_instance.image = 'art\\block.png'
         pigsprite_instance.layer = 'Background'
-        pigsprite_instance.position = (400.0, 298.5)
-        pigsprite_instance.scale = (1.0, 0.9625)
-        pigsprite_instance.rotation = 45.0
+        pigsprite_instance.position = (400.0, 300.0)
+        pigsprite_instance.scale = (10.0, 10.0)
 ### End MyScene autocode ###

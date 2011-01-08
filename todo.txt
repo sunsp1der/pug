@@ -1,10 +1,8 @@
 todo:
 	run main is broken
-	component selector
-	editor not popping up when already up
 	screen position not saving right
-	change size when changing immages
-	center pug antenna
+	change size when changing images
+		agui_text_ctrl converting to ''
 	change Images folder to images
  	
 installer:
@@ -63,6 +61,7 @@ soon:
 	search component book
 
 bugs: 
+?	editor not popping up when already up
 	bad data being saved in sprites/scenes sometimes
 		archetype creation?
 	spawn location edges crashes editor intermittent

@@ -56,9 +56,10 @@ start_component: start with view of this component
         event.Skip()
         
     def on_tree_dclicked(self, event):
-        self.finalize()
-        if self.component:
-            self.EndModal( wx.ID_OK)    
+        if self.browser.tree.GetSelection():
+            self.finalize()
+            if self.component:
+                self.EndModal( wx.ID_OK)    
         
     def on_add(self, event):
         self.finalize()
@@ -149,10 +150,15 @@ A basic text display of a components features...
         #TODO: this is just an ugly, hacked version. Need a nice display format
         #title
         if component is None:
+            self.infosizer.Clear(True)
+            text = wx.StaticText(self, -1, "")
+            self.infosizer.Add(text,0)
             return
         if isinstance( component, Component):
             instance = component
             component = component.__class__
+        else:
+            instance = False
         self.Freeze()
         self.infosizer.Clear(True)
         textlist = []
@@ -276,12 +282,17 @@ tree on the left and info on the right.
         """on_tree_sel_changed(): Display component info"""
         #item = self.tree.GetComponentItemByPosition(evt.GetPosition())
         item = self.tree.GetSelection()
+        
         if item and item is not self.currentItem:
-            self.currentItem = item
-            self.currentComponent = self.tree.GetItemPyData(item)
-            if self.currentComponent:
+            if self.tree.GetItemPyData(item):
+                self.currentItem = item
+                self.currentComponent = self.tree.GetItemPyData(item)
                 self.infowin.display_component( self.currentComponent)
                 self.current.SetSelection( -1)
+            else:      
+                if self.current.GetSelection() == -1:
+                    self.infowin.display_component( None)
+                self.tree.UnselectAll()
         evt.Skip()
             
     def select_component(self, component):
