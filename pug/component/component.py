@@ -179,6 +179,8 @@ line breaks between each. To create a single-line argument list, strip out all
                 store = False
             if store:       
                 output = prettify_data( val)
+                if type(val) == str or type(val) == unicode:
+                    output = repr(output)                
                 attribute_code += [''.join([attr, '=', output])]
         joiner = ''.join([',\n',argIndent])
         code = joiner.join(attribute_code)

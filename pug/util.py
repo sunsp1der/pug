@@ -278,8 +278,10 @@ Prettify various data including floats, -0.0 etc."""
     elif _PRETTIFY_FLOATS and type(val) == float:
         # prettify floats
         output = prettify_float(val, precision)
-    else:
+    elif type(val) != str and type(val) != unicode:
         output = repr(val)
+    else:
+        output = val
     return output
      
 def test_referrers(obj):

@@ -234,8 +234,8 @@ _project_settings file unless otherwise noted.
             exec('from scenes.' + scenename + ' import ' + scenename)
             raise ValueError("Problem with scene: "+scenename) 
     
-    set_opioid_window_position( position)
     Opioid2D.Display.init(resolution, units, title, fullscreen, icon)
+    set_opioid_window_position( position)
     Opioid2D.Director.start_project = True
     # Import Psyco if available
     try:

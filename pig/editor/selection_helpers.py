@@ -103,11 +103,11 @@ node: any object containing a 'rect' attribute that is a pygame rect
     def on_rotate_begin(self, handle):
         self.orig_rot = self.node.rotation
         mouse_pos = Mouse.get_position()
-        self.orig_angle = angle_to(self.base.position, mouse_pos)        
+        self.orig_angle = angle_to(self.node.position, mouse_pos)        
          
     def on_rotate(self, handle):
         mouse_pos = Mouse.get_position()
-        angle = angle_to(self.base.position, mouse_pos)
+        angle = angle_to(self.node.position, mouse_pos)
         new_rotation = self.orig_rot + angle - self.orig_angle
         if is_shift_down():
             new_rotation = round(new_rotation / 15.0) * 15
@@ -121,32 +121,32 @@ node: any object containing a 'rect' attribute that is a pygame rect
         self.drag_from = Mouse.get_position()   
         self.orig_rect = node.rect.size  
         self.orig_scale = tuple(node.scale)
-        self.orig_position = Opioid2D.Vector(node.position[0],
-                                             node.position[1])
+        self.orig_position = Opioid2D.Vector(self.node.position[0],
+                                             self.node.position[1])
   
     def on_scale(self, handle):
         node = self.get_node()
         mouse_pos = Mouse.get_position()
         delta = Opioid2D.Vector(mouse_pos[0] - self.drag_from[0],
                                 mouse_pos[1] - self.drag_from[1])
-        movedir = Opioid2D.Vector()
+        movedir = Opioid2D.Vector() # adjust sprite hotspot
         delta.direction -= node.rotation
         location = handle.id
         # calculate scale changes
         if 'left' in location: 
             xchange = -delta[0]
-            movedir[0] = -1
+            movedir[0] = -1 + (self.hotspot[0] - 0.5) * 2
         elif 'right' in location:
             xchange = delta[0] 
-            movedir[0] = 1
+            movedir[0] = 1 + (self.hotspot[0] - 0.5) * 2
         else:
             handle.position[0] = xchange = 0
         if 'top' in location: 
             ychange = -delta[1]
-            movedir[1] = -1
+            movedir[1] = -1 + (self.hotspot[1] - 0.5) * 2
         elif 'bottom' in location:
             ychange = delta[1]
-            movedir[1] = 1
+            movedir[1] = 1 + (self.hotspot[1] - 0.5) * 2
         else: 
             handle.position[1] = ychange = 0
         xscale = self.orig_scale[0] * (self.orig_rect[0] + xchange)\
@@ -166,10 +166,14 @@ node: any object containing a 'rect' attribute that is a pygame rect
         node.scale = (xscale, yscale)
         # reposition sprite
         movevector = Opioid2D.Vector()
-        movevector[0] = (node.rect.width - self.orig_rect[0]) / 2.0 * movedir[0]
-        movevector[1] = (node.rect.height - self.orig_rect[1])/ 2.0 * movedir[1]
+        movevector[0] = movedir[0] * (node.rect.width - self.orig_rect[0]) \
+                         / 2.0
+        movevector[1] = movedir[1] * (node.rect.height - self.orig_rect[1]) \
+                        / 2.0 
         movevector.direction += node.rotation
+        print node.position
         node.position = self.orig_position + movevector
+        print node.position
         # set lines and handles
         self.surround_node(force=True)                
         
@@ -235,6 +239,7 @@ node: any object containing a 'rect' attribute that is a pygame rect
             y_offset *= -1
         for location, handle in self.handles.iteritems():
 #            if not handle.dragging:
+            handle.position = self.area.position
             if 'top' in location: 
                 handle.position.y = self.lines['top'].position[1]\
                                                    - y_offset - 0.5
@@ -247,7 +252,6 @@ node: any object containing a 'rect' attribute that is a pygame rect
             elif 'right' in location:
                 handle.position.x = self.lines['right'].position[0]\
                                                     + x_offset
-
         self.area.scale = (rect.width, rect.height)
         
 class SelectBoxBaseSprite( PigSprite):

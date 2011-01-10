@@ -15,6 +15,7 @@ from pug.util import make_valid_attr_name, prettify_path, prettify_float,\
 from pig.PigDirector import PigDirector
 from pig.editor.util import get_scene_layers, save_object, \
                                 exporter_cleanup, _fl_art_types
+from pig.editor.agui.pig_image_browser import PigImageBrowser                             
 from pig.gamedata import get_gamedata
 
 _DEBUG = False
@@ -462,7 +463,7 @@ _spritePugview = {
         [' Components', pug.Label],
         ['components'],
         [' Image', pug.Label],
-        ['image_file', pug.ImageBrowser, {'label': '   image file',
+        ['image_file', PigImageBrowser, {'label': '   image file',
                                           'subfolder':'art', 
                                           'filter':_fl_art_types}],
         ['tint', pug.ColorPicker,{'text_control':True}],
