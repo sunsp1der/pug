@@ -49,7 +49,7 @@ parentWindow: the parent window of name dialog. If not provided, the
         # a base class of the same object
         superclasses = getmro(obj.__class__)[1:]
         for cls in superclasses:
-            if name == cls.__name__ or name=='Sprite' or name=='PigSprite':
+            if name == cls.__name__ or name=='Sprite':
                 name = ''.join(['My',name])
                 break
         default = make_valid_attr_name(name)
@@ -60,9 +60,9 @@ parentWindow: the parent window of name dialog. If not provided, the
             if dlg.ShowModal() == wx.ID_OK:
                 name = dlg.GetValue()
                 errorDlg = None
-                if name == 'PigSprite' or name == 'Sprite':
+                if name == 'Sprite':
                     errorDlg = wx.MessageDialog( dlg, 
-                           "You can't use the names 'PigSprite' or 'Sprite'",
+                           "You can't use the names 'Sprite'",
                            "Reserved Name",
                            wx.OK)
                 elif name != make_valid_attr_name(name):
@@ -113,9 +113,9 @@ parentWindow: the parent window of name dialog. If not provided, the
             archetype = True
         else:
             archetype = False    
-        from pig.PigSprite import PigSprite
+        from pig.Sprite import Sprite
         exporter = code_export( obj, path, True, {'name':objName,
-                                                  'base_class':PigSprite})
+                                                  'base_class':Sprite})
         objDict = get_available_objects( True)
         oldclass = obj.__class__
         if oldclass != objDict[objName]:
@@ -226,7 +226,7 @@ parentWindow: the parent window of name dialog. If not provided, the
     scene = PigDirector.scene
     if not sceneName:
         name = scene.__class__.__name__
-        if name == 'PigScene' or name == 'Scene':
+        if name == 'Scene':
             name = 'MyScene'
         name = make_valid_attr_name(name)
         name.capitalize()
@@ -243,9 +243,9 @@ parentWindow: the parent window of name dialog. If not provided, the
             if dlg.ShowModal() == wx.ID_OK:
                 name = dlg.GetValue()
                 errorDlg = None
-                if name == 'PigScene' or name == 'Scene':
+                if name == 'Scene':
                     errorDlg = wx.MessageDialog( dlg, 
-                           "You can't use the names 'PigScene' or 'Scene'",
+                           "You can't use the name 'Scene'",
                            "Reserved Name",
                            wx.OK)
                 elif name != make_valid_attr_name(name):
@@ -282,8 +282,8 @@ parentWindow: the parent window of name dialog. If not provided, the
                 return False
         dlg.Destroy()
     else:
-        if sceneName == 'PigScene' or sceneName == 'Scene':
-            raise ValueError("Can't save over 'PigScene' or 'Scene'")
+        if sceneName == 'Scene':
+            raise ValueError("Can't save over baseclass 'Scene'")
 #            save_scene_as( sceneName, fileName)
     if not fileName:
         fileName = ''.join([sceneName, '.py'])

@@ -1,13 +1,13 @@
 ### import autocode ###
 from objects.DragonBreath import DragonBreath
 from objects.RedDragon import RedDragon
-from pig.PigScene import PigScene
-from pig.PigSprite import PigSprite
+from pig.Scene import Scene
+from pig.Sprite import Sprite
 from pug.all_components import Utility_Keys, Textbox
 ### End import autocode ###
 
 ### Dragon autocode ###
-class Dragon(PigScene):
+class Dragon(Scene):
     layers = ['Background', 'Sky']
 
     def on_enter(self):
@@ -18,13 +18,13 @@ class Dragon(PigScene):
         DragonBreath_archetype.archetype = True
 
         # Sprites
-        pigsprite_instance = PigSprite()
+        pigsprite_instance = Sprite()
         pigsprite_instance.image = 'art\\cloudscape 1b.jpg'
         pigsprite_instance.layer = 'Background'
         pigsprite_instance.position = (400.0, 300.0)
         pigsprite_instance.scale = (1.3, 1.5)
 
-        pigsprite_instance_2 = PigSprite()
+        pigsprite_instance_2 = Sprite()
         pigsprite_instance_2.layer = 'Sky'
         pigsprite_instance_2.position = (12.0, 544.0)
         pigsprite_instance_2.tint = (0, 0, 0)

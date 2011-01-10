@@ -13,7 +13,7 @@ class PigMouseManager():
     """PigMouseManager(): Manages mouse events for objects in a scene.
     
 Access this object through scene.mouse_manager. To register an object for mouse 
-events, use PigSprite.mouse_register(). 
+events, use Sprite.mouse_register(). 
 """
     def __init__(self):
         self._multi_objects = set() # all nodes registered as 'multi'

@@ -1,10 +1,10 @@
 ### import autocode ###
-from pig.PigSprite import PigSprite
+from pig.Sprite import Sprite
 from pug.all_components import Grow_Shrink, Set_Motion, Life_Zone
 ### End import autocode ###
 
 ### DragonBreath autocode ###
-class DragonBreath(PigSprite):
+class DragonBreath(Sprite):
     image = 'art\\explosion\\explosion09.png'
     layer = 'Sky'
     def on_create(self):

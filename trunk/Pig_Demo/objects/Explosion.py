@@ -1,10 +1,10 @@
 ### import autocode ###
-from pig.PigSprite import PigSprite
+from pig.Sprite import Sprite
 from pug.all_components import Animate_Folder, On_Create_Sound
 ### End import autocode ###
 
 ### Explosion autocode ###
-class Explosion(PigSprite):
+class Explosion(Sprite):
     layer = 'Background'
     def on_create(self):
         self.position = (156.0, 430.0)

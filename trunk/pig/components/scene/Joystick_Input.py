@@ -1,13 +1,13 @@
 """Joystick_Input.py
 
 This component adds joystick input functionality to a scene. It is an example of
-how to add a whole new input device to a PigScene.
+how to add a whole new input device to a Scene.
 """
 from pygame import joystick
 
 from pug.component import *
 
-from pig import PigScene
+from pig import Scene
 
 class Joystick_Input( Component):
     """Activate joystick input. To convert joystick input to keys, use the
@@ -24,7 +24,7 @@ handle_joyaxismotion( event): event has joy, value (0-1) and axis (0=x, 1=y)
     # component_info
     _set = 'pig'
     _type = 'controls'
-    _class_list = [PigScene]
+    _class_list = [Scene]
     # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
             ['test_mode', 'If True, prints all joystick events to the console'],

@@ -1,10 +1,10 @@
 ### import autocode ###
-from pig.PigSprite import PigSprite
+from pig.Sprite import Sprite
 from pug.all_components import Spawner
 ### End import autocode ###
 
 ### Launcher autocode ###
-class Launcher(PigSprite):
+class Launcher(Sprite):
     image = 'art\\pug.png'
     layer = 'Background'
     def on_create(self):

@@ -2,7 +2,7 @@ from pygame.key import get_pressed
 
 from pug.component import *
 
-from pig import PigScene
+from pig import Scene
 from pig.keyboard import keys
 from pig.editor.agui import KeyDropdown
 
@@ -17,7 +17,7 @@ Joystick_Input component with test_mode set to True.
     # component_info
     _set = 'pig'
     _type = 'controls'
-    _class_list = [PigScene]
+    _class_list = [Scene]
     # attributes:   
     _field_list = [
         ['joystick_id',"The joystick's ID number (event info: 'joy')"],                   

@@ -1,5 +1,5 @@
 todo:
-
+	eliminate pigsprite and pigscene. pigdirector?
  	
 installer:
 	eliminate need for pythonpather

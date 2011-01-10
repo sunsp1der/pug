@@ -1,11 +1,11 @@
-from pig.PigScene import PigScene
-from pig import PigSprite
+from pig.Scene import Scene
+from pig import Sprite
 
-class StartScene(PigScene):
+class StartScene(Scene):
     layers = ['Background']
     def on_enter(self):
         # Sprites
-        pigsprite_instance = PigSprite()
+        pigsprite_instance = Sprite()
         pigsprite_instance.image = 'art/pug.png'
         pigsprite_instance.layer = 'Background'
         pigsprite_instance.position.x = 400.0

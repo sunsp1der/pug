@@ -1,11 +1,11 @@
 ### import autocode ###
-from pig.PigSprite import PigSprite
+from pig.Sprite import Sprite
 from pug.all_components import Set_Motion, Grow_Shrink, On_Collision_Sound,\
     Life_Zone, Fade, Stop_Motion_On_Destroy, Deals_Damage
 ### End import autocode ###
 
 ### Bullet autocode ###
-class Bullet(PigSprite):
+class Bullet(Sprite):
     image = 'art\\pug.png'
     layer = 'Background'
     def on_create(self):

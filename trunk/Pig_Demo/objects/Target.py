@@ -1,12 +1,12 @@
 ### import autocode ###
-from pig.PigSprite import PigSprite
+from pig.Sprite import Sprite
 from pug.all_components import Spawn_On_Destroy, Fade, Grow_Shrink, Life_Zone,\
     Value_On_Destroy, Deals_Damage, Takes_Damage, On_Damage_Sound,\
     Random_Motion
 ### End import autocode ###
 
 ### Target autocode ###
-class Target(PigSprite):
+class Target(Sprite):
     image = 'art\\pug.png'
     layer = 'Background'
     def on_create(self):

@@ -1,12 +1,12 @@
 ### import autocode ###
-from pig.PigSprite import PigSprite
+from pig.Sprite import Sprite
 ### End import autocode ###
 
 from pig.util import get_mouse_position, Vector
 from pig.actions import RealTickFunc
 
 ### Grower autocode ###
-class Grower(PigSprite):
+class Grower(Sprite):
     image = 'art\\pug.png'
     layer = 'Background'
     def on_create(self):

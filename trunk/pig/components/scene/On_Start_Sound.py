@@ -1,6 +1,6 @@
 from pug.component import *
 
-from pig import PigScene
+from pig import Scene
 from pig.components.scene.Key_Sound_Scene import Key_Sound_Scene
 from pig.components import On_Create_Sound
 
@@ -9,7 +9,7 @@ class On_Start_Sound( Key_Sound_Scene):
     # component_info
     _set = 'pig'
     _type = 'sound'
-    _class_list = [PigScene]
+    _class_list = [Scene]
     # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = []
     _field_list += On_Create_Sound._field_list

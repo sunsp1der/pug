@@ -27,7 +27,7 @@ from pug.syswx.component_browser import ComponentBrowseFrame
 from pug.syswx.pugmdi import PugMDI
 from pug.syswx.drag_drop import FileDropTarget
 
-from pig import hacks, PigScene, PigSprite, PigDirector, PauseState
+from pig import hacks, Scene, Sprite, PigDirector, PauseState
 from pig.util import fix_project_path, set_project_path, save_project_settings,\
         entered_scene, start_scene, get_gamedata, create_gamedata, \
         get_display_center, skip_deprecated_warnings, set_opioid_window_position
@@ -42,7 +42,7 @@ from pig.editor.util import get_image_path, get_project_path, test_scene_code,\
 _DEBUG = False
 
 class OpioidInterface(pug.ProjectInterface):
-    """OpioidInterface( rootfile, scene=PigScene)
+    """OpioidInterface( rootfile, scene=Scene)
     
 rootfile: a file in the root folder of the project, usually the main python 
     module    
@@ -56,7 +56,7 @@ scene: the scene to load initially
     _initialized = False
     _quitting = False
     canvas = None
-    def __init__(self, rootfile, scene=PigScene):
+    def __init__(self, rootfile, scene=Scene):
         if _DEBUG: print "OpioidInterface.__init__"
         try:
             # for process watching purposes
@@ -107,11 +107,11 @@ scene: the scene to load initially
         app = wx.GetApp()
         app.set_pug_settings( self.pug_settings)
         code_exceptions = {}
-        initial_scene = getattr(self.pug_settings, 'initial_scene', 'PigScene')
+        initial_scene = getattr(self.pug_settings, 'initial_scene', 'Scene')
         self.reload_components( doReload=True)
         self.reload_scene_list( doReload=True)
         # initial scene
-        if initial_scene != 'PigScene' and initial_scene in self.sceneDict:
+        if initial_scene != 'Scene' and initial_scene in self.sceneDict:
             # test initial scene                
             try:
                 if self.sceneDict[initial_scene].__module__ == \
@@ -122,13 +122,13 @@ scene: the scene to load initially
             except:
                 key = '*Error loading initial scene ('+initial_scene+')'                
                 code_exceptions[key] = sys.exc_info()
-                self.sceneclass = PigScene
+                self.sceneclass = Scene
             else:
                 self.sceneclass = initial_scene
                 if self.sceneclass.__module__ == 'scenes.__Working__':
                     self._new_scene = False
         else:
-            self.sceneclass = PigScene
+            self.sceneclass = Scene
         
         # default menus
         if not self.__cached[2]:
@@ -138,8 +138,8 @@ scene: the scene to load initially
                  ["Open Project", self.open_project,
                         "Open a Pig project"],
                  ["*DIVIDER*"],
-                 ["&New Scene\tCtrl+N", [self.set_scene, ("PigScene", True), {}],
-                        "Create a new PigScene"],
+                 ["&New Scene\tCtrl+N", [self.set_scene, ("Scene", True), {}],
+                        "Create a new Scene"],
                  ["&Save Working Scene\tCtrl+S", self.save_using_working_scene,
                         "Save current scene in scenes/__Working__.py"],
                  ["&Commit Scene\tShift+Ctrl+S", self.commit_scene,
@@ -187,7 +187,7 @@ scene: the scene to load initially
         self.frame = frame
         # cache a sprite view for speed on first selection
         if not self.__cached[0]:
-            dummy = PigSprite( register=False)
+            dummy = Sprite( register=False)
             cache_default_view( dummy)
             dummy.delete()
             while dummy in self.Director.scene.nodes:
@@ -332,8 +332,8 @@ forceReload: if True, reload all scenes and objects first.
             if self.sceneDict.has_key(value):
                 value = self.sceneDict[value]
             else:
-                if value == "PigScene":
-                    value = PigScene
+                if value == "Scene":
+                    value = Scene
         else:
             if _DEBUG: print "set_scene 3"
             if value not in self.sceneDict.values():
@@ -350,7 +350,7 @@ forceReload: if True, reload all scenes and objects first.
 #                    test_scene_code(value.__name__)
 #            except:
 #                print "set_scene 3.6"
-#                self.set_scene( PigScene, forceReload=True)
+#                self.set_scene( Scene, forceReload=True)
 #                wx.GetApp().get_project_frame().refresh()
 #                show_exception_dialog( prefix='Unable to set scene: ')
 #                return
@@ -403,8 +403,8 @@ forceReload: if True, reload all scenes and objects first.
     def reload_scene(self):
         """Reload scene from version on disk"""
         if _DEBUG: print 'reload_scene 1'
-        if self.Director.scene.__class__ == PigScene:
-            self.set_scene("PigScene")
+        if self.Director.scene.__class__ == Scene:
+            self.set_scene("Scene")
             return
         if _DEBUG: print 'reload_scene 2'
         scenename = self.scene.__class__.__name__
@@ -436,7 +436,7 @@ forceReload: if True, reload all scenes and objects first.
         """Load changes made to object class files"""
         addName = self.addObjectClass.__name__
         objectDict = get_available_objects( doReload, errors=errors)
-        self.addObjectClass = objectDict.get(addName, PigSprite)
+        self.addObjectClass = objectDict.get(addName, Sprite)
         
     def reload_components(self, doReload=True, errors=None):
         """Load changes made to project components"""
@@ -456,7 +456,7 @@ show_dialog: show a dialog displaying all file errors found
 save_reload: if True, save the working file before reloading project files, then
     reload the scene when done
 """
-        if save_reload and self.scene.__class__.__name__ not in ['PigScene',
+        if save_reload and self.scene.__class__.__name__ not in ['Scene',
                                                                  'Scene']:
             if not self.save_using_working_scene():
                 save_reload = False
@@ -536,11 +536,14 @@ Callback from PugApp...
                 show_exception_dialog()
         if getattr(self.pug_settings,'save_settings_on_quit',True):
             if os.name == 'nt':
-                window_pos = self.canvas.GetWindowPosition()
-                if not self.canvas.IsIconic():
-                    self.pug_settings.rect_opioid_window = tuple( 
+                try:
+                    window_pos = self.canvas.GetWindowPosition()
+                    if not self.canvas.IsIconic():
+                        self.pug_settings.rect_opioid_window = tuple( 
                                             self.canvas.GetWindowPosition() +\
                                             self.canvas.GetWindowSize())
+                except:
+                    pass
             self.save_pug_settings()
         self.Director.realquit()
         time.sleep(1)   
@@ -626,7 +629,7 @@ event: a wx.Event
         self.use_working_scene = True
         scenename = self.scene.__class__.__name__ 
         if _DEBUG: print "s0"
-        if scenename in ['PigScene', 'Scene']:
+        if scenename in ['Scene', 'Scene']:
             # this is a new scene that hasn't been saved before
             saved = save_scene_as()
             if _DEBUG: print "s1",
@@ -800,7 +803,7 @@ If nodeclass is None, addObjectClass will be used.
         (Opioid2D.Delay(0) + Opioid2D.CallFunc(self.do_add_object, 
                                                nodeclass)).do() 
         
-    addObjectClass = PigSprite
+    addObjectClass = Sprite
     def do_add_object(self, objectclass):
         """do_add_object( objectclass)
         
@@ -816,7 +819,7 @@ Opioid2D, it is safer to call this via add_object.
             if _DEBUG: print objectclass, Node
             raise
         node = objectclass()
-        if objectclass == PigSprite and type(self.scene.state) == EditorState:
+        if objectclass == Sprite and type(self.scene.state) == EditorState:
             # set a default image for basic sprite
             try:
                 node.set_image("art\\pug.png")
@@ -919,13 +922,13 @@ def _scene_list_generator():
     """_scene_list_generator( includeNewScene=True)-> list of scenes + 'New'
     
 Return a list of scene classes available in the scenes folder. Append to that
-list a tuple ("New Scene", PigScene) for use in the sceneclass dropdown"""
+list a tuple ("New Scene", Scene) for use in the sceneclass dropdown"""
     if _DEBUG: print "_scene_list_generator"
     scenedict = get_available_scenes( 
                     useWorking = wx.GetApp().projectObject._use_working_scene)
     scenelist = scenedict.values()
     scenelist.sort()
-    scenelist.insert(0,("New Scene", PigScene))
+    scenelist.insert(0,("New Scene", Scene))
     return scenelist    
         
 from pig.editor.agui import ObjectsDropdown      
@@ -949,7 +952,7 @@ _interfacePugview = {
         ['sceneclass', ScenesDropdown, 
              {'label':'   Scene',
               'sort': False,
-              'prepend_list':[("New Scene", PigScene)],
+              'prepend_list':[("New Scene", Scene)],
               'doc':"Pick a scene to edit"}],
         ['commit_scene', None, {
                                'label':"   Commit Scene", 
@@ -961,7 +964,7 @@ _interfacePugview = {
 #                    'doc':'Uncheck to go back to last committed version'}],
         [' Objects', pug.Label],
         ['addObjectClass', ObjectsDropdown, 
-             {'prepend_list':[("New Sprite", PigSprite)],
+             {'prepend_list':[("New Sprite", Sprite)],
               'sort':False,
               'label':'   Object to add',
               'doc':'Select an object type for the add button below'}],

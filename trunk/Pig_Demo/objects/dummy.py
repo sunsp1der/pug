@@ -1,9 +1,9 @@
 ### import autocode ###
-from pig.PigSprite import PigSprite
+from pig.Sprite import Sprite
 ### End import autocode ###
 
 ### dummy autocode ###
-class dummy(PigSprite):
+class dummy(Sprite):
     image = 'art\\pug.png'
     layer = 'Background'
     def on_create(self):

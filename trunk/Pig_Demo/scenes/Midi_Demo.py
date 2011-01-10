@@ -1,12 +1,12 @@
 ### import autocode ###
-from pig.PigScene import PigScene
-from pig.PigSprite import PigSprite
+from pig.Scene import Scene
+from pig.Sprite import Sprite
 from pug.all_components import Utility_Keys, Midi_Input, Midi_To_Key,\
     Midi_Spawn, Spawn_Flower, Textbox, Key_Attribute_Change
 ### End import autocode ###
 
 ### Midi_Demo autocode ###
-class Midi_Demo(PigScene):
+class Midi_Demo(Scene):
     def on_enter(self):
         self.components.add( Utility_Keys() )
         self.components.add( Midi_Input(
@@ -14,7 +14,7 @@ class Midi_Demo(PigScene):
         self.components.add( Midi_To_Key() )
 
         # Sprites
-        pigsprite_instance = PigSprite()
+        pigsprite_instance = Sprite()
         pigsprite_instance.image = 'art\\pug.png'
         pigsprite_instance.layer = 'Background'
         pigsprite_instance.position = (207.0, 253.0)
@@ -27,7 +27,7 @@ class Midi_Demo(PigScene):
                 match_scale=True) )
         pigsprite_instance.components.add( Spawn_Flower() )
 
-        pigsprite_instance_2 = PigSprite()
+        pigsprite_instance_2 = Sprite()
         pigsprite_instance_2.image = 'art\\pug.png'
         pigsprite_instance_2.layer = 'Background'
         pigsprite_instance_2.position = (358.0, 537.0)
@@ -41,7 +41,7 @@ class Midi_Demo(PigScene):
                 spawn_offset=(0.5, 0.0),
                 match_scale=True) )
 
-        pigsprite_instance_3 = PigSprite()
+        pigsprite_instance_3 = Sprite()
         pigsprite_instance_3.image = 'art\\pug.png'
         pigsprite_instance_3.layer = 'Background'
         pigsprite_instance_3.position = (482.0, 534.0)
@@ -55,7 +55,7 @@ class Midi_Demo(PigScene):
                 spawn_offset=(0.5, 0.0),
                 match_scale=True) )
 
-        pigsprite_instance_4 = PigSprite()
+        pigsprite_instance_4 = Sprite()
         pigsprite_instance_4.image = 'art\\pug.png'
         pigsprite_instance_4.layer = 'Background'
         pigsprite_instance_4.position = (609.0, 530.0)
@@ -69,7 +69,7 @@ class Midi_Demo(PigScene):
                 spawn_offset=(0.5, 0.0),
                 match_scale=True) )
 
-        pigsprite_instance_5 = PigSprite()
+        pigsprite_instance_5 = Sprite()
         pigsprite_instance_5.image = 'art\\pug.png'
         pigsprite_instance_5.layer = 'Background'
         pigsprite_instance_5.position = (734.0, 528.0)
@@ -83,7 +83,7 @@ class Midi_Demo(PigScene):
                 spawn_offset=(0.5, 0.0),
                 match_scale=True) )
 
-        pigsprite_instance_6 = PigSprite()
+        pigsprite_instance_6 = Sprite()
         pigsprite_instance_6.layer = 'Background'
         pigsprite_instance_6.position = (10.0, 515.0)
         pigsprite_instance_6.components.add( Textbox(
@@ -91,7 +91,7 @@ class Midi_Demo(PigScene):
                 font_size=14,
                 max_width=250) )
 
-        pigsprite_instance_7 = PigSprite()
+        pigsprite_instance_7 = Sprite()
         pigsprite_instance_7.image = 'art\\pug.png'
         pigsprite_instance_7.layer = 'Background'
         pigsprite_instance_7.position = (551.0, 120.0)

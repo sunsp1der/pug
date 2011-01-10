@@ -18,15 +18,15 @@ unpause_keys: list of keys that cause unpause. [] means any key
 
     def enter(self, font_file=None, font_size=None, unpause_keys=[]):
         from pug.all_components import Textbox
-        from pig import PigSprite
+        from pig import Sprite
         from pig.util import get_display_center
         PauseState.enter( self, unpause_keys=unpause_keys)
-        backSprite = PigSprite()
+        backSprite = Sprite()
         backSprite.set_image('art//block.png')
         backSprite.color = (0, 0, 0, 0.8)
         backSprite.set_layer('__pause__')
-        gameOverSprite = PigSprite()
-        pressKeySprite = PigSprite()
+        gameOverSprite = Sprite()
+        pressKeySprite = Sprite()
         textarg = {'text':'GAME OVER', 'hotspot':(0.5, 0.5)}
         if font_file:
             textarg['font_file']=font_file

@@ -81,8 +81,8 @@ modulename: name of module to find scene in. Basically for __Working__ only
     if modulename is None:
         modulename = scenename
     if _DEBUG: print "test_scene_code 1"
-    if scenename == 'PigScene':
-        # we'll assume PigScene is okay
+    if scenename == 'Scene':
+        # we'll assume Scene is okay
         return
     if wx.GetApp() and wx.GetApp().get_project_object():
         wx.GetApp().get_project_object().reload_object_list()
@@ -393,13 +393,13 @@ Note: for this to work on nodes, it must be run BEFORE the scene is changed.
 
 def exporter_cleanup( exporter):
     # delete dummies from Opioid scene
-    from pig.PigScene import PigScene
+    from pig.Scene import Scene
     dummyDict = exporter.dummyDict
     dummyKeys = dummyDict.keys()
     for cls in dummyKeys:
         if issubclass(cls, Node):
             dummyDict[cls].delete()
-        if issubclass(cls, PigScene):
+        if issubclass(cls, Scene):
             dummyDict[cls].exit()
     # wait for Opioid to catch up
     time.sleep(0.25)

@@ -1,7 +1,8 @@
 from inspect import getmro
 import time
 
-from Opioid2D import Sprite, CallFunc, Delay
+from Opioid2D import Sprite as OpioidSprite
+from Opioid2D import CallFunc, Delay
 from Opioid2D.public.gui import GUISprite
 from Opioid2D.public.Sprite import SpriteMeta
 
@@ -20,8 +21,8 @@ from pig.gamedata import get_gamedata
 
 _DEBUG = False
 
-class PigSprite(GUISprite, pug.BaseObject):
-    """PigSprite( img=None, gname='')
+class Sprite(GUISprite, pug.BaseObject):
+    """Sprite( img=None, gname='')
     
 Opioid2d Sprite with features for use with pug"""
     __metaclass__ = SpriteMeta
@@ -31,7 +32,7 @@ Opioid2d Sprite with features for use with pug"""
     _archetype = False
     destroying = False # in the process of being destroyed
     destroy_blockers = None
-    _pug_pugview_class = 'PigSprite'
+    _pug_pugview_class = 'Sprite'
     image = ''
     draggable = False
     auto_scene_register = True
@@ -42,15 +43,15 @@ Opioid2d Sprite with features for use with pug"""
     
     def __init__(self, img=None, gname='', register=None):
         #_DEBUG = False #
-        #if _DEBUG: print "PigSprite.__init__ 0"
+        #if _DEBUG: print "Sprite.__init__ 0"
         pug.BaseObject.__init__(self, gname=gname)
-        #if _DEBUG: print "PigSprite.__init__ 1"
-        Sprite._preinit(self, img)
-        #if _DEBUG: print "PigSprite.__init__ 2"        
+        #if _DEBUG: print "Sprite.__init__ 1"
+        OpioidSprite._preinit(self, img)
+        #if _DEBUG: print "Sprite.__init__ 2"        
         self.collision_groups = set([])
-        #if _DEBUG: print "PigSprite.__init__ 3"
+        #if _DEBUG: print "Sprite.__init__ 3"
         self.on_create()
-        #if _DEBUG: print "PigSprite.__init__ 4"
+        #if _DEBUG: print "Sprite.__init__ 4"
         if register is None:
             register = self.auto_scene_register
         if register:
@@ -94,7 +95,7 @@ fromGroup: group of the sprite we collided with
 Additional arguments are allowed, but will be ignored.
 
 Callback for when object collides in gameplay.
-This method is meant to work with the PigScene.register_collision_callback 
+This method is meant to work with the Scene.register_collision_callback 
 system. It does nothing in the base class, but is meant for overriding or for
 stacking with pug.components.
 """
@@ -112,12 +113,12 @@ stacking with pug.components.
     def leave_collision_groups(self):
         "leave_collision_groups(): leave all collision groups"
         for group in self.collision_groups:
-            Sprite.leave_group(self, group)
+            OpioidSprite.leave_group(self, group)
         self.collision_groups=set([])
         
     def leave_group(self, group):
         self.collision_groups.discard(group)
-        Sprite.leave_group(self, group)
+        OpioidSprite.leave_group(self, group)
         
     def set_archetype(self, TF):
         """set_archetype( TF): set archetype property.
@@ -132,8 +133,7 @@ if TF is "True" set archetype to True, but don't create default name
                 name = self.__class__.__name__
                 superclasses = getmro(self.__class__)[1:]
                 for cls in superclasses:
-                    if name == cls.__name__ or name == 'Sprite' \
-                                            or name == 'PigSprite':
+                    if name == cls.__name__ or name == 'Sprite':
                         name = ''.join(['My',name])    
                         break            
                 name = make_valid_attr_name(name)
@@ -147,7 +147,7 @@ if TF is "True" set archetype to True, but don't create default name
                 doc="Sprite used by editor. Does not appear in running scene.")
         
     def set_image(self, image):
-        Sprite.set_image(self, image)
+        OpioidSprite.set_image(self, image)
         if isinstance(image, basestring):
             self._image_file = image
 
@@ -156,9 +156,9 @@ if TF is "True" set archetype to True, but don't create default name
             self._image_file = file
         else:
             self._image_file = None
-#        Sprite.set_image(self, file)
+#        OpioidSprite.set_image(self, file)
         if file is not None:
-            (Delay(0) + CallFunc(Sprite.set_image, self, file)).do() 
+            (Delay(0) + CallFunc(OpioidSprite.set_image, self, file)).do() 
     
     def get_image_file(self):
         # TODO: find a way to actually look up this filename in the image
@@ -170,13 +170,13 @@ if TF is "True" set archetype to True, but don't create default name
                 self._image_file = self._init_image
         return self._image_file
         # the following line had problems on windows:
-        #     Sprite.set_image(self,image)
+        #     OpioidSprite.set_image(self,image)
         # HACK: putting a Delay before the set_image fixes the problem...
 #        if getattr(PigDirector, 'project_started', False):
 #        else:
-#            (Delay(0) + CallFunc(Sprite.set_image, self, image)).do()
+#            (Delay(0) + CallFunc(OpioidSprite.set_image, self, image)).do()
         # HACK: but it slows down animations ALOT. wtf with this?!
-        #Sprite.set_image(self,image)
+        #OpioidSprite.set_image(self,image)
         
     image_file = property(get_image_file, set_image_file, 
                           doc="The filename of this sprite's image")
@@ -185,7 +185,7 @@ if TF is "True" set archetype to True, but don't create default name
     def _set_gname(self, value):
         pug.BaseObject._set_gname(self, value)
         if hasattr(PigDirector, '_scene'):
-            if _DEBUG: print "PigSprite._set_gname calling scene.update_node"
+            if _DEBUG: print "Sprite._set_gname calling scene.update_node"
             PigDirector.scene.update_node(self)
     gname = property( pug.BaseObject._get_gname, _set_gname, 
                       pug.BaseObject._del_gname,
@@ -195,16 +195,16 @@ if TF is "True" set archetype to True, but don't create default name
         """destroy(): set sprite up for deletion, but allow option to block
         
 The destroy system is useful when dealing with deletion via components. When
-destroy is called, the PigSprite will send an 'on_destroy' callback to itself.
+destroy is called, the Sprite will send an 'on_destroy' callback to itself.
 Components (or an over-ridden on_destroy method) can then call 'block_destroy'
 on the sprite, with the argument being the blocking object. This blocking is
 cancelled when the blocking object is deleted or block_destroy(block=False) is 
 called. When all blocks have been removed, 'delete' will be called.
 
-In general, it is a good idea to use PigSprite.destroy rather than 
-PigSprite.delete whenever the PigSprite is being removed by gameplay effects."""
+In general, it is a good idea to use Sprite.destroy rather than 
+Sprite.delete whenever the Sprite is being removed by gameplay effects."""
         if _DEBUG:
-            print 'PigSprite.destroy',self, self.destroy_blockers.data
+            print 'Sprite.destroy',self, self.destroy_blockers.data
         if not self.destroying:
             self.on_destroy()
             self.destroying = True
@@ -221,9 +221,9 @@ block: set to False to unblock
 blockData: optional info associated with blocker
         
 block_destroy can be called before or during the 'on_destroy' callback. It will
-add blocker to a dictionary of objects blocking the PigSprite's destruction."""
+add blocker to a dictionary of objects blocking the Sprite's destruction."""
         if _DEBUG: 
-            print 'PigSprite.block_destroy', self, blocker, block, blockData
+            print 'Sprite.block_destroy', self, blocker, block, blockData
         if block:
             if self.destroy_blockers is None:
                 blockers = CallbackWeakKeyDictionary()
@@ -236,7 +236,7 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
                 
     def destroy_callback(self, dict, func, arg1, arg2):
         if _DEBUG:
-            print 'PigSprite.destroy_callback', dict, func, arg1, arg2
+            print 'Sprite.destroy_callback', dict, func, arg1, arg2
             print '    ', dict.data
         if not dict:
             if _DEBUG: print '    delete'
@@ -247,7 +247,7 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
         if self._mouse_registered :
             self.mouse_unregister()
         PigDirector.scene.update_node(self, "Delete") # register self with scene                
-        Sprite.delete(self)
+        OpioidSprite.delete(self)
         
     def set_tint(self, tint):
         """set_tint( tint)
@@ -255,26 +255,26 @@ add blocker to a dictionary of objects blocking the PigSprite's destruction."""
 tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
     the alpha element will be ignored. Use set_alpha or to set that."""
         color = (tint[0]/255.0, tint[1]/255.0, tint[2]/255.0, self.get_alpha())
-        Sprite.set_color( self, color)
+        OpioidSprite.set_color( self, color)
         
     def get_tint(self):
         "get_tint()->the (red, green, blue) color value of the sprite"
-        color = Sprite.get_color( self)
+        color = OpioidSprite.get_color( self)
         return (int(round(color[0]*255.0)), int(round(color[1]*255)), 
                 int(round(color[2]*255)))
     
     tint = property(get_tint, set_tint, doc="The color tint of the sprite")
     
     def scene_register(self):
-        "scene_register(): register with the PigScene"
+        "scene_register(): register with the Scene"
         PigDirector.scene.register_node(self)        
 
     # layer_name property
     def set_layer(self, layer):
         if layer not in PigDirector.scene.layers:
             PigDirector.scene.add_layer(layer)
-        Sprite.set_layer(self, layer)
-        if _DEBUG: print "PigSprite.set_layer calling scene.update_node"
+        OpioidSprite.set_layer(self, layer)
+        if _DEBUG: print "Sprite.set_layer calling scene.update_node"
         PigDirector.scene.update_node(self) # register self with scene    
     def get_layer_name(self):
         try:
@@ -292,7 +292,7 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
         
     def _get_source_code(self):
         "_get_source_code()->the scene file if this is not a derived class"
-        if self.__class__ == PigSprite:
+        if self.__class__ == Sprite:
             return PigDirector.scene._get_source_code()
         else:
             return pug.BaseObject._get_source_code(self)
@@ -313,8 +313,6 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
     def _get_shell_name(self):
         if self.gname:
             return self.gname
-        elif self.__class__.__name__ == "PigSprite":
-            return "Sprite"
         else:
             return self.__class__.__name__
 
@@ -327,16 +325,16 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
     def _create_dummy(cls, exporter):
         # make sure we have our dummy node and cleanup registered
         dummy = None
-        if _DEBUG: print "PigSprite.createdummy 0"
+        if _DEBUG: print "Sprite.createdummy 0"
         if exporter_cleanup not in exporter.deleteCallbacks:
             exporter.register_delete_callback( exporter_cleanup)
-        if _DEBUG: print "PigSprite.createdummy 1", cls
+        if _DEBUG: print "Sprite.createdummy 1", cls
         dummy = cls(register=False)
-        if _DEBUG: print "PigSprite.createdummy 2"
+        if _DEBUG: print "Sprite.createdummy 2"
         t = 0     
         while not dummy.initialized:
             t = t+1
-            if _DEBUG: print " PigSprite.createdummy wait", t
+            if _DEBUG: print " Sprite.createdummy wait", t
             time.sleep(0.02)
             if t == 50:
                 return None
@@ -346,11 +344,11 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
         if _DEBUG: print "*******************enter sprite save: "+str(self)        
         # check for valid names
         storage_name = storageDict['storage_name']
-        if storage_name == 'PigSprite' or storage_name == 'Sprite':
+        if storage_name == 'Sprite':
             raise ValueError(''.join(["Can't over-write ",
                                       storage_name," base class."]))
         # grandchildren need to call their parent.on_create
-        if storageDict['base_class'].__name__ != 'PigSprite':
+        if storageDict['base_class'].__name__ != 'Sprite':
             storageDict = storageDict.copy()
             storageDict['base_init'] = True
         # clean up
@@ -441,13 +439,13 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
                         }
     add_subclass_storageDict_key(_codeStorageDict, pug.BaseObject) 
 
-# force derived classes to use PigSprite as a base. Advanced users can get
+# force derived classes to use Sprite as a base. Advanced users can get
 # around this however they need to
-# PigSprite._codeStorageDict['base_class'] = PigSprite
+# Sprite._codeStorageDict['base_class'] = Sprite
 
         
 _spritePugview = {
-    'name':'PigSprite Editor',
+    'name':'Sprite Editor',
     'skip_menus':['Export'],
     'attributes':
     [
@@ -490,16 +488,16 @@ _spritePugview = {
     #        ['_delete_test'],
     ]       
  }
-pug.add_pugview('PigSprite', _spritePugview, True)
+pug.add_pugview('Sprite', _spritePugview, True)
 ########################################################
-## reveal this to test PigSprite deletion problems
+## reveal this to test Sprite deletion problems
 #_spritePugview['attributes'].append(['test_referrers'])
 #from pug.util import test_referrers
 #def _test_referrers( self):
 #    test_referrers(self)
-#PigSprite.test_referrers = _test_referrers
+#Sprite.test_referrers = _test_referrers
 ####################################################
-if hasattr(PigSprite,'test'):
+if hasattr(Sprite,'test'):
     _spritePugview['attributes'].append(['test'])
 
 

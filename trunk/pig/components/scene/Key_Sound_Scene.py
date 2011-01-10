@@ -1,6 +1,6 @@
 from pug.component import *
 
-from pig import PigScene
+from pig import Scene
 from pig.components.sound.Key_Sound import Key_Sound
 
 class Key_Sound_Scene( Key_Sound):
@@ -8,7 +8,7 @@ class Key_Sound_Scene( Key_Sound):
     # component_info
     _set = 'pig'
     _type = 'sound'
-    _class_list = [PigScene]
+    _class_list = [Scene]
     # attributes:   
     
     @component_method

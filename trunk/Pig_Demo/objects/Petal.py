@@ -1,10 +1,10 @@
 ### import autocode ###
-from pig.PigSprite import PigSprite
+from pig.Sprite import Sprite
 from pug.all_components import Grow_Shrink, Set_Motion, Self_Destruct
 ### End import autocode ###
 
 ### Petal autocode ###
-class Petal(PigSprite):
+class Petal(Sprite):
     image = 'art\\pug.png'
     layer = 'Background'
     def on_create(self):

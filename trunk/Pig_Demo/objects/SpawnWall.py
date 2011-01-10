@@ -1,10 +1,10 @@
 ### import autocode ###
-from pig.PigSprite import PigSprite
+from pig.Sprite import Sprite
 from pug.all_components import Spawner
 ### End import autocode ###
 
 ### SpawnWall autocode ###
-class SpawnWall(PigSprite):
+class SpawnWall(Sprite):
     image = 'art\\block.png'
     layer = 'walls'
     def on_create(self):

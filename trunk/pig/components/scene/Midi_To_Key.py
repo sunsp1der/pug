@@ -1,6 +1,6 @@
 from pug.component import *
 
-from pig import PigScene
+from pig import Scene
 from pig.keyboard import keys
 from pig.editor.agui import KeyDropdown
 from pig.components.controls.Midi_Callback import Midi_Callback
@@ -10,7 +10,7 @@ class Midi_To_Key( Midi_Callback):
     # component_info
     _set = 'pig'
     _type = 'controls'
-    _class_list = [PigScene]
+    _class_list = [Scene]
     # attributes:   
     _field_list = [
         ['key', KeyDropdown, 
