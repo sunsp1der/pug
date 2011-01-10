@@ -1,7 +1,7 @@
 """Midi_Input.py
 
 This component adds midi input functionality to a scene. It is an example of
-how to add a whole new input device to a PigScene.
+how to add a whole new input device to a Scene.
 """
 import pygame.midi
 
@@ -9,7 +9,7 @@ from Opioid2D import RealTickFunc
 
 from pug.component import *
 
-from pig import PigScene
+from pig import Scene
 from pig.keyboard import keys
 
 class Midi_Input( Component):
@@ -30,7 +30,7 @@ The midistate object contains the following attributes
     # component_info
     _set = 'pig'
     _type = 'controls'
-    _class_list = [PigScene]
+    _class_list = [Scene]
     # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
             ['input_id', 'The midi input id. -1 uses default.'],

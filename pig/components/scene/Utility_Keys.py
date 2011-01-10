@@ -6,7 +6,7 @@ from pug import Filename
 from pug.component import *
 from pug.util import start_file
 
-from pig import PigScene
+from pig import Scene
 from pig.keyboard import *
 from pig.PigDirector import PigDirector
 
@@ -24,7 +24,7 @@ do_info(filename=None): try to open the filename with default program
     # component_info
     _set = 'pig'
     _type = 'utilities'
-    _class_list = [PigScene]
+    _class_list = [Scene]
     # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
             ['restart_ctrl_r', 'If True, ctrl-r restarts scene'],

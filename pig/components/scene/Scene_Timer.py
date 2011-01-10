@@ -1,6 +1,6 @@
 from pug.component import *
 
-from pig import PigScene
+from pig import Scene
 from pig.actions import *
 from pig.editor.agui import ScenesDropdown
 
@@ -12,7 +12,7 @@ time."""
     # component_info
     _set = 'pig'
     _type = 'behavior'
-    _class_list = [PigScene]
+    _class_list = [Scene]
     # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
             ['scene_time','Seconds before scene changes'],

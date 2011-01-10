@@ -1,12 +1,12 @@
 ### import autocode ###
-from pig.PigSprite import PigSprite
+from pig.Sprite import Sprite
 from pug.all_components import Key_Direction_Controls, Motion_Zone, Mouse_Face,\
     Key_Spawn, On_Destroy_Sound, Spawn_On_Destroy, Fade, Multiple_Lives,\
     Takes_Damage
 ### End import autocode ###
 
 ### FlyAroundPlayer autocode ###
-class FlyAroundPlayer(PigSprite):
+class FlyAroundPlayer(Sprite):
     image = 'art\\pug.png'
     layer = 'Background'
     def on_create(self):

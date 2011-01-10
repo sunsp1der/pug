@@ -9,6 +9,7 @@ from pygame.locals import KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP
 from pygame.key import get_pressed, get_mods
 
 import Opioid2D
+from Opioid2D import Scene as OpioidScene
 from Opioid2D.internal.objectmgr import ObjectManager
 from Opioid2D.public.Scene import SceneCallbacks
 
@@ -29,18 +30,18 @@ from pig.PigMouseManager import PigMouseManager
 
 _DEBUG = False     
 
-class PigScene( Opioid2D.Scene, pug.BaseObject):
-    """PigScene - Opioid2d Scene with features for use with pug"""
+class Scene( OpioidScene, pug.BaseObject):
+    """Scene - Scene with features for use with pug"""
     mouse_manager = None
     __node_num = 0
     started = False
     exitted = False
-    _pug_pugview_class = 'PigScene'
+    _pug_pugview_class = 'Scene'
     layers = ['Background']
     k_info = []
     keys_pressed = None # efficiency for key register double-check
     def __init__(self, gname=''):
-        if _DEBUG: print "do PigScene.__init__",self
+        if _DEBUG: print "do Scene.__init__",self
         self._key_down_dict = {}
         self._key_up_dict = {}
         self._collision_callback_dict = WeakKeyDictionary()
@@ -48,9 +49,9 @@ class PigScene( Opioid2D.Scene, pug.BaseObject):
         self.k_info = [self.register_key_up(keys["ESCAPE"], self.keypause),
                        self.register_key_up((keymods["CTRL"],
                                                keys["Q"]), self.keyquit)]
-        Opioid2D.Scene.__init__(self)
+        OpioidScene.__init__(self)
         pug.BaseObject.__init__(self, gname)   
-        if _DEBUG: print "PigScene.__init__ done", self.__class__.__name__ 
+        if _DEBUG: print "Scene.__init__ done", self.__class__.__name__ 
         
     def register_collision_callback( self, sprite, fn, 
                                      toGroup="colliders",
@@ -413,7 +414,7 @@ Start the scene running. Called after enter() and before state changes
         
     def register_node(self, node):        
 #        """register(node): a new node is joining scene. Do callbacks"""
-        if _DEBUG: print "PigScene.register_node:",node,self.started
+        if _DEBUG: print "Scene.register_node:",node,self.started
         if self.started:
             try:
                 func = getattr(node, 'on_added_to_scene')
@@ -440,7 +441,7 @@ Start the scene running. Called after enter() and before state changes
     
     def all_nodes_callback(self, callback, *args, **kwargs):
         """Send a callback to all nodes in the scene"""
-        if _DEBUG: print "PigScene.all_nodes_callback:",callback,self.nodes.data
+        if _DEBUG: print "Scene.all_nodes_callback:",callback,self.nodes.data
         nodes = self.nodes.copy()
         for node in nodes:
             try:
@@ -448,7 +449,7 @@ Start the scene running. Called after enter() and before state changes
             except:
                 pass
             else:
-#                if _DEBUG: print "PigScene.node_callback",callback,node
+#                if _DEBUG: print "Scene.node_callback",callback,node
                 func( *args, **kwargs)
                         
     def on_start(self):
@@ -474,10 +475,10 @@ Start the scene running. Called after enter() and before state changes
         self.exit()
         
     def exit(self):
-        if _DEBUG: print "PigScene.exit"
+        if _DEBUG: print "Scene.exit"
         if not self.exitted:
             #if _DEBUG: 
-            if _DEBUG: print "do PigScene.exit", self
+            if _DEBUG: print "do Scene.exit", self
             self.on_exit()
             self.all_nodes_callback('on_exit_scene', self)
             nodes = self.nodes.keys()
@@ -567,10 +568,10 @@ terms of nodes within the layers"""
     def update_node(self, node, command=None):
         """update_node(node, command=None)
         
-Update the PigScene's node tracking dict for node. Possible commands: 'Delete'
+Update the Scene's node tracking dict for node. Possible commands: 'Delete'
 """
         nodes = self.nodes
-#        if _DEBUG: print "PigScene.update_node", node, command
+#        if _DEBUG: print "Scene.update_node", node, command
         if not nodes.has_key(node):
 #            if _DEBUG: print "   not registered:", node
             return
@@ -615,7 +616,7 @@ If scene is a working scene, return
             wx = wx
             interface = wx.GetApp().get_project_object()
             filename = interface.commit_scene()
-            if not filename or Opioid2D.Director.scene.__class__ == PigScene:
+            if not filename or Opioid2D.Director.scene.__class__ == Scene:
                 errorDlg = wx.MessageDialog( wx.GetApp().get_project_frame(),
                        "Your scene must be saved before viewing source.",
                        "Save Scene First",
@@ -660,7 +661,7 @@ If scene is a working scene, return
     def _create_object_code(self, storageDict, indentLevel, exporter):
         if _DEBUG: print "*******************enter scene save"
         storage_name = storageDict['storage_name']
-        if storage_name == 'PigScene' or storage_name == 'Scene':
+        if storage_name == 'Scene' or storage_name == 'Scene':
             raise ValueError(''.join(["Can't over-write ",
                                       storage_name," base class."]))
         if not storageDict['as_class']:            
@@ -715,7 +716,7 @@ If scene is a working scene, return
                 archetype_exporter = save_object( node, savename)
                 if not archetype_exporter or \
                                         archetype_exporter.errorfilename:
-                    error = ''.join(["PigScene code export failed...",
+                    error = ''.join(["Scene code export failed...",
                             "unable to save archetype:",
                             savename, node])
                     warnings.warn(error)
@@ -787,8 +788,8 @@ If scene is a working scene, return
              }   
     add_subclass_storageDict_key(_codeStorageDict, pug.BaseObject)
 
-# force derived classes to use PigScene as base class
-PigScene._codeStorageDict['base_class']=PigScene
+# force derived classes to use Scene as base class
+Scene._codeStorageDict['base_class']=Scene
 # pug pugview stuff
             
 def OnCollision(self, group1, group2, sprite1, sprite2):
@@ -806,7 +807,7 @@ callback( toSprite, fromSprite, toGroup, fromGroup)
 SceneCallbacks.OnCollision = OnCollision            
             
 _scenePugview = {
-    'name':'PigScene Editor',
+    'name':'Scene Editor',
     'skip_menus':['Export'],   
     'attributes':
     [
@@ -830,4 +831,4 @@ _scenePugview = {
         ['nodes', SceneNodes, {'growable':True}],
     ]
 }
-pug.add_pugview('PigScene', _scenePugview, True)
+pug.add_pugview('Scene', _scenePugview, True)

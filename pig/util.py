@@ -195,7 +195,7 @@ _project_settings file unless otherwise noted.
         try:
             title = project_settings.title
         except:
-            title = "Pig Scene"
+            title = "Scene"
     if fullscreen is None:
         try:
             fullscreen = project_settings.fullscreen
@@ -205,7 +205,7 @@ _project_settings file unless otherwise noted.
         try:
             scenename = project_settings.initial_scene
         except:
-            scenename = 'PigScene'
+            scenename = 'Scene'
     if icon is None:
         try:
             icon = project_settings.icon
@@ -216,9 +216,9 @@ _project_settings file unless otherwise noted.
     import pig.components
     get_package_classes('components', pug.component.Component)    
     scenedict = get_available_scenes( useWorking=useWorking)# use __Working__.py
-    from pig.PigScene import PigScene
-    if scenename == 'PigScene':
-        initial_scene = PigScene
+    from pig.Scene import Scene
+    if scenename == 'Scene':
+        initial_scene = Scene
     else:
         try:
             initial_scene = scenedict[scenename]
@@ -270,7 +270,7 @@ def get_available_scenes( doReload=False, useWorking=True, errors=None):
     """get_available_scenes( doReload=False, useWorking=False, errors=None)>dict
     
 Get all Scenes available in modules in Scenes folder. Return dict of available 
-Scene sub-classes {"sceneName":sceneClass}. PigScene is automatically included.  
+Scene sub-classes {"sceneName":sceneClass}. Scene is automatically included.  
 doReload: if True, don't just import scene modules, but reload them
 useWorking: if True, and the class in the __Working__.py file is in the class
     list, use the __Working__ scene to replace the one in the list.
@@ -338,7 +338,7 @@ def get_available_objects( doReload=False, errors=None):
     """get_available_objects( doReload=False, errors=None)->dict of objects
     
 Get all Nodes available in modules in Objects folder. Return a dict of available
-'name':class. PigSprite is automatically included.
+'name':class. Sprite is automatically included.
 doReload: if True reload all object modules from disk
 errors: if a dict is passed in, it will be filled with the results of 
     sys.exc_info() for each module that had a problem being imported. Indexed

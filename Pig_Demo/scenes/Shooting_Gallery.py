@@ -5,15 +5,15 @@ from objects.ExplodeParticle import ExplodeParticle
 from objects.Explosion import Explosion
 from objects.Launcher import Launcher
 from objects.Target import Target
-from pig.PigScene import PigScene
-from pig.PigSprite import PigSprite
+from pig.Scene import Scene
+from pig.Sprite import Sprite
 from pug.all_components import Joystick_Input, Joystick_Axis_To_Key,\
     Joystick_Button_To_Key, Utility_Keys, Value_Tracker_Text, Timer_Text,\
     Textbox
 ### End import autocode ###
 
 ### Shooting_Gallery autocode ###
-class Shooting_Gallery(PigScene):
+class Shooting_Gallery(Scene):
     def on_enter(self):
         self.components.add( Joystick_Input(
                 test_mode=True) )
@@ -44,17 +44,17 @@ class Shooting_Gallery(PigScene):
 
         cannon_instance = Cannon()
 
-        pigsprite_instance = PigSprite()
+        pigsprite_instance = Sprite()
         pigsprite_instance.layer = 'Background'
         pigsprite_instance.position = (666.0, 537.0)
         pigsprite_instance.components.add( Value_Tracker_Text() )
 
-        pigsprite_instance_2 = PigSprite()
+        pigsprite_instance_2 = Sprite()
         pigsprite_instance_2.layer = 'Background'
         pigsprite_instance_2.position = (667.0, 508.0)
         pigsprite_instance_2.components.add( Timer_Text() )
 
-        pigsprite_instance_3 = PigSprite()
+        pigsprite_instance_3 = Sprite()
         pigsprite_instance_3.layer = 'Background'
         pigsprite_instance_3.position = (19.0, 530.0)
         pigsprite_instance_3.components.add( Textbox(

@@ -1,10 +1,10 @@
 ### import autocode ###
-from pig.PigSprite import PigSprite
+from pig.Sprite import Sprite
 from pug.all_components import Key_Spawn, Key_Animate_Direction
 ### End import autocode ###
 
 ### RedDragon autocode ###
-class RedDragon(PigSprite):
+class RedDragon(Sprite):
     layer = 'Sky'
     def on_create(self):
         self.position = (363.0, 263.0)

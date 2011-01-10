@@ -2,8 +2,8 @@
 
 import util # must be first
 
-from PigSprite import PigSprite
-from PigScene import PigScene
+from Sprite import Sprite
+from Scene import Scene
 from PigDirector import PigDirector
 from PauseState import PauseState
 

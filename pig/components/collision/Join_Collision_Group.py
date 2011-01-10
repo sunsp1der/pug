@@ -1,11 +1,10 @@
 from weakref import ref
 
-from Opioid2D.public.Sprite import Sprite
-
 from pug.component import *
 
 from pig.editor.agui.group_dropdown import *
 from pig.components import SpriteComponent
+from pig import Sprite
 
 class Join_Collision_Group( SpriteComponent):
     """Object joins a sprite group for collisions or other uses."""

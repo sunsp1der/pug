@@ -1,10 +1,10 @@
 ### import autocode ###
-from pig.PigSprite import PigSprite
+from pig.Sprite import Sprite
 from pug.all_components import Key_Drive_Controls, Key_Spawn
 ### End import autocode ###
 
 ### Cannon autocode ###
-class Cannon(PigSprite):
+class Cannon(Sprite):
     image = 'art\\pug.png'
     layer = 'Background'
     def on_create(self):

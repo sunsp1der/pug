@@ -1,13 +1,13 @@
 """ExplodeParticle.py"""
 
 ### import autocode ###
-from pig.PigSprite import PigSprite
+from pig.Sprite import Sprite
 from pug.all_components import Random_Motion, Set_Motion, Self_Destruct,\
     Grow_Shrink, Face_Motion
 ### End import autocode ###
 
 ### ExplodeParticle autocode ###
-class ExplodeParticle(PigSprite):
+class ExplodeParticle(Sprite):
     image = 'art\\pug.png'
     layer = 'Background'
     def on_create(self):

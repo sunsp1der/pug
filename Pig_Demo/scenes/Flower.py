@@ -1,7 +1,7 @@
 ### import autocode ###
 from objects.LetterPetal import LetterPetal
-from pig.PigScene import PigScene
-from pig.PigSprite import PigSprite
+from pig.Scene import Scene
+from pig.Sprite import Sprite
 from pug.all_components import Key_Spawn, Spawn_Flower,\
     Spawned_Component_Change
 ### End import autocode ###
@@ -11,14 +11,14 @@ from pig.keyboard import keymods
 from pug import get_gnamed_object
 
 ### Flower autocode ###
-class Flower(PigScene):
+class Flower(Scene):
     def on_enter(self):
         # Archetypes
         LetterPetal_archetype = LetterPetal(gname='LetterPetal')
         LetterPetal_archetype.archetype = True
 
         # Sprites
-        pigsprite_instance = PigSprite()
+        pigsprite_instance = Sprite()
         pigsprite_instance.image = 'art\\pug.png'
         pigsprite_instance.layer = 'Background'
         pigsprite_instance.position = (400.0, 300.0)
@@ -68,4 +68,4 @@ class Flower(PigScene):
                 self.spawner.k_info.append(
                         self.register_key_up( self.spawner.key, 
                                                self.spawner.stop_spawning))
-                PigScene.handle_keydown( self, event)
+                Scene.handle_keydown( self, event)

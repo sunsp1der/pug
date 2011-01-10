@@ -1,7 +1,7 @@
 """ScenesDropdown attribute gui"""
 import wx
 
-from Opioid2D import Scene
+from Opioid2D import Scene as OpioidScene
 
 from pug.syswx.attributeguis.dropdown import Dropdown
 
@@ -29,7 +29,7 @@ For kwargs optional arguments, see the Base attribute GUI
 """      
     return_strings = False
     def setup(self, attribute, window, aguidata):    
-        specialaguidata = {'class_list': [Scene],
+        specialaguidata = {'class_list': [OpioidScene],
                            'append_list':[],
                            'prepend_list':[],
                            'doc': 'Saved object class', 

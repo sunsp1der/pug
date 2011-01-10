@@ -2,14 +2,14 @@
 from objects.FlyAroundPlayer import FlyAroundPlayer
 from objects.SpawnWall import SpawnWall
 from objects.Target import Target
-from pig.PigScene import PigScene
-from pig.PigSprite import PigSprite
+from pig.Scene import Scene
+from pig.Sprite import Sprite
 from pug.all_components import Utility_Keys, On_Start_Sound,\
     Value_Tracker_Text, Textbox
 ### End import autocode ###
 
 ### Fly_Around autocode ###
-class Fly_Around(PigScene):
+class Fly_Around(Scene):
     layers = ['Background', 'walls']
 
     def on_enter(self):
@@ -30,26 +30,26 @@ class Fly_Around(PigScene):
         SpawnWall_archetype.archetype = True
 
         # Sprites
-        pigsprite_instance = PigSprite()
+        pigsprite_instance = Sprite()
         pigsprite_instance.layer = 'Background'
         pigsprite_instance.position = (678.0, 547.0)
         pigsprite_instance.components.add( Value_Tracker_Text() )
 
-        pigsprite_instance_2 = PigSprite()
+        pigsprite_instance_2 = Sprite()
         pigsprite_instance_2.layer = 'Background'
         pigsprite_instance_2.position = (678.0, 480.0)
         pigsprite_instance_2.components.add( Value_Tracker_Text(
                 prefix='Health: ',
                 value_name='health') )
 
-        pigsprite_instance_3 = PigSprite()
+        pigsprite_instance_3 = Sprite()
         pigsprite_instance_3.layer = 'Background'
         pigsprite_instance_3.position = (678.0, 513.0)
         pigsprite_instance_3.components.add( Value_Tracker_Text(
                 prefix='Lives: ',
                 value_name='lives') )
 
-        pigsprite_instance_4 = PigSprite()
+        pigsprite_instance_4 = Sprite()
         pigsprite_instance_4.layer = 'Background'
         pigsprite_instance_4.position = (20.0, 503.0)
         pigsprite_instance_4.components.add( Textbox(

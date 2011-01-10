@@ -1,5 +1,5 @@
 ### import autocode ###
-from pig.PigSprite import PigSprite
+from pig.Sprite import Sprite
 from pug.all_components import Textbox, Set_Motion, Self_Destruct, Fade
 ### End import autocode ###
 
@@ -8,7 +8,7 @@ from pug.all_components import Fade
 from pig.actions import *
 
 ### LetterPetal autocode ###
-class LetterPetal(PigSprite):
+class LetterPetal(Sprite):
     layer = 'Background'
     def on_create(self):
         self.position = (569.0, 199.0)

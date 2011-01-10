@@ -12,7 +12,7 @@ from pug.syswx.attributeguis.filename import Filename
 #TODO: base this on Filename agui... only browse fn and doc are different
 
 class PigImageBrowser (Filename):
-    """An attribute gui for picking a PigSprite image via filename
+    """An attribute gui for picking a Sprite image via filename
 
 ImageBrowser(attribute, window, **kwargs)
 attribute: what attribute of window.object is being controlled

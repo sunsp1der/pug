@@ -1,18 +1,18 @@
 ### import autocode ###
-from pig.PigScene import PigScene
-from pig.PigSprite import PigSprite
+from pig.Scene import Scene
+from pig.Sprite import Sprite
 from pug.all_components import Scene_Timer, Grow_Shrink, Fade, Self_Destruct
 ### End import autocode ###
 
 ### Intro autocode ###
-class Intro(PigScene):
+class Intro(Scene):
     def on_enter(self):
         self.components.add( Scene_Timer(
                 scene_time=2,
                 next_scene='MenuScreen') )
 
         # Sprites
-        pigsprite_instance = PigSprite()
+        pigsprite_instance = Sprite()
         pigsprite_instance.image = 'art\\pug.png'
         pigsprite_instance.layer = 'Background'
         pigsprite_instance.position = (400.0, 300.0)

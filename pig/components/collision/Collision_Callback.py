@@ -8,14 +8,13 @@ can give the user a nice dropdown of all group names used in the scene.
 
 from weakref import ref
 
-from Opioid2D.public.Sprite import Sprite
-
 from pug.component import *
 
 from pig.PigDirector import PigDirector
 from pig.editor.agui.group_dropdown import GroupDropdown, register_group, \
         unregister_group
 from pig.components import SpriteComponent
+from pig import Sprite
 
 class Collision_Callback( SpriteComponent):
     """Object's "on_collision" method is called when it collides

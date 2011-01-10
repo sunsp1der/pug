@@ -13,7 +13,7 @@ from Opioid2D import Mouse
 from pig.PigDirector import PigDirector
 from pig.editor.util import get_image_path
 from pig.util import is_shift_down, is_ctrl_down, angle_to
-from pig import PigSprite
+from pig import Sprite
 
 wx = wx
 
@@ -254,7 +254,7 @@ node: any object containing a 'rect' attribute that is a pygame rect
                                                     + x_offset
         self.area.scale = (rect.width, rect.height)
         
-class SelectBoxBaseSprite( PigSprite):
+class SelectBoxBaseSprite( Sprite):
     layer = "__editor1__"
     auto_scene_register = False
 
