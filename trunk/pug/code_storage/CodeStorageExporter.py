@@ -681,6 +681,8 @@ there are no attributes to set, this method returns "".
                     #otherwise only store builtins for now
                     continue
             output = prettify_data(val)
+            if type(val) == str or type(val) == unicode:
+                output = repr(output)
             line = [baseIndent, prefix, attr, ' = ', output, '\n']
             codeList += line
         return ''.join(codeList)

@@ -1,9 +1,5 @@
 todo:
-	run main is broken
-	screen position not saving right
-	change size when changing images
-		agui_text_ctrl converting to ''
-	change Images folder to images
+
  	
 installer:
 	eliminate need for pythonpather
@@ -13,6 +9,7 @@ installer:
 	update numeric refs to numpy
 
 soon:
+	change Images folder to images
  	master volume
 	'loading' graphic while scene saves, or at least cleanup
 	destroy on gameover
