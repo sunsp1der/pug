@@ -171,9 +171,7 @@ node: any object containing a 'rect' attribute that is a pygame rect
         movevector[1] = movedir[1] * (node.rect.height - self.orig_rect[1]) \
                         / 2.0 
         movevector.direction += node.rotation
-        print node.position
         node.position = self.orig_position + movevector
-        print node.position
         # set lines and handles
         self.surround_node(force=True)                
         

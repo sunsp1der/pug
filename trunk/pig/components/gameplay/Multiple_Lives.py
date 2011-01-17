@@ -42,8 +42,9 @@ This component gives the base object a new callback:
     _lives = None
     
     @component_method
-    def on_project_start(self):
-        self.set_lives( self.start_lives - 1)
+    def on_scene_start(self):
+        "Set lives at beginning of scene"
+        self.get_lives()
     
     @component_method
     def on_destroy(self):
@@ -80,7 +81,7 @@ This component gives the base object a new callback:
     def get_lives(self):
         "get_lives()->self._lives"
         if self._lives is None:
-            self.set_lives( self.start_lives)
+            self.set_lives( self.start_lives - 1)
         if self.value_name:
             gamedata = get_gamedata()         
             try:

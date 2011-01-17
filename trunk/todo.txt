@@ -1,5 +1,6 @@
 todo:
-	eliminate pigsprite and pigscene. pigdirector?
+	levelchange on score
+	joystick controls have heldkey problem
  	
 installer:
 	eliminate need for pythonpather

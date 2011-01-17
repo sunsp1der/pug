@@ -917,19 +917,6 @@ Opioid2D, it is safer to call this via add_object.
 #                print test_referrers(x)
 #                pug.frame(x)
 
-         
-def _scene_list_generator():
-    """_scene_list_generator( includeNewScene=True)-> list of scenes + 'New'
-    
-Return a list of scene classes available in the scenes folder. Append to that
-list a tuple ("New Scene", Scene) for use in the sceneclass dropdown"""
-    if _DEBUG: print "_scene_list_generator"
-    scenedict = get_available_scenes( 
-                    useWorking = wx.GetApp().projectObject._use_working_scene)
-    scenelist = scenedict.values()
-    scenelist.sort()
-    scenelist.insert(0,("New Scene", Scene))
-    return scenelist    
         
 from pig.editor.agui import ObjectsDropdown      
 from pig.editor.agui import ScenesDropdown      

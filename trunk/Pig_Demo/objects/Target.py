@@ -1,7 +1,7 @@
 ### import autocode ###
 from pig.Sprite import Sprite
 from pug.all_components import Spawn_On_Destroy, Fade, Grow_Shrink, Life_Zone,\
-    Value_On_Destroy, Deals_Damage, Takes_Damage, On_Damage_Sound,\
+    Value_On_Destroy, Deals_Damage, Takes_Damage, On_Deal_Damage_Sound,\
     Random_Motion
 ### End import autocode ###
 
@@ -33,7 +33,7 @@ class Target(Sprite):
         self.components.add( Takes_Damage(
                 start_health=10.0,
                 group='target') )
-        self.components.add( On_Damage_Sound(
+        self.components.add( On_Deal_Damage_Sound(
                 sound='sound\\explosion.wav') )
         self.components.add( Random_Motion(
                 angle_variance=30,

@@ -1,5 +1,6 @@
 """ObjectsDropdown attribute gui"""
 
+from pug.util import sort_case_insensitive
 from pug.syswx.attributeguis.dropdown import Dropdown
 
 class GroupDropdown (Dropdown):
@@ -46,7 +47,7 @@ def get_group_list():
     group_list = [DEFAULT_GROUP]
     last_group = ""
     groups = group_dict.values()
-    groups.sort()
+    sort_case_insensitive(groups)
     for group in groups:
         if last_group != group:
             group_list.append(group)

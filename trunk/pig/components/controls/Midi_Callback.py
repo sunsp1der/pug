@@ -37,10 +37,11 @@ want to know if any keys are currently on, check the has_on_note boolean.
     has_on_note = False
     
     @component_method
-    def on_scene_start(self, scene):
+    def on_scene_start(self):
         "Set spawn key and setup the spawner"
         self.k_info = []
-        self.k_info += [scene.register_key_down( keys["MIDI"], self.midi_event)]
+        self.k_info += [PigDirector.scene.register_key_down( keys["MIDI"],
+                        self.midi_event)]
         self.on_notes = {}
             
     def midi_event(self, event):

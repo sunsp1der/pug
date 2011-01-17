@@ -5,7 +5,7 @@ from pug.component import *
 from pig.audio import get_sound
 from pig.components.sound.On_Create_Sound import On_Create_Sound
 
-class On_Damaged_Sound( On_Create_Sound):
+class On_Take_Damage_Sound( On_Create_Sound):
     """Owner plays a sound when it takes damage"""
     # component_info
     _set = 'pig'
@@ -25,5 +25,5 @@ class On_Damaged_Sound( On_Create_Sound):
         "Play the sound when object takes damage"
         self.sound_object.play()
     
-register_component( On_Damaged_Sound)
+register_component( On_Take_Damage_Sound)
     
