@@ -20,7 +20,7 @@ class Set_Attribute(SpriteComponent):
         ['attribute',"Owner's attribute to set"],
         ['change_type', Dropdown,
                     {'doc':"Attribute will be changed in this way",
-                     'list':["=","+","*"]}],                
+                     'list':["=","+","*"],'sort':False}],                
         ['change_value', Generic,
                     {'doc':"Attribute will be changed by this value",
                      'do_typecast': False}],                     

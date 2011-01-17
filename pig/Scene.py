@@ -469,18 +469,19 @@ Start the scene running. Called after enter() and before state changes
     
     def stop(self):
         """Stop a level that is playing"""
+        self.exit()
         Opioid2D.Director.project_started = False  
         Opioid2D.Director.start_project = False                     
         self.started = False
-        self.exit()
         
     def exit(self):
         if _DEBUG: print "Scene.exit"
         if not self.exitted:
             #if _DEBUG: 
             if _DEBUG: print "do Scene.exit", self
-            self.on_exit()
-            self.all_nodes_callback('on_exit_scene', self)
+            if Opioid2D.Director.project_started:
+                self.on_exit()
+                self.all_nodes_callback('on_exit_scene', self)
             nodes = self.nodes.keys()
             for node in nodes:
                 if _DEBUG: print "   Delete Node:",node

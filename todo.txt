@@ -1,7 +1,5 @@
 todo:
-	levelchange on score
-	joystick controls have heldkey problem
- 	
+	
 installer:
 	eliminate need for pythonpather
 	create_demo_project
@@ -10,12 +8,12 @@ installer:
 	update numeric refs to numpy
 
 soon:
+	joystick controls have heldkey problem
 	change Images folder to images
  	master volume
 	'loading' graphic while scene saves, or at least cleanup
 	destroy on gameover
 	level on group empty
-	level on value
 	
 	option for gameover pause
 	option for gameover timer

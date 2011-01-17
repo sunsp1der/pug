@@ -46,14 +46,16 @@ callbackfunc: the callback function. It will receive:
         
     def __setattr__(self, attr, value):
         BaseObject.__setattr__(self, attr, value)
-        try:
+#        try:
+        if attr in self.__callbackDict:
             for callback in self.__callbackDict[attr]:
-                try:
-                    callback( value, attr, self)
-                except:
-                    self.__callbackDict[attr].remove(callback)
-        except:
-            pass
+                callback( value, attr, self)
+#                try:
+#                    callback( value, attr, self)
+#                except:
+#                    self.__callbackDict[attr].remove(callback)
+#        except:
+#            pass
         
     def __del__(self):
         # don't know why this try is necessary, but I get an exception without

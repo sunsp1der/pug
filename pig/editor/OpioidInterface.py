@@ -568,7 +568,7 @@ event: a wx.Event
             pass
         answer = dlg.ShowModal() 
         if answer == wx.ID_YES:
-            self.stop_scene()
+            self.do_stop_scene()
             saved = self.save_using_working_scene()
             if not saved:
                 dlg = wx.MessageDialog( self.frame,
