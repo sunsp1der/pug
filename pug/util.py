@@ -91,6 +91,15 @@ def make_valid_attr_name(name):
     name = re.sub(r'\W','_',name) # replace non alpha numerics with _
     return name
 
+def sort_case_insensitive( lst):
+    def lower_if_possible(x):
+        try:
+            return x.lower()
+        except AttributeError:
+            return x  
+    lst.sort(  key=lambda x: map(lower_if_possible, x))          
+    
+
 def prettify_path( path):
     "prettify_path( path)-> normalized path with os separator as divider"
     ret = os.path.normpath(path)

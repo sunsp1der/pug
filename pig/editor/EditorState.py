@@ -38,16 +38,16 @@ class EditorState(PigState):
         if _DEBUG: print "EditorState.exit complete"
         PigState.exit(self)
 
-    def handle_activeevent(self, event):
-        # skip mouse down event when just gaining focus
-        if event.state == 6:
-            self.skip_mouse_down = True
+#    def handle_activeevent(self, event):
+#        # skip mouse down event when just gaining focus
+#        if event.state == 6:
+#            self.skip_mouse_down = True
                         
     def handle_mousebuttondown(self, event):
-        # skip if not focused
-        if self.skip_mouse_down:
-            self.skip_mouse_down = False
-            return
+#        # skip if not focused
+#        if self.skip_mouse_down:
+#            self.skip_mouse_down = False
+#            return
         # nothing if the mouse is locked
         if self.mouse_locked_by:
             return

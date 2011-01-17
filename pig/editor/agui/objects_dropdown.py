@@ -2,6 +2,7 @@
 
 from Opioid2D.public.Node import Node
 
+from pug.util import sort_case_insensitive
 from pug.gname import get_gnames
 from pug.syswx.attributeguis.dropdown import Dropdown
 
@@ -53,7 +54,7 @@ For kwargs optional arguments, see the Base attribute GUI
             objlist = objdict.keys()
         else:
             objlist = [(name, objdict[name]) for name in objdict.keys()]
-        objlist.sort()
+        sort_case_insensitive(objlist)
         for item in self.aguidata['prepend_list']:
             objlist.insert(0, item)
         for item in self.aguidata['append_list']:

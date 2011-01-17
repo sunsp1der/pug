@@ -13,7 +13,7 @@ class Grower(Sprite):
         self.position = (400.0, 300.0)
 ### End Grower autocode ###
 
-    def on_scene_start(self, scene):
+    def on_scene_start(self):
         self.threshold = 100 * 100
         self.scale_multiplier = 3
         self.original_scale = Vector(self.scale.x, self.scale.y)

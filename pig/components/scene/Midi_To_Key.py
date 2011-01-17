@@ -25,7 +25,7 @@ class Midi_To_Key( Midi_Callback):
     @component_method
     def on_start(self):
         "Get the sound object and set it to play when key is pressed"
-        Midi_Callback.on_scene_start(self, self.owner)
+        Midi_Callback.on_scene_start(self)
         
     def midi_event(self, event):
         has_on_note = self.has_on_note

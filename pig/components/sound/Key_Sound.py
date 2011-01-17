@@ -53,9 +53,9 @@ class Key_Sound( On_Create_Sound):
         try:
             self.play_channel = self.sound_object.play(loops=self.loops, 
                                             fade_ms=int(self.fade_in*1000))
-            print self.play_channel, self.sound_object
-            import threading
-            print 'sceneplay', threading.currentThread()
+#            print self.play_channel, self.sound_object
+#            import threading
+#            print 'sceneplay', threading.currentThread()
 
         except:
             pass

@@ -3,6 +3,7 @@ import wx
 
 from Opioid2D import Scene as OpioidScene
 
+from pug.util import sort_case_insensitive
 from pug.syswx.attributeguis.dropdown import Dropdown
 
 from pig.util import get_available_scenes
@@ -55,7 +56,7 @@ For kwargs optional arguments, see the Base attribute GUI
             scenelist = scenedict.keys()
         else:
             scenelist = [(name, scenedict[name]) for name in scenedict.keys()]
-        scenelist.sort()
+        sort_case_insensitive(scenelist)
         for item in self.aguidata['prepend_list']:
             scenelist.insert(0, item)
         for item in self.aguidata['append_list']:

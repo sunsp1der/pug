@@ -4,6 +4,7 @@ import wx
 import wx.combo
 wx=wx
 
+from pug.util import sort_case_insensitive
 from pug.syswx.list_ctrl_combo_popup import ListCtrlComboPopup
 from pug.syswx.wxconstants import *
 from pug.syswx.attributeguis.base import Base
@@ -115,7 +116,7 @@ For kwargs optional arguments, see the Base attribute GUI
                 namelist.append(name)
                 namedict[name] = item
         if self.sort:
-            namelist.sort()
+            sort_case_insensitive(namelist)
         for key in namelist:
             self.listctrl.AddItem( key, namedict[key])
         i = self.listctrl.FindData(selectedData)

@@ -6,7 +6,7 @@ from pig.audio import get_sound
 from pig.editor.agui import SoundFile
 from pig.components.sound.On_Create_Sound import On_Create_Sound
 
-class On_Damage_Sound( On_Create_Sound):
+class On_Deal_Damage_Sound( On_Create_Sound):
     """Owner plays a sound when it deals damage to something"""
     # component_info
     _set = 'pig'
@@ -26,5 +26,5 @@ class On_Damage_Sound( On_Create_Sound):
         "Play the sound when object deals damage"
         self.sound_object.play()
     
-register_component( On_Damage_Sound)
+register_component( On_Deal_Damage_Sound)
     

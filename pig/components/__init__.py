@@ -49,8 +49,8 @@ from pig.components.spawn.Spawned_Component_Change import Spawned_Component_Chan
 from pig.components.spawn.Key_Spawn import Key_Spawn
 from pig.components.sound.On_Create_Sound import On_Create_Sound
 from pig.components.sound.On_Destroy_Sound import On_Destroy_Sound
-from pig.components.sound.On_Damage_Sound import On_Damage_Sound
-from pig.components.sound.On_Damaged_Sound import On_Damaged_Sound
+from pig.components.sound.On_Deal_Damage_Sound import On_Deal_Damage_Sound
+from pig.components.sound.On_Take_Damage_Sound import On_Take_Damage_Sound
 from pig.components.sound.Key_Sound import Key_Sound
 from pig.components.sound.On_Collision_Sound import On_Collision_Sound
 from pig.components.scene.Midi_To_Key import Midi_To_Key
