@@ -4,21 +4,24 @@ from objects.SpawnWall import SpawnWall
 from objects.Target import Target
 from pig.Scene import Scene
 from pig.Sprite import Sprite
-from pug.all_components import Utility_Keys, On_Start_Sound,\
+from pug.all_components import Utility_Keys, On_Start_Sound, Scene_On_Value,\
     Value_Tracker_Text, Textbox
 ### End import autocode ###
 
-### Fly_Around autocode ###
-class Fly_Around(Scene):
+### MyScene autocode ###
+class MyScene(Scene):
     layers = ['Background', 'walls']
 
-    _Scene__node_num = 12
+    _Scene__node_num = 84
     def on_enter(self):
         self.components.add( Utility_Keys(
                 info_F1='scenes\\Fly_Around_Help.txt') )
         self.components.add( On_Start_Sound(
                 sound='sound\\beep.wav',
                 loops=0) )
+        self.components.add( Scene_On_Value(
+                scene='MenuScreen',
+                test_value=5) )
 
         # Archetypes
         Target_archetype = Target(gname='Target')
@@ -80,4 +83,4 @@ class Fly_Around(Scene):
         spawnwall_instance_5.position = (795.0, 300.0)
         spawnwall_instance_5.scale = (300.0, 5.0)
         spawnwall_instance_5.rotation = 270.0
-### End Fly_Around autocode ###
+### End MyScene autocode ###
