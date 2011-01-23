@@ -128,9 +128,9 @@ frames, number with zeros, like this: "frame08", "frame09","frame10","frame11"
                 else:
                     self.owner.image_file = None
                     return
-            self.owner.image_file = "art\\pug.png"
+            self.owner.image_file = "art/pug.png"
     
     def on_removed_from_object(self):
-        self.owner.set_image_file("art\\pug.png")
+        self.owner.set_image_file("art/pug.png")
 
 register_component( Animate_Folder)

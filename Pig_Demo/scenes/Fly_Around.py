@@ -14,9 +14,9 @@ class Fly_Around(Scene):
 
     def on_enter(self):
         self.components.add( Utility_Keys(
-                info_F1='scenes\\Fly_Around_Help.txt') )
+                info_F1='scenes/Fly_Around_Help.txt') )
         self.components.add( On_Start_Sound(
-                sound='sound\\beep.wav',
+                sound='sound/beep.wav',
                 loops=0) )
 
         # Archetypes

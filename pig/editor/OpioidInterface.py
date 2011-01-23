@@ -35,7 +35,7 @@ from pig.editor.StartScene import StartScene
 from pig.editor import EditorState
 from pig.editor.GraphicsManager import graphicsManager
 from pig.editor.util import get_image_path, get_project_path, test_scene_code,\
-        edit_project_file, on_drop_files, close_scene_windows, wait_for_state,\
+        open_code_editor, on_drop_files, close_scene_windows, wait_for_state,\
         get_available_objects, get_available_scenes, create_new_project,\
         open_project, save_scene_as, wait_for_exit_scene, python_process
  
@@ -149,8 +149,8 @@ scene: the scene to load initially
                  ["*DIVIDER*"],
 #                 ["Selection Tab", self.open_selection_frame, 
 #                        "Open a new tab to view selected objects"],
-                 ["&Edit Python File\tCtrl+E", edit_project_file,
-                        "Edit a python code file."],
+                 ["Open Code &Editor\tCtrl+E", open_code_editor,
+                        "Open python code editor."],
                  ["Browse Project &Folder\tCtrl+F", self.open_project_folder,
                         "Open the project's folder in a browser"],
                  ["Show All &Windows\tCtrl+W", app.raise_all_frames,
@@ -822,7 +822,7 @@ Opioid2D, it is safer to call this via add_object.
         if objectclass == Sprite and type(self.scene.state) == EditorState:
             # set a default image for basic sprite
             try:
-                node.set_image("art\\pug.png")
+                node.set_image("art/pug.png")
             except:
                 pass
             node.position = get_display_center()

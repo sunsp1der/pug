@@ -11,7 +11,8 @@ from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.code_storage import add_subclass_storageDict_key
 from pug.code_storage.constants import _INDENT, _PRETTIFY_FLOATS
 from pug.util import make_valid_attr_name, prettify_path, prettify_float,\
-                        start_edit_process
+                        start_edit_process, destandardize_filename,\
+                        standardize_filename
 
 from pig.PigDirector import PigDirector
 from pig.editor.util import get_scene_layers, save_object, \
@@ -147,7 +148,10 @@ if TF is "True" set archetype to True, but don't create default name
                 doc="Sprite used by editor. Does not appear in running scene.")
         
     def set_image(self, image):
-        OpioidSprite.set_image(self, image)
+        try:
+            OpioidSprite.set_image( self, image)
+        except:
+            OpioidSprite.set_image( destandardize_filename(image))
         if isinstance(image, basestring):
             self._image_file = image
 
@@ -365,7 +369,8 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
         if storageDict['as_class']:
             if not dummy or dummy.image_file != self.image_file:
                 custom_code += [baseIndent, _INDENT, 'image = ', 
-                                repr(prettify_path(self.image_file)),'\n']
+                                repr(standardize_filename(
+                                    prettify_path(self.image_file))),'\n']
             if not dummy or dummy.layer_name != self.layer_name:
                 custom_code += [baseIndent, _INDENT, 'layer = ', 
                                 repr(self.layer_name),'\n']
@@ -377,7 +382,8 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
             name = storage_name
             if not dummy or dummy.image_file != self.image_file:
                 custom_code += [baseIndent, name, '.image = ', 
-                                    repr(prettify_path(self.image_file)),'\n']
+                                repr(standardize_filename(
+                                    prettify_path(self.image_file))),'\n']
             if not dummy or dummy.layer_name != self.layer_name:
                 custom_code += [baseIndent, name, '.layer = ', 
                                     repr(self.layer_name),'\n']

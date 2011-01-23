@@ -6,7 +6,7 @@ from pug.all_components import Set_Motion, Grow_Shrink, On_Collision_Sound,\
 
 ### Bullet autocode ###
 class Bullet(Sprite):
-    image = 'art\\pug.png'
+    image = 'art/pug.png'
     layer = 'Background'
     def on_create(self):
         self.position = (316.0, 531.0)
@@ -18,7 +18,7 @@ class Bullet(Sprite):
                 grow_in_secs=0.2,
                 shrink_out_secs=-1.0) )
         self.components.add( On_Collision_Sound(
-                sound='sound\\beep.wav',
+                sound='sound/beep.wav',
                 their_group='target',
                 my_group='bullet',
                 enabled=False) )

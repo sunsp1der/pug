@@ -19,7 +19,7 @@ class Dragon(Scene):
 
         # Sprites
         pigsprite_instance = Sprite()
-        pigsprite_instance.image = 'art\\cloudscape 1b.jpg'
+        pigsprite_instance.image = 'art/cloudscape 1b.jpg'
         pigsprite_instance.layer = 'Background'
         pigsprite_instance.position = (400.0, 300.0)
         pigsprite_instance.scale = (1.3, 1.5)

@@ -10,7 +10,7 @@ import wx
 
 from pug.util import make_valid_attr_name
 from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
-from pug.syswx.util import show_exception_dialog
+from pug.syswx.util import show_exception_dialog, highlight_frame
 from pug.syswx.pugframe import PugFrame
 from pug.syswx.SelectionWindow import SelectionWindow
 from pug.syswx.pug_splash import PugSplash
@@ -190,8 +190,9 @@ called every second until the object is initialized"""
     def get_code_editor(self):
         """get_code_editor(self)->editor frame
     
-Creates code_editor_frame or shows the one that's hidden.
-Code editors have open_shell and open_code_file methods.
+Creates code_editor_frame or returns the already created one.
+Code editors have open_shell and open_code_file methods, both of which will show
+the editor window.
 """
         if self._code_editor:
             return self._code_editor
@@ -332,11 +333,7 @@ with object as an argument. Otherwise it will be de-iconized, raised, and will
             if hasattr(frame, 'on_show_object'):
                 frame.on_show_object(object)
             else:
-                frame.Show()
-                if frame.IsIconized():
-                    frame.Iconize(False)
-                frame.Raise()
-                frame.RequestUserAttention()
+                highlight_frame(frame)
         return frame
     
     def show_selection_frames(self):

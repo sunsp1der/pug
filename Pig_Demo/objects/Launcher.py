@@ -5,7 +5,7 @@ from pug.all_components import Spawner
 
 ### Launcher autocode ###
 class Launcher(Sprite):
-    image = 'art\\pug.png'
+    image = 'art/pug.png'
     layer = 'Background'
     def on_create(self):
         self.position.x = 759.0

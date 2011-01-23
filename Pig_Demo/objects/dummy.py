@@ -4,7 +4,7 @@ from pig.Sprite import Sprite
 
 ### dummy autocode ###
 class dummy(Sprite):
-    image = 'art\\pug.png'
+    image = 'art/pug.png'
     layer = 'Background'
     def on_create(self):
         self.position = (400.0, 300.0)

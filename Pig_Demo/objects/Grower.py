@@ -7,7 +7,7 @@ from pig.actions import RealTickFunc
 
 ### Grower autocode ###
 class Grower(Sprite):
-    image = 'art\\pug.png'
+    image = 'art/pug.png'
     layer = 'Background'
     def on_create(self):
         self.position = (400.0, 300.0)

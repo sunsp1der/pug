@@ -12,12 +12,12 @@ from pug.all_components import Utility_Keys, On_Start_Sound, Scene_On_Value,\
 class MyScene(Scene):
     layers = ['Background', 'walls']
 
-    _Scene__node_num = 84
+    _Scene__node_num = 62
     def on_enter(self):
         self.components.add( Utility_Keys(
-                info_F1='scenes\\Fly_Around_Help.txt') )
+                info_F1='scenes/Fly_Around_Help.txt') )
         self.components.add( On_Start_Sound(
-                sound='sound\\beep.wav',
+                sound='sound/beep.wav',
                 loops=0) )
         self.components.add( Scene_On_Value(
                 scene='MenuScreen',
@@ -59,6 +59,16 @@ class MyScene(Scene):
         sprite_instance_4.components.add( Textbox(
                 text='Keys: W, A, S, D Mouse: Aim, Fire',
                 max_width=220) )
+
+        sprite_instance_5 = Sprite()
+        sprite_instance_5.image = 'art/ufo.png'
+        sprite_instance_5.layer = 'Background'
+        sprite_instance_5.position = (632.0, 224.0)
+
+        sprite_instance_6 = Sprite()
+        sprite_instance_6.image = 'art/ufo.png'
+        sprite_instance_6.layer = 'Background'
+        sprite_instance_6.position = (574.0, 231.0)
 
         spawnwall_instance = SpawnWall()
         spawnwall_instance.position = (400.0, 595.0)

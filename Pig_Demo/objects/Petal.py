@@ -5,7 +5,7 @@ from pug.all_components import Grow_Shrink, Set_Motion, Self_Destruct
 
 ### Petal autocode ###
 class Petal(Sprite):
-    image = 'art\\pug.png'
+    image = 'art/pug.png'
     layer = 'Background'
     def on_create(self):
         self.position = (568.0, 159.0)
