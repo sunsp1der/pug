@@ -1,4 +1,6 @@
 todo:
+	eliminate demo project
+	eliminate myproject
 	
 installer:
 	eliminate need for pythonpather
