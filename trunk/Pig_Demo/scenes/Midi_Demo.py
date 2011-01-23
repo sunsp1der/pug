@@ -15,7 +15,7 @@ class Midi_Demo(Scene):
 
         # Sprites
         pigsprite_instance = Sprite()
-        pigsprite_instance.image = 'art\\pug.png'
+        pigsprite_instance.image = 'art/pug.png'
         pigsprite_instance.layer = 'Background'
         pigsprite_instance.position = (207.0, 253.0)
         pigsprite_instance.components.add( Midi_Spawn(
@@ -28,7 +28,7 @@ class Midi_Demo(Scene):
         pigsprite_instance.components.add( Spawn_Flower() )
 
         pigsprite_instance_2 = Sprite()
-        pigsprite_instance_2.image = 'art\\pug.png'
+        pigsprite_instance_2.image = 'art/pug.png'
         pigsprite_instance_2.layer = 'Background'
         pigsprite_instance_2.position = (358.0, 537.0)
         pigsprite_instance_2.components.add( Midi_Spawn(
@@ -42,7 +42,7 @@ class Midi_Demo(Scene):
                 match_scale=True) )
 
         pigsprite_instance_3 = Sprite()
-        pigsprite_instance_3.image = 'art\\pug.png'
+        pigsprite_instance_3.image = 'art/pug.png'
         pigsprite_instance_3.layer = 'Background'
         pigsprite_instance_3.position = (482.0, 534.0)
         pigsprite_instance_3.components.add( Midi_Spawn(
@@ -56,7 +56,7 @@ class Midi_Demo(Scene):
                 match_scale=True) )
 
         pigsprite_instance_4 = Sprite()
-        pigsprite_instance_4.image = 'art\\pug.png'
+        pigsprite_instance_4.image = 'art/pug.png'
         pigsprite_instance_4.layer = 'Background'
         pigsprite_instance_4.position = (609.0, 530.0)
         pigsprite_instance_4.components.add( Midi_Spawn(
@@ -70,7 +70,7 @@ class Midi_Demo(Scene):
                 match_scale=True) )
 
         pigsprite_instance_5 = Sprite()
-        pigsprite_instance_5.image = 'art\\pug.png'
+        pigsprite_instance_5.image = 'art/pug.png'
         pigsprite_instance_5.layer = 'Background'
         pigsprite_instance_5.position = (734.0, 528.0)
         pigsprite_instance_5.components.add( Midi_Spawn(
@@ -92,7 +92,7 @@ class Midi_Demo(Scene):
                 max_width=250) )
 
         pigsprite_instance_7 = Sprite()
-        pigsprite_instance_7.image = 'art\\pug.png'
+        pigsprite_instance_7.image = 'art/pug.png'
         pigsprite_instance_7.layer = 'Background'
         pigsprite_instance_7.position = (551.0, 120.0)
         pigsprite_instance_7.scale = (0.2, 0.2)

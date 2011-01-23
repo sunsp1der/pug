@@ -11,7 +11,7 @@ from Opioid2D.public.Node import Node
 
 import pug
 from pug.component import Component
-from pug.syswx.util import show_exception_dialog
+from pug.syswx.util import show_exception_dialog, highlight_frame
 from pug.syswx.SelectionWindow import SelectionWindow
 from pug.util import python_process, start_edit_process
 
@@ -38,23 +38,9 @@ _fl_art_types =(
             ("All Files", "*.*"),
             )
 
-def edit_project_file():
-    """edit_project_file(): browse for a file to edit"""
-    cwd = os.getcwd() # save this for later
-    dlg = wx.FileDialog(
-        wx.GetApp().get_project_frame(), 
-        message="Choose a file to edit",
-        defaultDir=cwd,
-        wildcard="Python files (*.py)|*.py",
-        style=wx.OPEN | wx.CHANGE_DIR
-        )
-    if dlg.ShowModal() == wx.ID_OK:
-        file = dlg.GetPath()
-        if file:
-            start_edit_process(file)
-        dlg.Destroy()
-    os.chdir(cwd) # thanks for automatically changing that, windows
-    
+def open_code_editor():
+    """open_code_editor(): open pug's code editor window"""
+    highlight_frame(wx.GetApp().code_editor)    
 
 def get_scene_layers():
     """get_scene_layers() -> list of layers that don't start with '__'"""

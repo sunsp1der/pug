@@ -103,7 +103,7 @@ def sort_case_insensitive( lst):
 def prettify_path( path):
     "prettify_path( path)-> normalized path with os separator as divider"
     ret = os.path.normpath(path)
-#    ret = ret.replace('\\', os.sep)
+#    ret = ret.replace('/', os.sep)
 #    ret = ret.replace('//', os.sep)
     return ret
 
@@ -229,6 +229,18 @@ like pugframe titles...
         if not simplename:
             simplename = objectpath     
     return simplename           
+
+def standardize_filename( filename):
+    """standardize_filename( filename)->filename with '/' as path separator
+    
+WARNING: Characters that are illegal in other operating systems will be not be
+removed.
+"""
+    return filename.replace(os.path.sep, "/")
+
+def destandardize_filename( filename):
+    "destandardize_filename( filename)->convert all '/' to os.path.sep"
+    return filename.replace("/", os.path.sep)
 
 def prettify_float( val, precision=3):
     """prettify_float(val, precision=3)->prettified string

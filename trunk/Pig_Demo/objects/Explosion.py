@@ -10,9 +10,9 @@ class Explosion(Sprite):
         self.position = (156.0, 430.0)
         self.rotation = 180.0
         self.components.add( Animate_Folder(
-                folder='art\\explosion',
+                folder='art/explosion',
                 mode='Stop',
                 destroy=True) )
         self.components.add( On_Create_Sound(
-                sound='sound\\explosion.wav') )
+                sound='sound/explosion.wav') )
 ### End Explosion autocode ###

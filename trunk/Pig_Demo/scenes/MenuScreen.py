@@ -19,34 +19,34 @@ class MenuScreen(Scene):
 
         # Sprites
         pigsprite_instance = Sprite()
-        pigsprite_instance.image = 'art\\block.png'
+        pigsprite_instance.image = 'art/block.png'
         pigsprite_instance.layer = 'Background'
         pigsprite_instance.position = (397.0, 518.0)
         pigsprite_instance.scale = (100.0, 20.0)
         pigsprite_instance.components.add( Scene_Button(
                 target='Dragon',
-                hover_sound='sound\\beep.wav',
-                click_sound='sound\\explosion.wav') )
+                hover_sound='sound/beep.wav',
+                click_sound='sound/explosion.wav') )
 
         pigsprite_instance_2 = Sprite()
-        pigsprite_instance_2.image = 'art\\block.png'
+        pigsprite_instance_2.image = 'art/block.png'
         pigsprite_instance_2.layer = 'Background'
         pigsprite_instance_2.position = (659.0, 518.0)
         pigsprite_instance_2.scale = (100.0, 20.0)
         pigsprite_instance_2.components.add( Scene_Button(
                 target='Shooting_Gallery',
-                hover_sound='sound\\beep.wav',
-                click_sound='sound\\explosion.wav') )
+                hover_sound='sound/beep.wav',
+                click_sound='sound/explosion.wav') )
 
         pigsprite_instance_3 = Sprite()
-        pigsprite_instance_3.image = 'art\\block.png'
+        pigsprite_instance_3.image = 'art/block.png'
         pigsprite_instance_3.layer = 'Background'
         pigsprite_instance_3.position = (138.0, 518.0)
         pigsprite_instance_3.scale = (100.0, 20.0)
         pigsprite_instance_3.components.add( Scene_Button(
                 target='Fly_Around',
-                hover_sound='sound\\beep.wav',
-                click_sound='sound\\explosion.wav') )
+                hover_sound='sound/beep.wav',
+                click_sound='sound/explosion.wav') )
 
         pigsprite_instance_4 = Sprite()
         pigsprite_instance_4.layer = 'Background'
@@ -63,7 +63,7 @@ class MenuScreen(Scene):
                 font_size=60) )
 
         pigsprite_instance_6 = Sprite()
-        pigsprite_instance_6.image = 'art\\pug.png'
+        pigsprite_instance_6.image = 'art/pug.png'
         pigsprite_instance_6.layer = 'Background'
         pigsprite_instance_6.position = (401.0, 255.0)
         pigsprite_instance_6.components.add( Spawner(

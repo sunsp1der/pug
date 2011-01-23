@@ -7,10 +7,10 @@ from pug.all_components import Key_Direction_Controls, Motion_Zone, Mouse_Face,\
 
 ### FlyAroundPlayer autocode ###
 class FlyAroundPlayer(Sprite):
-    image = 'art\\pug.png'
+    image = 'art/pug.png'
     layer = 'Background'
     def on_create(self):
-        self.position = (405.0, 297.0)
+        self.position = (400.0, 300.0)
         self.components.add( Key_Direction_Controls(
                 x_velocity=200,
                 y_velocity=200,
@@ -24,11 +24,11 @@ class FlyAroundPlayer(Sprite):
         self.components.add( Key_Spawn(
                 key='LEFT_MOUSE',
                 spawn_object='Bullet',
-                sound='sound\\beep.wav',
+                sound='sound/beep.wav',
                 spawn_offset=(0.5, 0),
                 max_spawns_in_scene=1) )
         self.components.add( On_Destroy_Sound(
-                sound='sound\\beep.wav') )
+                sound='sound/beep.wav') )
         self.components.add( Spawn_On_Destroy(
                 spawn_object='ExplodeParticle',
                 obs_per_spawn=15,

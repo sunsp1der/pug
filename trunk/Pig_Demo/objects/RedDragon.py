@@ -12,7 +12,7 @@ class RedDragon(Sprite):
                 spawn_object='DragonBreath',
                 spawn_offset=(0.5, 0.05)) )
         self.components.add( Key_Animate_Direction(
-                file='art\\dragon.png',
+                file='art/dragon.png',
                 grid_width=75,
                 grid_height=70,
                 up_frames=[(60, 70)],

@@ -5,7 +5,7 @@ from pug.all_components import Grow_Shrink, Set_Motion, Life_Zone
 
 ### DragonBreath autocode ###
 class DragonBreath(Sprite):
-    image = 'art\\explosion\\explosion09.png'
+    image = 'art/explosion/explosion09.png'
     layer = 'Sky'
     def on_create(self):
         self.position = (536.0, 341.0)

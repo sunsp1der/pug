@@ -7,7 +7,7 @@ from pug.all_components import Spawn_On_Destroy, Fade, Grow_Shrink, Life_Zone,\
 
 ### Target autocode ###
 class Target(Sprite):
-    image = 'art\\pug.png'
+    image = 'art/pug.png'
     layer = 'Background'
     def on_create(self):
         self.position = (213.0, 382.0)
@@ -34,7 +34,7 @@ class Target(Sprite):
                 start_health=10.0,
                 group='target') )
         self.components.add( On_Deal_Damage_Sound(
-                sound='sound\\explosion.wav') )
+                sound='sound/explosion.wav') )
         self.components.add( Random_Motion(
                 angle_variance=30,
                 velocity=300,

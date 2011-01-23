@@ -18,7 +18,18 @@ class TestEventHandler( wx.EvtHandler):
     def ProcessEvent(self, event):
         print event
         
+def highlight_frame( frame):        
+    "highlight_frame(frame): If frame ishidden, show/raise else raise/flash"
+    shown = frame.IsShown()
+    frame.Show()
+    if frame.IsIconized():
+        frame.Iconize(False)
+    frame.Raise()
+    if not shown:
+        frame.RequestUserAttention()
+        
 def get_icon():
+    "get_icon()->The wx.Icon for pug"
     return wx.Icon( get_image_path('pug.ico'), wx.BITMAP_TYPE_ICO)
 
 def show_exception_dialog( parent=None, prefix='', exc_info=None):

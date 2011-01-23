@@ -13,7 +13,7 @@ class Intro(Scene):
 
         # Sprites
         pigsprite_instance = Sprite()
-        pigsprite_instance.image = 'art\\pug.png'
+        pigsprite_instance.image = 'art/pug.png'
         pigsprite_instance.layer = 'Background'
         pigsprite_instance.position = (400.0, 300.0)
         pigsprite_instance.scale = (6.0, 6.0)

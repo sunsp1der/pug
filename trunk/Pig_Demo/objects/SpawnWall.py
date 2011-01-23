@@ -5,7 +5,7 @@ from pug.all_components import Spawner
 
 ### SpawnWall autocode ###
 class SpawnWall(Sprite):
-    image = 'art\\block.png'
+    image = 'art/block.png'
     layer = 'walls'
     def on_create(self):
         self.position = (395.0, 424.0)

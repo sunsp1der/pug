@@ -1,5 +1,7 @@
 import pygame
 
+from pug.util import destandardize_filename
+
 # this needs to be imported before pygame is initialized
 pygame.mixer.pre_init(22050,-16,2,1024)
 SoundDict = {}
@@ -32,7 +34,11 @@ volume: you can pass a float from 0 to 1 for the sound volume. A unique sound
     index = filename+"_"+tag+"_"+str(volume)
     sound = SoundDict.get(index, None)
     if sound is None:
-        sound = SoundDict[index] = load_sound(filename)
+        try:
+            sound = SoundDict[index] = load_sound(filename)
+        except:
+            sound = SoundDict[index] = load_sound(
+                                            destandardize_filename(filename))    
     sound.set_volume(volume)
     return sound
 

@@ -15,9 +15,9 @@ class MyScene(Scene):
     _Scene__node_num = 48
     def on_enter(self):
         self.components.add( Utility_Keys(
-                info_F1='scenes\\Fly_Around_Help.txt') )
+                info_F1='scenes/Fly_Around_Help.txt') )
         self.components.add( On_Start_Sound(
-                sound='sound\\beep.wav',
+                sound='sound/beep.wav',
                 loops=0) )
         self.components.add( Scene_On_Value(
                 scene='MenuScreen',
