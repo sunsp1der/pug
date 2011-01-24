@@ -2,9 +2,6 @@
 #labels Phase-Design
 
 ==LITTLE TODO==
-  * Ingame Text
-  * Scoring System
-  * Damage System
   * Collision Boxes
   * Ingame gui
 
