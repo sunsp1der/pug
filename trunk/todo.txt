@@ -1,15 +1,15 @@
 todo:
-	eliminate demo project
-	eliminate myproject
-	
+
 installer:
 	eliminate need for pythonpather
-	create_demo_project
-	google.code: system requirements = software requirements
-		note BIG PYTHON 2.5!!!
-	update numeric refs to numpy
 
 soon:
+	eliminate demo project
+		import files from project
+		create demo files folder
+		new_project
+		new_demo_project
+		open_project
 	joystick controls have heldkey problem
 	change Images folder to images
  	master volume

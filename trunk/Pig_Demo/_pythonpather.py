@@ -2,7 +2,7 @@
     
 try:
     import sys
-    # special code just for Pig_Demo version
+    # special code just for Pig_Demo version. Uses current folder
     import os.path
     path = os.path.split(os.path.split(__file__)[0])[0]
     sys.path.append(path)
