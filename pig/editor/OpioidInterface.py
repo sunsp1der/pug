@@ -978,7 +978,7 @@ _interfacePugview = {
 #        ['canvas', pug.ObjectButtons],
 #        ['Director'],
 #        ['Display'],
-        ['test', pug.Routine]
+#        ['test', pug.Routine]
     ]
 }
 pug.add_pugview('OpioidInterface', _interfacePugview, True)
