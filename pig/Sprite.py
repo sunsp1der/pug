@@ -151,7 +151,7 @@ if TF is "True" set archetype to True, but don't create default name
         try:
             OpioidSprite.set_image( self, image)
         except:
-            OpioidSprite.set_image( destandardize_filename(image))
+            OpioidSprite.set_image( self, destandardize_filename(image))
         if isinstance(image, basestring):
             self._image_file = image
 
