@@ -39,7 +39,7 @@ from ctypes import CDLL, pythonapi, py_object, Structure, Union, create_string_b
 from ctypes import byref, sizeof, cast, POINTER
 from ctypes import c_void_p, c_byte, c_char, c_char_p, c_short, c_int, c_long, c_ulong
 
-libX11 = CDLL("libX11.so")
+libX11 = CDLL("libX11.so.6")
 XIconifyWindow              = libX11.XIconifyWindow
 XInternAtom                 = libX11.XInternAtom
 XRootWindow                 = libX11.XRootWindow
@@ -63,7 +63,7 @@ XCreateRegion               = libX11.XCreateRegion
 XDestroyRegion              = libX11.XDestroyRegion
 XPolygonRegion              = libX11.XPolygonRegion
 
-libXext= CDLL("libXext.so")
+libXext= CDLL("libXext.so.6")
 XShapeQueryExtension    = libXext.XShapeQueryExtension
 XShapeCombineRegion     = libXext.XShapeCombineRegion
 XShapeCombineMask       = libXext.XShapeCombineMask
