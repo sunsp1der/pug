@@ -73,6 +73,11 @@ class Key_Sound( On_Create_Sound):
         "Unregister key"
         self.unregister_keys()
         
+    @component_method
+    def on_delete(self):
+        "Unregister key"
+        self.unregister_keys()
+
     def unregister_keys(self):
         try:
             PigDirector.scene.unregister_key(self.kinfo) #@UndefinedVariable

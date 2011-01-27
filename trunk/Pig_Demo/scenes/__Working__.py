@@ -1,96 +1,63 @@
 ### import autocode ###
-from objects.FlyAroundPlayer import FlyAroundPlayer
-from objects.SpawnWall import SpawnWall
+from objects.Bullet import Bullet
+from objects.Cannon import Cannon
+from objects.ExplodeParticle import ExplodeParticle
+from objects.Explosion import Explosion
+from objects.Launcher import Launcher
 from objects.Target import Target
 from pig.Scene import Scene
 from pig.Sprite import Sprite
-from pug.all_components import Utility_Keys, On_Start_Sound, Scene_On_Value,\
-    Value_Tracker_Text, Textbox
+from pug.all_components import Joystick_Input, Joystick_Axis_To_Key,\
+    Joystick_Button_To_Key, Utility_Keys, Value_Tracker_Text, Timer_Text,\
+    Textbox
 ### End import autocode ###
 
-### MyScene autocode ###
-class MyScene(Scene):
-    layers = ['Background', 'walls']
-
-    _Scene__node_num = 62
+### Shooting_Gallery autocode ###
+class Shooting_Gallery(Scene):
+    _Scene__node_num = 10
     def on_enter(self):
-        self.components.add( Utility_Keys(
-                info_F1='scenes/Fly_Around_Help.txt') )
-        self.components.add( On_Start_Sound(
-                sound='sound/beep.wav',
-                loops=0) )
-        self.components.add( Scene_On_Value(
-                scene='MenuScreen',
-                test_value=5) )
+        self.components.add( Joystick_Input(
+                test_mode=True) )
+        self.components.add( Joystick_Axis_To_Key() )
+        self.components.add( Joystick_Button_To_Key() )
+        self.components.add( Utility_Keys() )
 
         # Archetypes
+        Bullet_archetype = Bullet(gname='Bullet')
+        Bullet_archetype.archetype = True
+
+        ExplodeParticle_archetype = ExplodeParticle(gname='ExplodeParticle')
+        ExplodeParticle_archetype.archetype = True
+
         Target_archetype = Target(gname='Target')
         Target_archetype.archetype = True
 
-        FlyAroundPlayer_archetype = FlyAroundPlayer(gname='FlyAroundPlayer')
-        FlyAroundPlayer_archetype.archetype = True
-
-        SpawnWall_archetype = SpawnWall(gname='SpawnWall')
-        SpawnWall_archetype.archetype = True
+        Explosion_archetype = Explosion(gname='Explosion')
+        Explosion_archetype.archetype = True
 
         # Sprites
+        launcher_instance = Launcher()
+        launcher_instance.position = (731.0, 142.0)
+
+        launcher_instance_2 = Launcher()
+        launcher_instance_2.position = (43.0, 175.0)
+        launcher_instance_2.rotation = 90.0
+
+        cannon_instance = Cannon()
+
         sprite_instance = Sprite()
         sprite_instance.layer = 'Background'
-        sprite_instance.position = (678.0, 547.0)
+        sprite_instance.position = (666.0, 537.0)
         sprite_instance.components.add( Value_Tracker_Text() )
 
         sprite_instance_2 = Sprite()
         sprite_instance_2.layer = 'Background'
-        sprite_instance_2.position = (678.0, 480.0)
-        sprite_instance_2.components.add( Value_Tracker_Text(
-                prefix='Health: ',
-                value_name='health') )
+        sprite_instance_2.position = (667.0, 508.0)
+        sprite_instance_2.components.add( Timer_Text() )
 
         sprite_instance_3 = Sprite()
         sprite_instance_3.layer = 'Background'
-        sprite_instance_3.position = (678.0, 513.0)
-        sprite_instance_3.components.add( Value_Tracker_Text(
-                prefix='Lives: ',
-                value_name='lives') )
-
-        sprite_instance_4 = Sprite()
-        sprite_instance_4.layer = 'Background'
-        sprite_instance_4.position = (20.0, 503.0)
-        sprite_instance_4.components.add( Textbox(
-                text='Keys: W, A, S, D Mouse: Aim, Fire',
-                max_width=220) )
-
-        sprite_instance_5 = Sprite()
-        sprite_instance_5.image = 'art/ufo.png'
-        sprite_instance_5.layer = 'Background'
-        sprite_instance_5.position = (632.0, 224.0)
-
-        sprite_instance_6 = Sprite()
-        sprite_instance_6.image = 'art/ufo.png'
-        sprite_instance_6.layer = 'Background'
-        sprite_instance_6.position = (574.0, 231.0)
-
-        spawnwall_instance = SpawnWall()
-        spawnwall_instance.position = (400.0, 595.0)
-        spawnwall_instance.scale = (400.0, 5.0)
-
-        spawnwall_instance_2 = SpawnWall()
-        spawnwall_instance_2.position = (400.0, 5.0)
-        spawnwall_instance_2.scale = (400.0, 5.0)
-        spawnwall_instance_2.rotation = 180.0
-
-        spawnwall_instance_3 = SpawnWall()
-        spawnwall_instance_3.position = (400.0, 5.0)
-        spawnwall_instance_3.scale = (400.0, 5.0)
-        spawnwall_instance_3.rotation = 180.0
-
-        spawnwall_instance_4 = SpawnWall()
-        spawnwall_instance_4.position = (5.0, 300.0)
-        spawnwall_instance_4.scale = (300.0, 5.0)
-        spawnwall_instance_4.rotation = 90.0
-
-        spawnwall_instance_5 = SpawnWall()
-        spawnwall_instance_5.position = (795.0, 300.0)
-        spawnwall_instance_5.scale = (300.0, 5.0)
-        spawnwall_instance_5.rotation = 270.0
-### End MyScene autocode ###
+        sprite_instance_3.position = (19.0, 530.0)
+        sprite_instance_3.components.add( Textbox(
+                text='Keys: J, L, Space') )
+### End Shooting_Gallery autocode ###

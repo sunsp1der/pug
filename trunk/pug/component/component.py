@@ -133,6 +133,11 @@ enabled: When this is false, the component's component_methods will not
                 if getattr(self, attr) != getattr(other, attr):
                     duplicate = False
                     break
+            if duplicate:
+                for attr in ['gname','enabled']:
+                    if getattr(self, attr) != getattr(other, attr):
+                        duplicate = False
+                        break                     
         return duplicate         
     
     def on_added_to_object(self):

@@ -4,7 +4,7 @@ import util # must be first
 
 from Sprite import Sprite
 from Scene import Scene
-from PigDirector import PigDirector
+from PigDirector import PigDirector as Director
 from PauseState import PauseState
 
 from gamedata import get_gamedata

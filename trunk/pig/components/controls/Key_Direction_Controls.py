@@ -79,16 +79,16 @@ class Key_Direction_Controls( SpriteComponent):
                 
     @component_method
     def on_destroy(self):
-        """unregister keys when component is destroyed"""
-        self.on_delete()
-    
+        """unregister keys"""
+        scene = PigDirector.scene
+        for k in self.k_info:
+            scene.unregister_key(k)
+        self.k_info = []
+        
     @component_method
     def on_delete(self):
-        """unregister keys when component is deleted"""
-        scene = PigDirector.scene
-        for info in self.k_info:
-            scene.unregister_key(info)
-        self.k_info = []
+        """unregister keys"""
+        self.on_destroy()
             
 register_component( Key_Direction_Controls)
 

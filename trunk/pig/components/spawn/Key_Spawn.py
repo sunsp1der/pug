@@ -27,6 +27,7 @@ class Key_Spawn( Spawner):
     rapid_fire = True
     
     interval_complete = True  
+    k_info = []
     
     @component_method
     def on_added_to_scene(self):
@@ -34,9 +35,8 @@ class Key_Spawn( Spawner):
         scene = PigDirector.scene
         self.setup_spawner()
         self.interval_complete = False
-        self.k_info = [0,0]
-        self.k_info[0] = scene.register_key_down( self.key, self.check_spawn)
-        self.k_info[1] = scene.register_key_up( self.key, self.stop_spawning)
+        self.k_info.append(scene.register_key_down( self.key, self.check_spawn))
+        self.k_info.append(scene.register_key_up( self.key, self.stop_spawning))
         self.interval_complete = True
     
     def check_spawn(self, schedule_next=False):
@@ -67,11 +67,17 @@ class Key_Spawn( Spawner):
     @component_method
     def on_destroy(self):
         """unregister keys when component is destroyed"""
+        self.on_delete()
+        
+    @component_method
+    def on_delete(self):
+        """unregister keys when component is deleted"""
+        self.rapid_fire = False
         scene = PigDirector.scene
         for k in self.k_info:
             scene.unregister_key(k)
         self.k_info = []
- 
+        
 register_component( Key_Spawn)
         
        

@@ -26,26 +26,31 @@ class Key_Destroy( SpriteComponent):
     key = "SPACE"
     press = True
     release = True
+    k_info = []
     
     @component_method
     def on_added_to_scene(self):
         "Set spawn key and setup the spawner"
         scene = PigDirector.scene
-        self.k_info = [0,0]
         if self.press:
-            self.k_info[0] = scene.register_key_down( self.key, 
-                                                  self.owner.destroy)
+            self.k_info.append( scene.register_key_down( self.key, 
+                                                         self.owner.destroy))
         if self.release:
-            self.k_info[1] = scene.register_key_up( self.key, 
-                                                self.owner.destroy)
+            self.k_info.append( scene.register_key_up( self.key, 
+                                                       self.owner.destroy))
 
     @component_method
     def on_destroy(self):
-        """unregister keys when component is destroyed"""
+        """unregister keys"""
         scene = PigDirector.scene
         for k in self.k_info:
             scene.unregister_key(k)
         self.k_info = []
+        
+    @component_method
+    def on_delete(self):
+        """unregister keys"""
+        self.on_destroy()
  
 register_component( Key_Destroy)
         
