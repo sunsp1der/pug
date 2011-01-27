@@ -54,6 +54,8 @@ arguments: on_collision( toSprite, fromSprite, toGroup, my_group)"""
         pass
         
 ### track all available groups for editor dropdowns
+### all the functions below are for the editor and aren't really part of 
+### collision callbacks  
     def __init__(self, *args, **kwargs):
         self.ref = ref(self)
         Component.__init__(self,  *args, **kwargs)

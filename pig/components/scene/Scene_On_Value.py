@@ -3,7 +3,7 @@ from pug import Dropdown
 
 from pig import Scene, get_gamedata
 from pig.editor.agui import ScenesDropdown, SoundFile
-from pig import PigDirector
+from pig import Director
 
 class Scene_On_Value( Component):
     """Change to another scene when a gamedata attribute reaches a certain
@@ -58,7 +58,7 @@ value."""
             if value <= self.test_value:
                 change_scene = True
         if change_scene:
-            PigDirector.switch_scene_to(self.scene)
+            Director.switch_scene_to(self.scene)
         
         
 register_component( Scene_On_Value)

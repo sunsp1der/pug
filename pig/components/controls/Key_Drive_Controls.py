@@ -44,6 +44,7 @@ class Key_Drive_Controls( Forward_Motion, Key_Direction_Controls):
     right_key = "L"
                 
     acceleration = None # for Forward_Motion
+    k_info = []
     
     @component_method
     def on_added_to_scene(self):

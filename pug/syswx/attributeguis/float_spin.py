@@ -35,7 +35,7 @@ For more aguidata optional arguments, see the Base attribute GUI
         sizer.Add(floatspin,1,flag=wx.EXPAND)
         floatspin.Bind(wx.EVT_TEXT_ENTER, self.enter)
         floatspin.GetTextCtrl().Bind(wx.EVT_SET_FOCUS, self.enter)
-        floatspin.GetTextCtrl().Bind(wx.EVT_KILL_FOCUS, self.apply)
+        floatspin.GetTextCtrl().Bind(wx.EVT_KILL_FOCUS, self.exit)
         floatspin.Bind(FS.EVT_FLOATSPIN, self.apply)
         self.floatspin = floatspin
         kwargs['control_widget'] = control
@@ -56,6 +56,10 @@ For more aguidata optional arguments, see the Base attribute GUI
         self.floatspin.SetValue( float(self.floatspin.GetTextCtrl().GetValue()))
 #        self.apply(event)    
         self.floatspin.GetTextCtrl().SelectAll()
+        
+    def exit(self, event):
+        self.floatspin.SetValue( float(self.floatspin.GetTextCtrl().GetValue()))
+        self.apply()
     
     def fix(self, event=None):
         "fix problem with showing out of range values"

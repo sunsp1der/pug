@@ -1,4 +1,6 @@
 todo:
+	keyboard sticking in julian's game
+	collision problem in julian's game
 
 installer:
 	eliminate need for pythonpather

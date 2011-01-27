@@ -27,7 +27,7 @@ from pug.syswx.component_browser import ComponentBrowseFrame
 from pug.syswx.pugmdi import PugMDI
 from pug.syswx.drag_drop import FileDropTarget
 
-from pig import hacks, Scene, Sprite, PigDirector, PauseState
+from pig import hacks, Scene, Sprite, Director, PauseState
 from pig.util import fix_project_path, set_project_path, save_project_settings,\
         entered_scene, start_scene, get_gamedata, create_gamedata, \
         get_display_center, skip_deprecated_warnings, set_opioid_window_position
@@ -76,7 +76,7 @@ scene: the scene to load initially
             self.project_name = self.project_settings.title 
 
         self.Display = Opioid2D.Display
-        self.Director = PigDirector   
+        self.Director = Director   
         self.Director.editorMode = True
         opioid_rect = self.pug_settings.rect_opioid_window # x, y, w, h
         thread.start_new_thread(self.start_opioid, 
@@ -403,6 +403,7 @@ forceReload: if True, reload all scenes and objects first.
     def reload_scene(self):
         """Reload scene from version on disk"""
         if _DEBUG: print 'reload_scene 1'
+        self.stop_scene(False)
         if self.Director.scene.__class__ == Scene:
             self.set_scene("Scene")
             return
@@ -870,7 +871,7 @@ Opioid2D, it is safer to call this via add_object.
         if selected:                    
             return selected.popitem()[0]._get_source_code()
         else:
-            return PigDirector.scene._get_source_code()
+            return Director.scene._get_source_code()
         
     def start_opioid( self, rect, title, icon, scene):
         #start up opioid with a little pause for threading

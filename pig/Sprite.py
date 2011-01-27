@@ -250,7 +250,7 @@ add blocker to a dictionary of objects blocking the Sprite's destruction."""
     def delete(self):
         if self._mouse_registered :
             self.mouse_unregister()
-        PigDirector.scene.update_node(self, "Delete") # register self with scene                
+        PigDirector.scene.update_node(self, "Delete") 
         OpioidSprite.delete(self)
         
     def set_tint(self, tint):
