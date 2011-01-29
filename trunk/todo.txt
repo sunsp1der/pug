@@ -1,11 +1,22 @@
 todo:
 	keyboard sticking in julian's game
+		keep array of pressed keys in director
+		no key down when key is down
+		no key up when key is up
 	collision problem in julian's game
 
 installer:
 	eliminate need for pythonpather
 
 soon:
+	Undo! - save query when changing levels or quitting
+		undo-unit('descr',fn,(*olda,**oldkw),(*newa,**newkw))
+		multi-undo-unit([undo-units])
+		delete
+			save object as text like in file
+			add 'delete-id'=id to object
+			do weakref.check_references and change to store delete-id
+			class undoref(weakref.ref)
 	eliminate demo project
 		import files from project
 		create demo files folder
@@ -13,7 +24,6 @@ soon:
 		new_demo_project
 		open_project
 	joystick controls have heldkey problem
-	change Images folder to images
  	master volume
 	'loading' graphic while scene saves, or at least cleanup
 	destroy on gameover
@@ -31,6 +41,7 @@ soon:
  	set_attribute on collide
  	set_component attribute on collide
 	try to return to selected object and reopen components
+		internal save, then give objects ids...
 	gameover
 		gameover_settings
 			gameover_pause t/f
@@ -55,15 +66,11 @@ soon:
 		group empty
 		value reached
 	extra life at
-	direction flip component (From key_direction_controls)
 	shoot_at component
 	spawn_this_archetype component
 	search component book
 
 bugs: 
-?	editor not popping up when already up
-	bad data being saved in sprites/scenes sometimes
-		archetype creation?
 	spawn location edges crashes editor intermittent
 	motion zone component shows no pugview intermittent
 	show menus when object is selected
@@ -90,7 +97,6 @@ later:
 	memory leak!
 	run in single thread...
 		problem picking up arrow keys in opioid window
-	Undo! - save query when changing levels or quitting
 	control w/variance or 'to' option
 	Separate runtime necessities
 	Resources
@@ -177,5 +183,5 @@ useability:
 	add refresh object option to pug view - to refresh actual puglist
 	make subobject subobject_small and subobject show ala components
 	list,dictionary,and tuple attribute guis can also work like components
-	make code_export functions and dicts separate from obj's?
+	make code_exporter functions and dicts separate from obj's?
 		reason would be to take out of release version

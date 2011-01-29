@@ -56,6 +56,7 @@ scene: the scene to load initially
     _initialized = False
     _quitting = False
     canvas = None
+    overlap_offset = (10,10)
     def __init__(self, rootfile, scene=Scene):
         if _DEBUG: print "OpioidInterface.__init__"
         try:
@@ -256,7 +257,7 @@ settingsObj: an object similar to the one below... if it is missing any default
         if wx.GetApp():
             wx.GetApp().create_frame_settings( self.pug_settings)
         try:
-            pug.code_export( self.pug_settings, "_pug_settings.py", True, 
+            pug.code_exporter( self.pug_settings, "_pug_settings.py", True, 
                      {'name':'pug_settings'})              
         except:
             if wx.GetApp():
@@ -793,24 +794,29 @@ Callback from pugApp notifying that app is becoming busy or unbusy.
         if isinstance(self.scene.state, EditorState):
             self.scene.state._on_set_busy_state(on)
             
-    def add_object(self, nodeclass=None):
+    def add_object(self, nodeclass=None, position=None):
         """add_object( nodeclass=None)
         
 If nodeclass is None, addObjectClass will be used.
+position: object will be moved to this position
 """
         # delay hack necessary to solve Opioid2D thread problem with images
         if nodeclass is None:
             nodeclass = self.addObjectClass
         (Opioid2D.Delay(0) + Opioid2D.CallFunc(self.do_add_object, 
-                                               nodeclass)).do() 
+                                               nodeclass, position)).do()
+        wx.CallAfter( self.set_selection, []) 
         
     addObjectClass = Sprite
-    def do_add_object(self, objectclass):
-        """do_add_object( objectclass)
+    def do_add_object(self, objectclass, position=None):
+        """do_add_object( objectclass, position)
         
 Add an object of class objectclass to the scene. Because of timing issues with 
 Opioid2D, it is safer to call this via add_object. 
+objectclass: class of object to add
+position: move object to this position
 """
+        Director.paused = True
         try:
             if not issubclass(objectclass, Node):
                 if _DEBUG: print objectclass, Node
@@ -828,6 +834,9 @@ Opioid2D, it is safer to call this via add_object.
                 pass
             node.position = get_display_center()
             node.layer = "Background"
+        if position is not None:
+            node.position = position
+        Director.paused = False
         # let components do image alterations, then check for node overlap
         (Opioid2D.Delay(1) + Opioid2D.CallFunc(self.avoid_node_overlap, 
                                                node)).do()
@@ -848,19 +857,15 @@ Opioid2D, it is safer to call this via add_object.
                         continue
                     if nodeloc == [obj.rect.left, obj.rect.top, 
                                    obj.rect.width, obj.rect.height]:
-                        nodeloc[0] += 10
-                        nodeloc[1] += 10
+                        nodeloc[0] += self.overlap_offset[0]
+                        nodeloc[1] += self.overlap_offset[1]
                         okay_position = False
                         break
             node.rect.left = nodeloc[0]
             node.rect.top = nodeloc[1]
         except:
             pass
-        # deal with Opioid image idiosyncracies HACK
-        # if hasattr(node, 'set_image_file') and\
-        #        hasattr(node, 'get_image_file'):
-        #    node.set_image_file( node.get_image_file())
-        wx.CallAfter(wx.GetApp().set_selection,[node])
+        wx.CallAfter(self.set_selection,[node])
         
     def kill_subprocesses(self):
         kill_subprocesses()
@@ -898,11 +903,49 @@ Opioid2D, it is safer to call this via add_object.
             show_exception_dialog()
             wx.GetApp().Exit()
             raise
+    
+    def copy_selected(self):
+        self.clipboard = {}
+        selectedDict = list(wx.GetApp().selectedObjectDict)
+        for item in selectedDict:
+            if isinstance(item, Opioid2D.public.Node.Node):
+                exporter = pug.code_exporter(item)
+                code = exporter.code
+                obj = exporter.objCode.popitem()[0]
+                self.clipboard[obj] = code
+                exporter = None
+        
+    def cut_selected(self):
+        self.copy_selected()
+        selectedDict = list(wx.GetApp().selectedObjectDict)
+        for item in selectedDict:
+            if isinstance(item, Opioid2D.public.Node.Node):
+                item.delete()
 
+    def paste_clipboard(self):
+        for obj, code in self.clipboard.iteritems():
+            exec code
+            exec "obj = " + obj
+            self.set_selection([obj])
+            (Opioid2D.Delay(1) + Opioid2D.CallFunc(self.avoid_node_overlap, 
+                                               obj)).do()
+            
+    clipboard = None
     def test(self):
-        from pig.editor.testframe import testframe
-        frame = testframe()
-
+#        from pug.CodeStorageExporter import CodeStorageExporter as cse
+        if not self.clipboard:
+            from pug import code_exporter
+            exporter = code_exporter(wx.GetApp().get_selection().popitem()[0])
+            pug.frame(exporter)
+            self.clipboard = exporter
+        else:
+            try:
+                Director.paused = True
+                exec self.clipboard.code
+                Director.paused = False
+            except:
+                show_exception_dialog()
+            
 # test for floating garbage
 #        from pug.util import test_referrers
 #        import gc
@@ -917,7 +960,6 @@ Opioid2D, it is safer to call this via add_object.
 #            if x: 
 #                print test_referrers(x)
 #                pug.frame(x)
-
         
 from pig.editor.agui import ObjectsDropdown      
 from pig.editor.agui import ScenesDropdown      
@@ -957,9 +999,13 @@ _interfacePugview = {
               'label':'   Object to add',
               'doc':'Select an object type for the add button below'}],
         ['add_object', None, {'doc':\
-              'Add an object to the scene.\nSelect object type above.',
+              'Add an object to the scene. Select object type above. '+\
+              'You can also Shift-Ctrl-Click in canvas.',
                               'use_defaults':True,
                               'label':'   Add Object'}],
+        ['overlap_offset', None, {
+                    'doc':'Offset new sprites that overlap by this much',
+                    'label':'   Overlap Offset'}],
 
         [' Settings', pug.Label],
         ['project_settings'],

@@ -143,7 +143,7 @@ def entered_scene():
         frame.set_object(PigDirector.scene, title="Scene")
     
 def save_project_settings( projectSettings):
-    pug.code_export( projectSettings, "_project_settings.py", True, 
+    pug.code_exporter( projectSettings, "_project_settings.py", True, 
                  {'name':'project_settings'})        
 
 def run_pig_scene( projectPath, scenename=None, position=None, resolution=None, 

@@ -783,7 +783,7 @@ If scene is a working scene, return
             'base_init': False,
             'force_init_def': True,
             'skip_attributes': ['_nodes','_groups','scene_layers','layers',
-                                '_PigScene__node_num', '_key_down_dict', 
+                                '_Scene__node_num', '_key_down_dict', 
                                 '_key_up_dict','started','k_info',
                                 'mouse_manager']
              }   

@@ -349,8 +349,7 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
         # check for valid names
         storage_name = storageDict['storage_name']
         if storage_name == 'Sprite':
-            raise ValueError(''.join(["Can't over-write ",
-                                      storage_name," base class."]))
+            raise ValueError(''.join(["Can't over-write Sprite base class."]))
         # grandchildren need to call their parent.on_create
         if storageDict['base_class'].__name__ != 'Sprite':
             storageDict = storageDict.copy()

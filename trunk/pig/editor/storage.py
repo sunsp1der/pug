@@ -13,7 +13,7 @@ from Opioid2D.public.Node import Node
 from Opioid2D.public.Vector import VectorReference
 from Opioid2D.public.Image import ImageInstance
 
-from pug import code_export, CodeStorageExporter
+from pug import code_exporter, CodeStorageExporter
 from pug.util import make_valid_attr_name
 from pug.syswx.util import show_exception_dialog
 
@@ -114,7 +114,7 @@ parentWindow: the parent window of name dialog. If not provided, the
         else:
             archetype = False    
         from pig.Sprite import Sprite
-        exporter = code_export( obj, path, True, {'name':objName,
+        exporter = code_exporter( obj, path, True, {'name':objName,
                                                   'base_class':Sprite})
         objDict = get_available_objects( True)
         oldclass = obj.__class__
@@ -298,9 +298,9 @@ parentWindow: the parent window of name dialog. If not provided, the
     wx.BeginBusyCursor()
     saved = False
     try:
-        if _DEBUG: print "util: save_scene_as enter code_export"
-        code_export( scene, path, True, {'name':sceneName})
-        if _DEBUG: print "util: save_scene_as exit code_export"
+        if _DEBUG: print "util: save_scene_as enter code_exporter"
+        code_exporter( scene, path, True, {'name':sceneName})
+        if _DEBUG: print "util: save_scene_as exit code_exporter"
     except:
         if _DEBUG: print "util: save_scene_as 6"        
         show_exception_dialog()

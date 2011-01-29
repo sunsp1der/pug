@@ -28,7 +28,7 @@ from pug.syswx.helpframe import HelpFrame
 from pug.syswx.wxconstants import *
 from pug.syswx.util import show_exception_dialog, cache_aguilist
 from pug.pugview_manager import get_obj_pugview_info
-from pug.code_storage import code_export
+from pug.code_storage import code_exporter
 
 #_DEBUG
 _DEBUG = False
@@ -235,11 +235,11 @@ To return to object view, call display_aguilist().
         if self._currentView in ('&Raw', 'Raw'):
             self.aguilist = create_raw_aguilist(self.object, self, None, 
                                               filterUnderscore)
-        elif self._currentView == ('Raw &Data', 'Raw Data'):
+        elif self._currentView in ('Raw &Data', 'Raw Data'):
             self.aguilist = create_raw_aguilist(self.object, self, 
                                               ['Default', 'Objects'],
                                               filterUnderscore)
-        elif self._currentView == ('Raw &Methods', 'Raw Methods'):
+        elif self._currentView in ('Raw &Methods', 'Raw Methods'):
             self.aguilist = create_raw_aguilist(self.object, self,['Routine'],
                                               filterUnderscore)
         else:
@@ -644,7 +644,7 @@ Automatically calls on_<setting>(val, event) callback.
             else:
                 asClass = False
             try:
-                code_export(self.object, 
+                code_exporter(self.object, 
                             os.path.join(lastfolder, lastfilename), 
                             asClass)
             except:

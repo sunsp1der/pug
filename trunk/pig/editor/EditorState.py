@@ -38,26 +38,22 @@ class EditorState(PigState):
         if _DEBUG: print "EditorState.exit complete"
         PigState.exit(self)
 
-#    def handle_activeevent(self, event):
-#        # skip mouse down event when just gaining focus
-#        if event.state == 6:
-#            self.skip_mouse_down = True
                         
     def handle_mousebuttondown(self, event):
-#        # skip if not focused
-#        if self.skip_mouse_down:
-#            self.skip_mouse_down = False
-#            return
-        # nothing if the mouse is locked
         if self.mouse_locked_by:
             return
+        shiftDown = is_shift_down()
+        ctrlDown = is_ctrl_down()
         x, y = event.pos
-        node = self.scene.mouse_manager.pick_selection(x,y,
-                                        wx.GetApp().selectedObjectDict)
-        if node is not None:
-            self.selectOnUp = weakref.ref(node)
+        if shiftDown and ctrlDown:
+            self.interface.add_object( position=(x,y))
         else:
-            wx.CallAfter(self.interface.set_selection,[])
+            node = self.scene.mouse_manager.pick_selection(x,y,
+                                            wx.GetApp().selectedObjectDict)
+            if node is not None:
+                self.selectOnUp = weakref.ref(node)
+            else:
+                wx.CallAfter(self.interface.set_selection,[])
         
     def handle_mousebuttonup(self, event):
         try:
@@ -99,6 +95,12 @@ class EditorState(PigState):
             wx.CallAfter(self.interface.quit)
         if ev.key == Opioid2D.K_w and ctrlDown:
             wx.CallAfter(wx.GetApp().raise_all_frames)
+        if ev.key == Opioid2D.K_c and ctrlDown:
+            wx.CallAfter(self.interface.copy_selected)
+        if ev.key == Opioid2D.K_x and ctrlDown:
+            wx.CallAfter(self.interface.cut_selected)
+        if ev.key == Opioid2D.K_v and ctrlDown:
+            wx.CallAfter(self.interface.paste_clipboard)
         if ev.key == Opioid2D.K_u and ctrlDown:
             try:
                 app = wx.GetApp()

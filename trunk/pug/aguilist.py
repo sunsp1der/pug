@@ -82,7 +82,7 @@ class otherClass( myClass):
     _pug_pugview_class = myClass
 """
     if _DEBUG: print "create_pugview_aguilist: begin"
-    if pugview.has_key('create_pug_list_function'):
+    if type(pugview) and pugview.has_key('create_pug_list_function'):
         aguilist = pugview['create_pug_list_function'](obj, 
                                                        window, filterUnderscore)
     else:
