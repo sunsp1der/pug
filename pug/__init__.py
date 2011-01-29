@@ -3,7 +3,7 @@
 #Create a GUI for Python objects automatically
 
 # code storage
-from pug.code_storage import CodeStorageExporter, code_export
+from pug.code_storage import CodeStorageExporter, code_exporter
 
 # pugviews
 from pug.pugview_manager import add_pugview, set_default_pugview

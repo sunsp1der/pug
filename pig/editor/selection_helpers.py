@@ -278,6 +278,9 @@ class SelectBoxAreaSprite( SelectBoxBaseSprite):
         PigDirector.scene.state.selectOnUp = None
         self.graphicsManager.update_selection_boxes()
         wx.CallAfter(wx.GetApp().selection_refresh)
+
+    def on_press(self):
+        PigDirector.scene.state.mouse_locked_by = self
         
 class SelectBoxHandleSprite( SelectBoxBaseSprite):
     layer = "__editor2__"
@@ -291,9 +294,6 @@ class SelectBoxHandleSprite( SelectBoxBaseSprite):
         self.state = PigDirector.scene.state.graphicsManager
         self.graphicsManager = PigDirector.scene.state.graphicsManager
         self.mouse_register("single")
-
-    def on_press(self):
-        PigDirector.scene.state.mouse_locked_by = self
         
     def on_enter(self):
         if not PigDirector.scene.state.mouse_locked_by and \
