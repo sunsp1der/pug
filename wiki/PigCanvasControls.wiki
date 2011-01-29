@@ -2,6 +2,7 @@
 =Pig Canvas Controls=
 
 ==Canvas Mouse Controls==
+|| Shift+Ctrl+Click || Add object selected in 'Object to add' dropdown||
 || Click on object || Select the object ||
 || Click on overlapping objects || Select next object ||
 || Click on no object || Select none ||
