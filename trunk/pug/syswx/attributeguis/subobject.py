@@ -1,6 +1,7 @@
 """SubObject agui"""
 
 import weakref 
+from functools import partial
 
 import wx
 
@@ -148,7 +149,7 @@ simple objects that contain a few values within them (i.e. X and Y)
             self.subControlList[i][1].SetValue(value)
             i+=1
         return
-    
+
     def get_attribute_value(self, event=None):
         object = getattr(self.window.object, self.attribute)
         val = []
@@ -158,16 +159,27 @@ simple objects that contain a few values within them (i.e. X and Y)
             
     def set_attribute_value(self):
         object = getattr(self.window.object, self.attribute)
+        current_val = self.get_attribute_value()
         val = self.get_control_value()
-        i=0
+        do_fn = partial( self.set_values, 
+                         self.aguidata['sub_attributes'],
+                         val)
         try:
-            for attr,control in self.subControlList:
-                setattr(object,attr,val[i])
-                i+=1
+            do_fn()
         except:
             return False
         else:
+            undo_fn = partial( self.set_values,
+                               self.aguidata['sub_attributes'],
+                               current_val)
+            wx.GetApp().undoManager.add(
+                            "Set "+self.window.shortPath+" "+self.attribute, 
+                            undo_fn, do_fn)            
             return True
 
-
-        
+    def set_values(self, object, attribute_list, assignment_list):
+        i = 0
+        for attr in attribute_list:
+            setattr( object, attr, assignment_list[i])
+            i += 1
+            

@@ -8,6 +8,7 @@ from threading import Thread
 from inspect import getsourcefile
 import wx
 
+from pug.undo_manager import UndoManager
 from pug.util import make_valid_attr_name
 from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.syswx.util import show_exception_dialog, highlight_frame
@@ -59,6 +60,7 @@ projectFolder: where file menus start at.  Defaults to current working dir.
                      projectFolder)
         self.permanent_settings = ["Rect_Pug_Python_Editor", 
                                    "Rect_Component_Browser"]
+        self.undoManager = UndoManager()
         wx.App.__init__(self, redirect=redirect)
         #self.SetExitOnFrameDelete(False)
     

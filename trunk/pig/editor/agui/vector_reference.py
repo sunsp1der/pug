@@ -12,6 +12,16 @@ from pug.syswx.agui_label_sizer import AguiLabelSizer
 from Opioid2D.public.Vector import VectorReference as _opioidVectorReference
 from Opioid2D.public.Vector import Vector
 
+#make SubObject the default attribute gui for VectorReference
+get_agui_default_dict().update({_opioidVectorReference:
+                                [SubObject,{'sub_attributes':['x','y'],
+                                            'no_button':True}]
+                                })
+get_agui_default_dict().update({Vector:
+                                [SubObject,{'sub_attributes':['x','y'],
+                                            'no_button':True}]
+                                })
+# BELOW DEPRECATED! May not work anymore with current system
 # attribute gui
 # Not used any more... but might be worth looking at as an example of
 # horizontally laid out sub-attributes
@@ -93,22 +103,12 @@ any object.
     def set_attribute_value(self):
         val = self.get_control_value()
         try:
-            self.object.x = val[0]
-            self.object.y = val[1]
+            self.object.__init__(*val)
         except:
             return False
         else:
             return True
 
-#make the above the default attribute gui for VectorReference
-get_agui_default_dict().update({_opioidVectorReference:
-                                [SubObject,{'sub_attributes':['x','y'],
-                                            'no_button':True}]
-                                })
-get_agui_default_dict().update({Vector:
-                                [SubObject,{'sub_attributes':['x','y'],
-                                            'no_button':True}]
-                                })
         
 #pug pugview
 _vectorReferencePugview = {

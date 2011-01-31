@@ -933,18 +933,7 @@ position: move object to this position
     clipboard = None
     def test(self):
 #        from pug.CodeStorageExporter import CodeStorageExporter as cse
-        if not self.clipboard:
-            from pug import code_exporter
-            exporter = code_exporter(wx.GetApp().get_selection().popitem()[0])
-            pug.frame(exporter)
-            self.clipboard = exporter
-        else:
-            try:
-                Director.paused = True
-                exec self.clipboard.code
-                Director.paused = False
-            except:
-                show_exception_dialog()
+        wx.GetApp().undoManager.undo()
             
 # test for floating garbage
 #        from pug.util import test_referrers
@@ -1025,7 +1014,7 @@ _interfacePugview = {
 #        ['canvas', pug.ObjectButtons],
 #        ['Director'],
 #        ['Display'],
-#        ['test', pug.Routine]
+        ['test', pug.Routine]
     ]
 }
 pug.add_pugview('OpioidInterface', _interfacePugview, True)

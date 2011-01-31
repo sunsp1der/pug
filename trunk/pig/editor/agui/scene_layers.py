@@ -57,7 +57,9 @@ For other kwargs arguments, see the Base attribute GUI
         dlg.Destroy()
         
     def get_control_value(self):
-        return self.list
+        retval = self.list[:]
+        retval.reverse()
+        return retval
     
     def set_control_value(self, value):
         self.list = value

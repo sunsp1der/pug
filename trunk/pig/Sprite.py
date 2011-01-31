@@ -343,7 +343,7 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
             if t == 50:
                 return None
         return dummy
-        
+
     def _create_object_code(self, storageDict, indentLevel, exporter):
         if _DEBUG: print "*******************enter sprite save: "+str(self)        
         # check for valid names
@@ -419,13 +419,8 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
         if not base_code.endswith('pass\n'): # clean up pass case (for looks)
             code.append(base_code)
         if _DEBUG: print "*******************exit sprite save: "+str(self)        
-        return ''.join(code)
-#    def test(self):
-#        import cOpioid2D as _c
-#        self._image._cObj.hotspot = _c.Vec2(0,0)
-#        print self._image._cObj.hotspot.x, self._image._cObj.hotspot.y 
-#        return self._image._cObj
-    
+        return ''.join(code)            
+        
     _codeStorageDict = {
             'skip_attributes': ['_actions', '_image_file', 'image_file','color',
                                 'layer_name','_init_image','_init_layer',

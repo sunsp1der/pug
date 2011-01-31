@@ -1,4 +1,14 @@
 todo:
+	scale in editor doesn't seem to work
+	Undo! - save query when changing levels or quitting
+X		undo-unit('descr',fn,(*olda,**oldkw),(*newa,**newkw))
+		mark system for multiple undo
+		delete sprite
+			store layer, call delete 
+			to undelete return layer, reregister with scene
+		delete component
+			remove from object
+			to undelete simply re-add
 	keyboard sticking in julian's game
 		keep array of pressed keys in director
 		no key down when key is down
@@ -9,14 +19,6 @@ installer:
 	eliminate need for pythonpather
 
 soon:
-	Undo! - save query when changing levels or quitting
-		undo-unit('descr',fn,(*olda,**oldkw),(*newa,**newkw))
-		multi-undo-unit([undo-units])
-		delete
-			save object as text like in file
-			add 'delete-id'=id to object
-			do weakref.check_references and change to store delete-id
-			class undoref(weakref.ref)
 	eliminate demo project
 		import files from project
 		create demo files folder

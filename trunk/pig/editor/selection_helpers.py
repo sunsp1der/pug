@@ -10,7 +10,7 @@ import Opioid2D
 from Opioid2D.public.Node import Node
 from Opioid2D import Mouse
 
-from pig.PigDirector import PigDirector
+from pig import Director
 from pig.editor.util import get_image_path
 from pig.util import is_shift_down, is_ctrl_down, angle_to
 from pig import Sprite
@@ -42,7 +42,7 @@ handles for scaling and rotating.
 
 node: any object containing a 'rect' attribute that is a pygame rect
 """
-        self.graphicsManager = PigDirector.scene.state.graphicsManager
+        self.graphicsManager = Director.scene.state.graphicsManager
         base = SelectBoxBaseSprite() 
         area = SelectBoxAreaSprite()
         area.attach_to(base)
@@ -75,7 +75,7 @@ node: any object containing a 'rect' attribute that is a pygame rect
             self.start_pulse()
     
     def on_drag_begin(self):
-#        layer = PigDirector.scene.get_layer("__editor1__")
+#        layer = Director.scene.get_layer("__editor1__")
         node = self.get_node()
         layer = node.layer
         position = Opioid2D.Mouse.get_position()
@@ -93,7 +93,7 @@ node: any object containing a 'rect' attribute that is a pygame rect
     node = property(get_node)
         
     def on_drag(self, node):
-        layer = PigDirector.scene.get_layer("__editor1__")
+        layer = Director.scene.get_layer("__editor1__")
         position = Opioid2D.Mouse.get_position()
         new_position = layer.convert_pos(position[0], position[1])\
                          + self.drag_offset
@@ -256,6 +256,13 @@ class SelectBoxBaseSprite( Sprite):
     layer = "__editor1__"
     auto_scene_register = False
 
+    def on_delete(self):
+        try:
+            if Director.scene.state.mouse_locked_by == self:
+                    Director.scene.state.mouse_locked_by = None
+        except:
+            pass
+
 class SelectBoxLineSprite( SelectBoxBaseSprite):
     color = (0.7,0.75,0.8,1)
     image = _line_sprite_file
@@ -265,23 +272,23 @@ class SelectBoxAreaSprite( SelectBoxBaseSprite):
     draggable = True
     dragging = False
     def on_create(self):
-        self.graphicsManager = PigDirector.scene.state.graphicsManager
+        self.graphicsManager = Director.scene.state.graphicsManager
         self.mouse_register("single")
         
     def on_drag_begin(self):
         self.box.on_drag_begin()
-        PigDirector.scene.state.selectOnUp = None
+        Director.scene.state.selectOnUp = None
         self.dragging = True
 
     def on_drag_end(self):
         self.dragging = False
-        PigDirector.scene.state.selectOnUp = None
+        Director.scene.state.selectOnUp = None
         self.graphicsManager.update_selection_boxes()
         wx.CallAfter(wx.GetApp().selection_refresh)
 
-    def on_press(self):
-        PigDirector.scene.state.mouse_locked_by = self
-        
+#    def on_press(self):
+#        Director.scene.state.mouse_locked_by = self
+                
 class SelectBoxHandleSprite( SelectBoxBaseSprite):
     layer = "__editor2__"
     image = _handle_sprite_file
@@ -291,12 +298,12 @@ class SelectBoxHandleSprite( SelectBoxBaseSprite):
     tick_action = None
     def on_create(self):
         self.scale = (_HANDLE_SIZE, _HANDLE_SIZE)
-        self.state = PigDirector.scene.state.graphicsManager
-        self.graphicsManager = PigDirector.scene.state.graphicsManager
+        self.state = Director.scene.state.graphicsManager
+        self.graphicsManager = Director.scene.state.graphicsManager
         self.mouse_register("single")
         
     def on_enter(self):
-        if not PigDirector.scene.state.mouse_locked_by and \
+        if not Director.scene.state.mouse_locked_by and \
                     pygame.key.get_focused():
             self.tick_action = Opioid2D.TickFunc( self.test_cursor).do()
     
@@ -314,13 +321,13 @@ class SelectBoxHandleSprite( SelectBoxBaseSprite):
                                             (0,0))
             
     def on_exit(self):
-        if not self.dragging and not PigDirector.scene.state.mouse_locked_by:
+        if not self.dragging and not Director.scene.state.mouse_locked_by:
             if self.tick_action:
                 self.tick_action.abort()
             Mouse.cursor = Opioid2D.HWCursor.arrow
                 
     def on_drag_begin(self):
-        PigDirector.scene.state.selectOnUp = None
+        Director.scene.state.selectOnUp = None
         self.dragging = True
         if is_ctrl_down():
             self.box.on_rotate_begin( self)
@@ -331,7 +338,7 @@ class SelectBoxHandleSprite( SelectBoxBaseSprite):
 
     def on_drag_end(self):
         self.dragging = False
-        PigDirector.scene.state.selectOnUp = None
+        Director.scene.state.selectOnUp = None
         self.box.surround_node(force=True)
         self.graphicsManager.update_selection_boxes()
         wx.CallAfter(wx.GetApp().selection_refresh)
@@ -344,4 +351,4 @@ class SelectBoxHandleSprite( SelectBoxBaseSprite):
         self.dragfunc( self)
         
     def on_release(self):
-        PigDirector.scene.state.mouse_locked_by = None
+        Director.scene.state.mouse_locked_by = None

@@ -34,9 +34,3 @@ For kwargs optional arguments, see the Base attribute GUI
     
     def set_control_value(self, value):
         return self.checkbox.SetValue(bool(value))
-    
-#    def focus(self, event=None):
-#        pass
-#        
-#    def unfocus(self, event=None):
-#        pass
