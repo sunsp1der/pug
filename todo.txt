@@ -1,8 +1,14 @@
 todo:
-	scale in editor doesn't seem to work
 	Undo! - save query when changing levels or quitting
 X		undo-unit('descr',fn,(*olda,**oldkw),(*newa,**newkw))
-		mark system for multiple undo
+X		limit to history_manager.MAX_UNDOS entries
+X		mark system for multiple undo
+x			small undo to break up multiple undo
+			nudging
+			dragging
+			scaling
+			rotating
+X			same attribute over and over
 		delete sprite
 			store layer, call delete 
 			to undelete return layer, reregister with scene

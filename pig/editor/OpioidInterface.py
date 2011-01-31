@@ -157,6 +157,17 @@ scene: the scene to load initially
                  ["Show All &Windows\tCtrl+W", app.raise_all_frames,
                         "Show all open Pug Windows"],
                  ["&Quit\tCtrl+Q", self.quit]])
+            app.add_global_menu("&Edit",
+                [["Undo\tCtrl+Z", app.history.undo, "Undo last change group"],
+                 ["Redo\tCtrl+Y", app.history.redo, "Redo last undo group"],
+                 ["Small Undo\tShift+Ctrl+Z", app.history.small_undo,
+                        "Undo last individual change"],
+                 ["Small Redo\tShift+Ctrl+Y", app.history.small_redo,
+                        "Redo last individual undo"],
+                 ["*DIVIDER*"],
+                 ["Cut\tCtrl+X", self.cut_selected, "Cut selection"],
+                 ["Copy\tCtrl+C", self.copy_selected, "Copy selection"],
+                 ["Paste\tCtrl+V", self.paste_clipboard, "Paste selection"]])
             self.__cached[2]=True
         # open MDI frame
         if not app.get_project_frame():
@@ -930,10 +941,9 @@ position: move object to this position
             (Opioid2D.Delay(1) + Opioid2D.CallFunc(self.avoid_node_overlap, 
                                                obj)).do()
             
-    clipboard = None
     def test(self):
 #        from pug.CodeStorageExporter import CodeStorageExporter as cse
-        wx.GetApp().undoManager.undo()
+        wx.GetApp().history.undo()
             
 # test for floating garbage
 #        from pug.util import test_referrers
@@ -1014,7 +1024,7 @@ _interfacePugview = {
 #        ['canvas', pug.ObjectButtons],
 #        ['Director'],
 #        ['Display'],
-        ['test', pug.Routine]
+#        ['test', pug.Routine]
     ]
 }
 pug.add_pugview('OpioidInterface', _interfacePugview, True)

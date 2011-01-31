@@ -270,7 +270,7 @@ By default, this returns the attribute value
         """set_attribute_value(val)->False if there was a problem, else True.
         
 Try to set the aguis attribute to the value shown in the control. This is where
-pug registers with its undo system. For info, see pug.undo_manager.
+pug registers with its undo system. For info, see pug.history_manager.
 """
         try:
             current_value = self.get_attribute_value()
@@ -285,12 +285,13 @@ pug registers with its undo system. For info, see pug.undo_manager.
                                self.attribute,
                                current_value)
             do_fn()
-            wx.GetApp().undoManager.add(
-                                "Set "+self.window.shortPath+" "+self.attribute, 
-                                undo_fn, do_fn)
         except:
             return False
         else:
+            wx.GetApp().history.add(
+                                "Set "+self.window.shortPath+" "+self.attribute, 
+                                undo_fn, do_fn, 
+                                (self.window.object, self.attribute))
             return True
                 
     def refresh_window(self):
