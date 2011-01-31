@@ -1,4 +1,5 @@
 """Simple text entry attribute gui"""
+from functools import partial
 
 import wx
 
@@ -58,13 +59,24 @@ Try to set the aguis attribute to the value shown in the control
             attribute_value = self.get_attribute_value()
         except:
             return False
+        undo_fn = partial( setattr,
+                           self.window.object,
+                           self.attribute,
+                           attribute_value)
         if attribute_value is None: 
             # attribute type not set
             try:
-                setattr(self.window.object,self.attribute,control_value)
+                do_fn = partial( setattr,
+                                 self.window.object,
+                                 self.attribute,
+                                 control_value)
+                do_fn()
             except:
                 return False
             else:
+                wx.GetApp().undoManager.add(
+                            "Set "+self.window.shortPath+" "+self.attribute, 
+                            undo_fn, do_fn)
                 return True                  
         else:
             try:
@@ -82,9 +94,16 @@ Try to set the aguis attribute to the value shown in the control
                     # no type-casting for special types... don't want any 
                     # weird garbage sitting around
                     typedValue = control_value
-                setattr(self.window.object, self.attribute, typedValue)              
+                do_fn = partial( setattr,
+                                 self.window.object,
+                                 self.attribute,
+                                 typedValue)
+                do_fn()
             except:
                 return False
             else:
+                wx.GetApp().undoManager.add(
+                            "Set "+self.window.shortPath+" "+self.attribute, 
+                            undo_fn, do_fn)
                 return True        
             

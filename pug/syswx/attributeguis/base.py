@@ -1,6 +1,7 @@
 """Base class for attribute guis"""
 import time
 from inspect import isclass
+from functools import partial
 
 import wx
 
@@ -266,13 +267,27 @@ By default, this returns the attribute value
         return getattr(self.window.object, self.attribute, None)
 
     def set_attribute_value(self):
-        """set_attribute_value()->False if there was a problem. True otherwise.
+        """set_attribute_value(val)->False if there was a problem, else True.
         
-Try to set the aguis attribute to the value shown in the control
+Try to set the aguis attribute to the value shown in the control. This is where
+pug registers with its undo system. For info, see pug.undo_manager.
 """
         try:
+            current_value = self.get_attribute_value()
             control_value = self.get_control_value()
-            setattr(self.window.object, self.attribute, control_value)              
+#            setattr(self.window.object, self.attribute, control_value)              
+            do_fn = partial( setattr, 
+                             self.window.object,                                         
+                             self.attribute, 
+                             control_value)
+            undo_fn = partial( setattr,
+                               self.window.object,
+                               self.attribute,
+                               current_value)
+            do_fn()
+            wx.GetApp().undoManager.add(
+                                "Set "+self.window.shortPath+" "+self.attribute, 
+                                undo_fn, do_fn)
         except:
             return False
         else:
