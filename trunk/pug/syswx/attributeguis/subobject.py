@@ -126,6 +126,11 @@ simple objects that contain a few values within them (i.e. X and Y)
         else:
             Base.setup( self, attribute, window, aguidata)
             
+    def apply(self, event=None):
+        Base.apply(self, event)
+        if event:
+            event.EventObject.select_all()
+            
     objRef = None    
     def get_object(self):
         if self.objRef:
@@ -162,19 +167,24 @@ simple objects that contain a few values within them (i.e. X and Y)
         current_val = self.get_attribute_value()
         val = self.get_control_value()
         do_fn = partial( self.set_values, 
-                         self.aguidata['sub_attributes'],
+                         object,                         
+                         self.aguidata['sub_attributes'][:],
                          val)
         try:
             do_fn()
         except:
+            from pug.syswx.util import show_exception_dialog
+            show_exception_dialog()
             return False
         else:
             undo_fn = partial( self.set_values,
-                               self.aguidata['sub_attributes'],
+                               object,
+                               self.aguidata['sub_attributes'][:],
                                current_val)
-            wx.GetApp().undoManager.add(
+            wx.GetApp().history.add(
                             "Set "+self.window.shortPath+" "+self.attribute, 
-                            undo_fn, do_fn)            
+                            undo_fn, do_fn, 
+                            (self.window.object, self.attribute))            
             return True
 
     def set_values(self, object, attribute_list, assignment_list):
