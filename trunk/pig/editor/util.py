@@ -3,15 +3,19 @@
 import time
 import shutil
 from copy import deepcopy
+from functools import partial
+from weakref import proxy
 
 import wx
 
 import Opioid2D
+import cOpioid2D
 from Opioid2D.public.Node import Node
 
 import pug
 from pug.component import Component
-from pug.syswx.util import show_exception_dialog, highlight_frame
+from pug.syswx.util import show_exception_dialog, highlight_frame,\
+                            close_obj_windows
 from pug.syswx.SelectionWindow import SelectionWindow
 from pug.util import python_process, start_edit_process
 
@@ -52,6 +56,28 @@ def get_scene_layers():
         return layers        
     except:
         return []
+    
+def _hide_nodes( nodelist):
+    for node in nodelist:
+        wx.CallAfter(close_obj_windows, node)
+        node.__old_color = node.color
+        node.color = (0,0,0,0)
+        node.__old_layer = node.layer_name
+        node.layer = "__limbo__"
+    
+def undoable_delete_nodes( nodelist):
+    undo_fn = partial(undelete_nodes, nodelist)
+    do_fn = partial(_hide_nodes, nodelist)
+    do_fn()
+    wx.GetApp().history.add("Delete node", undo_fn, do_fn)
+
+def undelete_nodes( nodelist):
+    for node in nodelist:
+        node.layer = node.__old_layer
+        del(node.__old_layer)
+        node.color = node.__old_color
+        del(node.__old_color)
+    wx.CallAfter(wx.GetApp().set_selection,nodelist)
         
 def test_scene_code(scenename, modulename = None):
     """test_scene_code( scenename)
@@ -312,7 +338,7 @@ def wait_for_exit_scene():
     time.sleep(0.05)         
     
 def close_scene_windows( scene=None):
-    """_close_scene_windows( scene=None)
+    """close_scene_windows( scene=None)
     
 Close all scene and node windows belonging to current scene
 Note: for this to work on nodes, it must be run BEFORE the scene is changed.    
@@ -327,18 +353,6 @@ Note: for this to work on nodes, it must be run BEFORE the scene is changed.
             except:
                 continue
         elif not hasattr(frame,'pugWindow'):
-            # multi-view
-#            for view in app.objFrameDict[frame]:
-#                if type(view) == tuple and view[0]() == scene:
-#                    try:
-#                        frame.close_pug_view(view)
-#                    except:
-#                        pass
-#                elif view == id(scene):
-#                    try:
-#                        frame.close_pug_view(view)
-#                    except:
-#                        pass
             continue
         else:
             if not bool(frame) or isinstance(frame.pugWindow, SelectionWindow):
@@ -376,7 +390,7 @@ Note: for this to work on nodes, it must be run BEFORE the scene is changed.
                         doclose = True
         if doclose:
             frame.Close()    
-
+        
 def exporter_cleanup( exporter):
     # delete dummies from Opioid scene
     from pig.Scene import Scene

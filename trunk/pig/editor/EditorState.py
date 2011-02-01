@@ -16,7 +16,7 @@ Opioid2D = Opioid2D
 _DEBUG = False
 
 class EditorState(PigState):
-    layers = ["__editor1__","__editor2__"]
+    layers = ["__editor1__","__editor2__","__limbo__"]
     selectOnUp = None
     mouse_locked_by = False
     skip_mouse_down = False
@@ -77,31 +77,42 @@ class EditorState(PigState):
             nudge = nudge * 0.1            
         if ev.key == Opioid2D.K_LEFT:
             self.interface.nudge((-nudge, 0))
-        if ev.key == Opioid2D.K_RIGHT:
+        elif ev.key == Opioid2D.K_RIGHT:
             self.interface.nudge((nudge, 0))
-        if ev.key == Opioid2D.K_UP:
+        elif ev.key == Opioid2D.K_UP:
             self.interface.nudge((0, -nudge))
-        if ev.key == Opioid2D.K_DOWN:
+        elif ev.key == Opioid2D.K_DOWN:
             self.interface.nudge((0, nudge))
-        if ev.key == Opioid2D.K_DELETE:
-            selectedDict = list(wx.GetApp().selectedObjectDict)
-            for item in selectedDict:
-                if isinstance(item, Opioid2D.public.Node.Node):
-                    if _DEBUG: print 'callafter'
-                    wx.CallAfter(item.delete)
-        if ev.key == Opioid2D.K_s and ctrlDown:
+        elif ev.key == Opioid2D.K_DELETE:
+            from pig.editor.util import undoable_delete_nodes
+            deletelist = []
+            for ref in wx.GetApp().selectedObjectDict.itervalues():
+                if isinstance(ref(), Opioid2D.public.Node.Node):
+                    deletelist.append(ref())
+            undoable_delete_nodes(deletelist)
+        elif ev.key == Opioid2D.K_s and ctrlDown:
             wx.CallAfter(self.interface.save_using_working_scene)
-        if ev.key == Opioid2D.K_q and ctrlDown:
+        elif ev.key == Opioid2D.K_q and ctrlDown:
             wx.CallAfter(self.interface.quit)
-        if ev.key == Opioid2D.K_w and ctrlDown:
+        elif ev.key == Opioid2D.K_w and ctrlDown:
             wx.CallAfter(wx.GetApp().raise_all_frames)
-        if ev.key == Opioid2D.K_c and ctrlDown:
+        elif ev.key == Opioid2D.K_c and ctrlDown:
             wx.CallAfter(self.interface.copy_selected)
-        if ev.key == Opioid2D.K_x and ctrlDown:
+        elif ev.key == Opioid2D.K_x and ctrlDown:
             wx.CallAfter(self.interface.cut_selected)
-        if ev.key == Opioid2D.K_v and ctrlDown:
+        elif ev.key == Opioid2D.K_v and ctrlDown:
             wx.CallAfter(self.interface.paste_clipboard)
-        if ev.key == Opioid2D.K_u and ctrlDown:
+        elif ev.key == Opioid2D.K_z and ctrlDown:
+            if shiftDown:
+               wx.GetApp().history.small_undo()
+            else:
+               wx.GetApp().history.undo()
+        elif ev.key == Opioid2D.K_y and ctrlDown:
+            if shiftDown:
+               wx.GetApp().history.small_redo()
+            else:
+               wx.GetApp().history.redo()
+        elif ev.key == Opioid2D.K_u and ctrlDown:
             try:
                 app = wx.GetApp()
                 selected = app.get_selection()
@@ -114,7 +125,7 @@ class EditorState(PigState):
                 wx.CallAfter(app.raise_all_frames)
             except:
                 pass
-        if ev.key == Opioid2D.K_p and ctrlDown:
+        elif ev.key == Opioid2D.K_p and ctrlDown:
             try:
                 app = wx.GetApp()
                 selected = app.get_selection()

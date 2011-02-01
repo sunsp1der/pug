@@ -1,5 +1,6 @@
 from weakref import proxy
 from math import sin, cos, radians
+from functools import partial
 
 from pygame import Rect
 import pygame.key
@@ -53,6 +54,7 @@ node: any object containing a 'rect' attribute that is a pygame rect
         self.rect = Rect([0,0,0,0])
         self.lines = {}
         self.handles = {}
+        self.node = proxy(node)
         for side in ['left','right','top','bottom']:
             # edge lines
             line = SelectBoxLineSprite()
@@ -76,21 +78,26 @@ node: any object containing a 'rect' attribute that is a pygame rect
     
     def on_drag_begin(self):
 #        layer = Director.scene.get_layer("__editor1__")
-        node = self.get_node()
+        node = self.node
         layer = node.layer
         position = Opioid2D.Mouse.get_position()
         world_position = layer.convert_pos(position[0], position[1])
         if node:
             self.drag_offset = node.position - world_position
         else:
-            self.drag_offset = (0,0)   
+            self.drag_offset = (0,0)
+        Director.scene.state.selectOnUp = None
+        self.orig_position = tuple(node.position)
         
-    def get_node(self):  
-        boxDict = self.graphicsManager.boxDict
-        for node, box in boxDict.iteritems():
-            if box == self:
-                return node
-    node = property(get_node)
+    def on_drag_end(self):
+        Director.scene.state.selectOnUp = None
+        self.graphicsManager.update_selection_boxes()
+        wx.CallAfter(wx.GetApp().selection_refresh)
+        node = self.node
+        do_fn = partial(setattr, node, "position", tuple(node.position))
+        undo_fn = partial(setattr, node, "position", self.orig_position)
+        wx.GetApp().history.add("Drag selection", undo_fn, do_fn, 
+                                ("Drag", wx.GetApp().selectedObjectDict.keys()))
         
     def on_drag(self, node):
         layer = Director.scene.get_layer("__editor1__")
@@ -105,6 +112,12 @@ node: any object containing a 'rect' attribute that is a pygame rect
         mouse_pos = Mouse.get_position()
         self.orig_angle = angle_to(self.node.position, mouse_pos)        
          
+    def on_rotate_end(self):        
+        do_fn = partial(setattr, self.node, "rotation", self.node.rotation)
+        undo_fn = partial(setattr, self.node, "rotation", self.orig_rot)
+        wx.GetApp().history.add("Rotate selection", undo_fn, do_fn, 
+                            ("Rotate", self.node))
+        
     def on_rotate(self, handle):
         mouse_pos = Mouse.get_position()
         angle = angle_to(self.node.position, mouse_pos)
@@ -124,8 +137,19 @@ node: any object containing a 'rect' attribute that is a pygame rect
         self.orig_position = Opioid2D.Vector(self.node.position[0],
                                              self.node.position[1])
   
+    def on_scale_end(self):        
+        do_fn = partial(self.node.set, scale=tuple(self.node.scale),
+                                       position=tuple(self.node.position))
+        undo_fn = partial(self.node.set, scale=self.orig_scale,
+                                         position=self.orig_position)
+        wx.GetApp().history.add("Scale selection", undo_fn, do_fn, 
+                            ("Scale", self.node))
+        
+    def scale_node(self, node, position):
+        pass
+        
     def on_scale(self, handle):
-        node = self.get_node()
+        node = self.node
         mouse_pos = Mouse.get_position()
         delta = Opioid2D.Vector(mouse_pos[0] - self.drag_from[0],
                                 mouse_pos[1] - self.drag_from[1])
@@ -175,6 +199,7 @@ node: any object containing a 'rect' attribute that is a pygame rect
         # set lines and handles
         self.surround_node(force=True)                
         
+        
     def start_pulse(self):
         pulse = Opioid2D.ColorFade((0.15,0.2,0.25,1), 1.2,Opioid2D.PingPongMode)
 #        pulse = Opioid2D.AlphaFade(0.2, 1.2, Opioid2D.PingPongMode)
@@ -193,7 +218,7 @@ node: any object containing a 'rect' attribute that is a pygame rect
 
     def surround_node(self, node=None, force=False):
         if node is None:
-            node = self.get_node()
+            node = self.node
         try:
             hotspot = (node.image._cObj.hotspot.x, node.image._cObj.hotspot.y)
             rect = node._get_rect()
@@ -272,19 +297,15 @@ class SelectBoxAreaSprite( SelectBoxBaseSprite):
     draggable = True
     dragging = False
     def on_create(self):
-        self.graphicsManager = Director.scene.state.graphicsManager
         self.mouse_register("single")
         
     def on_drag_begin(self):
         self.box.on_drag_begin()
-        Director.scene.state.selectOnUp = None
         self.dragging = True
 
     def on_drag_end(self):
         self.dragging = False
-        Director.scene.state.selectOnUp = None
-        self.graphicsManager.update_selection_boxes()
-        wx.CallAfter(wx.GetApp().selection_refresh)
+        self.box.on_drag_end()
 
 #    def on_press(self):
 #        Director.scene.state.mouse_locked_by = self
@@ -298,8 +319,6 @@ class SelectBoxHandleSprite( SelectBoxBaseSprite):
     tick_action = None
     def on_create(self):
         self.scale = (_HANDLE_SIZE, _HANDLE_SIZE)
-        self.state = Director.scene.state.graphicsManager
-        self.graphicsManager = Director.scene.state.graphicsManager
         self.mouse_register("single")
         
     def on_enter(self):
@@ -338,17 +357,24 @@ class SelectBoxHandleSprite( SelectBoxBaseSprite):
 
     def on_drag_end(self):
         self.dragging = False
-        Director.scene.state.selectOnUp = None
-        self.box.surround_node(force=True)
-        self.graphicsManager.update_selection_boxes()
-        wx.CallAfter(wx.GetApp().selection_refresh)
-        self.dragfunc = None
         if self.tick_action:
             self.tick_action.abort()
         Mouse.cursor = Opioid2D.HWCursor.arrow
+        Director.scene.state.selectOnUp = None
+        self.box.surround_node(force=True)
+        self.box.graphicsManager.update_selection_boxes()
+        wx.CallAfter(wx.GetApp().selection_refresh)
+        if self.dragfunc == self.box.on_rotate:
+            self.box.on_rotate_end()
+        else:
+            self.box.on_scale_end()
+        self.dragfunc = None
 
     def on_drag(self):
         self.dragfunc( self)
+        
+    def on_press(self):
+        Director.scene.state.mouse_locked_by = self
         
     def on_release(self):
         Director.scene.state.mouse_locked_by = None

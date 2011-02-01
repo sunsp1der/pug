@@ -416,25 +416,13 @@ Start the scene running. Called after enter() and before state changes
 #        """register(node): a new node is joining scene. Do callbacks"""
         if _DEBUG: print "Scene.register_node:",node,self.started
         if self.started:
-            try:
-                func = getattr(node, 'on_added_to_scene')
-            except:
-                pass
-            else:
-                func()
-            try:
-                func = getattr(node,'on_first_display')
-            except:
-                pass
-            else:
-                func()
+            if hasattr(node, 'on_added_to_scene'):
+                node.on_added_to_scene()
+            if hasattr(node, 'on_first_display'):
+                node.on_first_display()
         elif getattr(PigDirector, 'editorMode', False):
-            try:
-                func = getattr(node, 'on_added_to_editor')
-            except:
-                pass
-            else:
-                func()
+            if hasattr(node, 'on_added_to_editor'):
+                node.on_added_to_editor()
         self.nodes[node] = self.__node_num
         self.__node_num += 1        
         
