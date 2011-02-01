@@ -7,6 +7,7 @@ import time
 import thread
 import sys
 import traceback
+from functools import partial
 
 import wx
 from wx.lib.dialogs import ScrolledMessageDialog
@@ -534,12 +535,28 @@ Callback from PugApp...
         """Open a pug window for selected object"""
         self.frame.open_selection_child()
         
-    def nudge(self, vector):
-        for obj in wx.GetApp().selectedObjectDict:
+    def nudge(self, vector, list=None):
+        """nudge(vector,list): Nudge objects by given vector.
+        
+vector: amount to move objects by
+list: a list of objects. If None, pug's list of selected objects will be used.
+"""
+        if list is None:
+            list = wx.GetApp().selectedObjectDict.keys()
+        do_fn = partial( self.do_nudge, vector, list)
+        undo_fn = partial( self.do_nudge, (vector[0]*-1, vector[1]*-1), list)
+        do_fn()
+        wx.GetApp().history.add("Nudge selection", undo_fn, do_fn, 
+                                ("nudge",list))
+
+    def do_nudge(self, vector, list=None):
+        if list is None:
+            list = wx.GetApp().selectedObjectDict.keys()
+        for obj in list:
             if hasattr(obj, 'position'):
                 obj.position = (obj.position[0] + vector[0], 
-                                obj.position[1] + vector[1])  
- 
+                                obj.position[1] + vector[1])
+                
     def _on_pug_quit(self):
         if getattr(self.project_settings,'save_settings_on_quit',True):
             self.project_settings.initial_scene = self.scene.__class__.__name__
@@ -910,10 +927,6 @@ position: move object to this position
                 wx.GetApp().Exit()
             except:
                 pass
-        except:
-            show_exception_dialog()
-            wx.GetApp().Exit()
-            raise
     
     def copy_selected(self):
         self.clipboard = {}
