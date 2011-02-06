@@ -30,29 +30,29 @@ class Fly_Around(Scene):
         SpawnWall_archetype.archetype = True
 
         # Sprites
-        pigsprite_instance = Sprite()
-        pigsprite_instance.layer = 'Background'
-        pigsprite_instance.position = (678.0, 547.0)
-        pigsprite_instance.components.add( Value_Tracker_Text() )
+        sprite_instance = Sprite()
+        sprite_instance.layer = 'Background'
+        sprite_instance.position = (678.0, 547.0)
+        sprite_instance.components.add( Value_Tracker_Text() )
 
-        pigsprite_instance_2 = Sprite()
-        pigsprite_instance_2.layer = 'Background'
-        pigsprite_instance_2.position = (678.0, 480.0)
-        pigsprite_instance_2.components.add( Value_Tracker_Text(
+        sprite_instance_2 = Sprite()
+        sprite_instance_2.layer = 'Background'
+        sprite_instance_2.position = (678.0, 480.0)
+        sprite_instance_2.components.add( Value_Tracker_Text(
                 prefix='Health: ',
                 value_name='health') )
 
-        pigsprite_instance_3 = Sprite()
-        pigsprite_instance_3.layer = 'Background'
-        pigsprite_instance_3.position = (678.0, 513.0)
-        pigsprite_instance_3.components.add( Value_Tracker_Text(
+        sprite_instance_3 = Sprite()
+        sprite_instance_3.layer = 'Background'
+        sprite_instance_3.position = (678.0, 513.0)
+        sprite_instance_3.components.add( Value_Tracker_Text(
                 prefix='Lives: ',
                 value_name='lives') )
 
-        pigsprite_instance_4 = Sprite()
-        pigsprite_instance_4.layer = 'Background'
-        pigsprite_instance_4.position = (20.0, 503.0)
-        pigsprite_instance_4.components.add( Textbox(
+        sprite_instance_4 = Sprite()
+        sprite_instance_4.layer = 'Background'
+        sprite_instance_4.position = (20.0, 503.0)
+        sprite_instance_4.components.add( Textbox(
                 text='Keys: W, A, S, D Mouse: Aim, Fire',
                 max_width=220) )
 

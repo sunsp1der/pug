@@ -10,6 +10,7 @@ import cOpioid2D as _c
 
 from pig.PigState import PigState
 from pig.util import is_shift_down, is_ctrl_down
+from pig.editor.util import save_scene, save_scene_as
 
 wx = wx
 Opioid2D = Opioid2D
@@ -40,7 +41,7 @@ class EditorState(PigState):
 
                         
     def handle_mousebuttondown(self, event):
-        if self.mouse_locked_by:
+        if self.mouse_locked_by or self.busy:
             return
         shiftDown = is_shift_down()
         ctrlDown = is_ctrl_down()
@@ -56,6 +57,8 @@ class EditorState(PigState):
                 wx.CallAfter(self.interface.set_selection,[])
         
     def handle_mousebuttonup(self, event):
+        if self.busy:
+            return
         try:
             selected = self.selectOnUp()
         except:
@@ -68,6 +71,8 @@ class EditorState(PigState):
         
     def handle_keydown(self, ev):
         # nudge keys
+        if self.busy:
+            return
         nudge = 1
         shiftDown = is_shift_down()
         ctrlDown = is_ctrl_down()
@@ -91,7 +96,9 @@ class EditorState(PigState):
                     deletelist.append(ref())
             undoable_delete_nodes(deletelist)
         elif ev.key == Opioid2D.K_s and ctrlDown:
-            wx.CallAfter(self.interface.save_using_working_scene)
+            wx.CallAfter(save_scene)
+        elif ev.key == Opioid2D.K_a and ctrlDown:
+            wx.CallAfter(save_scene_as)
         elif ev.key == Opioid2D.K_q and ctrlDown:
             wx.CallAfter(self.interface.quit)
         elif ev.key == Opioid2D.K_w and ctrlDown:

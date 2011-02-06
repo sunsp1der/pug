@@ -18,17 +18,17 @@ class Dragon(Scene):
         DragonBreath_archetype.archetype = True
 
         # Sprites
-        pigsprite_instance = Sprite()
-        pigsprite_instance.image = 'art/cloudscape 1b.jpg'
-        pigsprite_instance.layer = 'Background'
-        pigsprite_instance.position = (400.0, 300.0)
-        pigsprite_instance.scale = (1.3, 1.5)
+        sprite_instance = Sprite()
+        sprite_instance.image = 'art/cloudscape 1b.jpg'
+        sprite_instance.layer = 'Background'
+        sprite_instance.position = (400.0, 300.0)
+        sprite_instance.scale = (1.3, 1.5)
 
-        pigsprite_instance_2 = Sprite()
-        pigsprite_instance_2.layer = 'Sky'
-        pigsprite_instance_2.position = (12.0, 544.0)
-        pigsprite_instance_2.tint = (0, 0, 0)
-        pigsprite_instance_2.components.add( Textbox(
+        sprite_instance_2 = Sprite()
+        sprite_instance_2.layer = 'Sky'
+        sprite_instance_2.position = (12.0, 544.0)
+        sprite_instance_2.tint = (0, 0, 0)
+        sprite_instance_2.components.add( Textbox(
                 text='Keys: I, J, K, L, Space') )
 
         RedDragon_instance = RedDragon(gname='RedDragon')

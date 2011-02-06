@@ -6,7 +6,7 @@ import wx.lib.buttons as buttons
 import Opioid2D
 
 from pug import Filename
-from pug.util import get_image_path, standardize_filename
+from pug.util import get_image_path, standardize_path
 from pug.syswx.wxconstants import *
 
 from pig.audio import get_sound

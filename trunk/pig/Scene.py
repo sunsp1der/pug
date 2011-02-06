@@ -20,9 +20,9 @@ from pug.code_storage import add_subclass_storageDict_key
 from pug.util import make_valid_attr_name, start_edit_process
 
 from pig.PauseState import PauseState
-from pig.util import entered_scene
 from pig.editor.agui import SceneNodes, SceneLayers
-from pig.editor.util import get_scene_layers, save_object, exporter_cleanup
+from pig.editor.util import get_scene_layers, save_object, exporter_cleanup,\
+                            entered_scene
 from pig.keyboard import keys, keymods
 from pig.PigDirector import PigDirector
 from pig.gamedata import create_gamedata, get_gamedata
@@ -604,8 +604,9 @@ If scene is a working scene, return
             import wx
             wx = wx
             interface = wx.GetApp().get_project_object()
-            filename = interface.commit_scene()
-            if not filename or Opioid2D.Director.scene.__class__ == Scene:
+            saved = interface.check_save(message="Scene has changed.\n"+\
+                                         "Save scene before viewing code?")
+            if Opioid2D.Director.scene.__class__ == Scene:
                 errorDlg = wx.MessageDialog( wx.GetApp().get_project_frame(),
                        "Your scene must be saved before viewing source.",
                        "Save Scene First",
@@ -614,8 +615,6 @@ If scene is a working scene, return
                 errorDlg.Destroy() 
                 return
             file = pug.BaseObject._get_source_code(self)
-            if os.path.split(file)[1] == '__Working__.py':
-                file = os.path.join(os.path.split(file)[0], filename)
             return file
         else:
             return pug.BaseObject._get_source_code(self)

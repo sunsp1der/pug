@@ -1,6 +1,6 @@
 """components.py - component viewer attribute gui"""
 
-import gc
+from functools import partial
 
 import wx
 import wx.lib.buttons as buttons
@@ -13,7 +13,7 @@ from pug.syswx.agui_label_sizer import AguiLabelSizer
 from pug.syswx.component_helpers import ComponentAddTree, ComponentList
 from pug.syswx.attributeguis.base import Base
 from pug.syswx.component_browser import ComponentAddDlg
-from pug.syswx.util import show_exception_dialog
+from pug.syswx.util import show_exception_dialog, close_obj_windows
 
 # TODO: make it fold up everything beneath it
 
@@ -159,21 +159,37 @@ For kwargs optional arguments, see the Base attribute GUI
         if component:
             try:
                 dlg.browser.tree.AddRecent(component)
-                instance = self.object.components.add(component)
+                instance = self.object.components.add(component)                
+                do_fn = partial( self.object.components.add, instance)
+                undo_fn = partial( remove_component, self.object, instance)
+                if self.aguidata['undo']:
+                    wx.GetApp().history.add(
+                                        "Add component: " + component.__name__,
+                                        undo_fn, do_fn)
                 self.editList.component_added(instance)
                 self.window.refresh()
                 self.edit_button_click()
             except:
                 show_exception_dialog()
         dlg.Destroy()
-        
+                
+    def refresh(self, event=None):
+        component = self.editList.get_selected()
+        if component not in self.object.components.get():
+            self.editList.component_removed()
+                
     def remove_button_click(self, event=None):
         component = self.editList.get_selected()
         if not component:
             return
-        self.object.components.remove(component)
+        do_fn = partial( remove_component, self.object, component)
+        undo_fn = partial( self.object.components.add, component)
+        do_fn()
+        if self.aguidata['undo']:
+            wx.GetApp().history.add(
+                                "Delete component: " + self.editList.get_text(),    
+                                undo_fn, do_fn)
         self.editList.component_removed()
-        wx.CallAfter(gc.collect)
         self.window.refresh()
 
     def edit_button_click(self, event=None):
@@ -214,6 +230,7 @@ For kwargs optional arguments, see the Base attribute GUI
             else:
                 y = 0
             frame.SetPosition((x,y))
+            self.window.refresh()
             frame.Show()
         
     def open_browser(self, event=None):
@@ -227,3 +244,6 @@ For kwargs optional arguments, see the Base attribute GUI
                 self.addTree.SelectItem(item)
         browser.Destroy()
         
+def remove_component( object, component):
+    object.components.remove(component)
+    close_obj_windows(component)

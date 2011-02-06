@@ -11,13 +11,13 @@ from pug.CallbackWeakKeyDictionary import CallbackWeakKeyDictionary
 from pug.code_storage import add_subclass_storageDict_key
 from pug.code_storage.constants import _INDENT, _PRETTIFY_FLOATS
 from pug.util import make_valid_attr_name, prettify_path, prettify_float,\
-                        start_edit_process, destandardize_filename,\
-                        standardize_filename
+                        start_edit_process, destandardize_path,\
+                        standardize_path
 
 from pig.PigDirector import PigDirector
 from pig.editor.util import get_scene_layers, save_object, \
                                 exporter_cleanup, _fl_art_types
-from pig.editor.agui.pig_image_browser import PigImageBrowser                             
+from pig.editor.agui import PigImageBrowser                             
 from pig.gamedata import get_gamedata
 
 _DEBUG = False
@@ -58,6 +58,8 @@ Opioid2d Sprite with features for use with pug"""
         if register:
             self.scene_register()
         self.initialized = True
+        if self._init_image:
+            self._image_file = self._init_image
             
     def on_create(self):
         pass
@@ -151,7 +153,8 @@ if TF is "True" set archetype to True, but don't create default name
         try:
             OpioidSprite.set_image( self, image)
         except:
-            OpioidSprite.set_image( self, destandardize_filename(image))
+            image = destandardize_path(image)
+            OpioidSprite.set_image( self, image)
         if isinstance(image, basestring):
             self._image_file = image
 
@@ -165,13 +168,6 @@ if TF is "True" set archetype to True, but don't create default name
             (Delay(0) + CallFunc(OpioidSprite.set_image, self, file)).do() 
     
     def get_image_file(self):
-        # TODO: find a way to actually look up this filename in the image
-        if self._image_file is None:
-            try:
-                image = self.get_image()._key[0]
-                self._image_file = image._key[0]
-            except:
-                self._image_file = self._init_image
         return self._image_file
         # the following line had problems on windows:
         #     OpioidSprite.set_image(self,image)
@@ -387,7 +383,7 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
         if storageDict['as_class']:
             if not dummy or dummy.image_file != self.image_file:
                 custom_code += [baseIndent, _INDENT, 'image = ', 
-                                repr(standardize_filename(
+                                repr(standardize_path(
                                     prettify_path(self.image_file))),'\n']
             if not dummy or dummy.layer_name != self.layer_name:
                 custom_code += [baseIndent, _INDENT, 'layer = ', 
@@ -400,7 +396,7 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
             name = storage_name
             if not dummy or dummy.image_file != self.image_file:
                 custom_code += [baseIndent, name, '.image = ', 
-                                repr(standardize_filename(
+                                repr(standardize_path(
                                     prettify_path(self.image_file))),'\n']
             if not dummy or dummy.layer_name != self.layer_name:
                 custom_code += [baseIndent, name, '.layer = ', 

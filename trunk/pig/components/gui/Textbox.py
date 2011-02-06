@@ -8,8 +8,10 @@ from Opioid2D.public.Node import Node
 
 from pug import Filename
 from pug.component import *
+from pug.util import standardize_path, destandardize_path
 
 from pig.components import SpriteComponent
+from pig.editor.agui import PigImageBrowser
 
 class Textbox(SpriteComponent):
     "Create text for this object's image"
@@ -26,7 +28,9 @@ class Textbox(SpriteComponent):
             ['hotspot','Relative coordinates of image hotspot. (0,0)=top-left,'+
                         ' (1,1)=bottom-right'],
             ['cache_images','Cache all text images created. '+
-                            'This is faster but uses more memory.']
+                            'This is faster but uses more memory.'],
+            ['old_image', PigImageBrowser, 
+                    {'doc': 'Image to return to if this component is removed'}]
             ]
     # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = [
@@ -40,6 +44,7 @@ class Textbox(SpriteComponent):
     _max_width = None
     _font_size = 32
     cache_images = False
+    old_image = None
     
     font = None
     action = None
@@ -87,7 +92,7 @@ class Textbox(SpriteComponent):
             try:
                 self.owner.set_image( image)     
             except:
-                self.owner.image_file = "art/pug.png"
+                self.restore_old_image()
             else:
                 self.owner.image_file = None
             if getattr(Opioid2D.Director, "viewing_in_editor", False):
@@ -140,7 +145,7 @@ class Textbox(SpriteComponent):
             font_size = self._font_size
         else:
             self._font_size = font_size
-        font_info = (font_file, self._font_size)
+        font_info = (destandardize_path(font_file), self._font_size)
         try:
             self.font = self.font_cache[font_info]
         except KeyError:
@@ -159,26 +164,41 @@ class Textbox(SpriteComponent):
     @component_method
     def on_added_to_scene(self):
         """Show text when object is added to scene"""
-        try:    
-            self.owner.image = None
-        except:
-            pass
+        if self.old_image is None:
+            try:    
+                self.old_image = standardize_path(self.owner.image_file)
+            except:
+                pass
+        self.owner.image = None
         self.set_text()
         
     @component_method
     def on_added_to_editor(self):
         """Show text when object or component is added to editor"""
         Textbox.on_added_to_scene( self) 
+        # force use of textbox to allow others to override
     
     def on_added_to_object(self):
         """Show text when component is added to object"""
         Textbox.on_added_to_scene( self)
+        # force use of textbox to allow others to override
         
     def on_removed_from_object(self):
-        self.owner.set_image_file("art/pug.png")
+        self.restore_old_image()
+    
+    def restore_old_image(self):
+        if not self.owner:
+            return
+        if self.old_image:
+            try:
+                self.owner.set_image_file( self.old_image)
+            except:
+                self.owner.set_image_file("art/pug.png")
+        else:
+            self.owner.set_image_file("art/pug.png")
         if getattr(Opioid2D.Director, "viewing_in_editor", False):
             import wx
-            wx.GetApp().refresh()
+            wx.CallAfter(wx.GetApp().refresh)
         
     def __init__(self, *a, **kw):
         if self.__class__.font is None:
@@ -187,7 +207,7 @@ class Textbox(SpriteComponent):
                 defaultfont = os.path.join("art","accid___.ttf")
                 self.__class__.font = font.Font(defaultfont,
                                                 self.__class__._font_size)
-                self.__class__._font_file = defaultfont
+                self.__class__._font_file = standardize_path(defaultfont)
             except:
                 self.__class__.font = font.Font(None, 
                                                 self.__class__._font_size)

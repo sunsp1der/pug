@@ -12,17 +12,17 @@ class Intro(Scene):
                 next_scene='MenuScreen') )
 
         # Sprites
-        pigsprite_instance = Sprite()
-        pigsprite_instance.image = 'art/pug.png'
-        pigsprite_instance.layer = 'Background'
-        pigsprite_instance.position = (400.0, 300.0)
-        pigsprite_instance.scale = (6.0, 6.0)
-        pigsprite_instance.components.add( Grow_Shrink(
+        sprite_instance = Sprite()
+        sprite_instance.image = 'art/pug.png'
+        sprite_instance.layer = 'Background'
+        sprite_instance.position = (400.0, 300.0)
+        sprite_instance.scale = (6.0, 6.0)
+        sprite_instance.components.add( Grow_Shrink(
                 grow_in_secs=2.0,
                 shrink_out_secs=-1.0) )
-        pigsprite_instance.components.add( Fade(
+        sprite_instance.components.add( Fade(
                 fade_in_secs=-1.0,
                 fade_out_secs=1.0) )
-        pigsprite_instance.components.add( Self_Destruct(
+        sprite_instance.components.add( Self_Destruct(
                 timer_secs=1.0) )
 ### End Intro autocode ###

@@ -63,7 +63,7 @@ This component gives the base object a new callback:
         if self.owner.archetype and self.spawn_archetype and \
                 getattr(PigDirector, 'start_project', False):
             # set up original lives
-            self.owner.__class__()
+            (Delay(0) + CallFunc(self.owner.__class__)).do()
                                              
     @component_method
     def on_respawn(self):

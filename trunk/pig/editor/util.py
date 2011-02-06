@@ -57,7 +57,7 @@ def get_scene_layers():
     except:
         return []
     
-def _hide_nodes( nodelist):
+def hide_nodes( nodelist):
     for node in nodelist:
         wx.CallAfter(close_obj_windows, node)
         node.__old_color = node.color
@@ -67,7 +67,7 @@ def _hide_nodes( nodelist):
     
 def undoable_delete_nodes( nodelist):
     undo_fn = partial(undelete_nodes, nodelist)
-    do_fn = partial(_hide_nodes, nodelist)
+    do_fn = partial(hide_nodes, nodelist)
     do_fn()
     wx.GetApp().history.add("Delete node", undo_fn, do_fn)
 
@@ -335,14 +335,22 @@ def wait_for_exit_scene():
         timer += 1
         if timer > 50:
             raise ValueError("Pug unable to exit scene")
-    time.sleep(0.05)         
+    time.sleep(0.05)        
     
-def close_scene_windows( scene=None):
-    """close_scene_windows( scene=None)
+def entered_scene():
+    """entered_scene(): Try to update editor scene window"""
+    import wx
+    frame = wx.FindWindowByName("SceneFrame") #@UndefinedVariable
+    if frame:
+        frame.set_object(PigDirector.scene, title="Scene")     
+    
+def get_scene_windows( scene=None):
+    """get_scene_windows( scene=None)
     
 Close all scene and node windows belonging to current scene
 Note: for this to work on nodes, it must be run BEFORE the scene is changed.    
 """
+    windows = []
     if scene == None:
         scene = PigDirector.scene
     app = wx.GetApp()
@@ -363,22 +371,22 @@ Note: for this to work on nodes, it must be run BEFORE the scene is changed.
                 frameObj = frame.pugWindow.objectRef()
             except:
                 continue
-        doclose = False
+        is_scene = False
         if frameObj == scene:
-            doclose = True
+            is_scene = True
         elif isinstance(frameObj, Node):
             try:
                 nodescene = frameObj.layer._scene
             except:
                 nodescene = 0
             if nodescene == scene:
-                doclose = True
+                is_scene = True
         elif isinstance(frameObj, Component):
-            if _DEBUG: print "close_scene_windows: Componentframe"
+            if _DEBUG: print "get_scene_windows: Componentframe"
             if _DEBUG: print "   frameObj:", frameObj
             if _DEBUG: print "   owner:", frameObj.owner
             if not frameObj.owner or frameObj.owner == scene:
-                doclose = True
+                is_scene = True
             else:
                 if isinstance(frameObj.owner, Node):
                     try:
@@ -387,9 +395,10 @@ Note: for this to work on nodes, it must be run BEFORE the scene is changed.
                         nodescene = scene
                     if _DEBUG: print "   scene:", nodescene
                     if nodescene == scene:
-                        doclose = True
-        if doclose:
-            frame.Close()    
+                        is_scene = True
+        if is_scene:
+            windows.append(frame)
+    return windows
         
 def exporter_cleanup( exporter):
     # delete dummies from Opioid scene

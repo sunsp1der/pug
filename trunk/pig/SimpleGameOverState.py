@@ -22,7 +22,7 @@ unpause_keys: list of keys that cause unpause. [] means any key
         from pig.util import get_display_center
         PauseState.enter( self, unpause_keys=unpause_keys)
         backSprite = Sprite()
-        backSprite.set_image('art\block.png')
+        backSprite.set_image('art/block.png')
         backSprite.color = (0, 0, 0, 0.8)
         backSprite.set_layer('__pause__')
         gameOverSprite = Sprite()

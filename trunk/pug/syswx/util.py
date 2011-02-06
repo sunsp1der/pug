@@ -111,3 +111,38 @@ def cache_default_view( obj):
     except:
         pass
         
+
+def close_obj_windows( obj):
+    """close_obj_windows( obj)
+    
+Close all windows showing obj and windows for all components belonging to it.
+"""
+    from pug.component import Component
+    app = wx.GetApp()
+    for frame in app.objFrameDict:
+        if hasattr(frame,'pug_view_key'):
+            try:
+                frameObj = frame.pug_view_key[0]()
+            except:
+                continue
+        elif not hasattr(frame,'pugWindow'):
+            continue
+        else:
+            if not bool(frame):
+                continue
+            try:
+                frameObj = frame.pugWindow.objectRef()
+            except:
+                continue
+        doclose = False
+        if frameObj == obj:
+            doclose = True
+        elif isinstance(frameObj, Component):
+            if frameObj.owner == obj:
+                doclose = True
+        if doclose:
+            frame.Close()
+    if obj in app.selectedObjectDict:
+        selection = app.selectedObjectDict.keys()
+        selection.remove(obj)
+        app.set_selection(selection)

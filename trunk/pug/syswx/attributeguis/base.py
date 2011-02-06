@@ -32,6 +32,8 @@ aguidata: dictionary of special agui information. Can be customized for specific
         'refresh_all': When attribute changes, refresh pug view. Default: True.
         'wait_for_set': Wait for confirmation when setting attribute. 
                         Default:True
+        'undo': Register changes in attribute with undo/redo history.
+                    Default: True
         
 control_widget: the widget used for input, usually defined by derived classes. 
 label_widget: widget used for label. For compatibility, this control should have
@@ -114,6 +116,7 @@ all controls.
         aguidata.setdefault('read_only',False)
         aguidata.setdefault('refresh_all', True)
         aguidata.setdefault('wait_for_set', True)
+        aguidata.setdefault('undo', True)
         #label
         if hasattr(self.label, 'textCtrl'):
             labelText = aguidata.get('label', 
@@ -206,29 +209,31 @@ When auto apply is off, skip apply events that were created by the event system
 """
         # when auto apply is off, skip apply events that were created by the 
         # event system
+        if self.applying:
+            return
+        self.applying = True
         if not self.window.settings['auto_apply'] and event:
+            self.applying = False
             return False
         # see if we even need to do anything
         try:
             control_value = self.get_control_value()
         except:
+            self.applying = False
             return False
         attribute_value = self.get_attribute_value()
         if attribute_value == control_value:
             # no need to set... effectively, our work is done successfully
+            self.applying = False
             return True
         # we need to set, but make sure attribute is not readonly
         if self.aguidata['read_only']:
             # this creates a loop by changing focus automatically
-            if self.applying:
-                return
-            self.applying = True
             retDlg = wx.MessageDialog(self.control, 
                               ''.join([self.attribute,
                                        ' cannot be editted via gui']), 
                                'Read Only', wx.OK)
             retDlg.ShowModal() 
-            self.applying = False
             retDlg.Destroy()          
             applied = False   
         else:                
@@ -257,6 +262,7 @@ When auto apply is off, skip apply events that were created by the event system
         else:
             # bad apply... just revert
             self.refresh()  
+        self.applying = False
         return applied
 
     def get_control_value(self):
@@ -288,10 +294,11 @@ pug registers with its undo system. For info, see pug.history_manager.
         except:
             return False
         else:
-            wx.GetApp().history.add(
-                                "Set "+self.window.shortPath+" "+self.attribute, 
-                                undo_fn, do_fn, 
-                                (self.window.object, self.attribute))
+            if self.aguidata['undo']:
+                wx.GetApp().history.add(
+                            "Set "+self.attribute+" of "+self.window.shortPath, 
+                            undo_fn, do_fn, 
+                            (self.window.object, self.attribute))
             return True
                 
     def refresh_window(self):

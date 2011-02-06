@@ -4,6 +4,7 @@ import wx
 import wx.lib.scrolledpanel as scrolled
 import wx.richtext as rt
 
+from pug.util import prettify_data
 from pug.syswx.component_helpers import ComponentTreeCtrl
 from pug.syswx.util import get_icon
 from pug.component import component_method, Component
@@ -59,7 +60,9 @@ start_component: start with view of this component
         if self.browser.tree.GetSelection():
             self.finalize()
             if self.component:
-                self.EndModal( wx.ID_OK)    
+                self.EndModal( wx.ID_OK)
+        else:
+            event.Skip()
         
     def on_add(self, event):
         self.finalize()
@@ -189,10 +192,10 @@ A basic text display of a components features...
             for item in component._field_list:
                 textlist = []
                 textlist+=['\n',item[0],': (Default=']
-                textlist+=[repr(getattr(dummy, item[0])),')']
+                textlist+=[prettify_data(getattr(dummy, item[0])),')']
                 if instance:
                     textlist+=[' (Current=']
-                    textlist+=[repr(getattr(instance, item[0])),')']
+                    textlist+=[prettify_data(getattr(instance, item[0])),')']
                 text=''.join(textlist)
                 text = wx.StaticText(self, -1, text)
                 self.infosizer.Add(text,0,wx.WEST,15)
@@ -265,6 +268,8 @@ tree on the left and info on the right.
                     label = label + ' (' + component.gname + ')'               
                 item = self.current.Insert(label, 0, component)
             sizer.Add(self.current, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, border=4)
+        else:
+            self.current = None
         # right
         infowin = ComponentInfoWin(self)
         self.infowin = infowin
@@ -288,9 +293,10 @@ tree on the left and info on the right.
                 self.currentItem = item
                 self.currentComponent = self.tree.GetItemPyData(item)
                 self.infowin.display_component( self.currentComponent)
-                self.current.SetSelection( -1)
-            else:      
-                if self.current.GetSelection() == -1:
+                if self.current:
+                    self.current.SetSelection( -1)
+            else:   
+                if self.current and self.current.GetSelection() == -1:
                     self.infowin.display_component( None)
                 self.tree.UnselectAll()
         evt.Skip()
