@@ -712,10 +712,10 @@ Automatically calls on_<setting>(val, event) callback.
         if not skip_source or not skip_shell:
             parent.AppendSeparator()
         if not skip_source:  
-            parent.Append(help="&View object's source file", 
+            parent.Append(help="View object's source file", 
                    id=_TOOL_VIEWSOURCE, text=u'View source &code\tCtrl+U')
         if not skip_shell:
-            parent.Append(help="&Open a python shell for this object",
+            parent.Append(help="Open a python shell for this object",
                       id=_TOOL_SHELL, text=u'Open &shell\tCtrl+P')      
 
     def save_object_state(self, event=None):

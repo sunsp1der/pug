@@ -19,7 +19,6 @@ from pug.syswx.util import show_exception_dialog
 
 from pig.util import get_available_scenes, get_available_objects
 from pig.PigDirector import PigDirector
-from pig.editor.EditorState import EditorState
 
 _DEBUG = False #
 
@@ -209,6 +208,8 @@ def archetype_changed( archetype, oldclass, archetype_exporter=None):
 def save_scene():
     """Save scene to disk"""
     name = PigDirector.scene.__class__.__name__ #@UndefinedVariable
+    if name == "Scene":
+        name = None
     return save_scene_as(name)
         
 def save_scene_as( sceneName=None, fileName=None):#, parentWindow=None):
@@ -307,7 +308,8 @@ parentWindow: the parent window of name dialog. If not provided, the
     else:
         if _DEBUG: print "util: save_scene_as 7"        
         sceneDict = get_available_scenes(True)
-        PigDirector.scene.__class__ = sceneDict[sceneName]
+        if '__Working__' not in path:
+            PigDirector.scene.__class__ = sceneDict[sceneName]
         saved = True
         if _DEBUG: print "util: save_scene_as 8"        
     finally:
@@ -315,7 +317,8 @@ parentWindow: the parent window of name dialog. If not provided, the
         wx.EndBusyCursor()        
         if PigDirector.scene != oldscene:
             wx.GetApp().set_selection([])
-            if _DEBUG: print "util: save_scene_as reset select:", selection        
+            if _DEBUG: print "util: save_scene_as reset select:", selection
+        from pig.editor.EditorState import EditorState
         wait_for_state(EditorState)
         if _DEBUG: print "util: save_scene_as 10"                
         wx.GetApp().refresh()

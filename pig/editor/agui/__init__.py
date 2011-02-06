@@ -7,3 +7,4 @@ from pig.editor.agui.key_dropdown import KeyDropdown
 from pig.editor.agui.objects_dropdown import ObjectsDropdown
 from pig.editor.agui.scenes_dropdown import ScenesDropdown
 from pig.editor.agui.sound_file import SoundFile
+from pig.editor.agui.pig_image_browser import PigImageBrowser

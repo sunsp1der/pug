@@ -18,18 +18,18 @@ class Flower(Scene):
         LetterPetal_archetype.archetype = True
 
         # Sprites
-        pigsprite_instance = Sprite()
-        pigsprite_instance.image = 'art/pug.png'
-        pigsprite_instance.layer = 'Background'
-        pigsprite_instance.position = (400.0, 300.0)
-        pigsprite_instance.alpha = 0.0
-        pigsprite_instance.components.add( Key_Spawn(
+        sprite_instance = Sprite()
+        sprite_instance.image = 'art/pug.png'
+        sprite_instance.layer = 'Background'
+        sprite_instance.position = (400.0, 300.0)
+        sprite_instance.alpha = 0.0
+        sprite_instance.components.add( Key_Spawn(
                 gname='spawner',
                 spawn_object='LetterPetal',
                 spawn_interval=0.2) )
-        pigsprite_instance.components.add( Spawn_Flower(
+        sprite_instance.components.add( Spawn_Flower(
                 gname='flower') )
-        pigsprite_instance.components.add( Spawned_Component_Change(
+        sprite_instance.components.add( Spawned_Component_Change(
                 gname='key_shifter',
                 component_name='symbol',
                 attribute='text',

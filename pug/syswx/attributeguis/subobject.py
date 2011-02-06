@@ -181,8 +181,9 @@ simple objects that contain a few values within them (i.e. X and Y)
                                object,
                                self.aguidata['sub_attributes'][:],
                                current_val)
-            wx.GetApp().history.add(
-                            "Set "+self.window.shortPath+" "+self.attribute, 
+            if self.aguidata['undo']:
+                wx.GetApp().history.add(
+                            "Set "+self.attribute+" of "+self.window.shortPath, 
                             undo_fn, do_fn, 
                             (self.window.object, self.attribute))            
             return True

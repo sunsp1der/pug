@@ -1,20 +1,4 @@
 todo:
-	Undo! - save query when changing levels or quitting
-X		undo-unit('descr',fn,(*olda,**oldkw),(*newa,**newkw))
-X		limit to history_manager.MAX_UNDOS entries
-X		mark system for multiple undo
-x			small undo to break up multiple undo
-			nudging
-			dragging
-			scaling
-			rotating
-X			same attribute over and over
-		delete sprite
-			store layer, call delete 
-			to undelete return layer, reregister with scene
-		delete component
-			remove from object
-			to undelete simply re-add
 	keyboard sticking in julian's game
 		keep array of pressed keys in director
 		no key down when key is down
@@ -127,10 +111,6 @@ later:
 	#TODO: integer agui (with spinners?)
 		derive from generic
 		range
-	#TODO: float agui
-		derive from generic
-		limit float precision output
-		range
 	make progress bar move during load
 		loading window... update by percentage in postinit
 	add component label
@@ -143,7 +123,6 @@ later:
 		has_duplicate_of(comp, check_label=True)
 		use gname?
 		find_by_label
-	open console window
 	font size for scene class
 	make opioid not respond during modal stuff
 	make objects imports absolute
@@ -158,13 +137,10 @@ later:
 		by type
 		by package
 	make very simple editor interface... 
-		ctrl-c, ctrl-v, ctrl-x, delete (on scenegraph too... maybe pass off)
 		grid and snap-to
-	make subobjects work for code storage... move components to end
 	code_storage list ala templates... no functionality in object
 	app = showPugFrame/getPugFrame should return lists
 	log all exceptions that are glossed over by automation
-	refactor scene and object dict into utils, only store strings in dropdowns
 	auto-refresh -- leave the attribute being editted alone
 	particles
 	list agui
@@ -187,7 +163,6 @@ useability:
 		refactor get_storage_info... totally unneccessary
 		derive class from CodeStorageExporter instead of customfunc
 	allow template to specify 'persist' so as not to use proxies
-	allow Routine aguidict 'argstring' instead of arguments
 	add refresh object option to pug view - to refresh actual puglist
 	make subobject subobject_small and subobject show ala components
 	list,dictionary,and tuple attribute guis can also work like components

@@ -230,16 +230,16 @@ like pugframe titles...
             simplename = objectpath     
     return simplename           
 
-def standardize_filename( filename):
-    """standardize_filename( filename)->filename with '/' as path separator
+def standardize_path( filename):
+    """standardize_path( filename)->filename with '/' as path separator
     
 WARNING: Characters that are illegal in other operating systems will be not be
 removed.
 """
     return filename.replace(os.path.sep, "/")
 
-def destandardize_filename( filename):
-    "destandardize_filename( filename)->convert all '/' to os.path.sep"
+def destandardize_path( filename):
+    "destandardize_path( filename)->convert all '/' to os.path.sep"
     return filename.replace("/", os.path.sep)
 
 def prettify_float( val, precision=3):
@@ -291,10 +291,7 @@ Prettify various data including floats, -0.0 etc."""
             end = ")"
         items = []
         for item in val:
-            if type(item) == float:
-                items.append( prettify_float(item, precision))
-            else:
-                items.append( repr(item))
+            items.append( prettify_data(item, precision))
         output += ", ".join(items) + end
     elif _PRETTIFY_FLOATS and type(val) == float:
         # prettify floats

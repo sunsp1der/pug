@@ -109,18 +109,29 @@ def newrun(initialScene, *args, **kw):
         ticker = cD.GetTicker()
         old_ticks = now
         self.now = now
-        
+        self.switch_scene = None
         # Preload Image subclasses that have been imported and that
         # contain the preload flag.
         for img in ImageMeta.subclasses:
             if img.preload:
                 ResourceManager.get_image(img)
-                
         while self._running:
             # Trigger possible scene change at the beginning of a new frame
             if self.next_scene is not None:
+                scene = None
                 self._change_scene()
-            
+            if self.switch_scene is not None:
+                scene = None
+                if isclass( self.switch_scene):
+                    self._scene = self.switch_scene()
+                else:
+                    self._scene = self.switch_scene
+                cD.SetScene( self._scene._cObj)
+                if isclass( self.switch_scene):
+                    self._scene.enter()
+                self.switch_scene = None
+                import wx
+                wx.CallAfter(wx.GetApp().refresh)
             # Time delta calculation
             ticks = get_ticks()
             self.delta = delta = min(ticks-old_ticks, 25) # limit the virtual clock to a max. advance of 25ms per frame

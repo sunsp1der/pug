@@ -37,7 +37,8 @@ class ComponentAddTree(wx.combo.ComboCtrl):
         if get_last_component_update() > self.lastTreeUpdate:
             self.allTreesNeedUpdate = get_last_component_update()
         
-        if self.treesNeedUpdate or self.allTreesNeedUpdate > self.lastTreeUpdate:
+        if self.treesNeedUpdate or \
+                                self.allTreesNeedUpdate > self.lastTreeUpdate:
             self.create_tree(self.__object)
 
             

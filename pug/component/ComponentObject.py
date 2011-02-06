@@ -158,13 +158,13 @@ If comp and gname are both None, return all components on the object.
             return b
 
     def remove(self, component):
+        component_list = self.__component_list
+        if component not in component_list.get_components():
+            return False
         try:
             component.on_removed_from_object()
         except:
             pass
-        component_list = self.__component_list
-        if component not in component_list.get_components():
-            return False
         component_list.remove(component)
         obj = self.__obj()
         original_methods = self.__original_methods

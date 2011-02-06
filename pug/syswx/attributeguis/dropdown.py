@@ -59,6 +59,8 @@ For kwargs optional arguments, see the Base attribute GUI
         Base.__init__(self, attribute, window, aguidata, **kwargs)
 
     def apply(self, event=None):
+        if self.applying:
+            return
         self.applying = True
         self.item_selected()
         self.applying = False

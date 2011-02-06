@@ -74,8 +74,9 @@ Try to set the aguis attribute to the value shown in the control
             except:
                 return False
             else:
-                wx.GetApp().history.add(
-                            "Set "+self.window.shortPath+" "+self.attribute, 
+                if self.aguidata['undo']:
+                    wx.GetApp().history.add(
+                            "Set "+self.attribute+" of "+self.window.shortPath, 
                             undo_fn, do_fn, 
                             (self.window.object, self.attribute))
                 return True                  
@@ -103,8 +104,9 @@ Try to set the aguis attribute to the value shown in the control
             except:
                 return False
             else:
-                wx.GetApp().history.add(
-                            "Set "+self.window.shortPath+" "+self.attribute, 
+                if self.aguidata['undo']:
+                    wx.GetApp().history.add(
+                            "Set "+self.attribute+" of "+self.window.shortPath, 
                             undo_fn, do_fn, 
                             (self.window.object, self.attribute))
                 return True        

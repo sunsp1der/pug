@@ -43,6 +43,7 @@ projectFolder: where file menus start at.  Defaults to current working dir.
     settings = object()
     projectFrame = None
     _code_editor = None
+    history = None
     def __init__(self, projectObject=None, projectObjectName='',
                  projectName='PUG', projectFolder = "", redirect=False ):
         # global menus
@@ -60,10 +61,20 @@ projectFolder: where file menus start at.  Defaults to current working dir.
                      projectFolder)
         self.permanent_settings = ["Rect_Pug_Python_Editor", 
                                    "Rect_Component_Browser"]
-        self.history = HistoryManager()
+        self.reset_history()
         wx.App.__init__(self, redirect=redirect)
         #self.SetExitOnFrameDelete(False)
+        
+    def reset_history(self):
+        "reset_history(): Start a completely new history manager. Returns old"
+        history = self.history
+        self.history = HistoryManager()
+        return history
     
+    def restore_history(self, history):
+        "restore_history( history): reinstate an old history (from reset)"
+        self.history = history
+        
     def OnInit(self):
         self.splash = PugSplash() 
         self.SetTopWindow(self.splash)
@@ -591,12 +602,17 @@ settingsObj: any frame settings members will be replaced
             if hasattr(current_win,"_on_raise_all_frames"):
                 current_win._on_raise_all_frames()
             current_win.Raise()
-            
+
+    is_refreshing = False # soda?            
     def refresh(self, event=None):
+        if self.is_refreshing:
+            return
+        self.is_refreshing = True
         windows = wx.GetTopLevelWindows()
         for frame in windows:
             if hasattr( frame, 'refresh'):
-                frame.refresh()            
+                frame.refresh()  
+        self.is_refreshing = False          
             
     def apply(self, event=None):
         windows = wx.GetTopLevelWindows()

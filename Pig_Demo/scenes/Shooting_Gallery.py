@@ -44,19 +44,19 @@ class Shooting_Gallery(Scene):
 
         cannon_instance = Cannon()
 
-        pigsprite_instance = Sprite()
-        pigsprite_instance.layer = 'Background'
-        pigsprite_instance.position = (666.0, 537.0)
-        pigsprite_instance.components.add( Value_Tracker_Text() )
+        sprite_instance = Sprite()
+        sprite_instance.layer = 'Background'
+        sprite_instance.position = (666.0, 537.0)
+        sprite_instance.components.add( Value_Tracker_Text() )
 
-        pigsprite_instance_2 = Sprite()
-        pigsprite_instance_2.layer = 'Background'
-        pigsprite_instance_2.position = (667.0, 508.0)
-        pigsprite_instance_2.components.add( Timer_Text() )
+        sprite_instance_2 = Sprite()
+        sprite_instance_2.layer = 'Background'
+        sprite_instance_2.position = (667.0, 508.0)
+        sprite_instance_2.components.add( Timer_Text() )
 
-        pigsprite_instance_3 = Sprite()
-        pigsprite_instance_3.layer = 'Background'
-        pigsprite_instance_3.position = (19.0, 530.0)
-        pigsprite_instance_3.components.add( Textbox(
+        sprite_instance_3 = Sprite()
+        sprite_instance_3.layer = 'Background'
+        sprite_instance_3.position = (19.0, 530.0)
+        sprite_instance_3.components.add( Textbox(
                 text='Keys: J, L, Space') )
 ### End Shooting_Gallery autocode ###

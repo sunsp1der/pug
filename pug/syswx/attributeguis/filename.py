@@ -9,7 +9,7 @@ import wx.lib.buttons as buttons
 from pug.syswx.wxconstants import *
 from pug.syswx.attributeguis import Base
 from pug.syswx.agui_text_ctrl import AguiTextCtrl
-from pug.util import prettify_path, standardize_filename
+from pug.util import prettify_path, standardize_path
 
 #TODO: base imagebrowser agui on this
 
@@ -148,7 +148,7 @@ Uses a browser dialog to facilitate picking a graphics file
             if not folder:
                 folder = os.path.dirname(self.control.value)
                 val = ''.join(folder,file)
-            val = standardize_filename(val)
+            val = standardize_path(val)
             tooltip = val
         else:
             val = None

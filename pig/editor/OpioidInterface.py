@@ -30,15 +30,12 @@ from pug.syswx.drag_drop import FileDropTarget
 
 from pig import hacks, Scene, Sprite, Director, PauseState
 from pig.util import fix_project_path, set_project_path, save_project_settings,\
-        entered_scene, start_scene, get_gamedata, create_gamedata, \
+        start_scene, get_gamedata, create_gamedata, \
         get_display_center, skip_deprecated_warnings, set_opioid_window_position
 from pig.editor.StartScene import StartScene
 from pig.editor import EditorState
 from pig.editor.GraphicsManager import graphicsManager
-from pig.editor.util import get_image_path, get_project_path, test_scene_code,\
-        open_code_editor, on_drop_files, close_scene_windows, wait_for_state,\
-        get_available_objects, get_available_scenes, create_new_project,\
-        open_project, save_scene_as, wait_for_exit_scene, python_process
+from pig.editor.util import *
  
 _DEBUG = False
 
@@ -52,12 +49,13 @@ scene: the scene to load initially
     _pug_pugview_class = 'OpioidInterface'
     _scene = ''
     component_browser = None
-    _use_working_scene = True
+    _use_working_scene = False
     _new_scene = True
     _initialized = False
     _quitting = False
     canvas = None
     overlap_offset = (10,10)
+    edit_info = None # store info on scene being editted while playing
     def __init__(self, rootfile, scene=Scene):
         if _DEBUG: print "OpioidInterface.__init__"
         try:
@@ -124,13 +122,11 @@ scene: the scene to load initially
             except:
                 key = '*Error loading initial scene ('+initial_scene+')'                
                 code_exceptions[key] = sys.exc_info()
-                self.sceneclass = Scene
+                self.set_scene( Scene)
             else:
-                self.sceneclass = initial_scene
-                if self.sceneclass.__module__ == 'scenes.__Working__':
-                    self._new_scene = False
+                self.set_scene( initial_scene)
         else:
-            self.sceneclass = Scene
+            self.set_scene( Scene)
         
         # default menus
         if not self.__cached[2]:
@@ -142,10 +138,10 @@ scene: the scene to load initially
                  ["*DIVIDER*"],
                  ["&New Scene\tCtrl+N", [self.set_scene, ("Scene", True), {}],
                         "Create a new Scene"],
-                 ["&Save Working Scene\tCtrl+S", self.save_using_working_scene,
-                        "Save current scene in scenes/__Working__.py"],
-                 ["&Commit Scene\tShift+Ctrl+S", self.commit_scene,
-                        "Commit current scene into scenes folder"],
+                 ["&Save...\tCtrl+S", save_scene,
+                        "Save scene"],
+                 ["Save &As...\Ctrl+A", save_scene_as,
+                        "Save scene as"],
                  ["New &Object\tShift+Ctrl+N", self.add_object,
                         "Add the currently selected add object to the scene"],
                  ["*DIVIDER*"],
@@ -353,23 +349,15 @@ forceReload: if True, reload all scenes and objects first.
                 self.reload_scene_list()
                 value = self.sceneDict.get(value.__name__, value)
         oldscene = self.Director.scene
+#        _DEBUG = True
         if oldscene.__class__ != value or forceReload:
             if _DEBUG: print "OpioidInterface.set_scene", value
-#            try:
-#                print "set_scene 3.5"
-#                if value.__module__ == 'scenes.__Working__':
-#                    test_scene_code(value.__name__, '__Working__')
-#                else:
-#                    test_scene_code(value.__name__)
-#            except:
-#                print "set_scene 3.6"
-#                self.set_scene( Scene, forceReload=True)
-#                wx.GetApp().get_project_frame().refresh()
-#                show_exception_dialog( prefix='Unable to set scene: ')
-#                return
+            wx.GetApp().history.clear()
             self._new_scene = True
             self.set_selection([])
-            close_scene_windows(oldscene)
+            winlist = get_scene_windows(oldscene)
+            for win in winlist:
+                win.Close()
             self.stop_scene(False)
             # wait for completion
             starttime = time.time()
@@ -378,24 +366,53 @@ forceReload: if True, reload all scenes and objects first.
             if _DEBUG: print "set_scene 4"            
             while self.Director.scene.__class__ != value or \
                     self.Director.scene is oldscene:
-                if time.time() - starttime > 30:
+                if time.time() - starttime > 10:
                     dlg = wx.MessageDialog(None,''.join([value.__name__,
-                ' has taken over 30 seconds to load. \nContinue waiting?']),
+                ' has taken over 10 seconds to load. \nContinue waiting?']),
                 'Scene Load Time',wx.YES_NO)
                     if dlg.ShowModal() == wx.ID_NO:
-                        return
+                        self.set_scene( oldscene.__class__)
                     else:
                         starttime = time.time()
-                time.sleep(0.05)
+                time.sleep(0.5)
+                if _DEBUG: print "set_scene 5"
             time.sleep(0.05)
             if _DEBUG: print "set_scene 5"
             wait_for_state(EditorState)
             if _DEBUG: print "set_scene 6"
             entered_scene()
             wx.GetApp().refresh()
+
+    def reload_scene(self):
+        """Reload scene from version on disk"""
+        if _DEBUG: print 'reload_scene 1'
+        scene = self
+        self.stop_scene()
+        while wx.GetApp().busyState == True:
+            time.sleep(0.05)
+        if not self.check_save():
+            return        
+        if Director.scene.__class__ == Scene:
+            self.set_scene("Scene")
+            return
+        if _DEBUG: print 'reload_scene 2'
+        scenename = self.scene.__class__.__name__
+        try:
+            if _DEBUG: print 'reload_scene 3'
+            test_scene_code(scenename)
+        except:
+            if _DEBUG: print 'reload_scene 3.2'            
+            show_exception_dialog(prefix='Unable to reload scene: ')
+        else:
+            if _DEBUG: print 'reload_scene 3.5'    
+            self.set_scene(scenename, True)
+            if _DEBUG: print 'reload_scene 3.6'            
             
     def _set_sceneclass( self, val):
         self.stop_scene()
+        if not self.check_save():
+            # raising an exception cancels the change in editor
+            raise "sceneclass change declined by user"
         self.set_scene(val)            
     def _get_sceneclass(self):
         try:
@@ -412,26 +429,6 @@ forceReload: if True, reload all scenes and objects first.
         except:
             return None
     scene = property(_get_scene, doc="The scene object currently being editted")
-    
-    def reload_scene(self):
-        """Reload scene from version on disk"""
-        if _DEBUG: print 'reload_scene 1'
-        self.stop_scene(False)
-        if self.Director.scene.__class__ == Scene:
-            self.set_scene("Scene")
-            return
-        if _DEBUG: print 'reload_scene 2'
-        scenename = self.scene.__class__.__name__
-        try:
-            if _DEBUG: print 'reload_scene 3'
-            test_scene_code(scenename)
-        except:
-            if _DEBUG: print 'reload_scene 3.2'            
-            show_exception_dialog(prefix='Unable to reload scene: ')
-        else:
-            if _DEBUG: print 'reload_scene 3.4'            
-            self.revert_working_scene()
-            self.set_scene(scenename, True)
         
     def revert_working_scene(self):
         """copy scene file into __Working__ scene file"""
@@ -443,8 +440,7 @@ forceReload: if True, reload all scenes and objects first.
     
     def reload_scene_list(self, doReload=True, errors=None):
         """Load changes made to scene class files"""
-        self.sceneDict = get_available_scenes( doReload, self.use_working_scene,
-                                               errors=errors)
+        self.sceneDict = get_available_scenes( doReload, False, errors=errors)
 
     def reload_object_list(self, doReload=True, errors=None):
         """Load changes made to object class files"""
@@ -470,10 +466,9 @@ show_dialog: show a dialog displaying all file errors found
 save_reload: if True, save the working file before reloading project files, then
     reload the scene when done
 """
-        if save_reload and self.scene.__class__.__name__ not in ['Scene',
-                                                                 'Scene']:
-            if not self.save_using_working_scene():
-                save_reload = False
+        if save_reload:
+            if not self.check_save():
+                return
         if errors is None:
             errors = {}
         self.reload_components(doReload=doReload, errors=errors)
@@ -586,33 +581,9 @@ event: a wx.Event
 """
         if self._quitting:
             return
-        self._quitting = True 
-        dlg = wx.MessageDialog( self.frame,
-                       "Save Working Scene Before Quit?",
-                       'Project Frame Closed', 
-            wx.YES_NO | wx.CANCEL | wx.YES_DEFAULT | wx.ICON_QUESTION)
-        try:
-            self.frame.Raise()
-            self.frame.RequestUserAttention()
-        except:
-            pass
-        answer = dlg.ShowModal() 
-        if answer == wx.ID_YES:
-            self.do_stop_scene()
-            saved = self.save_using_working_scene()
-            if not saved:
-                dlg = wx.MessageDialog( self.frame,
-                       "The scene failed to save properly.\nShut down anyway?",
-                       'Save Failed', 
-                       wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-                continue_shutdown = dlg.ShowModal()
-                if continue_shutdown == wx.ID_NO:
-                    self._quitting = False
-                    return False
-        elif answer == wx.ID_CANCEL:
-            self._quitting = False
-            return False
-        return True
+        self.stop_scene()
+        self._quitting = self.check_save()
+        return self._quitting      
     
     def browse_components(self):
         """Open up a window showing all available components"""
@@ -636,76 +607,60 @@ event: a wx.Event
             show_exception_dialog()
             return
             
-    def _get_use_working_scene(self): 
-        return self._use_working_scene
-    def _set_use_working_scene(self, value):
-        if self._use_working_scene == value:
-            return
-        self._use_working_scene = value
-        self.reload_scene_list(True)
-        if value:
-            for cls in self.sceneDict.values():
-                if '__Working__' in cls.__module__:
-                    self.set_scene(cls)
-                    break
-        else:
-            if '__Working__' in self.Director.scene.__module__:
-                self.reload_scene()
-    use_working_scene = property(_get_use_working_scene, 
-                                   _set_use_working_scene, 
-                             doc="Using a working copy of the scene")
     def save_using_working_scene(self, event=None):
         """Save the current scene as scenes/__Working__.py"""
-        self.use_working_scene = True
-        scenename = self.scene.__class__.__name__ 
-        if _DEBUG: print "s0"
-        if scenename in ['Scene', 'Scene']:
-            # this is a new scene that hasn't been saved before
-            saved = save_scene_as()
-            if _DEBUG: print "s1",
-            if not saved:
-                if _DEBUG: print "s2",
-                return False
-            else:
-                if _DEBUG: print "s3",
-                self.sceneDict[self.Director.scene.__class__.__name__] = \
-                                                self.Director.scene.__class__
-                if _DEBUG: print "s4",
-            # we want to save as the new scene name AND as working scene...
-        if self._new_scene:
-            # hack in user code from original file
-            if _DEBUG: print "s5",
-            self.revert_working_scene()
-            self._new_scene = False
-            if _DEBUG: print "s6",            
-        # save the scene in __working__
-        if _DEBUG: print "s7",    
         saved = save_scene_as( self.scene.__class__.__name__, '__Working__.py')
-        if _DEBUG: print "s8",
         if not saved:
-            if _DEBUG: print "s9",
             return False
         else:
-            if _DEBUG: print "s10",
-            self.sceneDict[self.Director.scene.__class__.__name__] = \
-                                                self.Director.scene.__class__
-            if _DEBUG: print "s11",
+            self.sceneDict['__Working__'] = \
+                                        get_available_scenes()['__Working__']
         wx.GetApp().refresh()
-        if _DEBUG: print "s12",
         return True            
         
-    def commit_scene(self):
-        self.stop_scene()
-        filename = save_scene_as()
-        if _DEBUG: print "s13",
-        if filename:
-            if _DEBUG: print "s14",
-            self.revert_working_scene()
-            if _DEBUG: print "s15",
-            self.sceneDict[self.Director.scene.__class__.__name__] = \
-                                                self.Director.scene.__class__
-            if _DEBUG: print "s16",
-        return filename
+    def check_save( self, title=None, message=None, force=False):
+        """check_save( title=None, message=None, force=False)
+    
+If changes have been made to scene, offer to save. 
+Return values: True = continue without saving, False = cancel, filename = 
+    continue, saved as filename.
+title: title of window. Default = "Save Scene?"
+message: message of window. Default = "Changes that have been made to scene will
+                                        be lost. Save first?"
+force: if True, offer to save whether or not changes have been made 
+"""
+        if not wx.GetApp().history.has_changes() and not force:
+            return True
+        if title is None:
+            title = "Save Scene?"
+        if message is None:
+            message = "Changes that have been made to scene will be lost.\n"+\
+                        "Save first?"
+        dlg = wx.MessageDialog( self.frame, message, title,
+            wx.YES_NO | wx.CANCEL | wx.YES_DEFAULT | wx.ICON_QUESTION)
+        try:
+            if self.frame.FindFocus().GetTopLevelParent() != self.frame:
+                self.frame.Raise()
+                self.frame.RequestUserAttention()
+        except:
+            pass
+        answer = dlg.ShowModal() 
+        if answer == wx.ID_YES:
+            saved = save_scene()
+            if not saved:
+                dlg = wx.MessageDialog( self.frame,
+                       "The scene failed to save properly.\nContinue anyway?",
+                       'Save Failed', 
+                       wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+                go_ahead = dlg.ShowModal()
+                if go_ahead == wx.ID_NO:
+                    return False
+            else:
+                return saved
+        elif answer == wx.ID_CANCEL:
+            return False       
+        else:
+            return True
 
     def rewind_scene(self):
         """rewind_scene(): reset the scene and play it again"""
@@ -728,7 +683,7 @@ doSave: save working copy first
             # don't do anything if game started
             return False
         if doSave:
-            saved = self.save_using_working_scene()
+            saved = self.save_using_working_scene()           
             if not saved:
                 dlg = wx.MessageDialog( self.frame,
                        "The scene failed to save properly.\nPlay anyway?",
@@ -737,14 +692,32 @@ doSave: save working copy first
                 continue_shutdown = dlg.ShowModal()
                 if continue_shutdown == wx.ID_NO:
                     return False  
+                else:
+                    self.edit_info = None
             else:
-                self.set_scene(self.scene.__class__.__name__, True)
+                self.play_working_scene()
+        else:
+            self.edit_info = None
         #self.reload_scene()
         pug.set_default_pugview("Component", _dataMethodPugview)
 #        app = wx.GetApp()
 #        app.set_selection([])
         start_scene()
         return True
+    
+    def play_working_scene(self):
+        winlist = get_scene_windows(Director.scene)
+        for win in winlist:
+            win.Hide()
+        app = wx.GetApp()
+        self.edit_info = [Director.scene, app.get_selection().keys(),
+                          winlist, app.reset_history()]
+        self.set_selection([])
+        oldscene = Director.scene
+        Director.switch_scene = self.sceneDict['__Working__']
+        while Director.scene == oldscene:
+            time.sleep(0.05)
+        entered_scene()
     
     def pause_scene(self):
         """pause_scene(): pause the current scene"""
@@ -761,16 +734,12 @@ doSave: save working copy first
 Stop the current scene from playing. if doRevert, Reload original state from 
 disk.
 """
-        if not doRevert:
+        try:
+            button_info_dict['agui'].button_press(button='stop')
+        except:
             self.do_stop_scene(doRevert)
-        else:
-            try:
-                button_info_dict['agui'].button_press(button='stop')
-            except:
-                self.do_stop_scene(doRevert)
         
     def do_stop_scene(self, doRevert=True):      
-        if _DEBUG: print "stop_scene 1"
         if _DEBUG: print "stop_scene"
         if not getattr(self.Director, "project_started", False):
             return
@@ -788,9 +757,30 @@ disk.
         pug.set_default_pugview("Component", _dataPugview)
         if _DEBUG: print "stop_scene 6", scene.__name__        
         if doRevert:
-            self.set_scene(scene.__name__, True)
-        if _DEBUG: print "stop_scene 7"            
+            if self.edit_info:
+                wx.GetApp().set_busy_state( True)
+                Director.switch_scene = self.edit_info[0]
+                while Director.scene != self.edit_info[0]:
+                    time.sleep(0.05)
+                self.restore_editor()
+                wx.CallAfter( entered_scene)
+            else:
+                self.set_scene(scene.__name__, True)
+                self.edit_info = None
+        if _DEBUG: print "stop_scene 7"  
         
+    def restore_editor(self):
+        for win in self.edit_info[2]:
+            win.Show()
+        self.set_selection(self.edit_info[1])
+        wx.GetApp().restore_history(self.edit_info[3])
+        self.edit_info = None     
+        wx.GetApp().set_busy_state(False)
+        
+    def recover_scene(self):
+        "Load the last played scene."
+        self.set_scene("__Working__")
+                  
     def execute_scene( self, doSave=True):
         """execute_scene()
         
@@ -814,13 +804,13 @@ Run the scene being editted in a new process.
             return False
         return True
         
-    def _on_set_busy_state(self, on):
+    def on_set_busy_state(self, on):
         """_on_set_busy_state(on)
         
 Callback from pugApp notifying that app is becoming busy or unbusy.
 """
         if isinstance(self.scene.state, EditorState):
-            self.scene.state._on_set_busy_state(on)
+            self.scene.state.on_set_busy_state(on)
             
     def add_object(self, nodeclass=None, position=None):
         """add_object( nodeclass=None)
@@ -828,6 +818,10 @@ Callback from pugApp notifying that app is becoming busy or unbusy.
 If nodeclass is None, addObjectClass will be used.
 position: object will be moved to this position
 """
+        if wx.GetApp().busyState:
+            return
+        wx.GetApp().set_busy_state()
+        self.adding_object = True
         # delay hack necessary to solve Opioid2D thread problem with images
         if nodeclass is None:
             nodeclass = self.addObjectClass
@@ -866,7 +860,7 @@ position: move object to this position
             node.position = position
         Director.paused = False
         # let components do image alterations, then check for node overlap
-        (Opioid2D.Delay(1) + Opioid2D.CallFunc(self.avoid_node_overlap, 
+        (Opioid2D.Delay(0.1) + Opioid2D.CallFunc(self.avoid_node_overlap, 
                                                node)).do()
     
     def avoid_node_overlap(self, node):
@@ -893,7 +887,12 @@ position: move object to this position
             node.rect.top = nodeloc[1]
         except:
             pass
+        do_fn = partial( undelete_nodes, [node])
+        undo_fn = partial( hide_nodes, [node])
         wx.CallAfter(self.set_selection,[node])
+        wx.CallAfter(wx.GetApp().set_busy_state, False)
+        wx.CallAfter(wx.GetApp().history.add,"Add "+node.__class__.__name__,
+                                             undo_fn, do_fn)
         
     def kill_subprocesses(self):
         kill_subprocesses()
@@ -954,9 +953,27 @@ position: move object to this position
             (Opioid2D.Delay(1) + Opioid2D.CallFunc(self.avoid_node_overlap, 
                                                obj)).do()
             
+    t = 0
     def test(self):
 #        from pug.CodeStorageExporter import CodeStorageExporter as cse
-        wx.GetApp().history.undo()
+        def hide_scene():
+            self.hid_scene = Director.scene
+            from scenes.Dragon import Dragon
+            Director._scene = Dragon()
+            Director._cDirector.SetScene( Director._scene._cObj)
+            Director._scene.enter()
+        def restore_scene():
+            Director._scene.exit()
+            hid_scene = self.hid_scene
+            Director._scene = hid_scene
+            Director._cDirector.SetScene( hid_scene._cObj)
+#            hid_scene.enter()
+            wx.CallAfter(wx.GetApp().refresh)
+        if self.t == 0:
+            Director.restore_scene = hide_scene
+            self.t = 1
+        else:
+            Director.restore_scene = restore_scene
             
 # test for floating garbage
 #        from pug.util import test_referrers
@@ -993,13 +1010,9 @@ _interfacePugview = {
         [' Current Scene', pug.Label],
         ['sceneclass', ScenesDropdown, 
              {'label':'   Scene',
-              'sort': False,
+              'sort': False, 'undo': False,
               'prepend_list':[("New Scene", Scene)],
               'doc':"Pick a scene to edit"}],
-        ['commit_scene', None, {
-                               'label':"   Commit Scene", 
-                               'doc':"Commit current scene to disk",
-                               'no_return_popup':True}],
 #        ['view_scene', pug.Routine,  {'label':'   View Scene'}],
         ['reload_scene', None, {'label':'   Reload Scene'}],
 #        ['use_working_scene', None, {'label':'   Use Working Scene',
@@ -1007,7 +1020,7 @@ _interfacePugview = {
         [' Objects', pug.Label],
         ['addObjectClass', ObjectsDropdown, 
              {'prepend_list':[("New Sprite", Sprite)],
-              'sort':False,
+              'sort':False, 'undo':False,
               'label':'   Object to add',
               'doc':'Select an object type for the add button below'}],
         ['add_object', None, {'doc':\
@@ -1017,7 +1030,7 @@ _interfacePugview = {
                               'label':'   Add Object'}],
         ['overlap_offset', None, {
                     'doc':'Offset new sprites that overlap by this much',
-                    'label':'   Overlap Offset'}],
+                    'label':'   Overlap Offset', 'undo':False}],
 
         [' Settings', pug.Label],
         ['project_settings'],
@@ -1034,6 +1047,7 @@ _interfacePugview = {
 #                {'label':'   View Selection'}],
         ['browse_components', None, 
                 {'label':'   Browse Components'}],
+        ['recover_scene', None, {'label':'   Recover Scene'}],
 #        ['canvas', pug.ObjectButtons],
 #        ['Director'],
 #        ['Display'],

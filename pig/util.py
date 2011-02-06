@@ -135,13 +135,6 @@ def start_scene():
         sleep(0.05)
     PigDirector.scene.start()    
 
-def entered_scene():
-    """entered_scene(): Try to update editor scene window"""
-    import wx
-    frame = wx.FindWindowByName("SceneFrame") #@UndefinedVariable
-    if frame:
-        frame.set_object(PigDirector.scene, title="Scene")
-    
 def save_project_settings( projectSettings):
     pug.code_exporter( projectSettings, "_project_settings.py", True, 
                  {'name':'project_settings'})        
@@ -266,7 +259,7 @@ def fix_project_path( path):
         return path
 
 availableScenes = None
-def get_available_scenes( doReload=False, useWorking=True, errors=None):
+def get_available_scenes( doReload=False, useWorking=False, errors=None):
     """get_available_scenes( doReload=False, useWorking=False, errors=None)>dict
     
 Get all Scenes available in modules in Scenes folder. Return dict of available 
