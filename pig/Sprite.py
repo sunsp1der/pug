@@ -164,7 +164,7 @@ if TF is "True" set archetype to True, but don't create default name
         else:
             self._image_file = None
 #        OpioidSprite.set_image(self, file)
-        if file is not None:
+        if file:
             (Delay(0) + CallFunc(OpioidSprite.set_image, self, file)).do() 
     
     def get_image_file(self):
@@ -320,24 +320,24 @@ tint: a tuple or list of 3 or 4 elements- (red, green, blue, [alpha])
         "Edit the source file for this object"
         start_edit_process( self._get_source_code())     
     
-    x = 0    
-    def test(self):
-        if self.x==0:
-            from pig.editor.util import close_obj_windows
-            close_obj_windows(self)
-            self.x = 1
-            self.ref = self
-            self.original_layer = self.layer_name
-#            self._end_actions()
-#            self.deleted = True
-            self.delete()
-        else:
-            import cOpioid2D
-            self.deleted = False
-            self._cObj = cOpioid2D.Sprite()
-            self.layer_name = self.original_layer
-            del(self.original_layer)
-            self.scene_register()
+#    x = 0    
+#    def test(self):
+#        if self.x==0:
+#            from pig.editor.util import close_obj_windows
+#            close_obj_windows(self)
+#            self.x = 1
+#            self.ref = self
+#            self.original_layer = self.layer_name
+##            self._end_actions()
+##            self.deleted = True
+#            self.delete()
+#        else:
+#            import cOpioid2D
+#            self.deleted = False
+#            self._cObj = cOpioid2D.Sprite()
+#            self.layer_name = self.original_layer
+#            del(self.original_layer)
+#            self.scene_register()
         
     # code storage customization
     @classmethod
@@ -497,8 +497,8 @@ _spritePugview = {
     #        ['rotation_speed'],
     #        ['velocity'],
     #        ['acceleration'],
-        [' Functions', pug.Label],
-        ['delete',"Delete this sprite"],
+#        [' Functions', pug.Label],
+#        ['delete',"Delete this sprite"],
     #    ['edit_code', None, {'label':'   edit code'}]
     #        ['_delete_test'],
     ]       

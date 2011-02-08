@@ -122,6 +122,7 @@ Uses a browser dialog to facilitate picking a graphics file
         if not self.fullpath:
             pre_path, short_path = os.path.split( file)
             slice = True
+            samefile = False
             while slice:
                 pre_path, slice = os.path.split(pre_path)
                 short_path = os.path.join( slice, short_path)
@@ -131,7 +132,9 @@ Uses a browser dialog to facilitate picking a graphics file
                 except AttributeError:
                     f1 = os.path.abspath(pre_path).lower()
                     f2 = os.path.abspath(os.getcwd()).lower()
-                    samefile = f1 == f2                    
+                    samefile = f1 == f2    
+                except:
+                    file = pre_path
                 if samefile:
                     file = short_path
                     break
