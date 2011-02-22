@@ -2,7 +2,6 @@ from Opioid2D.public.Node import Node
 
 from pug.component import *
 
-from pig.audio import get_sound
 from pig.components import Collision_Callback, On_Create_Sound
 
 class On_Collision_Sound( Collision_Callback, On_Create_Sound):
@@ -13,7 +12,7 @@ class On_Collision_Sound( Collision_Callback, On_Create_Sound):
     _class_list = [Node]
     # attributes:   
     _field_list = []    
-    _field_list += On_Create_Sound._field_list
+    _field_list += On_Create_Sound._sound_fields
     _field_list += Collision_Callback._field_list 
 
     @component_method

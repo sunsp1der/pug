@@ -3,8 +3,6 @@ from Opioid2D.public.Node import Node
 from pug.component import *
 from pug import FloatSpin
 
-from pig.audio import get_sound
-from pig.editor.agui import SoundFile
 from pig.components import On_Create_Sound
 
 class On_Destroy_Sound( On_Create_Sound):
@@ -15,7 +13,7 @@ class On_Destroy_Sound( On_Create_Sound):
     _class_list = [Node]
     # attributes:   
     _field_list = []    
-    _field_list += On_Create_Sound._field_list
+    _field_list += On_Create_Sound._sound_fields
     # defaults
     sound = None
     volume = 1.0

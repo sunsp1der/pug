@@ -7,7 +7,9 @@ import traceback
 from time import sleep
 from inspect import isclass
 
-_DEBUG = True
+from pig.keyboard import keys
+
+_DEBUG = False
 try:
     import Numeric #@UnresolvedImport
     if _DEBUG: print 'using Numeric'
@@ -36,12 +38,12 @@ projectPath = os.getcwd()
 _revertScene = None
 
 def is_shift_down():
-    return Opioid2D.Keyboard.is_pressed(Opioid2D.K_RSHIFT) or \
-            Opioid2D.Keyboard.is_pressed(Opioid2D.K_LSHIFT)
+    return Opioid2D.Keyboard.is_pressed(keys["RSHIFT"]) or \
+            Opioid2D.Keyboard.is_pressed(keys["LSHIFT"])
 
 def is_ctrl_down():
-    return Opioid2D.Keyboard.is_pressed(Opioid2D.K_RCTRL) or \
-            Opioid2D.Keyboard.is_pressed(Opioid2D.K_LCTRL)
+    return Opioid2D.Keyboard.is_pressed(keys["RCTRL"]) or \
+            Opioid2D.Keyboard.is_pressed(keys["LCTRL"])
            
 
 def get_mouse_position( layer_name=None):
@@ -152,7 +154,8 @@ _project_settings file unless otherwise noted.
     projectPath: the root path of this project. If projectPath is a file path, 
                 just the folder will be used. If that folder is the 'scenes'
                 folder, the parent of that folder will be used.
-    scenename: the name of the scene to run (look in 'scenename'.py file)
+    scenename: the name of the scene to run ('scenename'.py in scenes folder).
+                If '__Editor__', use the scenename in _pug_settings.py
     position: (x, y) the topleft corner of the window. 
     resolution: (x,y) the width and height of the window
     title: the title to appear on the window
@@ -194,6 +197,8 @@ _project_settings file unless otherwise noted.
             fullscreen = project_settings.fullscreen
         except:
             fullscreen = False
+    if fullscreen:
+        position = [0,0]
     if scenename is None:
         try:
             scenename = project_settings.initial_scene
@@ -212,6 +217,10 @@ _project_settings file unless otherwise noted.
     from pig.Scene import Scene
     if scenename == 'Scene':
         initial_scene = Scene
+    elif scenename == '__Editor__':
+        from _pug_settings import pug_settings
+        editor_scene = pug_settings.initial_scene
+        initial_scene = scenedict[editor_scene]
     else:
         try:
             initial_scene = scenedict[scenename]

@@ -15,7 +15,7 @@ class On_Create_Sound( SpriteComponent):
     _type = 'sound'
     _class_list = [Node]
     # attributes:   
-    _field_list = [
+    _sound_fields = _field_list = [
         ["sound", SoundFile, {'doc':"The sound to play", 'volume':'volume'}],
         ["volume", FloatSpin, {'doc':"Sound volume", 'range':(0,1),
                                'digits':1, 'adjust_digits':True}],    

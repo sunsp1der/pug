@@ -1,14 +1,11 @@
 todo:
-	keyboard sticking in julian's game
-		keep array of pressed keys in director
-		no key down when key is down
-		no key up when key is up
-	collision problem in julian's game
 
 installer:
-	eliminate need for pythonpather
 
 soon:
+	eliminate hacks
+	preload sounds in components
+	very basic collision rect component
 	eliminate demo project
 		import files from project
 		create demo files folder
@@ -16,6 +13,9 @@ soon:
 		new_demo_project
 		open_project
 	joystick controls have heldkey problem
+		keep array of pressed keys in director
+		no key down when key is down
+		no key up when key is up
  	master volume
 	'loading' graphic while scene saves, or at least cleanup
 	destroy on gameover
@@ -44,32 +44,30 @@ soon:
 				scene component
 				fadetime
 				scene
+	change_scene
+		check values holding steady
+		timer
+		ala delete in sprite
 	switch_scene to replace set_scene
 		on_switch_scene callback for fades
 		fadescene
 			disable collisions?
 			stop motion?
-	put an example of custom code in Pig_Demo
 	grid units
 	drag-n-drop animation folder
-	level on this or that
-		object deleted
-		number of object destroyed
-		group empty
-		value reached
 	extra life at
 	shoot_at component
 	spawn_this_archetype component
 	search component book
 
+Opioid2D:
+	actions relative to rotation
+	check visibility
+
 bugs: 
 	spawn location edges crashes editor intermittent
 	motion zone component shows no pugview intermittent
 	show menus when object is selected
-	scene tree doesn't show selected object 
-		when obj is first added?
-		when scene is not shown during selection?
-	leftover items in scene graph after deleting both layers
 	crash - selecting an object while changing selectionwin to another view 
 
 later: 

@@ -39,7 +39,7 @@ class HelpFrame(wx.Frame):
                                            wx.ART_TOOLBAR, WX_BUTTON_BMP_SIZE)
             tooltip = "Change object's type"
             if showRetypeButton:
-                retypebutton = buttons.ThemedGenBitmapButton(self, 
+                retypebutton = wx.BitmapButton(self, 
                                   size=WX_BUTTON_SIZE,
                                   bitmap = bmp
                                   )

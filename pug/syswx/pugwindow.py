@@ -347,10 +347,11 @@ Generally, this is called when an attribute gui has changed size.
             event.Skip()
             
     def setup_menus(self):
-        if not hasattr(self, 'menuBar'):
+        if not self.menuBar or not hasattr(self, 'menuBar'):
             self.menuBar = wx.MenuBar()
+        else:
+            self.menuBar.SetMenus([])
         self.menuBar.Freeze()
-        self.menuBar.SetMenus([])
         wx.GetApp().append_global_menus(self.menuBar)
         if self.object:
             self._init_viewMenu_Items(self.viewMenu)
@@ -450,11 +451,14 @@ Generally, this is called when an attribute gui has changed size.
             return
         if not self.objectRef or not self.objectRef():
             return
+        self.Freeze()
         if _DEBUG: print "pugwindow.refresh", self.object
         for item in self.aguilist:
             if _DEBUG: print item.attribute
             item.refresh()
         if _DEBUG: print "DONE refresh\n"
+        if self.IsFrozen():
+            self.Thaw()
 
     def help_context(self, event=None):
         help = wx.ContextHelp( self, False)

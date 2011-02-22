@@ -2,7 +2,7 @@ import re
 import weakref
 
 import wx
-import wx.lib.buttons
+import wx.lib.buttons as buttons
 
 from pug.syswx.util import show_exception_dialog
 from pug.syswx.wxconstants import *
@@ -10,7 +10,7 @@ from pug.syswx.wxconstants import *
 # TODO: I think myPugFrame could be removed if I can figure out how to get
 #        parent's top level window
 
-class PugButton(wx.lib.buttons.ThemedGenBitmapButton):
+class PugButton(wx.BitmapButton):
     """A button that opens a pug frame, either in the current or in a new frame
     
 PugButton(parent, targetObject, objectName="the object", doOpenNew=True, 
@@ -47,8 +47,7 @@ size: the button size
                                             wx.ART_TOOLBAR, WX_BUTTON_BMP_SIZE)
             tooltip = ''.join(["View '",objectName,"' in this window"])
             fn = self.on_view_button                
-        wx.lib.buttons.ThemedGenBitmapButton.__init__(self, parent=parent, 
-                                               bitmap=None, size=size)
+        wx.BitmapButton.__init__(self, parent=parent, size=size)
         self.SetBitmapLabel(bmp)
         self.SetToolTipString(tooltip)
         self.Bind(wx.EVT_BUTTON, fn, self)   

@@ -52,7 +52,7 @@ Uses a browser dialog to facilitate picking a graphics file
         control.text = text
         browseBmp = wx.ArtProvider.GetBitmap( wx.ART_FILE_OPEN, wx.ART_TOOLBAR,
                                               WX_BUTTON_BMP_SIZE)
-        browseButton = buttons.ThemedGenBitmapButton(control, bitmap=browseBmp, 
+        browseButton = wx.BitmapButton(control, bitmap=browseBmp, 
                                        size=WX_BUTTON_SIZE)
         if self.type == "folder":
             browseButton.SetToolTipString('Browse for folder')

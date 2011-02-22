@@ -296,7 +296,7 @@ parentWindow: the parent window of name dialog. If not provided, the
     from pig.editor.util import wait_for_state
     wait_for_state( None)
     if _DEBUG: print "util: save_scene_as 5"
-    wx.BeginBusyCursor()
+    wx.GetApp().set_busy_state(True)
     saved = False
     try:
         if _DEBUG: print "util: save_scene_as enter code_exporter"
@@ -314,7 +314,7 @@ parentWindow: the parent window of name dialog. If not provided, the
         if _DEBUG: print "util: save_scene_as 8"        
     finally:
         if _DEBUG: print "util: save_scene_as 9"                
-        wx.EndBusyCursor()        
+        wx.GetApp().set_busy_state(False)        
         if PigDirector.scene != oldscene:
             wx.GetApp().set_selection([])
             if _DEBUG: print "util: save_scene_as reset select:", selection

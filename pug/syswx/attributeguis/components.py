@@ -32,17 +32,6 @@ For kwargs optional arguments, see the Base attribute GUI
     expanded = False
     object = None
     def __init__(self, attribute, window, aguidata={}, **kwargs):
-#        #label
-#        label = wx.Panel(window, style=0)
-#        labelAreaSizer = wx.BoxSizer(orient=wx.VERTICAL)
-#        textSizer = AguiLabelSizer(parent=label, line=False)
-#        labelAreaSizer.AddSizer(textSizer, 0, wx.TOP, 1)
-#        availSizer = AguiLabelSizer(parent=label, line=True, label='available:')
-#        availSizer.textCtrl.SetWindowStyleFlag(wx.TE_RIGHT)
-#        availSizer.textCtrl.SetForegroundColour('gray')
-#        labelAreaSizer.AddSizer(availSizer, 1, wx.EXPAND | wx.TOP, 6)
-#        label.SetSizer(labelAreaSizer)
-#        label.textCtrl = textSizer.textCtrl
                     
         #control
         control = wx.Panel(window)
@@ -59,7 +48,7 @@ For kwargs optional arguments, see the Base attribute GUI
         self.editList = editList
         # edit button
         edit_image = wx.Bitmap(get_image_path("edit.png"), wx.BITMAP_TYPE_PNG)
-        editButton = buttons.ThemedGenBitmapButton(control, size=WX_BUTTON_SIZE,
+        editButton = wx.BitmapButton(control, size=WX_BUTTON_SIZE,
                                                    bitmap=edit_image)
 #        editButton.SetInitialSize((50,self.editList.Size[1]))
         editButton.SetToolTipString("Edit this component in a new window")
@@ -69,41 +58,22 @@ For kwargs optional arguments, see the Base attribute GUI
         #delete
         remove_image = wx.Bitmap(get_image_path("delete.png"), 
                                  wx.BITMAP_TYPE_PNG)
-        removeButton = buttons.ThemedGenBitmapButton(control, 
+        removeButton = wx.BitmapButton(control, 
                                     size=WX_BUTTON_SIZE, bitmap=remove_image)
         removeButton.SetToolTipString("Remove this component from object")
         removeButton.Bind(wx.EVT_BUTTON, self.remove_button_click)
         editSizer.Add( removeButton,0, wx.EXPAND, 5)
         
-        #add
-#        addSizer = wx.BoxSizer(orient = wx.HORIZONTAL)
-#        sizer.Add(addSizer, flag=wx.EXPAND)
-#        # tree of available components
-#        addTree = ComponentAddTree(parent=control)
-#        addTree.SetPopupMinWidth(150)
-#        addTree.SetToolTipString("Component to add")
-#        addSizer.Add( addTree, 1)
-#        self.addTree = addTree
         # add button
         add_image = wx.Bitmap(get_image_path("add.png"), wx.BITMAP_TYPE_PNG)
         
-        addButton = buttons.ThemedGenBitmapButton(control, 
+        addButton = wx.BitmapButton(control, 
                                     size=WX_BUTTON_SIZE, bitmap=add_image)
 #        addButton.SetInitialSize(editButton.Size) 
         addButton.SetToolTipString("Pick a component to add to this object")
         addButton.Bind(wx.EVT_BUTTON, self.add_button_click)
         editSizer.Add( addButton, 0, wx.EAST)
-        
-#        # browse button
-#        bmp = wx.ArtProvider.GetBitmap(wx.ART_HELP_BOOK, 
-#                                       wx.ART_TOOLBAR, WX_BUTTON_BMP_SIZE)
-#        browseButton = buttons.ThemedGenBitmapButton(control, 
-#                                            size=WX_BUTTON_SIZE, bitmap=bmp)
-#        browseButton.SetToolTipString("Browse available components")
-#        addSizer.Add( browseButton,0)
-#        browseButton.Bind(wx.EVT_BUTTON, self.open_browser)
-#            # won't let me size normally!?
-        
+                
         control.SetSizer(sizer)
         control.SetMinSize((-1, -1))  
         sizer.SetMinSize((-1,-1))        
@@ -174,9 +144,12 @@ For kwargs optional arguments, see the Base attribute GUI
         dlg.Destroy()
                 
     def refresh(self, event=None):
-        component = self.editList.get_selected()
-        if component not in self.object.components.get():
-            self.editList.component_removed()
+        try:
+            component = self.editList.get_selected()
+            if component not in self.object.components.get():
+                self.editList.component_removed()
+        except:
+            pass
                 
     def remove_button_click(self, event=None):
         component = self.editList.get_selected()

@@ -3,7 +3,6 @@ location of this file defines the root folder of the project, so keep it there.
 """
 import sys
 
-import _pythonpather
 import pug
 
 from pig.editor.OpioidInterface import OpioidInterface

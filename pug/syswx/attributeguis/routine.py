@@ -35,8 +35,8 @@ See Base attribute gui for other argument info
                            size = (1,WX_STANDARD_HEIGHT))
         control.SetMinSize((-1,WX_STANDARD_HEIGHT))
         #widgets
-        runButton = buttons.ThemedGenBitmapButton(control, -1, None, 
-                                                  size=WX_BUTTON_SIZE)
+        runButton = wx.BitmapButton(control, -1,  
+                                            size=WX_BUTTON_SIZE)
         
         infoText = wx.StaticText(control)
         infoText.SetMinSize((-1,infoText.Size[1]))

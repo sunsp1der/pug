@@ -114,11 +114,7 @@ scene: the scene to load initially
         if initial_scene != 'Scene' and initial_scene in self.sceneDict:
             # test initial scene                
             try:
-                if self.sceneDict[initial_scene].__module__ == \
-                                                        'scenes.__Working__':
-                    test_scene_code( initial_scene, '__Working__')
-                else:
-                    test_scene_code( initial_scene)
+                test_scene_code( initial_scene)
             except:
                 key = '*Error loading initial scene ('+initial_scene+')'                
                 code_exceptions[key] = sys.exc_info()
@@ -226,7 +222,7 @@ settingsObj: an object similar to the one below... if it is missing any default
         # DEFAULT GAME SETTINGS
         class project_settings():
             title = os.path.split(get_project_path())[1]
-            initial_scene = '__Working__'
+            initial_scene = '__Editor__' # scene when using main.py
             rect_opioid_window = (25, 25, 800 , 600)
             fullscreen = False
             save_settings_on_quit = True
@@ -246,9 +242,9 @@ settingsObj: an object similar to the one below... if it is missing any default
 """
         # DEFAULT PUG SETTINGS
         class pug_settings():
-            initial_scene = "__Working__"
-            Rect_Pig_Editor = (470, 150, 550, 600)
-            Rect_Pug_Python_Editor = (0, 100, 869, 600)            
+            initial_scene = "Scene" # editor scene
+            Rect_Pig_Editor = (400, 150, 624, 535)
+            Rect_Pug_Python_Editor = (10, 100, 800, 600)            
             rect_opioid_window = (10, 10, 800 , 600)
             save_settings_on_quit = True
 
@@ -289,7 +285,7 @@ settingsObj: an object similar to the one below... if it is missing any default
         except:
             project_settings = self.create_default_project_settings()
             if not project_settings.initial_scene:
-                project_settings.initial_scene = self.pug_settings.initial_scene
+                project_settings.initial_scene = '__Editor__'
             try:
                 save_project_settings( project_settings)
             except:
@@ -390,11 +386,16 @@ forceReload: if True, reload all scenes and objects first.
         self.stop_scene()
         while wx.GetApp().busyState == True:
             time.sleep(0.05)
-        if not self.check_save():
-            return        
+        dlg = wx.MessageDialog( self.frame,
+                       "Current state of scene will be lost.\nContinue?",
+                       'Confirm Reload', 
+                       wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+        go_ahead = dlg.ShowModal()
+        if go_ahead == wx.ID_NO:
+            return False    
         if Director.scene.__class__ == Scene:
             self.set_scene("Scene")
-            return
+            return True
         if _DEBUG: print 'reload_scene 2'
         scenename = self.scene.__class__.__name__
         try:
@@ -406,7 +407,8 @@ forceReload: if True, reload all scenes and objects first.
         else:
             if _DEBUG: print 'reload_scene 3.5'    
             self.set_scene(scenename, True)
-            if _DEBUG: print 'reload_scene 3.6'            
+            if _DEBUG: print 'reload_scene 3.6'   
+            return True         
             
     def _set_sceneclass( self, val):
         self.stop_scene()
@@ -523,8 +525,8 @@ Callback from PugApp...
         if self.Director.scene.state and \
                         self.Director.scene.state.__class__ == EditorState:
             graphicsManager.on_set_selection(selectedObjectDict)
-        if selectedObjectDict:
-            wx.FindWindowByName("Selection").Activate()
+#        if selectedObjectDict:
+#            wx.FindWindowByName("Selection").Activate()
         
     def open_selection_frame(self):
         """Open a pug window for selected object"""
@@ -554,7 +556,6 @@ list: a list of objects. If None, pug's list of selected objects will be used.
                 
     def _on_pug_quit(self):
         if getattr(self.project_settings,'save_settings_on_quit',True):
-            self.project_settings.initial_scene = self.scene.__class__.__name__
             try:
                 save_project_settings( self.project_settings)
             except:
@@ -670,7 +671,11 @@ force: if True, offer to save whether or not changes have been made
         scene = gamedata.start_sceneclass
         create_gamedata()
         self.Director.project_started = False
+        oldscene = self.Director.scene
         self.Director.switch_scene_to(scene)
+        while Director.scene == oldscene:
+            time.sleep(0.05)
+        entered_scene()
 
     def play_scene( self, doSave=True):
         """play_scene(doSave=True)
@@ -702,7 +707,7 @@ doSave: save working copy first
         pug.set_default_pugview("Component", _dataMethodPugview)
 #        app = wx.GetApp()
 #        app.set_selection([])
-        start_scene()
+        (Opioid2D.Delay(0) + Opioid2D.CallFunc(start_scene)).do()
         return True
     
     def play_working_scene(self):
@@ -887,7 +892,7 @@ position: move object to this position
             node.rect.top = nodeloc[1]
         except:
             pass
-        do_fn = partial( undelete_nodes, [node])
+        do_fn = partial( unhide_nodes, [node])
         undo_fn = partial( hide_nodes, [node])
         wx.CallAfter(self.set_selection,[node])
         wx.CallAfter(wx.GetApp().set_busy_state, False)
@@ -903,8 +908,32 @@ position: move object to this position
         if selected:                    
             return selected.popitem()[0]._get_source_code()
         else:
-            return Director.scene._get_source_code()
+            return PigDirector.scene._get_source_code()
         
+    def _get_shell_info(self):
+        "_get_shell_info()->info for pug's open_shell command"
+        scene = PigDirector.scene
+        items = {'_Project':self, 
+                 '_'+scene.__class__.__name__:scene}
+        nodes = scene.nodes
+        indexes = {}
+        for node in nodes:
+            name = node._get_shell_name()
+            if name not in indexes:
+                indexes[name]=1
+            else:
+                indexes[name]+=1
+                name=name+"_"+str(indexes[name])
+            items[name] = node
+        items['_gamedata'] = get_gamedata()
+        locals = items.copy()
+        import pig.actions
+        for action in dir(pig.actions):
+            if action[0] != "_":
+                locals[action]=getattr(pig.actions,action)
+        return dict(rootObject=items,rootLabel="Project Data",locals=locals,
+                    pug_view_key=self)
+                
     def start_opioid( self, rect, title, icon, scene):
         #start up opioid with a little pause for threading
         skip_deprecated_warnings()    
@@ -955,25 +984,7 @@ position: move object to this position
             
     t = 0
     def test(self):
-#        from pug.CodeStorageExporter import CodeStorageExporter as cse
-        def hide_scene():
-            self.hid_scene = Director.scene
-            from scenes.Dragon import Dragon
-            Director._scene = Dragon()
-            Director._cDirector.SetScene( Director._scene._cObj)
-            Director._scene.enter()
-        def restore_scene():
-            Director._scene.exit()
-            hid_scene = self.hid_scene
-            Director._scene = hid_scene
-            Director._cDirector.SetScene( hid_scene._cObj)
-#            hid_scene.enter()
-            wx.CallAfter(wx.GetApp().refresh)
-        if self.t == 0:
-            Director.restore_scene = hide_scene
-            self.t = 1
-        else:
-            Director.restore_scene = restore_scene
+        print "passed"
             
 # test for floating garbage
 #        from pug.util import test_referrers
@@ -1014,7 +1025,8 @@ _interfacePugview = {
               'prepend_list':[("New Scene", Scene)],
               'doc':"Pick a scene to edit"}],
 #        ['view_scene', pug.Routine,  {'label':'   View Scene'}],
-        ['reload_scene', None, {'label':'   Reload Scene'}],
+        ['reload_scene', None, {'label':'   Reload Scene',
+                                'no_return_popup':True}],
 #        ['use_working_scene', None, {'label':'   Use Working Scene',
 #                    'doc':'Uncheck to go back to last committed version'}],
         [' Objects', pug.Label],

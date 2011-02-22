@@ -31,7 +31,7 @@ For other kwargs arguments, see the Base attribute GUI
         self.listbox = listbox
         
         #add button
-        add = buttons.ThemedGenBitmapButton(control, -1, None,
+        add = wx.BitmapButton(control, -1, None,
                                 size=(WX_STANDARD_HEIGHT, WX_STANDARD_HEIGHT))
         bmp = wx.ArtProvider.GetBitmap(wx.ART_ADD_BOOKMARK, 
                                        wx.ART_TOOLBAR, WX_BUTTON_BMP_SIZE)
@@ -39,7 +39,7 @@ For other kwargs arguments, see the Base attribute GUI
         add.SetToolTipString("Add a group")
         add.Bind(wx.EVT_BUTTON, self.evt_add_button)
         #delete button
-        delete = buttons.ThemedGenBitmapButton(control, -1, None,
+        delete = wx.BitmapButton(control, -1, None,
                                 size=(WX_STANDARD_HEIGHT, WX_STANDARD_HEIGHT))
         bmp = wx.ArtProvider.GetBitmap(wx.ART_DELETE, 
                                        wx.ART_TOOLBAR, WX_BUTTON_BMP_SIZE)
@@ -47,7 +47,7 @@ For other kwargs arguments, see the Base attribute GUI
         delete.SetToolTipString("Delete selected group")
         delete.Bind(wx.EVT_BUTTON, self.evt_delete_button)
         #info button
-#        info = buttons.ThemedGenBitmapButton(control, -1, None,
+#        info = wx.BitmapButton(control, -1, None,
 #                                size=(WX_STANDARD_HEIGHT, WX_STANDARD_HEIGHT))
 #        bmp = wx.ArtProvider.GetBitmap(wx.ART_TIP, 
 #                                       wx.ART_TOOLBAR, WX_BUTTON_BMP_SIZE)

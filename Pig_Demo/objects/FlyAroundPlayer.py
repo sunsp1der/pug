@@ -10,7 +10,7 @@ class FlyAroundPlayer(Sprite):
     image = 'art/pug.png'
     layer = 'Background'
     def on_create(self):
-        self.position = (400.0, 300.0)
+        self.position = (402.0, 256.0)
         self.components.add( Key_Direction_Controls(
                 x_velocity=200,
                 y_velocity=200,

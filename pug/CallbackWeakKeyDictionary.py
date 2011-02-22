@@ -54,7 +54,7 @@ remove func from callback and deleteCallback registries"""
         if func in self.deleteCallbacks:
             self.deleteCallbacks.remove(func)
         
-    def doCallbacks(self, funcname, arg1, arg2):
+    def doCallbacks(self, funcname=None, arg1=None, arg2=None):
         for callback in list(self.callbacks):
             callback( self, funcname, arg1, arg2)
         for callback in list(self.deleteCallbacks):

@@ -19,6 +19,7 @@ class SoundFile( Filename):
 #                   "midi files (*.mid)|*.mid|" \
 #                   "All files (*.*)|*.*"
         aguidata['subfolder'] = "sound"
+        aguidata['allow_delete'] = True
         Filename.__init__(self, attribute, window, aguidata=aguidata, **kw)
         # play sound button
         try:
@@ -28,7 +29,7 @@ class SoundFile( Filename):
             play_image = wx.ArtProvider.GetBitmap(wx.ART_GO_FORWARD,
                                         wx.ART_TOOLBAR, WX_BUTTON_BMP_SIZE)                             
 
-        playbutton = buttons.ThemedGenBitmapButton(self.control, 
+        playbutton = wx.BitmapButton(self.control, 
                                                    bitmap=play_image, 
                                                    size=WX_BUTTON_SIZE)
         playbutton.SetToolTipString('Play sound. Hold to loop.')
