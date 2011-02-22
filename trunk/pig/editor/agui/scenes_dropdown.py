@@ -53,6 +53,10 @@ For kwargs optional arguments, see the Base attribute GUI
 
     def set_control_value(self, value):
         # use name of value if we can
+        if not value:
+            self.control.SetText("")
+            self.data = None
+            return
         scenename = value.__name__
         i = self.listctrl.FindText( scenename)
         if i != -1:

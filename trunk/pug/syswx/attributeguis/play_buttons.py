@@ -104,17 +104,17 @@ For kwargs arguments, see the Base attribute GUI
                 if not isroutine(func):
                     continue
             if item == 'play':
-                button = buttons.ThemedGenBitmapToggleButton(control, -1, None,
+                button = wx.BitmapButton(control, -1, 
                                                    size=WX_BUTTON_SIZE)
                 self.playbutton = button
             elif item == 'pause':
-                button = buttons.ThemedGenBitmapToggleButton(control, -1, None,
+                button = wx.BitmapButton(control, -1, 
                                                    size=WX_BUTTON_SIZE)
                 self.pausebutton = button
                 button.Enable(False)
             else:
-                button = buttons.ThemedGenBitmapButton(control, -1, None,
-                                                   size=WX_BUTTON_SIZE)
+                button = wx.BitmapButton(control, -1, 
+                                                 size=WX_BUTTON_SIZE)
             button.type = item
             self.buttonDict[item] = button
 #            print info[1].Ok(), info[1]
@@ -155,9 +155,9 @@ For kwargs arguments, see the Base attribute GUI
             if button.type == 'stop':
                 if self.buttonDict['play']:
                     self.buttonDict['play'].Enable(True)
-                    self.buttonDict['play'].SetValue(False)
+#                    self.buttonDict['play'].SetValue(False)
                 if self.buttonDict['pause']:
-                    self.buttonDict['pause'].SetValue(False)
+#                    self.buttonDict['pause'].SetValue(False)
                     self.buttonDict['pause'].Enable(False)
         except:
             show_exception_dialog(self.control)

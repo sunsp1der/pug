@@ -92,11 +92,11 @@ PugFrame(self, obj=None, objectpath="object", title="", show=True, parent=None,
             
     def _evt_on_activate(self, event=None):
         if self.pugWindow:
-            if event.Active:
-                self.pugWindow.refresh()
-                self.Refresh()
+            if event.Active:                
+                wx.CallAfter(self.pugWindow.refresh)
+                wx.CallAfter(self.Refresh)
             elif self.pugWindow.settings.get('auto_apply', False):
-                self.apply()
+                wx.CallAfter(self.apply)
                 
     def apply(self, event=None):
         self.pugWindow.apply()

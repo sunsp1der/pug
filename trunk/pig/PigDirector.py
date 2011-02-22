@@ -96,6 +96,7 @@ def newrun(initialScene, *args, **kw):
         self.next_scene = None
         self.next_state = None
         self.paused = False
+        self.project_started = False
         
         now = get_ticks()
         cD.Start(now)

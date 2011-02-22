@@ -3,6 +3,7 @@
 import wx
 import wx.lib.buttons as buttons
 
+from pug.util import get_image_path
 from pug.syswx.helpframe import HelpFrame
 from pug.syswx.attributeguis import Base
 from pug.syswx.wxconstants import WX_STANDARD_HEIGHT, WX_BUTTON_BMP_SIZE
@@ -43,17 +44,12 @@ For kwargs optional arguments, see the Base attribute GUI
     def __init__(self, attribute, window, aguidata={}, **kwargs):
         #control
         control = wx.Panel(parent=window)
-        height = aguidata.get('height', WX_STANDARD_HEIGHT * 3)
-        control.MinSize = (-1, height+2)
         sizer = wx.GridBagSizer()
         control.SetSizer(sizer)
         self.list = []
-        listbox = wx.ListBox(control, -1)
-        listbox.MaxSize = (-1, height)
-        listbox.MinSize = (-1, height)
-        self.listbox = listbox
         #generate list
         self.list_generator = aguidata.get('list_generator', None)
+        add = delete = info = arrange_up = arrange_down = None
         #add button
         if aguidata.get('add', False):
             addinfo = aguidata['add']
@@ -65,11 +61,10 @@ For kwargs optional arguments, see the Base attribute GUI
                 tooltip = addinfo[1]
             else:
                 tooltip = "Add an item"
-            add = buttons.ThemedGenBitmapButton(control, -1, None,
+            add = wx.BitmapButton(control, -1, 
                                 size=(WX_STANDARD_HEIGHT, WX_STANDARD_HEIGHT))
-            bmp = wx.ArtProvider.GetBitmap(wx.ART_ADD_BOOKMARK, 
-                                           wx.ART_TOOLBAR, WX_BUTTON_BMP_SIZE)
-            add.SetBitmapLabel(bmp)       
+            add_image = wx.Bitmap(get_image_path("add.png"), wx.BITMAP_TYPE_PNG)
+            add.SetBitmapLabel(add_image)       
             add.SetToolTipString(tooltip)
             add.Bind(wx.EVT_BUTTON, addfn)
         #delete button
@@ -83,13 +78,13 @@ For kwargs optional arguments, see the Base attribute GUI
                 tooltip = deleteinfo[1]
             else:
                 tooltip = "Delete an item"
-            delete = buttons.ThemedGenBitmapButton(control, -1, None,
+            delete = wx.BitmapButton(control, -1, 
                                 size=(WX_STANDARD_HEIGHT, WX_STANDARD_HEIGHT))
-            bmp = wx.ArtProvider.GetBitmap(wx.ART_DELETE, 
-                                           wx.ART_TOOLBAR, WX_BUTTON_BMP_SIZE)
-            delete.SetBitmapLabel(bmp)       
+            remove_image = wx.Bitmap(get_image_path("delete.png"), 
+                                     wx.BITMAP_TYPE_PNG)
+            delete.SetBitmapLabel(remove_image)       
             delete.SetToolTipString(tooltip)
-            delete.Bind(wx.EVT_BUTTON, self.evt_delete_button)
+            delete.Bind(wx.EVT_BUTTON, deletefn)
         #info button
         if aguidata.get('info', False):
             infoinfo = aguidata['info']
@@ -98,20 +93,67 @@ For kwargs optional arguments, see the Base attribute GUI
                 tooltip = infoinfo[1]
             else:
                 tooltip = "Info about this list"        
-            info = buttons.ThemedGenBitmapButton(control, -1, None,
+            info = wx.BitmapButton(control, -1,
                                 size=(WX_STANDARD_HEIGHT, WX_STANDARD_HEIGHT))
             bmp = wx.ArtProvider.GetBitmap(wx.ART_TIP, 
                                            wx.ART_TOOLBAR, WX_BUTTON_BMP_SIZE)
             info.SetBitmapLabel(bmp)
             info.SetToolTipString(tooltip)
             info.Bind(wx.EVT_BUTTON, self.evt_info_button)
+            
+        #arrange buttons
+        if aguidata.get('arrange_up', False):
+            arrange_upinfo = aguidata['arrange_up']
+            if len(arrange_upinfo) > 0:
+                arrange_upfn = arrange_upinfo[0]
+            else:
+                arrange_upfn = self.evt_arrange_up_button
+            if len(arrange_upinfo) > 1:
+                tooltip = arrange_upinfo[1]
+            else:
+                tooltip = "Move selected item up"
+            arrange_up = wx.BitmapButton(control, -1, 
+                                size=(WX_STANDARD_HEIGHT, WX_STANDARD_HEIGHT/2))
+            arrange_up_image = wx.Bitmap(get_image_path("arrow_up.png"), 
+                                     wx.BITMAP_TYPE_PNG)
+            arrange_up.SetBitmapLabel(arrange_up_image)       
+            arrange_up.SetToolTipString(tooltip)
+            arrange_up.Bind(wx.EVT_BUTTON, arrange_upfn)
+        if aguidata.get('arrange_down', False):
+            arrange_downinfo = aguidata['arrange_down']
+            if len(arrange_downinfo) > 0:
+                arrange_downfn = arrange_downinfo[0]
+            else:
+                arrange_downfn = self.evt_arrange_down_button
+            if len(arrange_downinfo) > 1:
+                tooltip = arrange_downinfo[1]
+            else:
+                tooltip = "Move selected item down"
+            arrange_down = wx.BitmapButton(control, -1, 
+                                size=(WX_STANDARD_HEIGHT, WX_STANDARD_HEIGHT/2))
+            arrange_down_image = wx.Bitmap(get_image_path("arrow_down.png"), 
+                                     wx.BITMAP_TYPE_PNG)
+            arrange_down.SetBitmapLabel(arrange_down_image)       
+            arrange_down.SetToolTipString(tooltip)
+            arrange_down.Bind(wx.EVT_BUTTON, arrange_downfn)
         line = wx.StaticLine(control,pos=(0,0))
         line.MaxSize = (-1,1)
-        sizer.Add(line,(3,0),flag=wx.EXPAND)
-        sizer.Add(listbox, (0, 0),(3, 1), flag=wx.EXPAND | wx.EAST, border = 4)
-        sizer.Add(delete, (0, 1))
-        sizer.Add(add, (1, 1))
-        sizer.Add(info, (2, 1))
+        buttons = 0
+        defaultsize = 0
+        for button in [delete, add, info, arrange_up, arrange_down]:
+            if button:
+                sizer.Add(button, (buttons,1))
+                defaultsize += button.GetSize()[1]
+                buttons+=1
+        height = aguidata.get('height', defaultsize)
+        control.MinSize = (-1, height+2)
+        listbox = wx.ListBox(control, -1)
+        listbox.MaxSize = (-1, height)
+        listbox.MinSize = (-1, height)
+        self.listbox = listbox
+        sizer.Add(line,(buttons,0),flag=wx.EXPAND)
+        sizer.Add(listbox, (0, 0),(buttons, 1), flag=wx.EXPAND | wx.EAST, 
+                  border = 4)
         sizer.AddGrowableCol(0)
 
         kwargs['control_widget'] = control
@@ -132,6 +174,14 @@ For kwargs optional arguments, see the Base attribute GUI
 
     def evt_delete_button(self, event=None):
         #TODO:  put in default behavior
+        self.refresh()
+        
+    def evt_arrange_up_button(self, event=None):
+        #TODO: put in default behavior
+        self.refresh()
+
+    def evt_arrange_down_button(self, event=None):
+        #TODO: put in default behavior
         self.refresh()
 
     def evt_info_button(self, event=None):

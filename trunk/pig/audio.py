@@ -16,18 +16,18 @@ class NoneSound:
     def get_length(self): pass
     def get_buffer(self): pass
 
-def get_sound( filename, tag="", volume=1.0):
-    """get_sound( filename, tag="", volume=1.0)->pygame.mixer.Sound object
+def get_sound( filename, volume = 1.0, tag=""):
+    """get_sound( filename, volume = 1.0, tag="")->pygame.mixer.Sound object
 
 Create a sound object with a 'play' method. If filename evaluates to False, a 
 dummy sound object will be created that has a 'play' method that does nothing.
 
 filename: path to the sound file. mp3, wav, or midi
-tag: if you want to create different sound objects with the same sound file, you
-    can give them different tags
 volume: you can pass a float from 0 to 1 for the sound volume. A unique sound
     will be created with that volume. You can still set the volume of a sound,
     but that will change all sounds with this tag/volume combination.
+tag: if you want to create different sound objects with the same sound file, you
+    can give them different tags
 """ 
     if not filename:
         return NoneSound()

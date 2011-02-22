@@ -63,7 +63,10 @@ This component gives the base object a new callback:
         if self.owner.archetype and self.spawn_archetype and \
                 getattr(PigDirector, 'start_project', False):
             # set up original lives
-            (Delay(0) + CallFunc(self.owner.__class__)).do()
+            (Delay(0) + CallFunc(do_respawn, 
+                                 self.owner.__class__,
+                                 self.lives, 
+                                 PigDirector.scene)).do()
                                              
     @component_method
     def on_respawn(self):
@@ -96,6 +99,7 @@ This component gives the base object a new callback:
 # has been deleted
 def do_respawn( cls, lives, scene=None):
     #check to make sure we're in the same scene
+    print "respawn"
     if scene and scene != PigDirector.scene:
         return
     obj = cls()

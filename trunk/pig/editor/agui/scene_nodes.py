@@ -1,5 +1,8 @@
 """Scene Nodes attribute gui... a tree window (also defined here)"""
 import weakref
+from functools import partial
+
+from pig.PigDirector import PigDirector
 
 import wx
 from wx.gizmos import TreeListCtrl
@@ -31,6 +34,11 @@ For other kwargs arguments, see the Base attribute GUI
         #control.SetMinSize((control.get_full_width(), -1))
         kwargs['control_widget'] = control
         Base.__init__(self, attribute, window, aguidata, **kwargs)
+        
+    def refresh(self, event=None):
+        if PigDirector.project_started:
+            self.list.refresh_tree()
+        Base.refresh(self, event)
         
     def setup(self, attribute, window, aguidata={}):
         aguidata.setdefault('control_only',True)
@@ -72,6 +80,7 @@ A tree control that shows all the nodes in an Opioid2D scene.
 """
     changing_sel = False
     object = None
+    auto_refresh = True
     def __init__(self, scene, *args, **kwargs):
         """__init__(scene, *args, **kwargs) 
         
@@ -81,7 +90,8 @@ Special kwargs:
                     | wx.TR_DEFAULT_STYLE \
                     | wx.TR_HAS_BUTTONS  \
                     | wx.TR_FULL_ROW_HIGHLIGHT \
-                    | wx.TR_ROW_LINES
+                    | wx.TR_SINGLE \
+                    | wx.TR_NO_LINES
 """
         style = kwargs.pop('style',-1)
         if style is -1:
@@ -89,12 +99,13 @@ Special kwargs:
                     | wx.TR_DEFAULT_STYLE \
                     | wx.TR_HAS_BUTTONS  \
                     | wx.TR_FULL_ROW_HIGHLIGHT \
-                    | wx.TR_SINGLE 
+                    | wx.TR_SINGLE \
+                    | wx.TR_NO_LINES
             # can't figure out how to make the list single selection
             # hacked below
         TreeListCtrl.__init__(self, style=style, *args, **kwargs)
         # columns
-        self.Indent = 5 # doesn't seem to work
+        self.Indent = 0 # doesn't seem to work
         self.AddColumn("gname")
         self.AddColumn("class")
         self.AddColumn("layer")
@@ -102,12 +113,59 @@ Special kwargs:
         self.set_object(scene)
         self.refresh_tree()
         self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_sel_changed)
-#        self.GetMainWindow().Bind(wx.EVT_LEFT_DCLICK, self.dclick)
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_activated)
+        self.Bind(wx.EVT_TREE_ITEM_RIGHT_CLICK, self.on_right_click)
+        self.menu_up = wx.NewId()
+        self.menu_down = wx.NewId()
+        self.menu_top = wx.NewId()
+        self.menu_bottom = wx.NewId()
+        self.Bind(wx.EVT_MENU, self.move_up, id=self.menu_up)
+        self.Bind(wx.EVT_MENU, self.move_down, id=self.menu_down)
+        self.Bind(wx.EVT_MENU, self.move_top, id=self.menu_top)
+        self.Bind(wx.EVT_MENU, self.move_bottom, id=self.menu_bottom)
+        self.right_clicked = None
         wx.GetApp().register_selection_watcher(self)
         from pug.syswx.pugframe import PugFrame
         self.PugFrame = PugFrame
         
+    def on_right_click(self, event):
+        menu = wx.Menu()
+        menu.Append(self.menu_up,"Move up in layer")
+        menu.Append(self.menu_down,"Move down in layer")
+        menu.Append(self.menu_top,"Move to top of layer")
+        menu.Append(self.menu_bottom,"Move to bottom of layer")
+        self.right_clicked = self.GetPyData(event.Item)()
+        self.PopupMenu(menu)
+        menu.Destroy()
+        
+    def move_up(self, event=None):
+        self.arrange( 1)
+        
+    def move_down(self, event=None):
+        self.arrange( -1)
+        
+    def move_top(self, event=None):
+        c_nodes = self.right_clicked.layer._layer.GetNodes()
+        idx = self.right_clicked.layer.get_node_idx(self.right_clicked)
+        self.arrange( len(c_nodes) - idx - 1)
+                 
+    def move_bottom(self, event=None):
+        idx = self.right_clicked.layer.get_node_idx(self.right_clicked)
+        self.arrange( -idx)
+        
+    def arrange(self, delta):
+        layer = self.right_clicked.layer
+        do_fn = partial(self.do_arrange, layer, self.right_clicked, delta)
+        undo_fn = partial(self.do_arrange, layer, self.right_clicked, -delta)
+        do_fn()
+        wx.GetApp().history.add("Arrange node", undo_fn, do_fn)
+        self.right_clicked = None
+        
+    def do_arrange( self, layer, node, delta):
+        layer.move_node( node, delta)
+        self.object.nodes.doCallbacks() # let guis know nodes changed
+        self.SelectItem( self.find_item_by_data(weakref.ref(node)))
+
     def set_object(self, scene):
         try:
             if self.object and self.object.nodes:
@@ -119,9 +177,13 @@ Special kwargs:
         self.object.nodes.register(self.nodes_changed)
         self.refresh_tree()
         
-    def on_set_selection(self, selectedObjectDict):
+    def on_set_selection(self, selectedObjectDict=None):
         """Callback from pug App"""
+        if self.changing_sel:
+            return
         self.changing_sel = True
+        if selectedObjectDict == None:
+            selectedObjectDict = wx.GetApp().selectedObjectDict
         self.UnselectAll()
         if selectedObjectDict:
             count = 0
@@ -164,9 +226,9 @@ Special kwargs:
                 self.changing_sel = True
                 self.UnselectAll()
                 self.SelectItem(item)
-                self.changing_sel = False
                 app = wx.GetApp()
                 app.set_selection([node])
+                self.changing_sel = False
         
     def on_activated(self, event):
         item = event.Item
@@ -180,15 +242,22 @@ Special kwargs:
                         wx.GetKeyState(wx.WXK_CONTROL):
                     self.PugFrame(node)
  
-    def nodes_changed(self, nodes, func, arg1, arg2):
+    def nodes_changed(self, nodes=None, func=None, arg1=None, arg2=None):
         # TODO: make this more efficient by making more specific changes
+        try:
+            if PigDirector.project_started and not PigDirector.paused:
+                return
+        except:
+            pass
+        if not self.auto_refresh:
+            return
         if not self.refreshing:
             wx.CallAfter(self.refresh_tree)
         self.refreshing = True
         
     def refresh_tree(self):
         try:
-            nodes = self.object.nodes
+            nodes = self.object.get_ordered_nodes()
         except:
             #object is probably destroyed
             self.DeleteAllItems()
@@ -198,7 +267,6 @@ Special kwargs:
         self.root = self.AddRoot("Invisible Root") # this won't be shown        
 #        self.DeleteChildren(self.root)
         self.SetMainColumn(1)
-        nodes = self.object.get_ordered_nodes()
         for node in nodes:
             cls = node.__class__.__name__
             if node.archetype:
@@ -212,6 +280,7 @@ Special kwargs:
             self.SetItemText(item, gname, 0)
             self.SetItemText(item, layer, 2)
         self.SetMainColumn(2)
+        self.on_set_selection()
         self.refreshing = False
         if self.IsFrozen():
             self.Thaw()

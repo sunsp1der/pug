@@ -12,7 +12,7 @@ class On_Start_Sound( Key_Sound_Scene):
     _class_list = [Scene]
     # attributes: ['name','desc'] or ['name', agui, {'doc':'desc', extra info}]
     _field_list = []
-    _field_list += On_Create_Sound._field_list
+    _field_list += On_Create_Sound._sound_fields
     _field_list += Key_Sound_Scene._loop_fields
     #defaults
     sound = None

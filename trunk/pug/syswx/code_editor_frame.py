@@ -8,7 +8,7 @@ from wx.py.editor import *
 from wx.py.frame import *
 
 from pug.util import start_file
-from pug.syswx.util import get_icon
+from pug.syswx.util import get_icon, highlight_frame
 from pug.syswx.file_tree import FileTree
         
 class PugEditorNotebook( aui.AuiNotebook):
@@ -200,6 +200,7 @@ Pug version of the py editor."""
             try:
                 if page.pug_view_key == object:
                     self.notebook.SetSelection(pagenum)
+                    highlight_frame( self)
                     return
             except:
                 continue

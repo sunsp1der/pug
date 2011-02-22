@@ -15,7 +15,7 @@ class Key_Sound( On_Create_Sound):
     _class_list = [Node]
     # attributes:   
     _field_list = []
-    _field_list += On_Create_Sound._field_list
+    _field_list += On_Create_Sound._sound_fields
     _field_list += [
         ["key", KeyDropdown, {'doc':"The key that triggers the sound"}],
         ["key_up_stop","Stop playing the sound when key is released"],
@@ -64,7 +64,7 @@ class Key_Sound( On_Create_Sound):
         if not self.key_up_stop:
             return
         if self.play_channel and \
-                            self.play_channel.get_sound == self.sound_object:
+                            self.play_channel.get_sound() == self.sound_object:
             self.play_channel.fadeout(int(self.fade_out*1000))
         self.play_channel=None
 

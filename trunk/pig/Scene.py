@@ -33,7 +33,6 @@ _DEBUG = False
 class Scene( OpioidScene, pug.BaseObject):
     """Scene - Scene with features for use with pug"""
     mouse_manager = None
-    __node_num = 0
     started = False
     exitted = False
     _pug_pugview_class = 'Scene'
@@ -392,25 +391,31 @@ key_down. In the future, maybe key_hold.
 
 Start the scene running. Called after enter() and before state changes
 """
+        if _DEBUG: print "start 0"
         if getattr(PigDirector, 'start_project', False):
             if not getattr(PigDirector, 'project_started', False):
                 gamedata = create_gamedata()
                 gamedata.start_sceneclass = self.__class__
-            for node in self.get_ordered_nodes():
+            if _DEBUG: print "start 1"
+            for node in self.nodes.keys():
                 if node.archetype:
                     node.delete()
+            if _DEBUG: print "start 2"
             if not getattr(PigDirector, 'project_started', False):
                 self.on_project_start()
                 self.all_nodes_callback( 'on_project_start')
                 PigDirector.project_started = True
+            if _DEBUG: print "start 3"
             self.all_nodes_callback( 'on_added_to_scene')
             self.all_nodes_callback( 'on_first_display')                        
             self.on_start()
             self.all_nodes_callback( 'on_scene_start')             
             self.started = True
+            if _DEBUG: print "start 4"
         elif getattr(PigDirector, 'viewing_in_editor', False):
             # viewing in editor, not playing
             self.all_nodes_callback( 'on_added_to_editor')
+        if _DEBUG: print "start 5"
         
     def register_node(self, node):        
 #        """register(node): a new node is joining scene. Do callbacks"""
@@ -423,15 +428,12 @@ Start the scene running. Called after enter() and before state changes
         elif getattr(PigDirector, 'editorMode', False):
             if hasattr(node, 'on_added_to_editor'):
                 node.on_added_to_editor()
-        self.nodes[node] = self.__node_num
-        self.__node_num += 1        
-        
+        self.nodes[node] = int(node._cObj.this)        
     
     def all_nodes_callback(self, callback, *args, **kwargs):
         """Send a callback to all nodes in the scene"""
         if _DEBUG: print "Scene.all_nodes_callback:",callback,self.nodes.data
-        nodes = self.nodes.copy()
-        for node in nodes:
+        for node in self.nodes.keys():
             try:
                 func = getattr(node, callback)
             except:
@@ -467,7 +469,7 @@ Start the scene running. Called after enter() and before state changes
         if not self.exitted:
             #if _DEBUG: 
             if _DEBUG: print "do Scene.exit", self
-            if Opioid2D.Director.project_started:
+            if PigDirector.project_started:
                 self.on_exit()
                 self.all_nodes_callback('on_exit_scene', self)
             nodes = self.nodes.keys()
@@ -502,57 +504,33 @@ Start the scene running. Called after enter() and before state changes
             self._nodes = CallbackWeakKeyDictionary()
         return self._nodes
 
-    nodes = property (_get_nodes,doc="dictionary of Scene nodes:node_num")
+    nodes = property (_get_nodes,
+                      doc="dictionary of Scene nodes:int(node._cObj)")
 
-    def get_ordered_nodes(self, include_all=False):
-        """get_ordered_nodes(include_all=False)->list of nodes 
+    def get_ordered_nodes(self):
+        """get_ordered_nodes()->list of nodes sorted top to bottom 
         
-Return a list of scene nodes, sorted by layer then create-time.
-include_all: if True, return nodes that are not in a layer. This is a weird case
-    used mainly for debugging
-        
-Note that due to the non-deterministic nature of Opioid z-ordering, the order
-returned will be from top to bottom in terms of layers, but pseudo-random in
-terms of nodes within the layers"""
-        nodelist = []
+Return a list of scene nodes, sorted by layer then order within the layer.
+"""
+ #       nodelist = []
         if self.nodes:
             # create ordered list of nodes
             layers = self.get_scene_layers()[:]
-            layersort = {}
-            a = 1
+#            layerinfo = {} # layerinfo[layer] = (sort#, nodelist)
+#            a = 1
+            ordered_nodes = []
+            keys = self.nodes.keys()
+            values = self.nodes.values()
             for layer in layers:
-                layersort[layer] = '%03d'%a
-                a+=1
-            ordered_nodes = {}
-            myNodes = self.nodes.keys()
-            nodesorter = None
-            for node in myNodes:
-                if node.layer_name:
-                    try:
-                        nodesorter = '_'.join([layersort[node.layer_name],
-                                           '%04d'%self.nodes[node]])
-                    except:
-                        if not node.layer_name:
-                            pass
-                        else:
-                            pass
-                elif not include_all:
-                    continue
-                else:
-                    try:
-                        nodesorter = '_'.join(['zzz', '%04d'%self.nodes[node]])
-                        print "scene.get_ordered_nodes nolayer:", str(node), \
-                                                                node.gname
-                    except:
-                        continue
-                if nodesorter:
-                    ordered_nodes[nodesorter] = node
-            nodenums = ordered_nodes.keys()
-            nodenums.sort()
-            nodenums.reverse()
-            for num in nodenums:
-                nodelist.append(ordered_nodes[num])
-        return nodelist
+                l = PigDirector.scene.get_layer(layer)
+                node_ids = list( int(ptr.this) for ptr in l._layer.GetNodes())
+                for id in node_ids:
+                    idx = values.index(id)
+                    ordered_nodes.append(keys[idx])
+            ordered_nodes.reverse()                    
+            return ordered_nodes
+        else:
+            return[]
             
     def update_node(self, node, command=None):
         """update_node(node, command=None)
@@ -564,22 +542,15 @@ Update the Scene's node tracking dict for node. Possible commands: 'Delete'
         if not nodes.has_key(node):
 #            if _DEBUG: print "   not registered:", node
             return
-        else:
-#            if  _DEBUG: print "   registered"
-            node_num = nodes[node]
         if getattr(node,'deleted',False) or command == 'Delete':
-            if nodes.has_key(node):
-                try:
-                    nodes.__delitem__(node)
-#                    if _DEBUG: print "   deleted"
-                except:
-                    pass
-#                    if _DEBUG: print "   could not delete (already gone?)"
-#            else:
-#                if _DEBUG: print "   unable to delete"
+            try:
+                nodes.__delitem__(node)
+            except:
+                pass
             return            
         # node_num tracks the order of node additions
-        nodes[node] = node_num # this call sets off callbacks for nodes gui        
+        nodes[node] = int(node._cObj.this) 
+        # this call sets off callbacks for nodes gui        
             
     def get_scene_layers(self):
         return get_scene_layers()
@@ -587,6 +558,28 @@ Update the Scene's node tracking dict for node. Possible commands: 'Delete'
     scene_layers = property(get_scene_layers, doc=
             "Scene layers excluding hidden ('__') layers")
     
+    def add_layer(self, name, skip_hidden=True):
+        """add_layer(name, skip_hidden=True)
+        
+Add a layer to the scene.
+name: name of layer
+skip_hidden: layers are always added at top. If this is True, the layer will be
+added under hidden layers (names begin with '__') which are generally used by 
+the editor. If layer is hidden, this will be ignored."""
+        if name[0:1] == '__' or not skip_hidden or self.layers == []:
+            return Opioid2D.Scene.add_layer( self, name)
+        layerlist = self.scene_layers
+        last_layer = layerlist[-1]
+        Opioid2D.Scene.add_layer(self, name)
+        # we need to avoid hidden layers
+        c_layers = self.get_c_layers()
+        idx = 0
+        for c_layer in c_layers:
+            if c_layer.GetName() == last_layer:
+                break
+            idx += 1
+        self.move_layer( name, -(len(c_layers) - idx - 2))
+       
     @classmethod
     def _create_dummy(cls, exporter):
         # make sure we have our dummy node and cleanup registered
@@ -625,24 +618,16 @@ If scene is a working scene, return
         
     def _get_shell_info(self):
         "_get_shell_info()->info for pug's open_shell command"
-        items = {'_Scene':self}
-        nodes = self.nodes
-        indexes = {}
-        for node in nodes:
-            name = node._get_shell_name()
-            if name not in indexes:
-                indexes[name]=1
-            else:
-                indexes[name]+=1
-                name=name+"_"+str(indexes[name])
-            items[name] = node
-        items['_gamedata'] = get_gamedata()
-        locals = items.copy()
+        rootObject = self
+        rootLabel = self.__class__.__name__
+        locals={}
+        locals['_gamedata'] = get_gamedata()
+        locals[rootLabel] = self
         import pig.actions
         for action in dir(pig.actions):
             if action[0] != "_":
                 locals[action]=getattr(pig.actions,action)
-        return dict(rootObject=items,rootLabel="Scene Data",locals=locals,
+        return dict(rootObject=rootObject,rootLabel=rootLabel,locals=locals,
                     pug_view_key=self)
         
     # code storage customization
@@ -770,9 +755,8 @@ If scene is a working scene, return
             'base_init': False,
             'force_init_def': True,
             'skip_attributes': ['_nodes','_groups','scene_layers','layers',
-                                '_Scene__node_num', '_key_down_dict', 
-                                '_key_up_dict','started','k_info',
-                                'mouse_manager']
+                                '_key_down_dict', '_key_up_dict','started',
+                                'k_info', 'mouse_manager']
              }   
     add_subclass_storageDict_key(_codeStorageDict, pug.BaseObject)
 
@@ -803,6 +787,7 @@ _scenePugview = {
         ['__class__', None, {'label':'   class', 'new_view_button':False}],        
         ['components'],
 ##        ['components', pug.ComponentFolder],
+        [' Scene Layers', pug.Label],
         ['scene_layers', SceneLayers],
 #        ['edit_code', None, {'label':'   Edit code'}],        
 #        ['   Save Scene', pug.Routine, {'routine':save_scene, 

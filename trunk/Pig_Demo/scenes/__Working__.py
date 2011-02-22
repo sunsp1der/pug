@@ -13,7 +13,8 @@ from pug import get_gnamed_object
 ### Flower autocode ###
 class Flower(Scene):
     def on_enter(self):
-        self.components.add( Set_Mouse_Cursor() )
+        self.components.add( Set_Mouse_Cursor(
+                image='art/pug.png') )
 
         # Archetypes
         LetterPetal_archetype = LetterPetal(gname='LetterPetal')

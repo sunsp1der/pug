@@ -67,16 +67,16 @@ class Key_Spawn( Spawner):
     @component_method
     def on_destroy(self):
         """unregister keys when component is destroyed"""
-        self.on_delete()
+        scene = PigDirector.scene
+        for k in self.k_info:
+            scene.unregister_key(k)
+        self.k_info = []
         
     @component_method
     def on_delete(self):
         """unregister keys when component is deleted"""
         self.rapid_fire = False
-        scene = PigDirector.scene
-        for k in self.k_info:
-            scene.unregister_key(k)
-        self.k_info = []
+        self.on_destroy()
         
 register_component( Key_Spawn)
         

@@ -10,8 +10,9 @@ from pug import Dropdown
 
 from pig.util import get_project_object
 from pig.audio import get_sound
-from pig.editor.agui import ObjectsDropdown, SoundFile
+from pig.editor.agui import ObjectsDropdown
 from pig.components import SpriteComponent
+from pig.components.sound.On_Create_Sound import On_Create_Sound
 
 class Spawner(SpriteComponent):
     """Owner spawns other objects
@@ -28,8 +29,9 @@ It also gives the spawned object a new callback:
     # attributes:   
     _field_list = [
         ["spawn_object", ObjectsDropdown, {'component':True,
-                                     'doc':"The object class to spawn"}],
-        ["sound", SoundFile, {'doc':"Sound to play when a spawn occurs"}],
+                                     'doc':"The object class to spawn"}]]
+    _field_list += On_Create_Sound._sound_fields
+    _field_list += [
         ["spawn_interval", "Seconds until next spawn"],
         ["spawn_interval_variance",
                 "spawn_interval can vary this many seconds"],
@@ -64,6 +66,7 @@ It also gives the spawned object a new callback:
     # attribute defaults
     spawn_object = None
     sound = None
+    volume = 1.0
     spawn_interval = 2.0
     spawn_interval_variance = 1.0
     spawn_delay = 0.0
@@ -97,7 +100,7 @@ It also gives the spawned object a new callback:
     def setup_spawner(self):
         "Setup for the spawner. Subclasses should call this."
         if self.sound:
-            self.sound_object = get_sound( self.sound)
+            self.sound_object = get_sound( self.sound, volume=self.volume)
         if self.spawned_objects is None:
             self.spawned_objects = weakref.WeakValueDictionary()
         

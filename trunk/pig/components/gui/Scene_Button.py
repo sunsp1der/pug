@@ -4,6 +4,7 @@ from Opioid2D.public.Node import Node
 
 import pug
 from pug.component import *
+from pug import FloatSpin
 
 from pig.audio import get_sound
 from pig.editor.agui import ScenesDropdown, SoundFile
@@ -27,8 +28,13 @@ clicked."""
         'doc':'Tint the button this color when mouse is pressed on it'}],
             ['hover_sound',SoundFile,{
                             'doc':'Play this sound when mouse is hovering'}],
+            ["volume", FloatSpin, {'doc':"Sound volume", 'range':(0,1),
+                               'digits':1, 'adjust_digits':True}],                                
             ['click_sound',SoundFile,{
                             'doc':'Play this sound when mouse is clicked'}],
+            ["volume", FloatSpin, {'doc':"Sound volume", 'range':(0,1),
+                               'digits':1, 'adjust_digits':True}],    
+                            
             ]
     #defaults
     target = None

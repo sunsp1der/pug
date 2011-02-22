@@ -75,7 +75,7 @@ For kwargs optional arguments, see the Base attribute GUI
         #delete
         bmp = wx.ArtProvider.GetBitmap(wx.ART_DELETE, 
                                        wx.ART_TOOLBAR, WX_BUTTON_BMP_SIZE)
-        removeButton = buttons.ThemedGenBitmapButton(control, 
+        removeButton = wx.BitmapButton(control, 
                                             size=WX_BUTTON_SIZE, bitmap=bmp)
         removeButton.SetToolTipString("Remove this component from object")
         removeButton.Bind(wx.EVT_BUTTON, self.remove_button_click)
@@ -101,7 +101,7 @@ For kwargs optional arguments, see the Base attribute GUI
         # browse button
         bmp = wx.ArtProvider.GetBitmap(wx.ART_HELP_BOOK, 
                                        wx.ART_TOOLBAR, WX_BUTTON_BMP_SIZE)
-        browseButton = buttons.ThemedGenBitmapButton(control, 
+        browseButton = wx.BitmapButton(control, 
                                             size=WX_BUTTON_SIZE, bitmap=bmp)
         browseButton.SetToolTipString("Browse available components")
         addSizer.Add( browseButton,0)

@@ -2,8 +2,6 @@ from Opioid2D.public.Node import Node
 
 from pug.component import *
 
-from pig.audio import get_sound
-from pig.editor.agui import SoundFile
 from pig.components.sound.On_Create_Sound import On_Create_Sound
 
 class On_Deal_Damage_Sound( On_Create_Sound):
@@ -14,7 +12,7 @@ class On_Deal_Damage_Sound( On_Create_Sound):
     _class_list = [Node]
     # attributes:   
     _field_list = []    
-    _field_list += On_Create_Sound._field_list
+    _field_list += On_Create_Sound._sound_fields
     
     @component_method
     def on_added_to_scene(self):

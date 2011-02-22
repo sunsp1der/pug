@@ -65,13 +65,7 @@ def hide_nodes( nodelist):
         node.__old_layer = node.layer_name
         node.layer = "__limbo__"
     
-def undoable_delete_nodes( nodelist):
-    undo_fn = partial(undelete_nodes, nodelist)
-    do_fn = partial(hide_nodes, nodelist)
-    do_fn()
-    wx.GetApp().history.add("Delete node", undo_fn, do_fn)
-
-def undelete_nodes( nodelist):
+def unhide_nodes( nodelist):
     for node in nodelist:
         node.layer = node.__old_layer
         del(node.__old_layer)
@@ -79,6 +73,35 @@ def undelete_nodes( nodelist):
         del(node.__old_color)
     wx.CallAfter(wx.GetApp().set_selection,nodelist)
         
+def undoable_delete_nodes( nodelist):
+    undo_fn = partial(unhide_nodes, nodelist)
+    do_fn = partial(hide_nodes, nodelist)
+    do_fn()
+    wx.GetApp().history.add("Delete node", undo_fn, do_fn)
+
+def undoable_delete_layer( layer_name):
+    nodelist = []
+    for node in PigDirector.scene.nodes:
+        if node.layer_name == layer_name:
+            nodelist.append(node)
+    layer_idx = PigDirector.scene.layers.index( layer_name)
+    layer_info = [layer_name, nodelist, layer_idx]
+    do_fn = partial(hide_layer, layer_info)
+    undo_fn = partial(unhide_layer, layer_info)
+    do_fn()
+    wx.GetApp().history.add("Delete layer", undo_fn, do_fn)
+    
+def hide_layer( layer_info):
+    hide_nodes( layer_info[1])
+    PigDirector.scene.delete_layer(layer_info[0])
+    
+def unhide_layer( layer_info):
+    scene = PigDirector.scene
+    delta = layer_info[2] - len(scene.scene_layers)
+    scene.add_layer(layer_info[0])
+    scene.move_layer(layer_info[0], delta)
+    unhide_nodes( layer_info[1])
+    
 def test_scene_code(scenename, modulename = None):
     """test_scene_code( scenename)
 
@@ -144,7 +167,7 @@ def create_new_project(project_path=None):
         dlg = wx.TextEntryDialog( parent,
                                   "Project Name",
                                   "Create New Project", 
-                                  "My Project")
+                                  "MyProject")
         if dlg.ShowModal() != wx.ID_OK:
             return
         new_project_name = dlg.GetValue()
@@ -158,31 +181,10 @@ def create_new_project(project_path=None):
         dlg.Destroy()
     try:
         shutil.copytree(source, project_path)
-        create_pythonpather( project_path)
     except:
         show_exception_dialog()          
         return  
     return project_path
-
-def create_pythonpather( path):
-    filename = os.path.join( path, '_pythonpather.py')
-    pp_file = open( filename, 'w')
-    pp_code = """# This file adds pig and pug to the search path
-    
-try:
-    import sys
-    sys.path.append('""" + os.path.split(pug.__path__[0])[0]+"""')
-except:
-    pass
-try:
-    import os.path
-    path = os.path.split(os.path.split(__file__)[0])[0]
-    sys.path.append(path)    
-except:
-    pass
-"""
-    pp_file.write( pp_code)
-    pp_file.close
 
 def open_project( project_path=None, force=False, quit=True): 
     """open_project( project_path=None, force=False, quit=True)->True if openned

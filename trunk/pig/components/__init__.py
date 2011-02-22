@@ -63,3 +63,4 @@ from pig.components.scene.Joystick_Input import Joystick_Input
 from pig.components.scene.Joystick_Axis_To_Key import Joystick_Axis_To_Key
 from pig.components.scene.Joystick_Button_To_Key import Joystick_Button_To_Key
 from pig.components.scene.Key_Sound_Scene import Key_Sound_Scene
+from pig.components.scene.Set_Mouse_Cursor import Set_Mouse_Cursor
