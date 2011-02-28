@@ -158,33 +158,40 @@ def get_available_groups():
     except:
         return []
 
-def create_new_project(project_path=None):
-    "create_new_project(project_path=None)->if successful, returns project_path"
+def create_new_project(project_path=None, new_project_name=None,
+                       source_project='New_Project'):
+    "create_new_project(project_path=None)->path_to_project or None if failed"
     if not project_path:
         this_folder = os.path.split( os.path.abspath(__file__))[0]
-        source = os.path.join( this_folder, "New_Project")
+        source = os.path.join( this_folder, source_project)
         parent = wx.GetApp().get_project_frame()
-        dlg = wx.TextEntryDialog( parent,
-                                  "Project Name",
-                                  "Create New Project", 
-                                  "MyProject")
-        if dlg.ShowModal() != wx.ID_OK:
-            return
-        new_project_name = dlg.GetValue()
-        dlg.Destroy()
+        if not new_project_name:
+            dlg = wx.TextEntryDialog( parent,
+                                      "Project Name",
+                                      "Create New Project", 
+                                      "MyProject")
+            if dlg.ShowModal() != wx.ID_OK:
+                return
+            new_project_name = dlg.GetValue()
+            dlg.Destroy()
         dlg = wx.DirDialog( parent, "Create project in folder:",
                             style=wx.DD_DEFAULT_STYLE )
         if dlg.ShowModal() != wx.ID_OK:
             return
         dest_folder = dlg.GetPath()
-        project_path = os.path.join( dest_folder, new_project_name)
+        path_to_project = os.path.join( dest_folder, new_project_name)
         dlg.Destroy()
     try:
-        shutil.copytree(source, project_path)
+        shutil.copytree(source, path_to_project)
     except:
         show_exception_dialog()          
         return  
-    return project_path
+    return path_to_project
+
+def create_demo_project(project_path=None, new_project_name="Pig_Demo"):
+    "create_demo_project(project_path=None)->project_path or None if failed"
+    path_to_project = create_new_project(project_path, new_project_name,
+                                         'Pig_Demo')
 
 def open_project( project_path=None, force=False, quit=True): 
     """open_project( project_path=None, force=False, quit=True)->True if openned
