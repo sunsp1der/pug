@@ -1,10 +1,10 @@
-To start, use python 2.5 to run the edit_project.py file in the Pig_Demo folder.
+To start the pig demo, use python 2.6 to run the edit_project.py file in the Pig_Demo folder.
 
-Documentation available at: http://code.google.com/p/pug/downloads/list
+Documentation available at: http://code.google.com/p/pug
 
 You can contact Ivan DelSol, the author of Pig and this guide, at sunspider@gmail.com. 
 You can also discuss Pig at http://groups.google.com/group/pug_discuss.
-Please report any issues with Pig or this guide to: http://code.google.com/p/pug/issues/entry.
+Please report any issues with Pig or this guide to: http://code.google.com/p/pug
 
 System Requirements
 Hardware - 
@@ -12,10 +12,9 @@ Hardware -
 	It really helps to have a monitor with at least 1280x1024 resolution
 
 Software - Before using Pig, the following must be installed on your computer:
-	Python 2.5 (http://www.python.org/download/releases/2.5.5/)
+	Python 2.6 (http://www.python.org)
 	wxPython (http://www.wxpython.org/download.php)
-	pygame 1.9.1 for Python 2.5 (http://www.pygame.org/download.shtml)
+	pygame 1.9.1 (http://www.pygame.org/download.shtml)
 	PyOpenGL (http://sourceforge.net/projects/pyopengl/)
-	Numpy (http://sourceforge.net/projects/numpy/files/NumPy/1.5.1/)
-		OR Numeric (available at Pig download site)
-	Opioid2D (available at Pig download site)
+	Numpy (http://sourceforge.net/projects/numpy)
+	Opioid2D (http://code.google.com/p/opioid2d)

@@ -6,7 +6,10 @@ from setuptools import setup, find_packages
 import ez_setup
 ez_setup.use_setuptools()
 
-remove_tree('build')
+try:
+    remove_tree('build')
+except:
+    pass
 
 setup(name='pug',
       description='Python Universal GUI',
