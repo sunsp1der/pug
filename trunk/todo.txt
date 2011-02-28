@@ -1,6 +1,13 @@
 todo:
 
 installer:
+	create pig and pug msi's
+	create pig_demo folder
+	gather prereqs
+	create nsis installer
+		checkboxes for prerequisites
+		checkboxes for pig pug
+		checkbox and location for pig_demo installation
 
 soon:
 	eliminate hacks
