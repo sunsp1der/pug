@@ -2,7 +2,7 @@ from pug.component import *
 from pug import Dropdown
 
 from pig import Scene, get_gamedata
-from pig.editor.agui import ScenesDropdown, SoundFile
+from pig.editor.agui import ScenesDropdown
 from pig import Director
 
 class Scene_On_Value( Component):
@@ -21,17 +21,22 @@ value."""
                                  'list':['=','>','<','>=','<='],
                                  'sort':False}],
         ['test_value', 'Compare the value to this using test_type'],
+        ['relative_to_start', 'Add the starting value to test_value'+\
+                ' to get the actual value to test against.']
         ]
     #defaults
     scene = None
     value_name = 'score'
     test_type = '='
     test_value = 100
+    relative_to_start = True
     
     @component_method
     def on_start(self):
         "Get and play the sound object"
         gamedata = get_gamedata()
+        if self.relative_to_start:
+            self.test_value += getattr(gamedata, self.value_name)
         gamedata.register_callback(self.value_name, self.on_value_change)        
         
     @component_method

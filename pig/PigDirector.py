@@ -198,11 +198,10 @@ def switch_scene_to( new_scene):
     else:
         target = new_scene
     self = PigDirector
-    self.set_scene( target)
+    self._scene.switch_scene_to( target)
     
 PigDirector.switch_scene_to = switch_scene_to
     
-
 def opioid_tick():
     import pygame
     from Opioid2D.public.Mouse import Mouse

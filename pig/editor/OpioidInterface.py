@@ -672,7 +672,7 @@ force: if True, offer to save whether or not changes have been made
         create_gamedata()
         self.Director.project_started = False
         oldscene = self.Director.scene
-        self.Director.switch_scene_to(scene)
+        self.Director.set_scene(scene)
         while Director.scene == oldscene:
             time.sleep(0.05)
         entered_scene()

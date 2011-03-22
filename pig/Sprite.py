@@ -169,14 +169,6 @@ if TF is "True" set archetype to True, but don't create default name
     
     def get_image_file(self):
         return self._image_file
-        # the following line had problems on windows:
-        #     OpioidSprite.set_image(self,image)
-        # HACK: putting a Delay before the set_image fixes the problem...
-#        if getattr(PigDirector, 'project_started', False):
-#        else:
-#            (Delay(0) + CallFunc(OpioidSprite.set_image, self, image)).do()
-        # HACK: but it slows down animations ALOT. wtf with this?!
-        #OpioidSprite.set_image(self,image)
         
     image_file = property(get_image_file, set_image_file, 
                           doc="The filename of this sprite's image")
@@ -227,20 +219,20 @@ add blocker to a dictionary of objects blocking the Sprite's destruction."""
         if block:
             if self.destroy_blockers is None:
                 blockers = CallbackWeakKeyDictionary()
-                blockers.register_for_delete( self.destroy_callback)
+                blockers.register_for_delete( self.destroy_blocker_callback)
                 self.destroy_blockers = blockers
             self.destroy_blockers[blocker] = blockData
         else:
             if blocker in self.destroy_blockers:
                 self.destroy_blockers.pop(blocker)
                 
-    def destroy_callback(self, dict, func, arg1, arg2):
+    def destroy_blocker_callback(self, dict, func, arg1, arg2):
         if _DEBUG:
-            print 'Sprite.destroy_callback', dict, func, arg1, arg2
+            print 'Sprite.destroy_blocker_callback', dict, func, arg1, arg2
             print '    ', dict.data
         if not dict:
             if _DEBUG: print '    delete'
-            self.destroy_blockers.unregister( self.destroy_callback)
+            self.destroy_blockers.unregister( self.destroy_blocker_callback)
             self.delete()        
 
     def delete(self):
