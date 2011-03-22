@@ -35,6 +35,8 @@ class Scene( OpioidScene, pug.BaseObject):
     mouse_manager = None
     started = False
     exitted = False
+    switching = False
+    switch_blockers = None
     _pug_pugview_class = 'Scene'
     layers = ['Background']
     k_info = []
@@ -456,6 +458,57 @@ Start the scene running. Called after enter() and before state changes
     def on_exit(self):
         """Callback hook for when scene is exitted"""
         pass
+    
+    def on_switch_scene(self, scene=None):
+        """on_switch_scene(self, scene=None)
+
+Callback hook when a request is received to switch away from this scene. Use the
+block_switch_scene method to delay switch during clean up and/or scene exit 
+effects.
+
+scene: the scene about to be switched to
+"""
+        pass
+    
+    def switch_scene_to(self, scene):
+        "Called by director when a request is received to switch scenes"
+        if not self.switching:
+            self.on_switch_scene(scene)
+            self.switching = True
+            self.switch_scene = scene 
+        if not self.switch_blockers:
+            PigDirector.set_scene( scene)
+            
+    def block_switch_scene(self, blocker, block=True, blockData=None):
+        """block_switch_scene( blocker, block=True, blockData=None)
+        
+blocker: the object creating the block
+block: set to False to unblock
+blockData: optional info associated with blocker
+        
+block_switch_scene can be called before or during the 'on_switch_scene' 
+callback. It will add blocker to a dictionary of objects blocking the switching
+of the scene."""
+        if _DEBUG: 
+            print 'Scene.block_switch_scene', self, blocker, block, blockData
+        if block:
+            if self.switch_blockers is None:
+                blockers = CallbackWeakKeyDictionary()
+                blockers.register_for_delete( self.switch_blocker_callback)
+                self.switch_blockers = blockers
+            self.switch_blockers[blocker] = blockData
+        else:
+            if blocker in self.switch_blockers:
+                self.switch_blockers.pop(blocker)
+
+    def switch_blocker_callback(self, dict, func, arg1, arg2):
+        if _DEBUG:
+            print 'Scene.switch_blocker_callback', dict, func, arg1, arg2
+            print '    ', dict.data
+        if not dict:
+            if _DEBUG: print '    switch'
+            self.switch_blockers.unregister( self.switch_blocker_callback)
+            PigDirector.set_scene( self.switch_scene)       
     
     def stop(self):
         """Stop a level that is playing"""

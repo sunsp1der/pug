@@ -110,6 +110,8 @@ register at the lower callback level.
                     continue
                 if p and p in self._multi_objects:
                     under.append(p)
+        if not pygame.mouse.get_focused():
+            under = []
         self._update_under(under)
         for ev in evs:
             if ev.type == pygame.MOUSEBUTTONDOWN:
