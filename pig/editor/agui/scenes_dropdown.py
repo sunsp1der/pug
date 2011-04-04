@@ -57,7 +57,10 @@ For kwargs optional arguments, see the Base attribute GUI
             self.control.SetText("")
             self.data = None
             return
-        scenename = value.__name__
+        try:
+            scenename = value.__name__
+        except:
+            scenename = value
         i = self.listctrl.FindText( scenename)
         if i != -1:
             self.listctrl.SelectItem(i)

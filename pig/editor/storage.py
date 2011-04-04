@@ -2,9 +2,11 @@
 
 loading and saving utility code"""
 
+import os
 import os.path
 from inspect import getmro
 from copy import copy
+import sys
 
 import wx
 wx=wx
@@ -93,7 +95,15 @@ parentWindow: the parent window of name dialog. If not provided, the
                                "Confirm Replace",
                                wx.YES_NO | wx.NO_DEFAULT)
                         if confirmDlg.ShowModal() == wx.ID_YES:
-                            objName = name
+                            if sys.platform == "win32":
+                                files = os.listdir('objects')
+                                testname = name + '.py'
+                                for f in files:
+                                    if f.lower() == testname.lower():
+                                        sceneName = os.path.splitext(f)[0]
+                                        break
+                            else:
+                                objName = name
                         confirmDlg.Destroy()
                 else:
                     objName = name
@@ -261,7 +271,7 @@ parentWindow: the parent window of name dialog. If not provided, the
                     dlg.SetValue(default)
                     dlg.SetFocus()      
                     continue
-                path = os.path.join('scenes',''.join([name,'.py']))
+                path = os.path.join('scenes', name + '.py')
                 if name != scene.__class__.__name__:
                     try:
                         test = file(path)
@@ -274,7 +284,15 @@ parentWindow: the parent window of name dialog. If not provided, the
                                "Confirm Replace",
                                wx.YES_NO | wx.NO_DEFAULT)
                         if confirmDlg.ShowModal() == wx.ID_YES:
-                            sceneName = name
+                            if sys.platform == "win32":
+                                files = os.listdir('scenes')
+                                testname = name + '.py'
+                                for f in files:
+                                    if f.lower() == testname.lower():
+                                        sceneName = os.path.splitext(f)[0]
+                                        break
+                            else:
+                                sceneName = name
                         confirmDlg.Destroy()   
                 else:    
                     sceneName = name             

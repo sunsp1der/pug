@@ -253,8 +253,6 @@ the editor window.
                     dlg.Destroy()
                     return
         self.quit()
-        if event:
-            event.Skip()
 
     def quit(self, event = None):
         if self.quitting:

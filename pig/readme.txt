@@ -1,4 +1,9 @@
-To start the pig demo, use python 2.6 to run the edit_project.py file in the Pig_Demo folder.
+QUICKSTART:
+At python prompt type:
+>>> import pig
+>>> pig.create_demo_project() # to create demo project
+ or
+>>> pig.create_project() # to create blank project
 
 Documentation available at: http://code.google.com/p/pug
 

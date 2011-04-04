@@ -296,7 +296,7 @@ Prettify various data including floats, -0.0 etc."""
     elif _PRETTIFY_FLOATS and type(val) == float:
         # prettify floats
         output = prettify_float(val, precision)
-    elif type(val) != str and type(val) != unicode:
+    elif type(val) not in [str, unicode]:
         output = repr(val)
     else:
         output = val

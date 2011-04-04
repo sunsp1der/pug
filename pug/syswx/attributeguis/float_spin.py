@@ -58,8 +58,12 @@ For more aguidata optional arguments, see the Base attribute GUI
         self.floatspin.GetTextCtrl().SelectAll()
         
     def exit(self, event):
+        oldvalue = self.floatspin.GetValue()
         self.floatspin.SetValue( float(self.floatspin.GetTextCtrl().GetValue()))
-        self.apply()
+        try:
+            self.apply()
+        except:
+            self.floatspin.SetValue(oldvalue)
     
     def fix(self, event=None):
         "fix problem with showing out of range values"

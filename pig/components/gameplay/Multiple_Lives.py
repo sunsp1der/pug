@@ -27,7 +27,7 @@ This component gives the base object a new callback:
                     'Number of seconds between being destroyed and respawning'],
             ['do_gameover', 'When lives reach zero, call gamedata.gameover()'],
             ['value_name', 
-                    'If this is not blank, number of lives remaining\n'+\
+                    'Number of lives remaining'+\
                     'will be stored in gamedata.<value_name>'],
             ['spawn_archetype', 'If this is an archetype, it\n'+\
                                 'will spawn when scene starts.']
@@ -44,6 +44,8 @@ This component gives the base object a new callback:
     @component_method
     def on_scene_start(self):
         "Set lives at beginning of scene"
+        if not self.value_name:
+            self.value_name = "_lives_"
         self.get_lives()
     
     @component_method
@@ -60,6 +62,7 @@ This component gives the base object a new callback:
             
     @component_method
     def on_delete(self):
+        "Respawn if being deleted as an archetype"
         if self.owner.archetype and self.spawn_archetype and \
                 getattr(PigDirector, 'start_project', False):
             # set up original lives
@@ -83,15 +86,12 @@ This component gives the base object a new callback:
     @component_method
     def get_lives(self):
         "get_lives()->self._lives"
-        if self._lives is None:
-            self.set_lives( self.start_lives - 1)
-        if self.value_name:
-            gamedata = get_gamedata()         
-            try:
-                return getattr(gamedata, self.value_name)   
-            except:
-                return None
-        else:
+        gamedata = get_gamedata()         
+        try:
+            return getattr(gamedata, self.value_name)   
+        except:
+            if self._lives is None:
+                self.set_lives( self.start_lives - 1)
             return self._lives
     lives = property(get_lives, set_lives, doc = "Current lives") 
     
@@ -99,7 +99,6 @@ This component gives the base object a new callback:
 # has been deleted
 def do_respawn( cls, lives, scene=None):
     #check to make sure we're in the same scene
-    print "respawn"
     if scene and scene != PigDirector.scene:
         return
     obj = cls()

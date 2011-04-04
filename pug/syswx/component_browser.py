@@ -192,10 +192,20 @@ A basic text display of a components features...
             for item in component._field_list:
                 textlist = []
                 textlist+=['\n',item[0],': (Default=']
-                textlist+=[prettify_data(getattr(dummy, item[0])),')']
+                data = getattr(dummy,item[0])
+                if type(data) in [str, unicode]:
+                    info = repr(data)
+                else:
+                    info = prettify_data(data)
+                textlist+=[info,')']
                 if instance:
                     textlist+=[' (Current=']
-                    textlist+=[prettify_data(getattr(instance, item[0])),')']
+                    data = getattr(instance,item[0])
+                    if type(data) in [str, unicode]:
+                        info = repr(data)
+                    else:
+                        info = prettify_data(data)
+                    textlist+=[info, ')']
                 text=''.join(textlist)
                 text = wx.StaticText(self, -1, text)
                 self.infosizer.Add(text,0,wx.WEST,15)

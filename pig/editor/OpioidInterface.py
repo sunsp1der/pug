@@ -136,7 +136,7 @@ scene: the scene to load initially
                         "Create a new Scene"],
                  ["&Save...\tCtrl+S", save_scene,
                         "Save scene"],
-                 ["Save &As...\Ctrl+A", save_scene_as,
+                 ["Save &As...\tCtrl+A", save_scene_as,
                         "Save scene as"],
                  ["New &Object\tShift+Ctrl+N", self.add_object,
                         "Add the currently selected add object to the scene"],
