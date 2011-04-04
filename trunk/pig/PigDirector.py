@@ -197,8 +197,7 @@ def switch_scene_to( new_scene):
             raise
     else:
         target = new_scene
-    self = PigDirector
-    self._scene.switch_scene_to( target)
+    PigDirector._scene.switch_scene_to( target)
     
 PigDirector.switch_scene_to = switch_scene_to
     

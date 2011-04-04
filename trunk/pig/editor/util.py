@@ -158,40 +158,51 @@ def get_available_groups():
     except:
         return []
 
-def create_new_project(project_path=None, new_project_name=None,
-                       source_project='New_Project'):
-    "create_new_project(project_path=None)->path_to_project or None if failed"
-    if not project_path:
-        this_folder = os.path.split( os.path.abspath(__file__))[0]
-        source = os.path.join( this_folder, source_project)
+def create_new_project(path=None, name=None, source=None):
+    """create_new_project(path, name, source)->path to project or None if failed
+    
+Create a new pig project
+path: path to create project in. default: query user
+name: name of new project. default: query user
+source: source path to copy project from. default: pig.editor.New_Project
+"""
+    if not name:
+        dlg = wx.TextEntryDialog( parent,
+                                  "Project Name",
+                                  "Create New Project", 
+                                  "MyProject")
+        if dlg.ShowModal() != wx.ID_OK:
+            return
+        name = dlg.GetValue()
+        dlg.Destroy()
+    if not name:
+        return
+    if not path:
         parent = wx.GetApp().get_project_frame()
-        if not new_project_name:
-            dlg = wx.TextEntryDialog( parent,
-                                      "Project Name",
-                                      "Create New Project", 
-                                      "MyProject")
-            if dlg.ShowModal() != wx.ID_OK:
-                return
-            new_project_name = dlg.GetValue()
-            dlg.Destroy()
-        dlg = wx.DirDialog( parent, "Create project in folder:",
+        dlg = wx.DirDialog( parent, "Create " + name + \
+                            " project in folder:",
                             style=wx.DD_DEFAULT_STYLE )
         if dlg.ShowModal() != wx.ID_OK:
             return
-        dest_folder = dlg.GetPath()
-        path_to_project = os.path.join( dest_folder, new_project_name)
+        path = dlg.GetPath()
         dlg.Destroy()
+    if not source:
+        this_folder = os.path.split( os.path.abspath(__file__))[0]
+        source = os.path.join( this_folder, 'New_Project')
+    project_path = os.path.join( path, name)
     try:
-        shutil.copytree(source, path_to_project)
+        shutil.copytree(source, project_path)
     except:
-        show_exception_dialog()          
+        show_exception_dialog( modal=True)          
         return  
-    return path_to_project
+    return project_path
 
-def create_demo_project(project_path=None, new_project_name="Pig_Demo"):
-    "create_demo_project(project_path=None)->project_path or None if failed"
-    path_to_project = create_new_project(project_path, new_project_name,
-                                         'Pig_Demo')
+def create_new_demo_project(path=None, name="Pig_Demo"):
+    "create_new_demo_project(path=None, name='Pig_Demo')->created path or None"
+    this_folder = os.path.split( os.path.abspath(__file__))[0]
+    source = os.path.join( this_folder, 'Pig_Demo')
+    path_to_project = create_new_project(path, name, source)
+    return path_to_project
 
 def open_project( project_path=None, force=False, quit=True): 
     """open_project( project_path=None, force=False, quit=True)->True if openned

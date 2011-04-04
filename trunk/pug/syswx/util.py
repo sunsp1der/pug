@@ -32,7 +32,7 @@ def get_icon():
     "get_icon()->The wx.Icon for pug"
     return wx.Icon( get_image_path('pug.ico'), wx.BITMAP_TYPE_ICO)
 
-def show_exception_dialog( parent=None, prefix='', exc_info=None):
+def show_exception_dialog( parent=None, prefix='', exc_info=None, modal=False):
     """ExceptionDialog(parent=None, prefix='', exc_info=None)
 
 show exception info in a dialog
@@ -40,6 +40,7 @@ parent: parent frame
 prefix: show in title of window before exception type
 exc_info: if provided, this is the data from sys.exc_info(). If not, use the
     current sys.exc_info()
+modal: if True, show dialog as a modal dialog
 """
     if exc_info is None:
         info = sys.exc_info()
@@ -58,7 +59,10 @@ exc_info: if provided, this is the data from sys.exc_info(). If not, use the
                             style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
     # scroll to bottom
     err.Children[0].ShowPosition(len(msg))
-    err.Show()
+    if modal:
+        err.ShowModal()
+    else:
+        err.Show()
     wx.Bell()
     return 
 

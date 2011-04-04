@@ -13,7 +13,7 @@ from pug.gname import GnamedObject
 _DEBUG = False
 
 class Component(GnamedObject):
-    """Component( **kwargs)
+    """Component( owner=None, **kwargs)
     
 Pug uses components to add python code to objects at runtime
 

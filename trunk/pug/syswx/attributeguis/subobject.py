@@ -104,6 +104,7 @@ simple objects that contain a few values within them (i.e. X and Y)
                 # empty left area for rows 2 and on
                 leftLabel = AguiLabelSizer( label, '', subnum == subcount)    
             leftLabel.SetMinSize((-1,controlText.MinSize[1]+1))
+            labelSizer.SetRows( subnum)
             labelSizer.AddSizer(leftLabel, flag = wx.EXPAND)
             labelSizer.AddSizer(rightLabel, flag = wx.EXPAND)
 

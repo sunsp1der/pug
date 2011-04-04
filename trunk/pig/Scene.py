@@ -382,7 +382,8 @@ key_down. In the future, maybe key_hold.
                 getattr(PigDirector, 'start_project', False):
             # notify scene window
             try:
-                entered_scene()
+                import wx
+                wx.CallAfter(entered_scene)
             except:
                 pass
         self.on_enter()
@@ -619,7 +620,8 @@ name: name of layer
 skip_hidden: layers are always added at top. If this is True, the layer will be
 added under hidden layers (names begin with '__') which are generally used by 
 the editor. If layer is hidden, this will be ignored."""
-        if name[0:1] == '__' or not skip_hidden or self.layers == []:
+        if name[0:1] == '__' or not skip_hidden or self.layers == [] or \
+                PigDirector.scene is None:
             return Opioid2D.Scene.add_layer( self, name)
         layerlist = self.scene_layers
         last_layer = layerlist[-1]
