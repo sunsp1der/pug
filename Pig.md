@@ -1,0 +1,9 @@
+## PIG ##
+Pig (Python Inventor Gizmo) is a 2d game-building environment based on the Pug system. It is gui based, uses python, and includes automatic code generation, which means when you save your project from the editor, it creates python code that you can edit further. Pig is the main example project of the [Pug](Pug.md) system. To try it, go into the Pig\_Demo folder and run edit\_project.py.
+
+### Pig as a Teaching Tool ###
+My main interest in creating Pig was to create an editor that would be easy enough for students learning to program, but would also be powerful enough to be used by experienced  developers making casual games or prototypes. Pig is a work-in-progress, but it's well on its way to achieving these goals. Beginners can do quite a bit in the editor without ever touching a line of code. When students are ready, the code created by Pig is easy to read and the connection between the code and the editor is easy to understand. Experienced developers will find a number of interesting tools at their disposal, including automated runtime gui creation for program objects, automated code-generation, and a versatile level editor.
+
+### Pig's dependencies ###
+Pig as an open source project and incorporates many other open source softwares. It uses python as its programming language, wx as its GUI system, and Opioid2D as its graphics engine. Of course, it also requires [Pug](Pug.md).
+There is a huge amount of useful open-source code written for python, including physics engines, midi controllers, networking systems, and more. Because Pig is python based, this code can be integrated into Pig games. And because Pug automatically generates guis, the user can have immediate access to these external features in the editor.

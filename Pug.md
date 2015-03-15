@@ -1,0 +1,4 @@
+## PUG ##
+Pug (Python Universal Gui) automatically creates gui editor windows for python objects. These windows allow you to view and alter your objects at runtime, as well as save and load their states. It can be used as a testing platform and can also be adapted as an editor. In addition to saving the states of python objects as data, Pug has automatic code-generation features which allows you to create python class and instance files.
+
+Pug is highly customizable and expandable. It uses python 2.5 and wxPython. Newer versions of python 2 may work as well, but it is currently being developed for 2.5 for compatibility with Pig.
